@@ -36,8 +36,8 @@ const VehicleList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('name');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [sortBy, setSortBy] = useState('internalCode');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
 
@@ -194,8 +194,8 @@ const VehicleList = () => {
           bValue = b.color.toLowerCase();
           break;
         default:
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
+          aValue = a.internalCode.toLowerCase();
+          bValue = b.internalCode.toLowerCase();
       }
 
       if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;

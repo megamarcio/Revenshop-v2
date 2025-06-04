@@ -41,52 +41,49 @@ const VehicleListView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleLis
   const { t } = useLanguage();
 
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'USD'
     }).format(value);
   };
 
   return (
-    <div className="border rounded-lg">
+    <div className="border rounded-lg text-xs">
       <Table>
         <TableHeader>
-          <TableRow>
-            <TableHead>Nome</TableHead>
-            <TableHead>Ano</TableHead>
-            <TableHead>Cor</TableHead>
-            <TableHead>Código</TableHead>
-            <TableHead>Placa</TableHead>
-            <TableHead>Compra</TableHead>
-            <TableHead>Venda</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Ações</TableHead>
+          <TableRow className="text-xs">
+            <TableHead className="text-xs">Código</TableHead>
+            <TableHead className="text-xs">Nome</TableHead>
+            <TableHead className="text-xs">Cor</TableHead>
+            <TableHead className="text-xs">Valor de Venda</TableHead>
+            <TableHead className="text-xs">VIN</TableHead>
+            <TableHead className="text-xs">Status</TableHead>
+            <TableHead className="text-xs">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {vehicles.map((vehicle) => (
-            <TableRow key={vehicle.id}>
-              <TableCell className="font-medium">{vehicle.name}</TableCell>
-              <TableCell>{vehicle.year}</TableCell>
-              <TableCell>{vehicle.color}</TableCell>
-              <TableCell>{vehicle.internalCode}</TableCell>
-              <TableCell>{vehicle.plate}</TableCell>
-              <TableCell className="text-green-600">{formatCurrency(vehicle.purchasePrice)}</TableCell>
-              <TableCell className="text-blue-600">{formatCurrency(vehicle.salePrice)}</TableCell>
-              <TableCell>
+            <TableRow key={vehicle.id} className="text-xs">
+              <TableCell className="font-medium text-xs whitespace-nowrap">{vehicle.internalCode}</TableCell>
+              <TableCell className="text-xs whitespace-nowrap">{vehicle.name}</TableCell>
+              <TableCell className="text-xs whitespace-nowrap">{vehicle.color}</TableCell>
+              <TableCell className="text-blue-600 text-xs whitespace-nowrap">{formatCurrency(vehicle.salePrice)}</TableCell>
+              <TableCell className="text-xs whitespace-nowrap" style={{ fontSize: '10px' }}>{vehicle.vin}</TableCell>
+              <TableCell className="text-xs whitespace-nowrap">
                 <Badge 
                   variant={vehicle.category === 'forSale' ? 'default' : 'secondary'}
-                  className={vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+                  className={`text-xs ${vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
                 >
                   {vehicle.category === 'forSale' ? t('forSale') : t('sold')}
                 </Badge>
               </TableCell>
-              <TableCell>
+              <TableCell className="text-xs">
                 <div className="flex space-x-1">
                   <Button 
                     size="sm" 
                     variant="outline" 
                     onClick={() => onEdit(vehicle)}
+                    className="h-6 w-6 p-0"
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -94,13 +91,14 @@ const VehicleListView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleLis
                     size="sm" 
                     variant="outline" 
                     onClick={() => onDuplicate(vehicle)}
+                    className="h-6 w-6 p-0"
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
-                    className="text-red-600 hover:text-red-700"
+                    className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
                     onClick={() => onDelete && onDelete(vehicle)}
                   >
                     <Trash2 className="h-3 w-3" />
