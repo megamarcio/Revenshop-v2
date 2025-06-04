@@ -111,15 +111,20 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     if (!formData.vin.trim()) newErrors.vin = 'VIN é obrigatório';
     if (!formData.year.trim()) newErrors.year = 'Ano é obrigatório';
     if (!formData.model.trim()) newErrors.model = 'Modelo é obrigatório';
-    if (!formData.plate.trim()) newErrors.plate = 'Placa é obrigatória';
+    if (!formData.plate.trim()) newErrors.plate = 'Milhas são obrigatórias';
     if (!formData.internalCode.trim()) newErrors.internalCode = 'Código interno é obrigatório';
     if (!formData.color.trim()) newErrors.color = 'Cor é obrigatória';
     if (!formData.purchasePrice.trim()) newErrors.purchasePrice = 'Valor de compra é obrigatório';
     if (!formData.salePrice.trim()) newErrors.salePrice = 'Valor de venda é obrigatório';
 
+    const miles = parseInt(formData.plate);
+    if (isNaN(miles) || miles < 0 || miles > 500000) {
+      newErrors.plate = 'Milhas devem estar entre 0 e 500,000';
+    }
+
     const caNote = parseInt(formData.caNote);
-    if (isNaN(caNote) || caNote < 0 || caNote > 50) {
-      newErrors.caNote = 'Nota CA deve estar entre 0 e 50';
+    if (isNaN(caNote) || caNote < 0 || caNote > 50 || caNote % 5 !== 0) {
+      newErrors.caNote = 'Nota CA deve ser múltiplo de 5 entre 0 e 50';
     }
 
     if (formData.category === 'sold') {

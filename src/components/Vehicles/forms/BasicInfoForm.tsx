@@ -45,6 +45,25 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     }
   };
 
+  const handleMilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow only numbers and limit to 500000
+    const numericValue = value.replace(/\D/g, '');
+    if (parseInt(numericValue) <= 500000 || numericValue === '') {
+      onInputChange('plate', numericValue);
+    }
+  };
+
+  const handleCaNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseInt(e.target.value);
+    // Only allow multiples of 5 between 0 and 50
+    if (!isNaN(value) && value >= 0 && value <= 50 && value % 5 === 0) {
+      onInputChange('caNote', value.toString());
+    } else if (e.target.value === '') {
+      onInputChange('caNote', '');
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Informações Básicas</h3>
@@ -99,15 +118,18 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="plate">Placa *</Label>
+          <Label htmlFor="miles">Milhas *</Label>
           <Input
-            id="plate"
+            id="miles"
+            type="text"
             value={formData.plate}
-            onChange={(e) => onInputChange('plate', e.target.value)}
-            placeholder="Ex: ABC-1234"
+            onChange={handleMilesChange}
+            placeholder="Ex: 45000"
+            max="500000"
             className={errors.plate ? 'border-red-500' : ''}
           />
           {errors.plate && <p className="text-sm text-red-500">{errors.plate}</p>}
+          <p className="text-xs text-gray-500">Máximo: 500,000 milhas</p>
         </div>
 
         <div className="space-y-2">
@@ -135,18 +157,20 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="caNote">Nota CA (0-50) *</Label>
+          <Label htmlFor="caNote">Nota CA (0-50, múltiplos de 5) *</Label>
           <Input
             id="caNote"
             type="number"
             min="0"
             max="50"
+            step="5"
             value={formData.caNote}
-            onChange={(e) => onInputChange('caNote', e.target.value)}
+            onChange={handleCaNoteChange}
             placeholder="Ex: 35"
             className={errors.caNote ? 'border-red-500' : ''}
           />
           {errors.caNote && <p className="text-sm text-red-500">{errors.caNote}</p>}
+          <p className="text-xs text-gray-500">Valores permitidos: 0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50</p>
         </div>
       </div>
 
