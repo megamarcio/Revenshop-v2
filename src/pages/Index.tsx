@@ -34,7 +34,7 @@ const Index = () => {
       case 'dashboard':
         return <Dashboard />;
       case 'vehicles':
-        return <VehicleList onNavigateToCustomers={handleNavigateToCustomers} />;
+        return <VehicleList />;
       case 'customers':
         return (
           <CustomerManagement 
@@ -51,7 +51,7 @@ const Index = () => {
       case 'profile':
         return <ProfilePage />;
       default:
-        return <VehicleList onNavigateToCustomers={handleNavigateToCustomers} />;
+        return <VehicleList />;
     }
   };
 
