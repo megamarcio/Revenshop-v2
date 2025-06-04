@@ -65,36 +65,36 @@ const Dashboard = () => {
       </div>
 
       {/* Recent Activity */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Atividade Recente</h2>
+      <div className="bg-card rounded-lg shadow p-6">
+        <h2 className="text-xl font-semibold text-foreground mb-4">Atividade Recente</h2>
         <div className="space-y-3">
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
             <div className="bg-green-100 p-2 rounded-full">
               <ShoppingCart className="h-4 w-4 text-green-600" />
             </div>
             <div>
-              <p className="text-sm font-medium">Honda Civic 2020 - Vendido</p>
-              <p className="text-xs text-gray-500">Por João Silva - $65.000</p>
+              <p className="text-sm font-medium text-foreground">Honda Civic 2020 - Vendido</p>
+              <p className="text-xs text-muted-foreground">Por João Silva - $65.000</p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
             <div className="bg-blue-100 p-2 rounded-full">
               <Car className="h-4 w-4 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium">Toyota Corolla 2021 - Cadastrado</p>
-              <p className="text-xs text-gray-500">Adicionado ao estoque - $75.000</p>
+              <p className="text-sm font-medium text-foreground">Toyota Corolla 2021 - Cadastrado</p>
+              <p className="text-xs text-muted-foreground">Adicionado ao estoque - $75.000</p>
             </div>
           </div>
           
-          <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+          <div className="flex items-center space-x-3 p-3 bg-muted rounded-lg">
             <div className="bg-purple-100 p-2 rounded-full">
               <Users className="h-4 w-4 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm font-medium">Novo vendedor cadastrado</p>
-              <p className="text-xs text-gray-500">Maria Santos - Acesso liberado</p>
+              <p className="text-sm font-medium text-foreground">Novo vendedor cadastrado</p>
+              <p className="text-xs text-muted-foreground">Maria Santos - Acesso liberado</p>
             </div>
           </div>
         </div>

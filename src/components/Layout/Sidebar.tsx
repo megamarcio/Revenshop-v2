@@ -31,7 +31,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   ];
 
   return (
-    <aside className="bg-white w-64 min-h-screen border-r border-gray-200 shadow-sm">
+    <aside className="bg-card w-64 min-h-screen border-r border-border shadow-sm">
       <nav className="p-4 space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -42,7 +42,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
               className={`w-full justify-start space-x-3 h-11 ${
                 activeTab === item.id 
                   ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' 
-                  : 'text-gray-700 hover:bg-gray-100'
+                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
               }`}
               onClick={() => setActiveTab(item.id)}
             >
