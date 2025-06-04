@@ -21,6 +21,8 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  console.log('LoginForm render - hasUsers:', hasUsers, 'checkingUsers:', checkingUsers);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Login form submitted with:', email);
@@ -55,6 +57,10 @@ const LoginForm = () => {
     // Refresh the page or trigger a re-check of users
     window.location.reload();
   };
+
+  // Show create admin button if explicitly no users found
+  const showCreateAdmin = hasUsers === false;
+  console.log('Show create admin button:', showCreateAdmin);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-revenshop-light to-revenshop-accent/20 p-4">
@@ -93,7 +99,7 @@ const LoginForm = () => {
               <div className="text-center py-4">
                 <p className="text-gray-600">Verificando sistema...</p>
               </div>
-            ) : hasUsers === false ? (
+            ) : showCreateAdmin ? (
               <CreateFirstAdminButton onAdminCreated={handleAdminCreated} />
             ) : (
               <>

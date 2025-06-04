@@ -17,16 +17,16 @@ export const useHasUsers = () => {
 
         if (error) {
           console.error('Error checking users:', error);
-          setHasUsers(null);
+          setHasUsers(false); // Assume no users on error to show create button
           return;
         }
 
         const userExists = data && data.length > 0;
-        console.log('Users exist:', userExists);
+        console.log('Users exist:', userExists, 'Data:', data);
         setHasUsers(userExists);
       } catch (error) {
         console.error('Error in checkUsers:', error);
-        setHasUsers(null);
+        setHasUsers(false); // Assume no users on error to show create button
       } finally {
         setLoading(false);
       }
