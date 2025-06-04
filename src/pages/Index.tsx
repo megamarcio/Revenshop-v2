@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { AuthProvider } from '../contexts/AuthContext';
+import { BHPHProvider } from '../contexts/BHPHContext';
 import LoginForm from '../components/Auth/LoginForm';
 import Header from '../components/Layout/Header';
 import Sidebar from '../components/Layout/Sidebar';
@@ -61,7 +62,9 @@ const Index = () => {
   return (
     <LanguageProvider>
       <AuthProvider>
-        <AppContent />
+        <BHPHProvider>
+          <AppContent />
+        </BHPHProvider>
       </AuthProvider>
     </LanguageProvider>
   );

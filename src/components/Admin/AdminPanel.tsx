@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
+import BHPHSettings from './BHPHSettings';
 import { 
   Settings, 
   Users, 
@@ -18,7 +18,8 @@ import {
   RefreshCw,
   AlertTriangle,
   CheckCircle,
-  Info
+  Info,
+  CreditCard
 } from 'lucide-react';
 
 // Mock data para demonstração
@@ -136,9 +137,10 @@ const AdminPanel = ({ onNavigateToUsers }: AdminPanelProps) => {
       </div>
 
       <Tabs defaultValue="overview" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview">Visão Geral</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="bhph">BHPH</TabsTrigger>
           <TabsTrigger value="system">Sistema</TabsTrigger>
           <TabsTrigger value="logs">Logs</TabsTrigger>
         </TabsList>
@@ -235,6 +237,10 @@ const AdminPanel = ({ onNavigateToUsers }: AdminPanelProps) => {
               </Button>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="bhph" className="space-y-6">
+          <BHPHSettings />
         </TabsContent>
 
         <TabsContent value="system" className="space-y-6">

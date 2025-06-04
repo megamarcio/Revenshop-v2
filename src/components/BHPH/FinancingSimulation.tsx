@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -5,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
 import { Vehicle, Deal } from './BuyHerePayHere';
+import { useBHPH } from '../../contexts/BHPHContext';
 
 interface FinancingSimulationProps {
   vehicle: Vehicle;
@@ -13,13 +15,15 @@ interface FinancingSimulationProps {
 }
 
 const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSimulationProps) => {
+  const { settings } = useBHPH();
   const [downPayment, setDownPayment] = useState(0);
   const [installments, setInstallments] = useState(12);
   const [customDownPayment, setCustomDownPayment] = useState('');
   const [isCustomDownPayment, setIsCustomDownPayment] = useState(false);
 
-  const interestRate = 0.12; // 12% ao mês
-  const suggestedDownPayment = Math.round(vehicle.purchasePrice * 0.6); // 60% do valor de compra
+  // Usar configurações do contexto BHPH
+  const interestRate = settings.monthlyInterestRate / 100; // Converter % para decimal
+  const suggestedDownPayment = Math.round(vehicle.purchasePrice * (settings.downPaymentPercentage / 100));
 
   useEffect(() => {
     setDownPayment(suggestedDownPayment);
@@ -29,13 +33,13 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
 
   useEffect(() => {
     calculateDeal();
-  }, [downPayment, installments]);
+  }, [downPayment, installments, settings]);
 
   const calculateDeal = () => {
     const remainingBalance = vehicle.salePrice - downPayment;
     
     // Compound interest calculation: PMT = PV * (r * (1 + r)^n) / ((1 + r)^n - 1)
-    const r = interestRate; // monthly interest rate (12%)
+    const r = interestRate; // monthly interest rate
     const n = installments; // number of payments
     const pv = remainingBalance; // present value (amount to finance)
     
@@ -48,7 +52,7 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
       downPayment,
       installments,
       installmentValue,
-      interestRate
+      interestRate: settings.monthlyInterestRate
     };
 
     onDealCalculated(deal);
@@ -86,6 +90,7 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
               <span className="font-semibold text-green-600">{formatCurrency(suggestedDownPayment)}</span>
+              <span className="text-sm text-gray-500">({settings.downPaymentPercentage}% do valor)</span>
             </div>
             
             {isAdmin && (
@@ -147,6 +152,7 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
             <p>Valor do veículo: {formatCurrency(vehicle.salePrice)}</p>
             <p>Entrada: {formatCurrency(downPayment)}</p>
             <p>Saldo a financiar: {formatCurrency(vehicle.salePrice - downPayment)}</p>
+            <p>Taxa de juros: {settings.monthlyInterestRate}% ao mês</p>
             <p>Parcelas: {installments}x de {formatCurrency(Math.round((vehicle.salePrice - downPayment) * (interestRate * Math.pow(1 + interestRate, installments)) / (Math.pow(1 + interestRate, installments) - 1)))}</p>
           </div>
         </div>
