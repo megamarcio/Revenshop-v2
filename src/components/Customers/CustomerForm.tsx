@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -12,6 +13,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '../ui/image-upload';
 import MultipleFileUpload from '../ui/multiple-file-upload';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface Customer {
   id: string;
@@ -24,12 +26,13 @@ interface Customer {
   document_photo?: string;
   reference1_name?: string;
   reference1_email?: string;
-  reference1_address?: string;
   reference1_phone?: string;
   reference2_name?: string;
   reference2_email?: string;
-  reference2_address?: string;
   reference2_phone?: string;
+  spouse_name?: string;
+  spouse_email?: string;
+  spouse_phone?: string;
   responsible_seller_id?: string;
   interested_vehicle_id?: string;
   deal_status?: string;
@@ -64,12 +67,13 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     document_photo: '',
     reference1_name: '',
     reference1_email: '',
-    reference1_address: '',
     reference1_phone: '',
     reference2_name: '',
     reference2_email: '',
-    reference2_address: '',
     reference2_phone: '',
+    spouse_name: '',
+    spouse_email: '',
+    spouse_phone: '',
     responsible_seller_id: '',
     interested_vehicle_id: '',
     deal_status: 'quote',
@@ -83,6 +87,10 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     bank_statements: [] as string[],
   });
 
+  const [employmentOpen, setEmploymentOpen] = useState(false);
+  const [referencesOpen, setReferencesOpen] = useState(false);
+  const [documentsOpen, setDocumentsOpen] = useState(false);
+
   useEffect(() => {
     if (customer) {
       setFormData({
@@ -95,12 +103,13 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
         document_photo: customer.document_photo || '',
         reference1_name: customer.reference1_name || '',
         reference1_email: customer.reference1_email || '',
-        reference1_address: customer.reference1_address || '',
         reference1_phone: customer.reference1_phone || '',
         reference2_name: customer.reference2_name || '',
         reference2_email: customer.reference2_email || '',
-        reference2_address: customer.reference2_address || '',
         reference2_phone: customer.reference2_phone || '',
+        spouse_name: customer.spouse_name || '',
+        spouse_email: customer.spouse_email || '',
+        spouse_phone: customer.spouse_phone || '',
         responsible_seller_id: customer.responsible_seller_id || '',
         interested_vehicle_id: customer.interested_vehicle_id || '',
         deal_status: customer.deal_status || 'quote',
@@ -262,6 +271,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
                     <SelectContent>
                       <SelectItem value="ssn">{t('ssn')}</SelectItem>
                       <SelectItem value="passport">{t('passport')}</SelectItem>
+                      <SelectItem value="drivers_license">Driver's License</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -278,166 +288,208 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
                   <ImageUpload
                     value={formData.document_photo}
                     onChange={(value) => handleInputChange('document_photo', value)}
-                    size="md"
+                    size="sm"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Employment and Income Info */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Informações de Emprego e Renda</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="monthly_income">Rendimento Mensal (R$)</Label>
-                  <Input
-                    id="monthly_income"
-                    type="number"
-                    value={formData.monthly_income}
-                    onChange={(e) => handleInputChange('monthly_income', Number(e.target.value))}
-                    placeholder="0.00"
-                  />
+            {/* Employment and Income Info - Collapsible */}
+            <Collapsible open={employmentOpen} onOpenChange={setEmploymentOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="font-semibold text-lg">Informações de Emprego e Renda</span>
+                  <span>{employmentOpen ? '−' : '+'}</span>
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="monthly_income">Rendimento Mensal (R$)</Label>
+                    <Input
+                      id="monthly_income"
+                      type="number"
+                      value={formData.monthly_income}
+                      onChange={(e) => handleInputChange('monthly_income', Number(e.target.value))}
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="current_job">Emprego Atual</Label>
+                    <Input
+                      id="current_job"
+                      value={formData.current_job}
+                      onChange={(e) => handleInputChange('current_job', e.target.value)}
+                      placeholder="Ex: Vendedor, Motorista, etc."
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="employer_name">Nome do Empregador</Label>
+                    <Input
+                      id="employer_name"
+                      value={formData.employer_name}
+                      onChange={(e) => handleInputChange('employer_name', e.target.value)}
+                      placeholder="Nome da empresa"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="employer_phone">Telefone do Empregador</Label>
+                    <Input
+                      id="employer_phone"
+                      value={formData.employer_phone}
+                      onChange={(e) => handleInputChange('employer_phone', e.target.value)}
+                      placeholder="(11) 99999-9999"
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="employment_duration">Há quanto tempo trabalha no local?</Label>
+                    <Input
+                      id="employment_duration"
+                      value={formData.employment_duration}
+                      onChange={(e) => handleInputChange('employment_duration', e.target.value)}
+                      placeholder="Ex: 2 anos, 6 meses, etc."
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="current_job">Emprego Atual</Label>
-                  <Input
-                    id="current_job"
-                    value={formData.current_job}
-                    onChange={(e) => handleInputChange('current_job', e.target.value)}
-                    placeholder="Ex: Vendedor, Motorista, etc."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="employer_name">Nome do Empregador</Label>
-                  <Input
-                    id="employer_name"
-                    value={formData.employer_name}
-                    onChange={(e) => handleInputChange('employer_name', e.target.value)}
-                    placeholder="Nome da empresa"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="employer_phone">Telefone do Empregador</Label>
-                  <Input
-                    id="employer_phone"
-                    value={formData.employer_phone}
-                    onChange={(e) => handleInputChange('employer_phone', e.target.value)}
-                    placeholder="(11) 99999-9999"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <Label htmlFor="employment_duration">Há quanto tempo trabalha no local?</Label>
-                  <Input
-                    id="employment_duration"
-                    value={formData.employment_duration}
-                    onChange={(e) => handleInputChange('employment_duration', e.target.value)}
-                    placeholder="Ex: 2 anos, 6 meses, etc."
-                  />
-                </div>
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
 
-            {/* Document Uploads */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Comprovantes e Documentos</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <MultipleFileUpload
-                  title="Comprovantes de Pagamento"
-                  description="Upload dos comprovantes de pagamento da compra"
-                  value={formData.payment_proof_documents}
-                  onChange={(value) => handleInputChange('payment_proof_documents', value)}
-                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                  maxFiles={5}
-                />
-                <MultipleFileUpload
-                  title="Extratos Bancários"
-                  description="Upload dos extratos bancários dos últimos 3 meses"
-                  value={formData.bank_statements}
-                  onChange={(value) => handleInputChange('bank_statements', value)}
-                  accept=".pdf,.jpg,.jpeg,.png"
-                  maxFiles={3}
-                />
-              </div>
-            </div>
+            {/* Document Uploads - Collapsible */}
+            <Collapsible open={documentsOpen} onOpenChange={setDocumentsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="font-semibold text-lg">Comprovantes e Documentos</span>
+                  <span>{documentsOpen ? '−' : '+'}</span>
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-4 mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <MultipleFileUpload
+                    title="Comprovantes de Pagamento"
+                    description="Upload dos comprovantes de pagamento da compra"
+                    value={formData.payment_proof_documents}
+                    onChange={(value) => handleInputChange('payment_proof_documents', value)}
+                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                    maxFiles={5}
+                  />
+                  <MultipleFileUpload
+                    title="Extratos Bancários"
+                    description="Upload dos extratos bancários dos últimos 3 meses"
+                    value={formData.bank_statements}
+                    onChange={(value) => handleInputChange('bank_statements', value)}
+                    accept=".pdf,.jpg,.jpeg,.png"
+                    maxFiles={3}
+                  />
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
 
-            {/* References */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">{t('reference1')}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="reference1_name">{t('referenceName')}</Label>
-                  <Input
-                    id="reference1_name"
-                    value={formData.reference1_name}
-                    onChange={(e) => handleInputChange('reference1_name', e.target.value)}
-                  />
+            {/* References - Collapsible */}
+            <Collapsible open={referencesOpen} onOpenChange={setReferencesOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <span className="font-semibold text-lg">Referências Pessoais</span>
+                  <span>{referencesOpen ? '−' : '+'}</span>
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-6 mt-4">
+                {/* Spouse */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-md border-b pb-2">Cônjuge</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="spouse_name">Nome do Cônjuge</Label>
+                      <Input
+                        id="spouse_name"
+                        value={formData.spouse_name}
+                        onChange={(e) => handleInputChange('spouse_name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="spouse_email">Email do Cônjuge</Label>
+                      <Input
+                        id="spouse_email"
+                        type="email"
+                        value={formData.spouse_email}
+                        onChange={(e) => handleInputChange('spouse_email', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="spouse_phone">Telefone do Cônjuge</Label>
+                      <Input
+                        id="spouse_phone"
+                        value={formData.spouse_phone}
+                        onChange={(e) => handleInputChange('spouse_phone', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="reference1_phone">{t('referencePhone')}</Label>
-                  <Input
-                    id="reference1_phone"
-                    value={formData.reference1_phone}
-                    onChange={(e) => handleInputChange('reference1_phone', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="reference1_email">{t('referenceEmail')}</Label>
-                  <Input
-                    id="reference1_email"
-                    type="email"
-                    value={formData.reference1_email}
-                    onChange={(e) => handleInputChange('reference1_email', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="reference1_address">{t('referenceAddress')}</Label>
-                  <Input
-                    id="reference1_address"
-                    value={formData.reference1_address}
-                    onChange={(e) => handleInputChange('reference1_address', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
 
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">{t('reference2')}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="reference2_name">{t('referenceName')}</Label>
-                  <Input
-                    id="reference2_name"
-                    value={formData.reference2_name}
-                    onChange={(e) => handleInputChange('reference2_name', e.target.value)}
-                  />
+                {/* Reference 1 */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-md border-b pb-2">{t('reference1')}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="reference1_name">{t('referenceName')}</Label>
+                      <Input
+                        id="reference1_name"
+                        value={formData.reference1_name}
+                        onChange={(e) => handleInputChange('reference1_name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reference1_email">{t('referenceEmail')}</Label>
+                      <Input
+                        id="reference1_email"
+                        type="email"
+                        value={formData.reference1_email}
+                        onChange={(e) => handleInputChange('reference1_email', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reference1_phone">{t('referencePhone')}</Label>
+                      <Input
+                        id="reference1_phone"
+                        value={formData.reference1_phone}
+                        onChange={(e) => handleInputChange('reference1_phone', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="reference2_phone">{t('referencePhone')}</Label>
-                  <Input
-                    id="reference2_phone"
-                    value={formData.reference2_phone}
-                    onChange={(e) => handleInputChange('reference2_phone', e.target.value)}
-                  />
+
+                {/* Reference 2 */}
+                <div className="space-y-4">
+                  <h4 className="font-medium text-md border-b pb-2">{t('reference2')}</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label htmlFor="reference2_name">{t('referenceName')}</Label>
+                      <Input
+                        id="reference2_name"
+                        value={formData.reference2_name}
+                        onChange={(e) => handleInputChange('reference2_name', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reference2_email">{t('referenceEmail')}</Label>
+                      <Input
+                        id="reference2_email"
+                        type="email"
+                        value={formData.reference2_email}
+                        onChange={(e) => handleInputChange('reference2_email', e.target.value)}
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="reference2_phone">{t('referencePhone')}</Label>
+                      <Input
+                        id="reference2_phone"
+                        value={formData.reference2_phone}
+                        onChange={(e) => handleInputChange('reference2_phone', e.target.value)}
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="reference2_email">{t('referenceEmail')}</Label>
-                  <Input
-                    id="reference2_email"
-                    type="email"
-                    value={formData.reference2_email}
-                    onChange={(e) => handleInputChange('reference2_email', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="reference2_address">{t('referenceAddress')}</Label>
-                  <Input
-                    id="reference2_address"
-                    value={formData.reference2_address}
-                    onChange={(e) => handleInputChange('reference2_address', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
 
             {/* Business Info */}
             <div className="space-y-4">
@@ -481,6 +533,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="quote">{t('quote')}</SelectItem>
+                      <SelectItem value="pending">Venda Pendente</SelectItem>
                       <SelectItem value="completed">{t('completedSale')}</SelectItem>
                     </SelectContent>
                   </Select>
