@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
@@ -9,6 +10,7 @@ import Dashboard from '../components/Dashboard/Dashboard';
 import VehicleList from '../components/Vehicles/VehicleList';
 import UserManagement from '../components/Users/UserManagement';
 import AdminPanel from '../components/Admin/AdminPanel';
+import ProfilePage from '../components/Profile/ProfilePage';
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
@@ -29,12 +31,7 @@ const AppContent = () => {
       case 'admin':
         return <AdminPanel />;
       case 'profile':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold">Perfil</h1>
-            <p className="text-gray-600 mt-2">Funcionalidade em desenvolvimento</p>
-          </div>
-        );
+        return <ProfilePage />;
       default:
         return <Dashboard />;
     }
