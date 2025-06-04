@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -50,21 +49,24 @@ interface VehicleFormProps {
 
 const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   const { t } = useLanguage();
+  
+  console.log('VehicleForm - editingVehicle received:', editingVehicle);
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
-    plate: editingVehicle?.plate || '',
-    internalCode: editingVehicle?.internalCode || '',
+    plate: editingVehicle?.miles?.toString() || editingVehicle?.plate || '', // Corrigido: usar miles do banco
+    internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '', // Corrigido: usar internal_code do banco
     color: editingVehicle?.color || '',
-    caNote: editingVehicle?.caNote?.toString() || '',
+    caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '', // Corrigido: usar ca_note do banco
     titleInfo: editingVehicle?.titleInfo || '',
-    purchasePrice: editingVehicle?.purchasePrice?.toString() || '',
-    salePrice: editingVehicle?.salePrice?.toString() || '',
-    minNegotiable: editingVehicle?.minNegotiable?.toString() || '',
-    carfaxPrice: editingVehicle?.carfaxPrice?.toString() || '',
-    mmrValue: editingVehicle?.mmrValue?.toString() || '',
+    purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '', // Corrigido: usar purchase_price do banco
+    salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '', // Corrigido: usar sale_price do banco
+    minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '', // Corrigido: usar min_negotiable do banco
+    carfaxPrice: editingVehicle?.carfax_price?.toString() || editingVehicle?.carfaxPrice?.toString() || '', // Corrigido: usar carfax_price do banco
+    mmrValue: editingVehicle?.mmr_value?.toString() || editingVehicle?.mmrValue?.toString() || '', // Corrigido: usar mmr_value do banco
     description: editingVehicle?.description || '',
     category: editingVehicle?.category || 'forSale',
     seller: editingVehicle?.seller || '',
@@ -78,13 +80,15 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     checkDetails: editingVehicle?.checkDetails || '',
     otherPaymentDetails: editingVehicle?.otherPaymentDetails || '',
     sellerCommission: editingVehicle?.sellerCommission?.toString() || '',
-    titleStatus: editingVehicle?.titleStatus || ''
+    titleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus || '' // Corrigido: usar title_status do banco
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
   const [video, setVideo] = useState<string>(editingVehicle?.video || '');
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<VehicleFormData>>({});
+
+  console.log('VehicleForm - formData initialized:', formData);
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -237,7 +241,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         caNote: parseInt(formData.caNote),
         purchasePrice: parseFloat(formData.purchasePrice),
         salePrice: parseFloat(formData.salePrice),
-        profitMargin: parseFloat(calculateProfitMargin()),
         minNegotiable: parseFloat(formData.minNegotiable || '0'),
         carfaxPrice: parseFloat(formData.carfaxPrice || '0'),
         mmrValue: parseFloat(formData.mmrValue || '0'),
@@ -247,6 +250,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         video: video || undefined,
         id: editingVehicle?.id || Date.now().toString()
       };
+
+      console.log('VehicleForm - submitting vehicleData:', vehicleData);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
       

@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles';
@@ -25,6 +24,9 @@ const VehicleList = () => {
 
   const handleSaveVehicle = async (vehicleData: any) => {
     try {
+      console.log('VehicleList - handleSaveVehicle called with:', vehicleData);
+      console.log('VehicleList - editingVehicle:', editingVehicle);
+      
       if (editingVehicle) {
         await updateVehicle(editingVehicle.id, vehicleData);
       } else {
@@ -39,6 +41,9 @@ const VehicleList = () => {
 
   const handleEditVehicle = (vehicle: Vehicle) => {
     if (!canEditVehicles) return;
+    console.log('VehicleList - handleEditVehicle called with:', vehicle);
+    
+    // Passar o objeto vehicle diretamente do banco de dados
     setEditingVehicle(vehicle);
     setShowAddForm(true);
   };
@@ -106,6 +111,29 @@ const VehicleList = () => {
       window.URL.revokeObjectURL(url);
     }
   };
+
+  // Função para converter dados do banco para o formato do formulário
+  const convertVehicleForCard = (vehicle: Vehicle) => ({
+    id: vehicle.id,
+    name: vehicle.name,
+    vin: vehicle.vin,
+    year: vehicle.year,
+    model: vehicle.model,
+    plate: vehicle.miles?.toString() || '', // Usar miles do banco
+    internalCode: vehicle.internal_code,
+    color: vehicle.color,
+    caNote: vehicle.ca_note,
+    purchasePrice: vehicle.purchase_price,
+    salePrice: vehicle.sale_price,
+    profitMargin: vehicle.profit_margin || 0,
+    minNegotiable: vehicle.min_negotiable || 0,
+    carfaxPrice: vehicle.carfax_price || 0,
+    mmrValue: vehicle.mmr_value || 0,
+    description: vehicle.description || '',
+    category: vehicle.category,
+    photos: vehicle.photos,
+    video: vehicle.video
+  });
 
   const filteredAndSortedVehicles = useMemo(() => {
     let filtered = vehicles.filter(vehicle => {
@@ -197,27 +225,7 @@ const VehicleList = () => {
           {filteredAndSortedVehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
-              vehicle={{
-                id: vehicle.id,
-                name: vehicle.name,
-                vin: vehicle.vin,
-                year: vehicle.year,
-                model: vehicle.model,
-                plate: '',
-                internalCode: vehicle.internal_code,
-                color: vehicle.color,
-                caNote: vehicle.ca_note,
-                purchasePrice: vehicle.purchase_price,
-                salePrice: vehicle.sale_price,
-                profitMargin: vehicle.profit_margin || 0,
-                minNegotiable: vehicle.min_negotiable || 0,
-                carfaxPrice: vehicle.carfax_price || 0,
-                mmrValue: vehicle.mmr_value || 0,
-                description: vehicle.description || '',
-                category: vehicle.category,
-                photos: vehicle.photos,
-                video: vehicle.video
-              }}
+              vehicle={convertVehicleForCard(vehicle)}
               onEdit={() => handleEditVehicle(vehicle)}
               onDuplicate={() => handleDuplicateVehicle(vehicle)}
             />
@@ -225,30 +233,19 @@ const VehicleList = () => {
         </div>
       ) : (
         <VehicleListView
-          vehicles={filteredAndSortedVehicles.map(vehicle => ({
-            id: vehicle.id,
-            name: vehicle.name,
-            vin: vehicle.vin,
-            year: vehicle.year,
-            model: vehicle.model,
-            plate: '',
-            internalCode: vehicle.internal_code,
-            color: vehicle.color,
-            caNote: vehicle.ca_note,
-            purchasePrice: vehicle.purchase_price,
-            salePrice: vehicle.sale_price,
-            profitMargin: vehicle.profit_margin || 0,
-            minNegotiable: vehicle.min_negotiable || 0,
-            carfaxPrice: vehicle.carfax_price || 0,
-            mmrValue: vehicle.mmr_value || 0,
-            description: vehicle.description || '',
-            category: vehicle.category,
-            photos: vehicle.photos,
-            video: vehicle.video
-          }))}
-          onEdit={(vehicle) => handleEditVehicle(vehicles.find(v => v.id === vehicle.id)!)}
-          onDuplicate={(vehicle) => handleDuplicateVehicle(vehicles.find(v => v.id === vehicle.id)!)}
-          onDelete={(vehicle) => handleDeleteVehicle(vehicles.find(v => v.id === vehicle.id)!)}
+          vehicles={filteredAndSortedVehicles.map(convertVehicleForCard)}
+          onEdit={(vehicle) => {
+            const originalVehicle = vehicles.find(v => v.id === vehicle.id);
+            if (originalVehicle) handleEditVehicle(originalVehicle);
+          }}
+          onDuplicate={(vehicle) => {
+            const originalVehicle = vehicles.find(v => v.id === vehicle.id);
+            if (originalVehicle) handleDuplicateVehicle(originalVehicle);
+          }}
+          onDelete={(vehicle) => {
+            const originalVehicle = vehicles.find(v => v.id === vehicle.id);
+            if (originalVehicle) handleDeleteVehicle(originalVehicle);
+          }}
         />
       )}
 
