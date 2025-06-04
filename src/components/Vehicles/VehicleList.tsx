@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
 import VehicleListHeader from './VehicleListHeader';
 import VehicleSearchBar from './VehicleSearchBar';
+import VehicleControls from './VehicleControls';
+import VehicleListView from './VehicleListView';
 import EmptyVehicleState from './EmptyVehicleState';
 
 interface Vehicle {
@@ -34,6 +36,10 @@ const VehicleList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [filterBy, setFilterBy] = useState('all');
 
   // Mock vehicles data
   const [vehicles] = useState<Vehicle[]>([
@@ -106,11 +112,99 @@ const VehicleList = () => {
     setShowAddForm(true);
   };
 
-  const filteredVehicles = vehicles.filter(vehicle =>
-    vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+  };
+
+  const handleExport = (format: 'csv' | 'xls') => {
+    const headers = ['Nome', 'Ano', 'Cor', 'Código Interno', 'Placa', 'VIN', 'Preço de Compra', 'Preço de Venda', 'Status'];
+    const data = filteredAndSortedVehicles.map(vehicle => [
+      vehicle.name,
+      vehicle.year,
+      vehicle.color,
+      vehicle.internalCode,
+      vehicle.plate,
+      vehicle.vin,
+      vehicle.purchasePrice,
+      vehicle.salePrice,
+      vehicle.category === 'forSale' ? 'À Venda' : 'Vendido'
+    ]);
+
+    if (format === 'csv') {
+      const csvContent = [headers, ...data].map(row => row.join(',')).join('\n');
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'veiculos.csv';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } else {
+      // Para XLS, criamos um CSV mas com extensão XLS (funciona na maioria dos casos)
+      const csvContent = [headers, ...data].map(row => row.join('\t')).join('\n');
+      const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'veiculos.xls';
+      a.click();
+      window.URL.revokeObjectURL(url);
+    }
+  };
+
+  const filteredAndSortedVehicles = useMemo(() => {
+    let filtered = vehicles.filter(vehicle => {
+      const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.plate.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      const matchesFilter = filterBy === 'all' || vehicle.category === filterBy;
+      
+      return matchesSearch && matchesFilter;
+    });
+
+    // Sort vehicles
+    filtered.sort((a, b) => {
+      let aValue, bValue;
+      
+      switch (sortBy) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'year':
+          aValue = a.year;
+          bValue = b.year;
+          break;
+        case 'purchasePrice':
+          aValue = a.purchasePrice;
+          bValue = b.purchasePrice;
+          break;
+        case 'salePrice':
+          aValue = a.salePrice;
+          bValue = b.salePrice;
+          break;
+        case 'internalCode':
+          aValue = a.internalCode.toLowerCase();
+          bValue = b.internalCode.toLowerCase();
+          break;
+        case 'color':
+          aValue = a.color.toLowerCase();
+          bValue = b.color.toLowerCase();
+          break;
+        default:
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+      }
+
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [vehicles, searchTerm, filterBy, sortBy, sortOrder]);
 
   return (
     <div className="p-6 space-y-6">
@@ -121,19 +215,38 @@ const VehicleList = () => {
         onSearchChange={setSearchTerm} 
       />
 
-      {/* Vehicles Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredVehicles.map((vehicle) => (
-          <VehicleCard
-            key={vehicle.id}
-            vehicle={vehicle}
-            onEdit={handleEditVehicle}
-            onDuplicate={handleDuplicateVehicle}
-          />
-        ))}
-      </div>
+      <VehicleControls
+        viewMode={viewMode}
+        onViewModeChange={setViewMode}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSortChange={handleSortChange}
+        filterBy={filterBy}
+        onFilterChange={setFilterBy}
+        onExport={handleExport}
+      />
 
-      {filteredVehicles.length === 0 && <EmptyVehicleState />}
+      {/* Vehicles Display */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredAndSortedVehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              onEdit={handleEditVehicle}
+              onDuplicate={handleDuplicateVehicle}
+            />
+          ))}
+        </div>
+      ) : (
+        <VehicleListView
+          vehicles={filteredAndSortedVehicles}
+          onEdit={handleEditVehicle}
+          onDuplicate={handleDuplicateVehicle}
+        />
+      )}
+
+      {filteredAndSortedVehicles.length === 0 && <EmptyVehicleState />}
 
       {/* Vehicle Form Modal */}
       {showAddForm && (
