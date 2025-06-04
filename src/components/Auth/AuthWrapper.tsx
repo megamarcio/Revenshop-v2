@@ -12,15 +12,9 @@ interface AuthWrapperProps {
 const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const { isAuthenticated, loading, user } = useAuth();
 
-  console.log('AuthWrapper render:', { 
-    isAuthenticated, 
-    loading, 
-    userEmail: user?.email,
-    userRole: user?.role 
-  });
+  console.log('AuthWrapper state:', { isAuthenticated, loading, user: user?.email });
 
   if (loading) {
-    console.log('AuthWrapper: Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-96">
@@ -34,11 +28,11 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
   }
 
   if (!isAuthenticated) {
-    console.log('AuthWrapper: User not authenticated, showing login form');
+    console.log('User not authenticated, showing login form');
     return <LoginForm />;
   }
 
-  console.log('AuthWrapper: User authenticated, showing main app');
+  console.log('User authenticated, showing main app');
   return <>{children}</>;
 };
 
