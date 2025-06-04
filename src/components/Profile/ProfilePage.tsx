@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -287,7 +288,7 @@ const ProfilePage = () => {
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  R$ {userStats.totalSales.toLocaleString('pt-BR')}
+                  $ {userStats.totalSales.toLocaleString('en-US')}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   +12% desde o último mês
