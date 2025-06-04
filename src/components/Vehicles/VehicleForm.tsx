@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -154,13 +155,42 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     const name = formData.name;
     const color = formData.color;
     const price = formatCurrency(formData.salePrice);
+    const vin = formData.vin;
+    const titleStatus = formData.titleStatus || 'CLEAN TITLE';
     
-    const description = `${name} ${year}
-🚗 Cor: ${color}
-💰 Preço: ${price}
-📱 Entre em contato para mais informações!
+    const description = `🚗 ${year} ${name} – ${titleStatus.toUpperCase()} 🚗
 
-#carros #seminovos #${formData.model.toLowerCase()} #venda`;
+📍 Located in Orlando, FL
+💰 Price: ${price}
+
+✅ Only xxxx miles
+✅ Clean Title – No Accidents
+✅ Non-smoker
+✅ Runs and drives like new!
+✅ Up to 35 MPG – Super Fuel Efficient
+
+🛠️ Recent Maintenance Done:
+• Fresh oil change
+• Good tires
+• Brake pads replaced
+• Cold A/C just serviced
+
+🧰 Features:
+• Backup Camera
+• Bluetooth & USB
+• Touchscreen Display
+• Sport Mode
+• Alloy Wheels
+• Cruise Control
+• Keyless Entry
+
+📋 VIN ${vin}
+💼 Financing available
+🧽 Clean inside & out – Ready to go!
+💵 You're Welcome
+
+⚠️ Serious buyers only. Test drives by appointment.
+📲 Send a message now.`;
 
     setFormData(prev => ({ ...prev, description }));
     toast({
