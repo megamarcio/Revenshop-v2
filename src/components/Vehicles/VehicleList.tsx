@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles';
@@ -27,9 +28,11 @@ const VehicleList = () => {
       console.log('VehicleList - handleSaveVehicle called with:', vehicleData);
       console.log('VehicleList - editingVehicle:', editingVehicle);
       
-      if (editingVehicle) {
+      if (editingVehicle && editingVehicle.id) {
+        // Se tem ID válido, é uma edição
         await updateVehicle(editingVehicle.id, vehicleData);
       } else {
+        // Se não tem ID ou é duplicação, é criação
         await createVehicle(vehicleData);
       }
       setShowAddForm(false);
@@ -50,18 +53,32 @@ const VehicleList = () => {
 
   const handleDuplicateVehicle = (vehicle: Vehicle) => {
     if (!canEditVehicles) return;
+    console.log('VehicleList - handleDuplicateVehicle called with:', vehicle);
+    
+    // Criar uma cópia sem ID para forçar criação de novo veículo
     const duplicatedVehicle = {
-      ...vehicle,
       name: `${vehicle.name} (Cópia)`,
       vin: '',
+      year: vehicle.year,
+      model: vehicle.model,
+      miles: vehicle.miles,
       internal_code: '',
+      color: vehicle.color,
+      ca_note: vehicle.ca_note,
+      purchase_price: vehicle.purchase_price,
+      sale_price: vehicle.sale_price,
+      min_negotiable: vehicle.min_negotiable,
+      carfax_price: vehicle.carfax_price,
+      mmr_value: vehicle.mmr_value,
+      description: vehicle.description,
+      category: vehicle.category,
+      title_type: vehicle.title_type,
+      title_status: vehicle.title_status,
+      photos: vehicle.photos,
+      video: vehicle.video
     };
-    // Remove id and other auto-generated fields
-    delete (duplicatedVehicle as any).id;
-    delete (duplicatedVehicle as any).created_at;
-    delete (duplicatedVehicle as any).updated_at;
-    delete (duplicatedVehicle as any).profit_margin;
     
+    // Não incluir ID para garantir que será tratado como criação
     setEditingVehicle(duplicatedVehicle as Vehicle);
     setShowAddForm(true);
   };

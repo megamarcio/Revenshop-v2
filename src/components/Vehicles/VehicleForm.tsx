@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -52,21 +53,24 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   
   console.log('VehicleForm - editingVehicle received:', editingVehicle);
   
+  // Determinar se é edição (tem ID válido) ou criação/duplicação (sem ID)
+  const isEditing = editingVehicle && editingVehicle.id;
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
-    plate: editingVehicle?.miles?.toString() || editingVehicle?.plate || '', // Corrigido: usar miles do banco
-    internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '', // Corrigido: usar internal_code do banco
+    plate: editingVehicle?.miles?.toString() || editingVehicle?.plate || '',
+    internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
-    caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '', // Corrigido: usar ca_note do banco
+    caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
     titleInfo: editingVehicle?.titleInfo || '',
-    purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '', // Corrigido: usar purchase_price do banco
-    salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '', // Corrigido: usar sale_price do banco
-    minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '', // Corrigido: usar min_negotiable do banco
-    carfaxPrice: editingVehicle?.carfax_price?.toString() || editingVehicle?.carfaxPrice?.toString() || '', // Corrigido: usar carfax_price do banco
-    mmrValue: editingVehicle?.mmr_value?.toString() || editingVehicle?.mmrValue?.toString() || '', // Corrigido: usar mmr_value do banco
+    purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '',
+    salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '',
+    minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
+    carfaxPrice: editingVehicle?.carfax_price?.toString() || editingVehicle?.carfaxPrice?.toString() || '',
+    mmrValue: editingVehicle?.mmr_value?.toString() || editingVehicle?.mmrValue?.toString() || '',
     description: editingVehicle?.description || '',
     category: editingVehicle?.category || 'forSale',
     seller: editingVehicle?.seller || '',
@@ -80,7 +84,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     checkDetails: editingVehicle?.checkDetails || '',
     otherPaymentDetails: editingVehicle?.otherPaymentDetails || '',
     sellerCommission: editingVehicle?.sellerCommission?.toString() || '',
-    titleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus || '' // Corrigido: usar title_status do banco
+    titleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus || ''
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
@@ -88,6 +92,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<VehicleFormData>>({});
 
+  console.log('VehicleForm - isEditing:', isEditing);
   console.log('VehicleForm - formData initialized:', formData);
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
@@ -248,17 +253,19 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         photos,
         video: video || undefined,
-        id: editingVehicle?.id || Date.now().toString()
+        // Não incluir ID para duplicações (quando isEditing é false)
+        ...(isEditing && { id: editingVehicle.id })
       };
 
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
+      console.log('VehicleForm - operation type:', isEditing ? 'update' : 'create');
 
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       onSave(vehicleData);
       toast({
         title: 'Sucesso',
-        description: `Veículo ${editingVehicle ? 'atualizado' : 'cadastrado'} com sucesso!`,
+        description: `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`,
       });
       onClose();
     } catch (error) {
@@ -278,7 +285,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center space-x-2">
             <Car className="h-6 w-6 text-revenshop-primary" />
-            <CardTitle>{editingVehicle ? 'Editar Veículo' : 'Adicionar Veículo'}</CardTitle>
+            <CardTitle>{isEditing ? 'Editar Veículo' : 'Adicionar Veículo'}</CardTitle>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-4 w-4" />
@@ -325,7 +332,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
               </Button>
               <Button type="submit" disabled={isLoading}>
                 <Save className="h-4 w-4 mr-2" />
-                {isLoading ? 'Salvando...' : editingVehicle ? 'Atualizar' : 'Salvar'}
+                {isLoading ? 'Salvando...' : isEditing ? 'Atualizar' : 'Salvar'}
               </Button>
             </div>
           </form>
