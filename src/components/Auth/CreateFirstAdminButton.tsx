@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,11 +49,10 @@ const CreateFirstAdminButton = ({ onAdminCreated }: CreateFirstAdminButtonProps)
       console.log('Auth user created:', authData);
 
       if (authData.user) {
-        // The profile should be created automatically by the trigger
-        // Let's wait a moment and then check if it was created
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        // Wait for the trigger to create the profile
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        // Update the profile to set admin role
+        // Try to update the profile to admin role
         const { error: updateError } = await supabase
           .from('profiles')
           .update({
@@ -64,7 +62,8 @@ const CreateFirstAdminButton = ({ onAdminCreated }: CreateFirstAdminButtonProps)
 
         if (updateError) {
           console.error('Error updating profile to admin:', updateError);
-          // If the profile doesn't exist, create it manually
+          
+          // If update failed, try to insert the profile manually
           const { error: insertError } = await supabase
             .from('profiles')
             .insert({
