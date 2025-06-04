@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -19,7 +18,7 @@ interface User {
   email: string;
   phone: string;
   facebook?: string;
-  role: 'admin' | 'seller';
+  role: 'admin' | 'manager' | 'seller';
   createdAt: string;
   photo?: string;
   commissionClientReferral?: number;
@@ -63,7 +62,7 @@ const mockUsers: User[] = [
     email: 'maria@revenshop.com',
     phone: '+55 11 77777-7777',
     facebook: 'https://facebook.com/mariasantos',
-    role: 'seller',
+    role: 'manager',
     createdAt: '2024-01-03',
     photo: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=face',
     commissionClientReferral: 80,
@@ -74,12 +73,66 @@ const mockUsers: User[] = [
 
 const UserManagement = () => {
   const { t } = useLanguage();
-  const { isAdmin } = useAuth();
+  const { canManageUsers, user: currentUser, isAdmin } = useAuth();
   const [users, setUsers] = useState<User[]>(mockUsers);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const canEditUser = (user: User) => {
+    if (!currentUser) return false;
+    
+    // Admins can edit everyone except other admins (unless it's themselves)
+    if (isAdmin) {
+      if (user.role === 'admin' && user.id !== currentUser.id) return false;
+      return true;
+    }
+    
+    // Managers can edit sellers but not admins or other managers
+    if (currentUser.role === 'manager') {
+      return user.role === 'seller';
+    }
+    
+    return false;
+  };
+
+  const canDeleteUser = (user: User) => {
+    if (!currentUser) return false;
+    
+    // Can't delete yourself
+    if (user.id === currentUser.id) return false;
+    
+    // Admins can delete managers and sellers
+    if (isAdmin) {
+      return user.role !== 'admin';
+    }
+    
+    // Managers can delete sellers
+    if (currentUser.role === 'manager') {
+      return user.role === 'seller';
+    }
+    
+    return false;
+  };
+
+  const getRoleLabel = (role: string) => {
+    switch (role) {
+      case 'admin': return 'Administrador';
+      case 'manager': return 'Gerente';
+      case 'seller': return 'Vendedor';
+      default: return role;
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'manager': return 'bg-purple-100 text-purple-800';
+      case 'seller': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   const handleCreateUser = async (userData: any) => {
     setIsLoading(true);
@@ -174,7 +227,7 @@ const UserManagement = () => {
     }).format(value);
   };
 
-  if (!isAdmin) {
+  if (!canManageUsers) {
     return (
       <div className="p-6">
         <Card>
@@ -245,12 +298,8 @@ const UserManagement = () => {
                       </div>
                     )}
                     <div className="flex items-center mt-1">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                        user.role === 'admin'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-blue-100 text-blue-800'
-                      }`}>
-                        {user.role === 'admin' ? 'Administrador' : 'Vendedor'}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getRoleColor(user.role)}`}>
+                        {getRoleLabel(user.role)}
                       </span>
                       <span className="text-xs text-gray-400 ml-3">
                         Criado em: {new Date(user.createdAt).toLocaleDateString('pt-BR')}
@@ -277,15 +326,17 @@ const UserManagement = () => {
                 </div>
 
                 <div className="flex items-center space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => openEditDialog(user)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
+                  {canEditUser(user) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => openEditDialog(user)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                  )}
                   
-                  {user.id !== '1' && ( // Não permitir excluir o admin principal
+                  {canDeleteUser(user) && (
                     <Button
                       variant="outline"
                       size="sm"

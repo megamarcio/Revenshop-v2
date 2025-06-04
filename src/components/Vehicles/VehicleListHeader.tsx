@@ -11,7 +11,7 @@ interface VehicleListHeaderProps {
 
 const VehicleListHeader = ({ onAddVehicle }: VehicleListHeaderProps) => {
   const { t } = useLanguage();
-  const { isAdmin } = useAuth();
+  const { canEditVehicles } = useAuth();
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
@@ -19,7 +19,7 @@ const VehicleListHeader = ({ onAddVehicle }: VehicleListHeaderProps) => {
         <h1 className="text-2xl font-bold text-gray-900">{t('vehicles')}</h1>
         <p className="text-gray-600">Gerencie seu estoque de veículos</p>
       </div>
-      {isAdmin && (
+      {canEditVehicles && (
         <Button 
           onClick={onAddVehicle}
           className="bg-revenshop-primary hover:bg-revenshop-primary/90"

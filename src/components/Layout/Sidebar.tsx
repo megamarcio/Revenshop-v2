@@ -19,14 +19,14 @@ interface SidebarProps {
 
 const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { t } = useLanguage();
-  const { isAdmin } = useAuth();
+  const { canAccessAdmin, canManageUsers } = useAuth();
 
   const menuItems = [
-    ...(isAdmin ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
+    ...(canAccessAdmin ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
     { id: 'vehicles', label: t('vehicles'), icon: Car },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
-    ...(isAdmin ? [{ id: 'users', label: t('users'), icon: Users }] : []),
-    ...(isAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),
+    ...(canManageUsers ? [{ id: 'users', label: t('users'), icon: Users }] : []),
+    ...(canAccessAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),
     { id: 'profile', label: t('profile'), icon: User }
   ];
 

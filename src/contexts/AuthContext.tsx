@@ -7,7 +7,7 @@ interface User {
   lastName: string;
   email: string;
   phone: string;
-  role: 'admin' | 'seller';
+  role: 'admin' | 'manager' | 'seller';
   photo?: string;
 }
 
@@ -17,6 +17,11 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isManager: boolean;
+  canEditVehicles: boolean;
+  canManageUsers: boolean;
+  canAccessAdmin: boolean;
+  canEditBHPHSettings: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -48,6 +53,15 @@ const mockUsers: User[] = [
     phone: '+55 11 88888-8888',
     role: 'seller',
     photo: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=face'
+  },
+  {
+    id: '3',
+    firstName: 'Maria',
+    lastName: 'Gerente',
+    email: 'maria@revenshop.com',
+    phone: '+55 11 77777-7777',
+    role: 'manager',
+    photo: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=face'
   }
 ];
 
@@ -78,6 +92,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
+  const isAdmin = user?.role === 'admin';
+  const isManager = user?.role === 'manager';
+  const canEditVehicles = isAdmin || isManager;
+  const canManageUsers = isAdmin || isManager;
+  const canAccessAdmin = isAdmin || isManager;
+  const canEditBHPHSettings = isAdmin;
+
   return (
     <AuthContext.Provider 
       value={{ 
@@ -85,7 +106,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         login, 
         logout, 
         isAuthenticated: !!user, 
-        isAdmin: user?.role === 'admin' 
+        isAdmin,
+        isManager,
+        canEditVehicles,
+        canManageUsers,
+        canAccessAdmin,
+        canEditBHPHSettings
       }}
     >
       {children}

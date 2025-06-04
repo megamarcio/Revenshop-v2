@@ -1,5 +1,5 @@
-
 import React, { useState, useMemo } from 'react';
+import { useAuth } from '../../contexts/AuthContext';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
 import VehicleListHeader from './VehicleListHeader';
@@ -33,6 +33,7 @@ interface Vehicle {
 }
 
 const VehicleList = () => {
+  const { canEditVehicles } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
@@ -95,11 +96,13 @@ const VehicleList = () => {
   };
 
   const handleEditVehicle = (vehicle: Vehicle) => {
+    if (!canEditVehicles) return;
     setEditingVehicle(vehicle);
     setShowAddForm(true);
   };
 
   const handleDuplicateVehicle = (vehicle: Vehicle) => {
+    if (!canEditVehicles) return;
     const duplicatedVehicle = {
       ...vehicle,
       id: undefined,
@@ -233,23 +236,23 @@ const VehicleList = () => {
             <VehicleCard
               key={vehicle.id}
               vehicle={vehicle}
-              onEdit={handleEditVehicle}
-              onDuplicate={handleDuplicateVehicle}
+              onEdit={canEditVehicles ? handleEditVehicle : undefined}
+              onDuplicate={canEditVehicles ? handleDuplicateVehicle : undefined}
             />
           ))}
         </div>
       ) : (
         <VehicleListView
           vehicles={filteredAndSortedVehicles}
-          onEdit={handleEditVehicle}
-          onDuplicate={handleDuplicateVehicle}
+          onEdit={canEditVehicles ? handleEditVehicle : undefined}
+          onDuplicate={canEditVehicles ? handleDuplicateVehicle : undefined}
         />
       )}
 
       {filteredAndSortedVehicles.length === 0 && <EmptyVehicleState />}
 
       {/* Vehicle Form Modal */}
-      {showAddForm && (
+      {showAddForm && canEditVehicles && (
         <VehicleForm
           onClose={() => {
             setShowAddForm(false);

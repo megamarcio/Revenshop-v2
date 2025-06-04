@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -136,6 +135,7 @@ const LoginForm = () => {
               <p className="text-sm font-medium text-gray-700 mb-2">Credenciais de Demonstração:</p>
               <div className="text-xs text-gray-600 space-y-1">
                 <p><strong>Admin:</strong> admin@revenshop.com / 123456</p>
+                <p><strong>Gerente:</strong> maria@revenshop.com / 123456</p>
                 <p><strong>Vendedor:</strong> joao@revenshop.com / 123456</p>
               </div>
             </div>
