@@ -24,20 +24,27 @@ export const useAuth = () => {
   const fetchUserProfile = async (userId: string) => {
     try {
       console.log('Fetching user profile for:', userId);
+      
+      // Try to get the profile, but don't fail if it doesn't exist yet
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching user profile:', error);
-        throw error;
+        return null;
       }
       
-      console.log('User profile fetched:', data);
-      setUser(data);
-      return data;
+      if (data) {
+        console.log('User profile fetched:', data);
+        setUser(data);
+        return data;
+      } else {
+        console.log('No profile found for user:', userId);
+        return null;
+      }
     } catch (error) {
       console.error('Error in fetchUserProfile:', error);
       return null;
@@ -68,6 +75,10 @@ export const useAuth = () => {
             title: 'Sucesso',
             description: 'Login realizado com sucesso!',
           });
+          return true;
+        } else {
+          // User exists but no profile - might be during signup process
+          console.log('User authenticated but no profile found');
           return true;
         }
       }

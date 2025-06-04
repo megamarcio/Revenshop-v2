@@ -31,7 +31,7 @@ const CreateFirstAdminButton = ({ onAdminCreated }: CreateFirstAdminButtonProps)
       console.log('Creating first admin user...');
       
       // Create the user in Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -42,26 +42,43 @@ const CreateFirstAdminButton = ({ onAdminCreated }: CreateFirstAdminButtonProps)
         },
       });
 
-      if (error) {
-        console.error('Error creating admin user:', error);
-        throw error;
+      if (authError) {
+        console.error('Error creating admin user:', authError);
+        throw authError;
       }
 
-      if (data.user) {
-        // Create profile with admin role
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            email: formData.email,
-            role: 'admin',
-          });
+      console.log('Auth user created:', authData);
 
-        if (profileError) {
-          console.error('Error creating admin profile:', profileError);
-          throw profileError;
+      if (authData.user) {
+        // The profile should be created automatically by the trigger
+        // Let's wait a moment and then check if it was created
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Update the profile to set admin role
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({
+            role: 'admin',
+          })
+          .eq('id', authData.user.id);
+
+        if (updateError) {
+          console.error('Error updating profile to admin:', updateError);
+          // If the profile doesn't exist, create it manually
+          const { error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: authData.user.id,
+              first_name: formData.firstName,
+              last_name: formData.lastName,
+              email: formData.email,
+              role: 'admin',
+            });
+
+          if (insertError) {
+            console.error('Error inserting admin profile:', insertError);
+            throw insertError;
+          }
         }
 
         toast({
