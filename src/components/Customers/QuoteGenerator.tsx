@@ -1,10 +1,12 @@
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Download, Print } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ArrowLeft, FileText, Download } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '../../integrations/supabase/client';
 
 interface Customer {
@@ -13,10 +15,12 @@ interface Customer {
   email: string;
   phone: string;
   address: string;
-  interested_vehicle_id?: string;
-  responsible_seller_id?: string;
-  deal_status: string;
-  payment_type: string;
+  interested_vehicle?: {
+    name: string;
+    model: string;
+    year: number;
+    sale_price: number;
+  };
 }
 
 interface QuoteGeneratorProps {
@@ -26,247 +30,147 @@ interface QuoteGeneratorProps {
 
 const QuoteGenerator = ({ customer, onBack }: QuoteGeneratorProps) => {
   const { t } = useLanguage();
-  const [signatureDate, setSignatureDate] = useState(new Date().toLocaleDateString());
-
-  // Fetch vehicle details
-  const { data: vehicle } = useQuery({
-    queryKey: ['vehicle', customer.interested_vehicle_id],
-    queryFn: async () => {
-      if (!customer.interested_vehicle_id) return null;
-      const { data, error } = await supabase
-        .from('vehicles')
-        .select('*')
-        .eq('id', customer.interested_vehicle_id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!customer.interested_vehicle_id,
-  });
-
-  // Fetch seller details
-  const { data: seller } = useQuery({
-    queryKey: ['seller', customer.responsible_seller_id],
-    queryFn: async () => {
-      if (!customer.responsible_seller_id) return null;
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', customer.responsible_seller_id)
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    enabled: !!customer.responsible_seller_id,
-  });
+  const [totalAmount, setTotalAmount] = useState(customer.interested_vehicle?.sale_price || 0);
+  const [downPayment, setDownPayment] = useState(0);
+  const [monthlyPayment, setMonthlyPayment] = useState(0);
+  const [termMonths, setTermMonths] = useState(36);
+  const [interestRate, setInterestRate] = useState(12);
 
   const handlePrint = () => {
     window.print();
   };
 
   const handleExport = () => {
-    // Create a downloadable document
-    const content = document.getElementById('quote-content')?.innerHTML;
-    const blob = new Blob([`
-      <html>
-        <head>
-          <title>${customer.deal_status === 'completed' ? 'Contrato' : 'Orçamento'}</title>
-          <style>
-            body { font-family: Arial, sans-serif; margin: 20px; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .section { margin: 20px 0; }
-            .signature-line { border-bottom: 1px solid #000; width: 300px; margin: 20px 0; }
-          </style>
-        </head>
-        <body>${content}</body>
-      </html>
-    `], { type: 'text/html' });
-    
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${customer.deal_status === 'completed' ? 'contrato' : 'orcamento'}-${customer.name}.html`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Implementar exportação do deal
+    console.log('Exporting deal...');
   };
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between mb-6 print:hidden">
-        <div className="flex items-center space-x-4">
-          <Button variant="outline" onClick={onBack}>
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <h1 className="text-2xl font-bold">
-            {customer.deal_status === 'completed' ? t('generateContract') : t('generateQuote')}
-          </h1>
-        </div>
-        <div className="flex space-x-2">
-          <Button variant="outline" onClick={handlePrint}>
-            <Print className="h-4 w-4 mr-2" />
-            {t('printQuote')}
-          </Button>
-          <Button onClick={handleExport}>
-            <Download className="h-4 w-4 mr-2" />
-            {t('exportDeal')}
-          </Button>
-        </div>
+      <div className="flex items-center space-x-4 mb-6">
+        <Button variant="outline" onClick={onBack}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Voltar
+        </Button>
+        <h1 className="text-2xl font-bold">{t('generateQuote')}</h1>
       </div>
 
-      <Card id="quote-content">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-revenshop-primary">
-            REVENSHOP
-          </CardTitle>
-          <p className="text-lg">
-            {customer.deal_status === 'completed' ? 'CONTRATO DE VENDA' : 'ORÇAMENTO'}
-          </p>
-          <p className="text-sm text-gray-600">
-            Data: {new Date().toLocaleDateString('pt-BR')}
-          </p>
-        </CardHeader>
-        
-        <CardContent className="space-y-8">
-          {/* Customer Details */}
-          <div className="border-b pb-4">
-            <h2 className="text-xl font-semibold mb-4">{t('customerDetails')}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <strong>Nome:</strong> {customer.name}
-              </div>
-              <div>
-                <strong>Telefone:</strong> {customer.phone}
-              </div>
-              <div>
-                <strong>Email:</strong> {customer.email || 'Não informado'}
-              </div>
-              <div>
-                <strong>Endereço:</strong> {customer.address || 'Não informado'}
-              </div>
-            </div>
-          </div>
-
-          {/* Vehicle Details */}
-          {vehicle && (
-            <div className="border-b pb-4">
-              <h2 className="text-xl font-semibold mb-4">{t('vehicleDetails')}</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <strong>Veículo:</strong> {vehicle.year} {vehicle.name} {vehicle.model}
-                </div>
-                <div>
-                  <strong>VIN:</strong> {vehicle.vin}
-                </div>
-                <div>
-                  <strong>Cor:</strong> {vehicle.color}
-                </div>
-                <div>
-                  <strong>Milhas:</strong> {vehicle.miles?.toLocaleString()}
-                </div>
-                <div>
-                  <strong>Preço de Venda:</strong> ${vehicle.sale_price?.toLocaleString()}
-                </div>
-                <div>
-                  <strong>Mínimo Negociável:</strong> ${vehicle.min_negotiable?.toLocaleString() || 'N/A'}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Deal Details */}
-          <div className="border-b pb-4">
-            <h2 className="text-xl font-semibold mb-4">{t('dealDetails')}</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <strong>Tipo de Pagamento:</strong> {
-                  customer.payment_type === 'cash' ? t('cash') :
-                  customer.payment_type === 'financing' ? t('financing') :
-                  customer.payment_type === 'bhph' ? t('bhph') : customer.payment_type
-                }
-              </div>
-              <div>
-                <strong>Status:</strong> {
-                  customer.deal_status === 'completed' ? t('completedSale') : t('quote')
-                }
-              </div>
-              {vehicle && (
-                <>
-                  <div>
-                    <strong>Valor Total:</strong> ${vehicle.sale_price?.toLocaleString()}
-                  </div>
-                  {customer.payment_type === 'bhph' && (
-                    <>
-                      <div>
-                        <strong>Entrada:</strong> $___________
-                      </div>
-                      <div>
-                        <strong>Financiado:</strong> $___________
-                      </div>
-                      <div>
-                        <strong>Pagamento Mensal:</strong> $___________
-                      </div>
-                      <div>
-                        <strong>Prazo:</strong> _______ meses
-                      </div>
-                      <div>
-                        <strong>Taxa de Juros:</strong> _______ %
-                      </div>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Seller Details */}
-          {seller && (
-            <div className="border-b pb-4">
-              <h2 className="text-xl font-semibold mb-4">Vendedor Responsável</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <strong>Nome:</strong> {seller.first_name} {seller.last_name}
-                </div>
-                <div>
-                  <strong>Email:</strong> {seller.email}
-                </div>
-                <div>
-                  <strong>Telefone:</strong> {seller.phone || 'Não informado'}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Signature Section */}
-          <div className="space-y-8 pt-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Formulário de Orçamento */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('dealDetails')}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-4">Termos e Condições:</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Este {customer.deal_status === 'completed' ? 'contrato' : 'orçamento'} está sujeito aos termos e condições da REVENSHOP. 
-                O cliente declara estar ciente de todas as condições apresentadas.
-              </p>
+              <Label htmlFor="totalAmount">{t('totalAmount')}</Label>
+              <Input
+                id="totalAmount"
+                type="number"
+                value={totalAmount}
+                onChange={(e) => setTotalAmount(Number(e.target.value))}
+              />
             </div>
+            <div>
+              <Label htmlFor="downPayment">{t('downPayment')}</Label>
+              <Input
+                id="downPayment"
+                type="number"
+                value={downPayment}
+                onChange={(e) => setDownPayment(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="monthlyPayment">{t('monthlyPayment')}</Label>
+              <Input
+                id="monthlyPayment"
+                type="number"
+                value={monthlyPayment}
+                onChange={(e) => setMonthlyPayment(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="termMonths">{t('termMonths')}</Label>
+              <Input
+                id="termMonths"
+                type="number"
+                value={termMonths}
+                onChange={(e) => setTermMonths(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label htmlFor="interestRate">{t('interestRate')}</Label>
+              <Input
+                id="interestRate"
+                type="number"
+                step="0.1"
+                value={interestRate}
+                onChange={(e) => setInterestRate(Number(e.target.value))}
+              />
+            </div>
+          </CardContent>
+        </Card>
 
-            <div className="grid grid-cols-2 gap-8">
+        {/* Preview do Orçamento */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Preview do Orçamento</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
               <div>
-                <p className="mb-4">Assinatura do Cliente:</p>
-                <div className="border-b border-black w-full h-16 mb-2"></div>
-                <p className="text-sm">
-                  {customer.name}<br/>
-                  Data: {signatureDate}
-                </p>
+                <h3 className="font-semibold text-lg">REVENSHOP</h3>
+                <p className="text-sm text-gray-600">Orçamento de Veículo</p>
               </div>
-              <div>
-                <p className="mb-4">Assinatura do Vendedor:</p>
-                <div className="border-b border-black w-full h-16 mb-2"></div>
-                <p className="text-sm">
-                  {seller ? `${seller.first_name} ${seller.last_name}` : '_______________'}<br/>
-                  Data: {signatureDate}
-                </p>
+              
+              <div className="border-t pt-4">
+                <h4 className="font-medium">{t('customerDetails')}</h4>
+                <p>{customer.name}</p>
+                <p>{customer.phone}</p>
+                <p>{customer.email}</p>
+                <p>{customer.address}</p>
+              </div>
+
+              {customer.interested_vehicle && (
+                <div className="border-t pt-4">
+                  <h4 className="font-medium">{t('vehicleDetails')}</h4>
+                  <p>{customer.interested_vehicle.year} {customer.interested_vehicle.name} {customer.interested_vehicle.model}</p>
+                  <p>Preço: R$ {customer.interested_vehicle.sale_price.toLocaleString()}</p>
+                </div>
+              )}
+
+              <div className="border-t pt-4">
+                <h4 className="font-medium">{t('dealDetails')}</h4>
+                <p>Valor Total: R$ {totalAmount.toLocaleString()}</p>
+                <p>Entrada: R$ {downPayment.toLocaleString()}</p>
+                <p>Parcela Mensal: R$ {monthlyPayment.toLocaleString()}</p>
+                <p>Prazo: {termMonths} meses</p>
+                <p>Taxa de Juros: {interestRate}%</p>
+              </div>
+
+              <div className="border-t pt-4">
+                <h4 className="font-medium">{t('signature')}</h4>
+                <div className="border-b border-gray-300 mt-8 mb-2"></div>
+                <p className="text-sm">Cliente</p>
+                <div className="mt-4">
+                  <p className="text-sm">{t('signatureDate')}: ___/___/_____</p>
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex space-x-4">
+        <Button onClick={handlePrint} className="bg-blue-600 hover:bg-blue-700">
+          <FileText className="h-4 w-4 mr-2" />
+          {t('printQuote')}
+        </Button>
+        <Button onClick={handleExport} variant="outline">
+          <Download className="h-4 w-4 mr-2" />
+          {t('exportDeal')}
+        </Button>
+      </div>
     </div>
   );
 };
