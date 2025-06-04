@@ -82,8 +82,9 @@ export const useVehicles = () => {
         mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
         description: vehicleData.description || null,
         category: vehicleData.category as 'forSale' | 'sold',
-        title_type: vehicleData.titleInfo?.includes('clean-title') ? 'clean-title' as const : 
-                   vehicleData.titleInfo?.includes('rebuilt') ? 'rebuilt' as const : null,
+        // CORRIGIDO: Melhor parsing do titleInfo
+        title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
+                   vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
         title_status: vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' as const :
                      vehicleData.titleInfo?.includes('em-transito') ? 'em-transito' as const : null,
         photos: vehicleData.photos || [],
@@ -92,6 +93,8 @@ export const useVehicles = () => {
       };
 
       console.log('Mapped vehicle data for database:', dbVehicleData);
+      console.log('Title type extracted:', dbVehicleData.title_type);
+      console.log('Title status extracted:', dbVehicleData.title_status);
 
       const { data, error } = await supabase
         .from('vehicles')
@@ -148,12 +151,40 @@ export const useVehicles = () => {
       if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
       if (vehicleData.category) dbUpdateData.category = vehicleData.category;
       
-      // Processar informações do título
+      // CORRIGIDO: Processar informações do título com parsing melhorado
       if (vehicleData.titleInfo !== undefined) {
-        dbUpdateData.title_type = vehicleData.titleInfo?.includes('clean-title') ? 'clean-title' : 
-                                 vehicleData.titleInfo?.includes('rebuilt') ? 'rebuilt' : null;
-        dbUpdateData.title_status = vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' :
-                                   vehicleData.titleInfo?.includes('em-transito') ? 'em-transito' : null;
+        console.log('Processing titleInfo:', vehicleData.titleInfo);
+        
+        if (vehicleData.titleInfo) {
+          const titleParts = vehicleData.titleInfo.split('-');
+          console.log('Title parts:', titleParts);
+          
+          // Primeiro parte é o tipo do título
+          if (titleParts[0] === 'clean-title' || titleParts[0] === 'rebuilt') {
+            dbUpdateData.title_type = titleParts[0];
+          } else {
+            dbUpdateData.title_type = null;
+          }
+          
+          // Partes restantes formam o status
+          if (titleParts.length > 1) {
+            const statusPart = titleParts.slice(1).join('-');
+            if (statusPart === 'em-maos' || statusPart === 'em-transito') {
+              dbUpdateData.title_status = statusPart;
+            } else {
+              dbUpdateData.title_status = null;
+            }
+          } else {
+            dbUpdateData.title_status = null;
+          }
+        } else {
+          // Se titleInfo está vazio, limpar ambos os campos
+          dbUpdateData.title_type = null;
+          dbUpdateData.title_status = null;
+        }
+        
+        console.log('Final title_type:', dbUpdateData.title_type);
+        console.log('Final title_status:', dbUpdateData.title_status);
       }
       
       // Processar fotos (sempre incluir, mesmo se vazio)

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,24 +23,42 @@ interface BasicInfoFormProps {
 
 const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) => {
   const [titleType, setTitleType] = useState(() => {
+    console.log('BasicInfoForm - initializing titleType from formData.titleInfo:', formData.titleInfo);
     if (formData.titleInfo?.includes('clean-title')) return 'clean-title';
     if (formData.titleInfo?.includes('rebuilt')) return 'rebuilt';
     return '';
   });
   
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(() => {
+    return !!titleType;
+  });
+
+  console.log('BasicInfoForm - titleType state:', titleType);
+  console.log('BasicInfoForm - isExpanded state:', isExpanded);
 
   const handleTitleTypeChange = (value: string) => {
+    console.log('BasicInfoForm - handleTitleTypeChange:', value);
     setTitleType(value);
     setIsExpanded(!!value);
     if (!value) {
       onInputChange('titleInfo', '');
+    } else {
+      // Se já há um status selecionado, manter
+      const currentStatus = formData.titleInfo?.split('-').slice(1).join('-') || '';
+      if (currentStatus) {
+        onInputChange('titleInfo', `${value}-${currentStatus}`);
+      } else {
+        onInputChange('titleInfo', value);
+      }
     }
   };
 
   const handleTitleStatusChange = (status: string) => {
+    console.log('BasicInfoForm - handleTitleStatusChange:', status);
     if (titleType && status) {
-      onInputChange('titleInfo', `${titleType}-${status}`);
+      const newTitleInfo = `${titleType}-${status}`;
+      console.log('BasicInfoForm - setting titleInfo to:', newTitleInfo);
+      onInputChange('titleInfo', newTitleInfo);
     }
   };
 
@@ -62,6 +79,16 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     } else if (e.target.value === '') {
       onInputChange('caNote', '');
     }
+  };
+
+  // Extrair o status atual do titleInfo
+  const getCurrentStatus = () => {
+    if (!formData.titleInfo) return '';
+    const parts = formData.titleInfo.split('-');
+    if (parts.length > 1) {
+      return parts.slice(1).join('-');
+    }
+    return '';
   };
 
   return (
@@ -200,7 +227,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
                 <Label className="text-xs text-gray-500">Status</Label>
                 <ToggleGroup 
                   type="single" 
-                  value={formData.titleInfo?.split('-').slice(-2).join('-') || ''}
+                  value={getCurrentStatus()}
                   onValueChange={handleTitleStatusChange}
                   className="justify-start"
                 >

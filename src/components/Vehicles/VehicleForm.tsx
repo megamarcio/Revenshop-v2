@@ -56,7 +56,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   // Determinar se é edição (tem ID válido) ou criação/duplicação (sem ID)
   const isEditing = editingVehicle && editingVehicle.id;
   
-  // Construir titleInfo a partir dos campos do banco
+  // Construir titleInfo a partir dos campos do banco - CORRIGIDO
   const buildTitleInfo = (vehicle: any) => {
     if (!vehicle) return '';
     
@@ -84,7 +84,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
-    titleInfo: editingVehicle?.titleInfo || buildTitleInfo(editingVehicle),
+    titleInfo: buildTitleInfo(editingVehicle) || editingVehicle?.titleInfo || '',
     purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '',
     salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '',
     minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
@@ -113,8 +113,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
 
   console.log('VehicleForm - isEditing:', isEditing);
   console.log('VehicleForm - formData initialized:', formData);
+  console.log('VehicleForm - titleInfo from buildTitleInfo:', buildTitleInfo(editingVehicle));
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
+    console.log('VehicleForm - handleInputChange:', field, value);
     setFormData(prev => ({ ...prev, [field]: value }));
     
     if (errors[field]) {
