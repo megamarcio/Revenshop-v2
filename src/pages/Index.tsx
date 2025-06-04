@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { LanguageProvider } from '../contexts/LanguageContext';
 import { AuthProvider } from '../contexts/AuthContext';
 import { BHPHProvider } from '../contexts/BHPHContext';
+import ThemeProvider from '../components/Providers/ThemeProvider';
 import LoginForm from '../components/Auth/LoginForm';
 import Header from '../components/Layout/Header';
 import Sidebar from '../components/Layout/Sidebar';
@@ -60,13 +61,15 @@ const AppContent = () => {
 
 const Index = () => {
   return (
-    <LanguageProvider>
-      <AuthProvider>
-        <BHPHProvider>
-          <AppContent />
-        </BHPHProvider>
-      </AuthProvider>
-    </LanguageProvider>
+    <ThemeProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <BHPHProvider>
+            <AppContent />
+          </BHPHProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 };
 

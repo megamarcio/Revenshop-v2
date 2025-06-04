@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LogOut, User, Car } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -26,6 +27,9 @@ const Header = () => {
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {/* Language Selector */}
           <Select value={language} onValueChange={(value: 'pt' | 'es' | 'en') => setLanguage(value)}>
             <SelectTrigger className="w-20 h-9">
