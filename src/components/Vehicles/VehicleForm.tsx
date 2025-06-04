@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -38,6 +37,10 @@ interface VehicleFormData {
   category: 'forSale' | 'sold';
   seller?: string;
   finalSalePrice?: string;
+  saleDate?: string;
+  saleNotes?: string;
+  customerName?: string;
+  customerPhone?: string;
 }
 
 interface VehicleFormProps {
@@ -65,7 +68,11 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     description: editingVehicle?.description || '',
     category: editingVehicle?.category || 'forSale',
     seller: editingVehicle?.seller || '',
-    finalSalePrice: editingVehicle?.finalSalePrice?.toString() || ''
+    finalSalePrice: editingVehicle?.finalSalePrice?.toString() || '',
+    saleDate: editingVehicle?.saleDate || '',
+    saleNotes: editingVehicle?.saleNotes || '',
+    customerName: editingVehicle?.customerName || '',
+    customerPhone: editingVehicle?.customerPhone || ''
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
@@ -110,6 +117,13 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     const caNote = parseInt(formData.caNote);
     if (isNaN(caNote) || caNote < 0 || caNote > 50) {
       newErrors.caNote = 'Nota CA deve estar entre 0 e 50';
+    }
+
+    // Validate sold vehicle fields
+    if (formData.category === 'sold') {
+      if (!formData.customerName?.trim()) newErrors.customerName = 'Nome do cliente é obrigatório';
+      if (!formData.customerPhone?.trim()) newErrors.customerPhone = 'Telefone do cliente é obrigatório';
+      if (!formData.saleDate?.trim()) newErrors.saleDate = 'Data da venda é obrigatória';
     }
 
     setErrors(newErrors);
@@ -465,25 +479,76 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
                 </div>
 
                 {formData.category === 'sold' && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="seller">Nome do Vendedor</Label>
-                      <Input
-                        id="seller"
-                        value={formData.seller}
-                        onChange={(e) => handleInputChange('seller', e.target.value)}
-                        placeholder="Ex: João Silva"
-                      />
+                  <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
+                    <h4 className="font-medium text-gray-900">Informações da Venda</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="saleDate">Data da Venda *</Label>
+                        <Input
+                          id="saleDate"
+                          type="date"
+                          value={formData.saleDate}
+                          onChange={(e) => handleInputChange('saleDate', e.target.value)}
+                          className={errors.saleDate ? 'border-red-500' : ''}
+                        />
+                        {errors.saleDate && <p className="text-sm text-red-500">{errors.saleDate}</p>}
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="finalSalePrice">Valor Final de Venda (R$)</Label>
+                        <Input
+                          id="finalSalePrice"
+                          type="number"
+                          step="0.01"
+                          value={formData.finalSalePrice}
+                          onChange={(e) => handleInputChange('finalSalePrice', e.target.value)}
+                          placeholder="Ex: 66500"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="customerName">Nome do Cliente *</Label>
+                        <Input
+                          id="customerName"
+                          value={formData.customerName}
+                          onChange={(e) => handleInputChange('customerName', e.target.value)}
+                          placeholder="Ex: João Silva"
+                          className={errors.customerName ? 'border-red-500' : ''}
+                        />
+                        {errors.customerName && <p className="text-sm text-red-500">{errors.customerName}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="customerPhone">Telefone do Cliente *</Label>
+                        <Input
+                          id="customerPhone"
+                          value={formData.customerPhone}
+                          onChange={(e) => handleInputChange('customerPhone', e.target.value)}
+                          placeholder="Ex: (11) 99999-9999"
+                          className={errors.customerPhone ? 'border-red-500' : ''}
+                        />
+                        {errors.customerPhone && <p className="text-sm text-red-500">{errors.customerPhone}</p>}
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="seller">Nome do Vendedor</Label>
+                        <Input
+                          id="seller"
+                          value={formData.seller}
+                          onChange={(e) => handleInputChange('seller', e.target.value)}
+                          placeholder="Ex: Maria Santos"
+                        />
+                      </div>
                     </div>
+
                     <div className="space-y-2">
-                      <Label htmlFor="finalSalePrice">Valor Final de Venda (R$)</Label>
-                      <Input
-                        id="finalSalePrice"
-                        type="number"
-                        step="0.01"
-                        value={formData.finalSalePrice}
-                        onChange={(e) => handleInputChange('finalSalePrice', e.target.value)}
-                        placeholder="Ex: 66500"
+                      <Label htmlFor="saleNotes">Observações da Venda</Label>
+                      <Textarea
+                        id="saleNotes"
+                        value={formData.saleNotes}
+                        onChange={(e) => handleInputChange('saleNotes', e.target.value)}
+                        placeholder="Ex: Cliente pagou à vista, entrega agendada para..."
+                        rows={3}
                       />
                     </div>
                   </div>
