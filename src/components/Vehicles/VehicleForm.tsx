@@ -137,6 +137,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   const validateForm = () => {
     const newErrors: Partial<VehicleFormData> = {};
 
+    // Validações básicas obrigatórias
     if (!formData.name.trim()) newErrors.name = t('nameRequired') || 'Nome é obrigatório';
     if (!formData.vin.trim()) newErrors.vin = t('vinRequired') || 'VIN é obrigatório';
     if (!formData.year.trim()) newErrors.year = t('yearRequired') || 'Ano é obrigatório';
@@ -157,10 +158,12 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
       newErrors.caNote = t('caNoteValidation') || 'Nota CA deve ser múltiplo de 5 entre 0 e 50';
     }
 
+    // Validações específicas para veículos vendidos
     if (formData.category === 'sold') {
       if (!formData.customerName?.trim()) newErrors.customerName = t('customerNameRequired') || 'Nome do cliente é obrigatório';
       if (!formData.customerPhone?.trim()) newErrors.customerPhone = t('customerPhoneRequired') || 'Telefone do cliente é obrigatório';
       if (!formData.saleDate?.trim()) newErrors.saleDate = t('saleDateRequired') || 'Data da venda é obrigatória';
+      if (!formData.finalSalePrice?.trim()) newErrors.finalSalePrice = 'Valor final de venda é obrigatório';
     }
 
     setErrors(newErrors);
@@ -282,15 +285,12 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         photos: photos,
         video: video || undefined,
-        // Garantir que titleInfo seja incluída
         titleInfo: formData.titleInfo,
-        // Não incluir ID para duplicações (quando isEditing é false)
         ...(isEditing && { id: editingVehicle.id })
       };
 
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
       console.log('VehicleForm - operation type:', isEditing ? 'update' : 'create');
-      console.log('VehicleForm - titleInfo being sent:', vehicleData.titleInfo);
 
       // Mostrar loading com timeout estimado baseado no número de fotos
       const estimatedTime = Math.max(5, photos.length * 2);
@@ -301,10 +301,23 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         });
       }
 
+      // Mostrar aviso especial para vendas
+      if (vehicleData.category === 'sold') {
+        toast({
+          title: 'Processando Venda',
+          description: 'Criando cliente e registrando venda...',
+        });
+      }
+
       await onSave(vehicleData);
+      
+      const successMessage = vehicleData.category === 'sold' ? 
+        `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} e venda registrada com sucesso!` :
+        `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`;
+        
       toast({
         title: t('success'),
-        description: t('vehicleSaved') || `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`,
+        description: successMessage,
       });
       onClose();
     } catch (error) {

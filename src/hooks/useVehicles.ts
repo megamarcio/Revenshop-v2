@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useCustomers } from './useCustomers';
 
 export interface Vehicle {
   id: string;
@@ -33,6 +33,7 @@ export interface Vehicle {
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
+  const { createCustomer, createSaleRecord } = useCustomers();
 
   const fetchVehicles = async () => {
     try {
@@ -82,7 +83,6 @@ export const useVehicles = () => {
         mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
         description: vehicleData.description || null,
         category: vehicleData.category as 'forSale' | 'sold',
-        // CORRIGIDO: Melhor parsing do titleInfo
         title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
                    vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
         title_status: vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' as const :
@@ -93,8 +93,6 @@ export const useVehicles = () => {
       };
 
       console.log('Mapped vehicle data for database:', dbVehicleData);
-      console.log('Title type extracted:', dbVehicleData.title_type);
-      console.log('Title status extracted:', dbVehicleData.title_status);
 
       const { data, error } = await supabase
         .from('vehicles')
@@ -108,6 +106,12 @@ export const useVehicles = () => {
       }
       
       console.log('Vehicle created successfully:', data);
+
+      // Se o veículo está sendo criado como vendido, criar cliente e venda
+      if (vehicleData.category === 'sold' && vehicleData.customerName && vehicleData.customerPhone) {
+        await handleVehicleSale(data.id, vehicleData);
+      }
+
       setVehicles(prev => [data, ...prev]);
       toast({
         title: 'Sucesso',
@@ -151,7 +155,7 @@ export const useVehicles = () => {
       if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
       if (vehicleData.category) dbUpdateData.category = vehicleData.category;
       
-      // CORRIGIDO: Processar informações do título com parsing melhorado
+      // Processar informações do título com parsing melhorado
       if (vehicleData.titleInfo !== undefined) {
         console.log('Processing titleInfo:', vehicleData.titleInfo);
         
@@ -159,14 +163,12 @@ export const useVehicles = () => {
           const titleParts = vehicleData.titleInfo.split('-');
           console.log('Title parts:', titleParts);
           
-          // Primeiro parte é o tipo do título
           if (titleParts[0] === 'clean-title' || titleParts[0] === 'rebuilt') {
             dbUpdateData.title_type = titleParts[0];
           } else {
             dbUpdateData.title_type = null;
           }
           
-          // Partes restantes formam o status
           if (titleParts.length > 1) {
             const statusPart = titleParts.slice(1).join('-');
             if (statusPart === 'em-maos' || statusPart === 'em-transito') {
@@ -178,28 +180,21 @@ export const useVehicles = () => {
             dbUpdateData.title_status = null;
           }
         } else {
-          // Se titleInfo está vazio, limpar ambos os campos
           dbUpdateData.title_type = null;
           dbUpdateData.title_status = null;
         }
-        
-        console.log('Final title_type:', dbUpdateData.title_type);
-        console.log('Final title_status:', dbUpdateData.title_status);
       }
       
-      // Processar fotos (sempre incluir, mesmo se vazio)
       if (vehicleData.photos !== undefined) {
         dbUpdateData.photos = vehicleData.photos || [];
       }
       
-      // Processar vídeo
       if (vehicleData.video !== undefined) {
         dbUpdateData.video = vehicleData.video || null;
       }
 
       console.log('Update data being sent to database:', dbUpdateData);
 
-      // Criar uma Promise com timeout personalizado
       const updatePromise = supabase
         .from('vehicles')
         .update(dbUpdateData)
@@ -219,6 +214,12 @@ export const useVehicles = () => {
       }
       
       console.log('Vehicle updated successfully:', data);
+
+      // Verificar se o status mudou para vendido e criar cliente/venda
+      if (vehicleData.category === 'sold' && vehicleData.customerName && vehicleData.customerPhone) {
+        await handleVehicleSale(id, vehicleData);
+      }
+
       setVehicles(prev => prev.map(v => v.id === id ? data : v));
       toast({
         title: 'Sucesso',
@@ -241,6 +242,77 @@ export const useVehicles = () => {
         variant: 'destructive',
       });
       throw error;
+    }
+  };
+
+  const handleVehicleSale = async (vehicleId: string, saleData: any) => {
+    try {
+      console.log('Processing vehicle sale for vehicle:', vehicleId);
+      
+      // Verificar se o cliente já existe pelo telefone
+      const { data: existingCustomer } = await supabase
+        .from('bhph_customers')
+        .select('*')
+        .eq('phone', saleData.customerPhone)
+        .single();
+
+      let customerId = existingCustomer?.id;
+
+      // Se o cliente não existe, criar um novo
+      if (!existingCustomer) {
+        console.log('Creating new customer for sale');
+        const newCustomer = await createCustomer({
+          name: saleData.customerName,
+          phone: saleData.customerPhone,
+          email: saleData.customerEmail || undefined,
+          address: saleData.customerAddress || undefined,
+        });
+        customerId = newCustomer.id;
+        toast({
+          title: 'Cliente Criado',
+          description: `Cliente ${saleData.customerName} foi criado automaticamente.`,
+        });
+      } else {
+        console.log('Using existing customer:', existingCustomer.name);
+        toast({
+          title: 'Cliente Existente',
+          description: `Venda vinculada ao cliente existente: ${existingCustomer.name}`,
+        });
+      }
+
+      // Criar registro de venda
+      if (customerId && saleData.saleDate && saleData.finalSalePrice) {
+        const currentUser = await supabase.auth.getUser();
+        
+        await createSaleRecord({
+          customer_id: customerId,
+          vehicle_id: vehicleId,
+          seller_id: currentUser.data.user?.id || null,
+          final_sale_price: parseFloat(saleData.finalSalePrice),
+          sale_date: saleData.saleDate,
+          customer_name: saleData.customerName,
+          customer_phone: saleData.customerPhone,
+          payment_method: saleData.paymentMethod || null,
+          financing_company: saleData.financingCompany || null,
+          check_details: saleData.checkDetails || null,
+          other_payment_details: saleData.otherPaymentDetails || null,
+          seller_commission: saleData.sellerCommission ? parseFloat(saleData.sellerCommission) : null,
+          sale_notes: saleData.saleNotes || null,
+        });
+
+        toast({
+          title: 'Venda Registrada',
+          description: 'Registro de venda criado com sucesso!',
+        });
+      }
+
+    } catch (error) {
+      console.error('Error handling vehicle sale:', error);
+      toast({
+        title: 'Erro na Venda',
+        description: 'Erro ao processar dados da venda. Verifique os detalhes.',
+        variant: 'destructive',
+      });
     }
   };
 
