@@ -8,6 +8,7 @@ interface User {
   email: string;
   phone: string;
   role: 'admin' | 'seller';
+  photo?: string;
 }
 
 interface AuthContextType {
@@ -36,7 +37,8 @@ const mockUsers: User[] = [
     lastName: 'Sistema',
     email: 'admin@revenshop.com',
     phone: '+55 11 99999-9999',
-    role: 'admin'
+    role: 'admin',
+    photo: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=face'
   },
   {
     id: '2',
@@ -44,7 +46,8 @@ const mockUsers: User[] = [
     lastName: 'Silva',
     email: 'joao@revenshop.com',
     phone: '+55 11 88888-8888',
-    role: 'seller'
+    role: 'seller',
+    photo: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=face'
   }
 ];
 

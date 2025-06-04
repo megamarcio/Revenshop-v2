@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
 import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import ImageUpload from '@/components/ui/image-upload';
 
 const userSchema = z.object({
   firstName: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
@@ -21,7 +22,8 @@ const userSchema = z.object({
   phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   confirmPassword: z.string().min(6, 'Confirmação de senha obrigatória'),
-  role: z.enum(['admin', 'seller'])
+  role: z.enum(['admin', 'seller']),
+  photo: z.string().optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Senhas não coincidem",
   path: ["confirmPassword"],
@@ -49,7 +51,8 @@ const UserForm = ({ onSubmit, isLoading = false }: UserFormProps) => {
       phone: '',
       password: '',
       confirmPassword: '',
-      role: 'seller'
+      role: 'seller',
+      photo: ''
     }
   });
 
@@ -68,6 +71,25 @@ const UserForm = ({ onSubmit, isLoading = false }: UserFormProps) => {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="flex justify-center mb-6">
+              <FormField
+                control={form.control}
+                name="photo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <ImageUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        size="lg"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}

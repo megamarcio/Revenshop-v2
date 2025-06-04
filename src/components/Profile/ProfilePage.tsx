@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -10,8 +9,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { User, Mail, Phone, Shield, Car, DollarSign, Calendar, Camera } from 'lucide-react';
+import { User, Mail, Phone, Shield, Car, DollarSign, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ImageUpload from '@/components/ui/image-upload';
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -23,6 +23,7 @@ const ProfilePage = () => {
     lastName: user?.lastName || '',
     email: user?.email || '',
     phone: user?.phone || '',
+    photo: user?.photo || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -43,6 +44,13 @@ const ProfilePage = () => {
     setFormData(prev => ({
       ...prev,
       [name]: value
+    }));
+  };
+
+  const handlePhotoChange = (photo: string) => {
+    setFormData(prev => ({
+      ...prev,
+      photo
     }));
   };
 
@@ -103,20 +111,26 @@ const ProfilePage = () => {
         <TabsContent value="profile" className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex items-center space-x-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src="" alt={`${user.firstName} ${user.lastName}`} />
-                  <AvatarFallback className="text-lg">
-                    {user.firstName.charAt(0)}{user.lastName.charAt(0)}
-                  </AvatarFallback>
-                </Avatar>
+              <div className="flex items-center space-x-6">
+                <div className="flex flex-col items-center space-y-2">
+                  <Avatar className="h-20 w-20">
+                    <AvatarImage src={formData.photo} alt={`${user.firstName} ${user.lastName}`} />
+                    <AvatarFallback className="text-lg">
+                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  {isEditing && (
+                    <ImageUpload
+                      value={formData.photo}
+                      onChange={handlePhotoChange}
+                      size="sm"
+                      showRemove={false}
+                    />
+                  )}
+                </div>
                 <div className="space-y-1">
                   <CardTitle className="text-2xl">{user.firstName} {user.lastName}</CardTitle>
                   <CardDescription className="text-base">{user.email}</CardDescription>
-                  <Button variant="outline" size="sm" className="mt-2">
-                    <Camera className="h-4 w-4 mr-2" />
-                    Alterar Foto
-                  </Button>
                 </div>
               </div>
             </CardHeader>

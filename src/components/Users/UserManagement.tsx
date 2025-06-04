@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
 import { Plus, Edit, Trash2, User, Shield, DollarSign } from 'lucide-react';
 import UserForm from './UserForm';
@@ -18,6 +19,7 @@ interface User {
   phone: string;
   role: 'admin' | 'seller';
   createdAt: string;
+  photo?: string;
   commissionClientReferral?: number;
   commissionClientBrought?: number;
   commissionFullSale?: number;
@@ -33,6 +35,7 @@ const mockUsers: User[] = [
     phone: '+55 11 99999-9999',
     role: 'admin',
     createdAt: '2024-01-01',
+    photo: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=face',
     commissionClientReferral: 100,
     commissionClientBrought: 250,
     commissionFullSale: 500
@@ -45,6 +48,7 @@ const mockUsers: User[] = [
     phone: '+55 11 88888-8888',
     role: 'seller',
     createdAt: '2024-01-02',
+    photo: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=face',
     commissionClientReferral: 75,
     commissionClientBrought: 200,
     commissionFullSale: 400
@@ -57,6 +61,7 @@ const mockUsers: User[] = [
     phone: '+55 11 77777-7777',
     role: 'seller',
     createdAt: '2024-01-03',
+    photo: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=face',
     commissionClientReferral: 80,
     commissionClientBrought: 220,
     commissionFullSale: 450
@@ -84,6 +89,7 @@ const UserManagement = () => {
         email: userData.email,
         phone: userData.phone,
         role: userData.role,
+        photo: userData.photo || '',
         createdAt: new Date().toISOString().split('T')[0],
         commissionClientReferral: 0,
         commissionClientBrought: 0,
@@ -206,17 +212,12 @@ const UserManagement = () => {
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-full ${
-                    user.role === 'admin' 
-                      ? 'bg-red-100 text-red-600' 
-                      : 'bg-blue-100 text-blue-600'
-                  }`}>
-                    {user.role === 'admin' ? (
-                      <Shield className="h-6 w-6" />
-                    ) : (
-                      <User className="h-6 w-6" />
-                    )}
-                  </div>
+                  <Avatar className="h-16 w-16">
+                    <AvatarImage src={user.photo} alt={`${user.firstName} ${user.lastName}`} />
+                    <AvatarFallback className="text-lg">
+                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
                   
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">
