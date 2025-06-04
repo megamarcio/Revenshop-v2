@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,24 +90,6 @@ const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) =>
           >
             Vendido
           </Button>
-        </div>
-
-        {/* Informações do Título - sempre visível */}
-        <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
-          <h4 className="font-medium text-gray-900">Informações do Título</h4>
-          <div className="space-y-2">
-            <Label htmlFor="titleStatus">Status do Título</Label>
-            <Select value={formData.titleStatus || ''} onValueChange={(value) => onInputChange('titleStatus', value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Selecione o status do título" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="inHand">Em Mão</SelectItem>
-                <SelectItem value="dmv">DMV</SelectItem>
-                <SelectItem value="other">Outro</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         {formData.category === 'sold' && (

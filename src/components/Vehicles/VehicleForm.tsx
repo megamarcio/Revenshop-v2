@@ -19,6 +19,7 @@ interface VehicleFormData {
   internalCode: string;
   color: string;
   caNote: string;
+  titleInfo?: string;
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;
@@ -57,6 +58,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     internalCode: editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.caNote?.toString() || '',
+    titleInfo: editingVehicle?.titleInfo || '',
     purchasePrice: editingVehicle?.purchasePrice?.toString() || '',
     salePrice: editingVehicle?.salePrice?.toString() || '',
     minNegotiable: editingVehicle?.minNegotiable?.toString() || '',
