@@ -29,7 +29,7 @@ interface UserProfile {
 
 const UserManagement = () => {
   const { t } = useLanguage();
-  const { canManageUsers, user: currentUser, isAdmin } = useAuth();
+  const { canManageUsers, user: currentUser, isAdmin, loading: authLoading } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -38,11 +38,15 @@ const UserManagement = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchUsers = async () => {
+    if (!canManageUsers || !currentUser) {
+      console.log('Cannot fetch users - insufficient permissions or no current user');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       console.log('Fetching users from database...');
-      console.log('Current user:', currentUser);
-      console.log('Can manage users:', canManageUsers);
 
       const { data, error } = await supabase
         .from('profiles')
@@ -71,17 +75,15 @@ const UserManagement = () => {
   };
 
   useEffect(() => {
-    console.log('UserManagement useEffect triggered');
-    console.log('canManageUsers:', canManageUsers);
-    console.log('currentUser:', currentUser);
-    
-    if (canManageUsers && currentUser) {
+    // Only fetch users when auth is ready and user has permissions
+    if (!authLoading && canManageUsers && currentUser) {
+      console.log('UserManagement: Auth ready, fetching users');
       fetchUsers();
-    } else {
-      console.log('Not fetching users - insufficient permissions or no current user');
+    } else if (!authLoading) {
+      console.log('UserManagement: Auth ready but no permissions or user');
       setLoading(false);
     }
-  }, [canManageUsers, currentUser]);
+  }, [authLoading, canManageUsers, currentUser]);
 
   const canEditUser = (user: UserProfile) => {
     if (!currentUser) return false;
@@ -137,7 +139,6 @@ const UserManagement = () => {
     try {
       console.log('Creating user with data:', userData);
       
-      // First create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password || 'TempPass123!',
@@ -157,7 +158,6 @@ const UserManagement = () => {
       console.log('Auth user created:', authData.user?.id);
 
       if (authData.user) {
-        // Update the profile with additional data
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
@@ -241,7 +241,6 @@ const UserManagement = () => {
   const handleDeleteUser = async (userId: string) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
       try {
-        // Delete from profiles first (cascades to auth.users)
         const { error } = await supabase
           .from('profiles')
           .delete()
@@ -276,6 +275,20 @@ const UserManagement = () => {
       currency: 'USD'
     }).format(value);
   };
+
+  // Show loading while auth is still loading
+  if (authLoading) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Verificando permissões...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (!canManageUsers) {
     return (
