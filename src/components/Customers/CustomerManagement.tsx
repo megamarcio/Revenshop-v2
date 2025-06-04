@@ -32,19 +32,9 @@ const CustomerManagement = () => {
     setShowForm(true);
   };
 
-  const handleEditCustomer = (customer: Customer) => {
-    setEditingCustomer(customer);
-    setShowForm(true);
-  };
-
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingCustomer(null);
-  };
-
-  const handleGenerateQuote = (customer: Customer) => {
-    setSelectedCustomer(customer);
-    setShowQuoteGenerator(true);
   };
 
   if (showQuoteGenerator && selectedCustomer) {
@@ -92,10 +82,7 @@ const CustomerManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <CustomerList 
-            onEditCustomer={handleEditCustomer}
-            onGenerateQuote={handleGenerateQuote}
-          />
+          <CustomerList />
         </CardContent>
       </Card>
     </div>
