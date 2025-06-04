@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -40,18 +39,30 @@ const UserManagement = () => {
 
   const fetchUsers = async () => {
     try {
+      setLoading(true);
+      console.log('Fetching users from database...');
+      console.log('Current user:', currentUser);
+      console.log('Can manage users:', canManageUsers);
+
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      console.log('Database query result:', { data, error });
+
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
+      
+      console.log('Successfully fetched users:', data?.length || 0);
       setUsers(data || []);
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
         title: t('error'),
-        description: 'Erro ao carregar usuários.',
+        description: 'Erro ao carregar usuários. Verifique as permissões.',
         variant: 'destructive',
       });
     } finally {
@@ -60,10 +71,17 @@ const UserManagement = () => {
   };
 
   useEffect(() => {
-    if (canManageUsers) {
+    console.log('UserManagement useEffect triggered');
+    console.log('canManageUsers:', canManageUsers);
+    console.log('currentUser:', currentUser);
+    
+    if (canManageUsers && currentUser) {
       fetchUsers();
+    } else {
+      console.log('Not fetching users - insufficient permissions or no current user');
+      setLoading(false);
     }
-  }, [canManageUsers]);
+  }, [canManageUsers, currentUser]);
 
   const canEditUser = (user: UserProfile) => {
     if (!currentUser) return false;
@@ -117,6 +135,8 @@ const UserManagement = () => {
     setIsSubmitting(true);
     
     try {
+      console.log('Creating user with data:', userData);
+      
       // First create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
@@ -129,7 +149,12 @@ const UserManagement = () => {
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+
+      console.log('Auth user created:', authData.user?.id);
 
       if (authData.user) {
         // Update the profile with additional data
@@ -143,7 +168,12 @@ const UserManagement = () => {
           })
           .eq('id', authData.user.id);
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error('Profile update error:', profileError);
+          throw profileError;
+        }
+
+        console.log('Profile updated successfully');
       }
 
       await fetchUsers();
@@ -279,6 +309,7 @@ const UserManagement = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">{t('users')}</h1>
           <p className="text-gray-600 mt-1">Gerencie usuários do sistema</p>
+          <p className="text-sm text-gray-500 mt-1">Total de usuários: {users.length}</p>
         </div>
         
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
