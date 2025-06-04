@@ -9,7 +9,7 @@ import ThemeToggle from './ThemeToggle';
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   return (
     <header className="bg-card shadow-sm border-b border-border px-4 py-3">
@@ -47,14 +47,14 @@ const Header = () => {
             <div className="flex items-center space-x-3">
               <div className="text-right">
                 <p className="text-sm font-medium text-foreground">
-                  {user.firstName} {user.lastName}
+                  {user.first_name} {user.last_name}
                 </p>
                 <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
               </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={logout}
+                onClick={signOut}
                 className="flex items-center space-x-1"
               >
                 <LogOut className="h-4 w-4" />

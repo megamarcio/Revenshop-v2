@@ -197,18 +197,58 @@ const VehicleList = () => {
           {filteredAndSortedVehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
-              vehicle={vehicle}
-              onEdit={canEditVehicles ? handleEditVehicle : undefined}
-              onDuplicate={canEditVehicles ? handleDuplicateVehicle : undefined}
+              vehicle={{
+                id: vehicle.id,
+                name: vehicle.name,
+                vin: vehicle.vin,
+                year: vehicle.year,
+                model: vehicle.model,
+                plate: '',
+                internalCode: vehicle.internal_code,
+                color: vehicle.color,
+                caNote: vehicle.ca_note,
+                purchasePrice: vehicle.purchase_price,
+                salePrice: vehicle.sale_price,
+                profitMargin: vehicle.profit_margin || 0,
+                minNegotiable: vehicle.min_negotiable || 0,
+                carfaxPrice: vehicle.carfax_price || 0,
+                mmrValue: vehicle.mmr_value || 0,
+                description: vehicle.description || '',
+                category: vehicle.category,
+                photos: vehicle.photos,
+                video: vehicle.video
+              }}
+              onEdit={() => handleEditVehicle(vehicle)}
+              onDuplicate={() => handleDuplicateVehicle(vehicle)}
             />
           ))}
         </div>
       ) : (
         <VehicleListView
-          vehicles={filteredAndSortedVehicles}
-          onEdit={canEditVehicles ? handleEditVehicle : undefined}
-          onDuplicate={canEditVehicles ? handleDuplicateVehicle : undefined}
-          onDelete={canEditVehicles ? handleDeleteVehicle : undefined}
+          vehicles={filteredAndSortedVehicles.map(vehicle => ({
+            id: vehicle.id,
+            name: vehicle.name,
+            vin: vehicle.vin,
+            year: vehicle.year,
+            model: vehicle.model,
+            plate: '',
+            internalCode: vehicle.internal_code,
+            color: vehicle.color,
+            caNote: vehicle.ca_note,
+            purchasePrice: vehicle.purchase_price,
+            salePrice: vehicle.sale_price,
+            profitMargin: vehicle.profit_margin || 0,
+            minNegotiable: vehicle.min_negotiable || 0,
+            carfaxPrice: vehicle.carfax_price || 0,
+            mmrValue: vehicle.mmr_value || 0,
+            description: vehicle.description || '',
+            category: vehicle.category,
+            photos: vehicle.photos,
+            video: vehicle.video
+          }))}
+          onEdit={(vehicle) => handleEditVehicle(vehicles.find(v => v.id === vehicle.id)!)}
+          onDuplicate={(vehicle) => handleDuplicateVehicle(vehicles.find(v => v.id === vehicle.id)!)}
+          onDelete={(vehicle) => handleDeleteVehicle(vehicles.find(v => v.id === vehicle.id)!)}
         />
       )}
 

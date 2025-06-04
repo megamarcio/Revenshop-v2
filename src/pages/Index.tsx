@@ -3,7 +3,7 @@ import { useState } from "react";
 import { AuthProvider } from "../contexts/AuthContext";
 import { LanguageProvider } from "../contexts/LanguageContext";
 import { BHPHProvider } from "../contexts/BHPHContext";
-import { ThemeProvider } from "../components/Providers/ThemeProvider";
+import ThemeProvider from "../components/Providers/ThemeProvider";
 import AuthWrapper from "../components/Auth/AuthWrapper";
 import Header from "../components/Layout/Header";
 import Sidebar from "../components/Layout/Sidebar";
@@ -28,7 +28,7 @@ const Index = () => {
       case 'users':
         return <UserManagement />;
       case 'admin':
-        return <AdminPanel />;
+        return <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />;
       case 'profile':
         return <ProfilePage />;
       default:

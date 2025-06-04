@@ -20,8 +20,8 @@ const ProfilePage = () => {
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
+    firstName: user?.first_name || '',
+    lastName: user?.last_name || '',
     email: user?.email || '',
     phone: user?.phone || '',
     photo: user?.photo || '',
@@ -115,9 +115,9 @@ const ProfilePage = () => {
               <div className="flex items-center space-x-6">
                 <div className="flex flex-col items-center space-y-2">
                   <Avatar className="h-20 w-20">
-                    <AvatarImage src={formData.photo} alt={`${user.firstName} ${user.lastName}`} />
+                    <AvatarImage src={formData.photo} alt={`${user.first_name} ${user.last_name}`} />
                     <AvatarFallback className="text-lg">
-                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   {isEditing && (
@@ -130,7 +130,7 @@ const ProfilePage = () => {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <CardTitle className="text-2xl">{user.firstName} {user.lastName}</CardTitle>
+                  <CardTitle className="text-2xl">{user.first_name} {user.last_name}</CardTitle>
                   <CardDescription className="text-base">{user.email}</CardDescription>
                 </div>
               </div>

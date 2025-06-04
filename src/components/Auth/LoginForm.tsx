@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -11,7 +12,7 @@ import { toast } from '@/hooks/use-toast';
 
 const LoginForm = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { login } = useAuth();
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -22,7 +23,7 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const success = await login(email, password);
+      const success = await signIn(email, password);
       if (success) {
         toast({
           title: t('success'),
