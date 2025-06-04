@@ -18,7 +18,8 @@ const VehicleSelector = ({ vehicles, selectedVehicle, onVehicleSelect }: Vehicle
   const filteredVehicles = vehicles.filter(vehicle =>
     vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     vehicle.color.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    vehicle.year.toString().includes(searchTerm)
+    vehicle.year.toString().includes(searchTerm) ||
+    vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const formatCurrency = (value: number) => {
@@ -38,7 +39,7 @@ const VehicleSelector = ({ vehicles, selectedVehicle, onVehicleSelect }: Vehicle
         <div className="relative">
           <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
           <Input
-            placeholder="Buscar por nome, cor ou ano..."
+            placeholder="Buscar por nome, cor, ano ou código..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -46,24 +47,31 @@ const VehicleSelector = ({ vehicles, selectedVehicle, onVehicleSelect }: Vehicle
         </div>
 
         {/* Dropdown de seleção */}
-        <Select
-          value={selectedVehicle?.id || ''}
-          onValueChange={(value) => {
-            const vehicle = vehicles.find(v => v.id === value);
-            if (vehicle) onVehicleSelect(vehicle);
-          }}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Escolha um veículo" />
-          </SelectTrigger>
-          <SelectContent>
-            {filteredVehicles.map((vehicle) => (
-              <SelectItem key={vehicle.id} value={vehicle.id}>
-                {vehicle.name} {vehicle.year} - {vehicle.color} - {formatCurrency(vehicle.salePrice)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {vehicles.length > 0 ? (
+          <Select
+            value={selectedVehicle?.id || ''}
+            onValueChange={(value) => {
+              const vehicle = vehicles.find(v => v.id === value);
+              if (vehicle) onVehicleSelect(vehicle);
+            }}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Escolha um veículo" />
+            </SelectTrigger>
+            <SelectContent>
+              {filteredVehicles.map((vehicle) => (
+                <SelectItem key={vehicle.id} value={vehicle.id}>
+                  {vehicle.name} {vehicle.year} - {vehicle.color} - {formatCurrency(vehicle.salePrice)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>Nenhum veículo disponível para financiamento.</p>
+            <p className="text-sm mt-2">Cadastre veículos na seção "Veículos" primeiro.</p>
+          </div>
+        )}
 
         {/* Detalhes do veículo selecionado */}
         {selectedVehicle && (
@@ -74,6 +82,7 @@ const VehicleSelector = ({ vehicles, selectedVehicle, onVehicleSelect }: Vehicle
               <p><span className="font-medium">Ano:</span> {selectedVehicle.year}</p>
               <p><span className="font-medium">Cor:</span> {selectedVehicle.color}</p>
               <p><span className="font-medium">VIN:</span> {selectedVehicle.vin}</p>
+              <p><span className="font-medium">Código Interno:</span> {selectedVehicle.internalCode}</p>
               <p><span className="font-medium">Preço de Venda:</span> {formatCurrency(selectedVehicle.salePrice)}</p>
             </div>
           </div>

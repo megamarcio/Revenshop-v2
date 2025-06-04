@@ -6,6 +6,7 @@ import VehicleSelector from './VehicleSelector';
 import FinancingSimulation from './FinancingSimulation';
 import DealSummary from './DealSummary';
 import { useAuth } from '../../contexts/AuthContext';
+import { useVehicles } from '../../hooks/useVehicles';
 
 export interface Vehicle {
   id: string;
@@ -28,42 +29,23 @@ export interface Deal {
 
 const BuyHerePayHere = () => {
   const { isAdmin } = useAuth();
+  const { vehicles, loading } = useVehicles();
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [deal, setDeal] = useState<Deal | null>(null);
 
-  // Mock vehicles data - em produção viria da API
-  const vehicles: Vehicle[] = [
-    {
-      id: '1',
-      name: 'Honda Civic EXL 2.0',
-      year: 2020,
-      color: 'Preto',
-      vin: '1HGCV1F30JA123456',
-      purchasePrice: 55000,
-      salePrice: 68000,
-      internalCode: 'HC001'
-    },
-    {
-      id: '2',
-      name: 'Toyota Corolla XEI 2.0',
-      year: 2021,
-      color: 'Branco',
-      vin: '1NXBR32E37Z123456',
-      purchasePrice: 60000,
-      salePrice: 75000,
-      internalCode: 'TC002'
-    },
-    {
-      id: '3',
-      name: 'Honda Civic',
-      year: 2019,
-      color: 'Azul',
-      vin: '123456789465',
-      purchasePrice: 7200,
-      salePrice: 12000,
-      internalCode: 'HC003'
-    }
-  ];
+  // Converter veículos do banco para o formato esperado pelo componente
+  const formattedVehicles: Vehicle[] = vehicles
+    .filter(vehicle => vehicle.category === 'forSale') // Apenas veículos à venda
+    .map(vehicle => ({
+      id: vehicle.id,
+      name: vehicle.name,
+      year: vehicle.year,
+      color: vehicle.color,
+      vin: vehicle.vin,
+      purchasePrice: vehicle.purchase_price,
+      salePrice: vehicle.sale_price,
+      internalCode: vehicle.internal_code
+    }));
 
   const handleVehicleSelect = (vehicle: Vehicle) => {
     setSelectedVehicle(vehicle);
@@ -73,6 +55,20 @@ const BuyHerePayHere = () => {
   const handleDealCalculated = (calculatedDeal: Deal) => {
     setDeal(calculatedDeal);
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Buy Here Pay Here</h1>
+          <p className="text-gray-600 mt-1">Sistema de financiamento interno</p>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <p className="text-gray-600">Carregando veículos...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -84,7 +80,7 @@ const BuyHerePayHere = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Seleção de Veículo */}
         <VehicleSelector 
-          vehicles={vehicles}
+          vehicles={formattedVehicles}
           selectedVehicle={selectedVehicle}
           onVehicleSelect={handleVehicleSelect}
         />
