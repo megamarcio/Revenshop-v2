@@ -77,7 +77,6 @@ export const useVehicles = () => {
         ca_note: parseInt(vehicleData.caNote),
         purchase_price: parseFloat(vehicleData.purchasePrice),
         sale_price: parseFloat(vehicleData.salePrice),
-        // Removido profit_margin - parece ser uma coluna calculada/gerada
         min_negotiable: vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null,
         carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
         mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
@@ -127,6 +126,9 @@ export const useVehicles = () => {
     try {
       console.log('Updating vehicle:', id, 'with data:', vehicleData);
       
+      // Timeout personalizado para operações com muitas fotos
+      const timeoutDuration = vehicleData.photos && vehicleData.photos.length > 5 ? 60000 : 30000;
+      
       // Mapear os dados de atualização
       const dbUpdateData: any = {};
       
@@ -140,21 +142,45 @@ export const useVehicles = () => {
       if (vehicleData.caNote) dbUpdateData.ca_note = parseInt(vehicleData.caNote);
       if (vehicleData.purchasePrice) dbUpdateData.purchase_price = parseFloat(vehicleData.purchasePrice);
       if (vehicleData.salePrice) dbUpdateData.sale_price = parseFloat(vehicleData.salePrice);
-      // Removido profit_margin do update também
-      if (vehicleData.minNegotiable) dbUpdateData.min_negotiable = parseFloat(vehicleData.minNegotiable);
-      if (vehicleData.carfaxPrice) dbUpdateData.carfax_price = parseFloat(vehicleData.carfaxPrice);
-      if (vehicleData.mmrValue) dbUpdateData.mmr_value = parseFloat(vehicleData.mmrValue);
+      if (vehicleData.minNegotiable !== undefined) dbUpdateData.min_negotiable = vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null;
+      if (vehicleData.carfaxPrice !== undefined) dbUpdateData.carfax_price = vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null;
+      if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
       if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
       if (vehicleData.category) dbUpdateData.category = vehicleData.category;
-      if (vehicleData.photos) dbUpdateData.photos = vehicleData.photos;
-      if (vehicleData.video !== undefined) dbUpdateData.video = vehicleData.video;
+      
+      // Processar informações do título
+      if (vehicleData.titleInfo !== undefined) {
+        dbUpdateData.title_type = vehicleData.titleInfo?.includes('clean-title') ? 'clean-title' : 
+                                 vehicleData.titleInfo?.includes('rebuilt') ? 'rebuilt' : null;
+        dbUpdateData.title_status = vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' :
+                                   vehicleData.titleInfo?.includes('em-transito') ? 'em-transito' : null;
+      }
+      
+      // Processar fotos (sempre incluir, mesmo se vazio)
+      if (vehicleData.photos !== undefined) {
+        dbUpdateData.photos = vehicleData.photos || [];
+      }
+      
+      // Processar vídeo
+      if (vehicleData.video !== undefined) {
+        dbUpdateData.video = vehicleData.video || null;
+      }
 
-      const { data, error } = await supabase
+      console.log('Update data being sent to database:', dbUpdateData);
+
+      // Criar uma Promise com timeout personalizado
+      const updatePromise = supabase
         .from('vehicles')
         .update(dbUpdateData)
         .eq('id', id)
         .select()
         .single();
+
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Operação excedeu o tempo limite')), timeoutDuration)
+      );
+
+      const { data, error } = await Promise.race([updatePromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('Supabase error updating vehicle:', error);
@@ -170,9 +196,17 @@ export const useVehicles = () => {
       return data;
     } catch (error) {
       console.error('Error updating vehicle:', error);
+      
+      let errorMessage = 'Erro desconhecido';
+      if (error.message?.includes('tempo limite')) {
+        errorMessage = 'Operação demorou muito para completar. Tente reduzir o número de fotos ou verificar sua conexão.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: 'Erro',
-        description: `Erro ao atualizar veículo: ${error.message || 'Erro desconhecido'}`,
+        description: `Erro ao atualizar veículo: ${errorMessage}`,
         variant: 'destructive',
       });
       throw error;

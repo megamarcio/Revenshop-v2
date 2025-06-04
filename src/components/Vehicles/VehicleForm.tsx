@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -238,6 +237,14 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
       return;
     }
 
+    // Validar número de fotos para evitar timeouts
+    if (photos.length > 8) {
+      const confirmed = window.confirm(
+        `Você está tentando salvar ${photos.length} fotos. Isso pode tornar o processo mais lento. Deseja continuar?`
+      );
+      if (!confirmed) return;
+    }
+
     setIsLoading(true);
     try {
       const vehicleData = {
@@ -251,7 +258,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         mmrValue: parseFloat(formData.mmrValue || '0'),
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
-        photos,
+        photos: photos,
         video: video || undefined,
         // Não incluir ID para duplicações (quando isEditing é false)
         ...(isEditing && { id: editingVehicle.id })
@@ -260,20 +267,24 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
       console.log('VehicleForm - operation type:', isEditing ? 'update' : 'create');
 
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onSave(vehicleData);
+      // Mostrar loading com timeout estimado baseado no número de fotos
+      const estimatedTime = Math.max(5, photos.length * 2);
+      if (photos.length > 5) {
+        toast({
+          title: 'Processando...',
+          description: `Salvando ${photos.length} fotos. Isso pode levar até ${estimatedTime} segundos.`,
+        });
+      }
+
+      await onSave(vehicleData);
       toast({
         title: 'Sucesso',
         description: `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`,
       });
       onClose();
     } catch (error) {
-      toast({
-        title: 'Erro',
-        description: 'Erro ao salvar veículo. Tente novamente.',
-        variant: 'destructive',
-      });
+      console.error('Error saving vehicle:', error);
+      // Erro já foi tratado no hook useVehicles
     } finally {
       setIsLoading(false);
     }
@@ -287,7 +298,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
             <Car className="h-6 w-6 text-revenshop-primary" />
             <CardTitle>{isEditing ? 'Editar Veículo' : 'Adicionar Veículo'}</CardTitle>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose}>
+          <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
             <X className="h-4 w-4" />
           </Button>
         </CardHeader>
@@ -327,14 +338,24 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
             />
 
             <div className="flex justify-end space-x-4 pt-6 border-t">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                 Cancelar
               </Button>
               <Button type="submit" disabled={isLoading}>
                 <Save className="h-4 w-4 mr-2" />
-                {isLoading ? 'Salvando...' : isEditing ? 'Atualizar' : 'Salvar'}
+                {isLoading ? 
+                  `${isEditing ? 'Atualizando' : 'Salvando'}...` : 
+                  isEditing ? 'Atualizar' : 'Salvar'
+                }
               </Button>
             </div>
+            
+            {isLoading && photos.length > 5 && (
+              <div className="text-center text-sm text-gray-600">
+                <p>Processando {photos.length} fotos... Isso pode levar alguns minutos.</p>
+                <p>Por favor, não feche esta janela.</p>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
