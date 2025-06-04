@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Copy, Trash2, Car } from 'lucide-react';
+import VehicleForm from './VehicleForm';
 
 interface Vehicle {
   id: string;
@@ -35,6 +35,7 @@ const VehicleList = () => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
   // Mock vehicles data
   const [vehicles] = useState<Vehicle[]>([
@@ -81,6 +82,31 @@ const VehicleList = () => {
       photos: [],
     }
   ]);
+
+  const handleSaveVehicle = (vehicleData: Vehicle) => {
+    console.log('Salvando veículo:', vehicleData);
+    // Aqui seria feita a integração com a API
+    setShowAddForm(false);
+    setEditingVehicle(null);
+  };
+
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    setEditingVehicle(vehicle);
+    setShowAddForm(true);
+  };
+
+  const handleDuplicateVehicle = (vehicle: Vehicle) => {
+    const duplicatedVehicle = {
+      ...vehicle,
+      id: undefined,
+      name: `${vehicle.name} (Cópia)`,
+      vin: '',
+      plate: '',
+      internalCode: ''
+    };
+    setEditingVehicle(duplicatedVehicle);
+    setShowAddForm(true);
+  };
 
   const filteredVehicles = vehicles.filter(vehicle =>
     vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -177,11 +203,21 @@ const VehicleList = () => {
               )}
 
               <div className="flex space-x-2">
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => handleEditVehicle(vehicle)}
+                >
                   <Edit className="h-3 w-3 mr-1" />
                   {t('edit')}
                 </Button>
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => handleDuplicateVehicle(vehicle)}
+                >
                   <Copy className="h-3 w-3 mr-1" />
                   {t('duplicate')}
                 </Button>
@@ -200,6 +236,18 @@ const VehicleList = () => {
           <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum veículo encontrado</h3>
           <p className="text-gray-500">Tente ajustar os filtros de busca ou adicione um novo veículo.</p>
         </div>
+      )}
+
+      {/* Vehicle Form Modal */}
+      {showAddForm && (
+        <VehicleForm
+          onClose={() => {
+            setShowAddForm(false);
+            setEditingVehicle(null);
+          }}
+          onSave={handleSaveVehicle}
+          editingVehicle={editingVehicle}
+        />
       )}
     </div>
   );
