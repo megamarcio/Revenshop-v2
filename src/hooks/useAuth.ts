@@ -64,10 +64,14 @@ export const useAuth = () => {
       }
 
       console.log('Sign in successful:', data);
+      
+      // We'll let onAuthStateChange handle setting the user
+      // Just show success message and return true
       toast({
         title: 'Sucesso',
         description: 'Login realizado com sucesso!',
       });
+      
       return true;
     } catch (error) {
       console.error('Error signing in:', error);
@@ -136,54 +140,68 @@ export const useAuth = () => {
 
   useEffect(() => {
     console.log('Setting up auth state listener');
-    
-    // Get initial session first
-    const getInitialSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        console.log('Initial session:', session?.user?.id);
-        
-        if (error) {
-          console.error('Error getting initial session:', error);
-          setLoading(false);
-          return;
-        }
+    let mounted = true;
 
-        if (session?.user) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile) {
-            setUser(profile);
-          }
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error in getInitialSession:', error);
-        setLoading(false);
-      }
-    };
-
-    // Set up auth state listener
+    // First set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
-        if (event === 'SIGNED_IN' && session?.user) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile) {
-            setUser(profile);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          setUser(null);
-        }
+        if (!mounted) return;
         
-        if (!loading) setLoading(false);
+        if (event === 'SIGNED_IN' && session?.user) {
+          // Use setTimeout to prevent potential deadlocks with Supabase auth
+          setTimeout(async () => {
+            if (!mounted) return;
+            const profile = await fetchUserProfile(session.user.id);
+            if (profile && mounted) {
+              console.log('Setting user in onAuthStateChange:', profile);
+              setUser(profile);
+              setLoading(false);
+            }
+          }, 0);
+        } else if (event === 'SIGNED_OUT') {
+          if (mounted) {
+            setUser(null);
+            setLoading(false);
+          }
+        }
       }
     );
 
-    getInitialSession();
+    // Then check for existing session
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Error getting session:', error);
+          if (mounted) setLoading(false);
+          return;
+        }
+        
+        console.log('Initial session check:', session?.user?.id);
+        
+        if (session?.user && mounted) {
+          const profile = await fetchUserProfile(session.user.id);
+          if (profile && mounted) {
+            console.log('Setting initial user from session:', profile);
+            setUser(profile);
+          }
+        }
+        
+        if (mounted) setLoading(false);
+      } catch (error) {
+        console.error('Error in checkSession:', error);
+        if (mounted) setLoading(false);
+      }
+    };
+
+    checkSession();
 
     return () => {
       console.log('Cleaning up auth subscription');
+      mounted = false;
       subscription.unsubscribe();
     };
   }, []);

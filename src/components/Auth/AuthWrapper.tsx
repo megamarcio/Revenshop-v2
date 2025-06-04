@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import LoginForm from './LoginForm';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,7 +12,9 @@ interface AuthWrapperProps {
 const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const { isAuthenticated, loading, user } = useAuth();
 
-  console.log('AuthWrapper state:', { isAuthenticated, loading, user: user?.email });
+  useEffect(() => {
+    console.log('AuthWrapper state updated:', { isAuthenticated, loading, user: user?.email });
+  }, [isAuthenticated, loading, user]);
 
   if (loading) {
     return (

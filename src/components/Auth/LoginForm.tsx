@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -23,8 +22,9 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const success = await signIn(email, password);
-      console.log('Login result:', success);
+      await signIn(email, password);
+      // The auth state will be updated by the onAuthStateChange listener
+      // And AuthWrapper will handle redirection
     } catch (error) {
       console.error('Login error:', error);
     } finally {
