@@ -161,14 +161,27 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     const color = formData.color;
     const price = formatCurrency(formData.salePrice);
     const vin = formData.vin;
-    const titleStatus = formData.titleStatus || 'CLEAN TITLE';
+    const miles = formData.plate; // Miles are stored in the plate field
     
-    const description = `🚗 ${year} ${name} – ${titleStatus.toUpperCase()} 🚗
+    // Format title information
+    let titleInfo = 'Clean Title';
+    if (formData.titleInfo) {
+      const parts = formData.titleInfo.split('-');
+      if (parts.length >= 3) {
+        const titleType = parts[0] === 'clean-title' ? 'Clean Title' : 'Rebuilt';
+        const status = parts.slice(-2).join(' ');
+        const statusFormatted = status === 'em-maos' ? 'In Hands' : 
+                               status === 'em-transito' ? 'In Transit' : status;
+        titleInfo = `${titleType} - ${statusFormatted}`;
+      }
+    }
+    
+    const description = `🚗 ${year} ${name} – ${titleInfo} 🚗
 
 📍 Located in Orlando, FL
 💰 Price: ${price}
 
-✅ Only xxxx miles
+✅ Only ${miles} miles
 ✅ Clean Title – No Accidents
 ✅ Non-smoker
 ✅ Runs and drives like new!
