@@ -2,8 +2,6 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { useHasUsers } from '../../hooks/useHasUsers';
-import CreateFirstAdminButton from './CreateFirstAdminButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,13 +13,10 @@ import { toast } from '@/hooks/use-toast';
 const LoginForm = () => {
   const { language, setLanguage, t } = useLanguage();
   const { signIn } = useAuth();
-  const { hasUsers, loading: checkingUsers } = useHasUsers();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
-  console.log('LoginForm render - hasUsers:', hasUsers, 'checkingUsers:', checkingUsers);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -52,15 +47,6 @@ const LoginForm = () => {
       setIsLoading(false);
     }
   };
-
-  const handleAdminCreated = () => {
-    // Refresh the page or trigger a re-check of users
-    window.location.reload();
-  };
-
-  // Show create admin button if explicitly no users found
-  const showCreateAdmin = hasUsers === false;
-  console.log('Show create admin button:', showCreateAdmin);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-revenshop-light to-revenshop-accent/20 p-4">
@@ -95,76 +81,66 @@ const LoginForm = () => {
             <p className="text-center text-gray-600">{t('loginSubtitle')}</p>
           </CardHeader>
           <CardContent>
-            {checkingUsers ? (
-              <div className="text-center py-4">
-                <p className="text-gray-600">Verificando sistema...</p>
-              </div>
-            ) : showCreateAdmin ? (
-              <CreateFirstAdminButton onAdminCreated={handleAdminCreated} />
-            ) : (
-              <>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">{t('email')}</Label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="email"
-                        type="email"
-                        placeholder="admin@revenshop.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="pl-10"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="password">{t('password')}</Label>
-                    <div className="relative">
-                      <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input
-                        id="password"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="123456"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 pr-10"
-                        required
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
-                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-revenshop-primary hover:bg-revenshop-primary/90" 
-                    disabled={isLoading}
-                  >
-                    {isLoading ? t('loading') : t('login')}
-                  </Button>
-                </form>
-
-                {/* Demo Credentials */}
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <p className="text-sm font-medium text-gray-700 mb-2">Credenciais de Demonstração:</p>
-                  <div className="text-xs text-gray-600 space-y-1">
-                    <p><strong>Admin:</strong> admin@revenshop.com / 123456</p>
-                    <p><strong>Gerente:</strong> maria@revenshop.com / 123456</p>
-                    <p><strong>Vendedor:</strong> joao@revenshop.com / 123456</p>
-                  </div>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">{t('email')}</Label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="admin@revenshop.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
                 </div>
-              </>
-            )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">{t('password')}</Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="123456"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10 pr-10"
+                    required
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-7 w-7 p-0"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+
+              <Button 
+                type="submit" 
+                className="w-full bg-revenshop-primary hover:bg-revenshop-primary/90" 
+                disabled={isLoading}
+              >
+                {isLoading ? t('loading') : t('login')}
+              </Button>
+            </form>
+
+            {/* Demo Credentials */}
+            <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm font-medium text-gray-700 mb-2">Credenciais de Demonstração:</p>
+              <div className="text-xs text-gray-600 space-y-1">
+                <p><strong>Admin:</strong> admin@revenshop.com / 123456</p>
+                <p><strong>Gerente:</strong> maria@revenshop.com / 123456</p>
+                <p><strong>Vendedor:</strong> joao@revenshop.com / 123456</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
