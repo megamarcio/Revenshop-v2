@@ -1,7 +1,8 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Download } from 'lucide-react';
+import { Copy, Download, Eye, EyeOff } from 'lucide-react';
 import { Deal } from './BuyHerePayHere';
 import { useAuth } from '../../contexts/AuthContext';
 import { useBHPH } from '../../contexts/BHPHContext';
@@ -13,6 +14,7 @@ interface DealSummaryProps {
 
 const DealSummary = ({ deal, isAdmin }: DealSummaryProps) => {
   const { settings } = useBHPH();
+  const [showAdminDetails, setShowAdminDetails] = useState(false);
   
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -165,39 +167,52 @@ Aprovação rápida. Veículo pronto para retirada.`;
           {/* Detalhes completos (apenas para admin) */}
           {isAdmin && (
             <div className="space-y-4">
-              <h4 className="font-semibold text-gray-900">Detalhes Completos (Admin)</h4>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-gray-600">Valor de Compra:</p>
-                    <p className="font-semibold">{formatCurrency(deal.vehicle.purchasePrice)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Preço de Venda:</p>
-                    <p className="font-semibold">{formatCurrency(deal.vehicle.salePrice)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Total Financiado:</p>
-                    <p className="font-semibold">{formatCurrency(deal.vehicle.salePrice - deal.downPayment)}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Total a Receber:</p>
-                    <p className="font-semibold text-green-600">
-                      {formatCurrency(deal.downPayment + (deal.installmentValue * deal.installments))}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Margem Bruta:</p>
-                    <p className="font-semibold text-blue-600">
-                      {formatCurrency(deal.vehicle.salePrice - deal.vehicle.purchasePrice)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Taxa de Juros:</p>
-                    <p className="font-semibold">{settings.monthlyInterestRate}% a.m.</p>
+              <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-gray-900">Detalhes Completos (Admin)</h4>
+                <Button
+                  onClick={() => setShowAdminDetails(!showAdminDetails)}
+                  variant="outline"
+                  size="sm"
+                  className="p-2"
+                >
+                  {showAdminDetails ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+              
+              {showAdminDetails && (
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-gray-600">Valor de Compra:</p>
+                      <p className="font-semibold">{formatCurrency(deal.vehicle.purchasePrice)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Preço de Venda:</p>
+                      <p className="font-semibold">{formatCurrency(deal.vehicle.salePrice)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Total Financiado:</p>
+                      <p className="font-semibold">{formatCurrency(deal.vehicle.salePrice - deal.downPayment)}</p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Total a Receber:</p>
+                      <p className="font-semibold text-green-600">
+                        {formatCurrency(deal.downPayment + (deal.installmentValue * deal.installments))}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Margem Bruta:</p>
+                      <p className="font-semibold text-blue-600">
+                        {formatCurrency(deal.vehicle.salePrice - deal.vehicle.purchasePrice)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-gray-600">Taxa de Juros:</p>
+                      <p className="font-semibold">{settings.monthlyInterestRate}% a.m.</p>
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>
