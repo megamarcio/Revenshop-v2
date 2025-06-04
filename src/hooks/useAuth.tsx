@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { fetchUserProfile } from '@/services/profileService';
 import { signIn as authSignIn, signUp as authSignUp, signOut as authSignOut, onAuthStateChange, getSession } from '@/services/authService';
-import { supabase } from '@/integrations/supabase/client';
 
 export type { User } from '@/types/auth';
 
@@ -14,7 +13,9 @@ export const useAuth = () => {
   const signIn = async (email: string, password: string) => {
     setLoading(true);
     const result = await authSignIn(email, password);
-    setLoading(false);
+    if (!result) {
+      setLoading(false);
+    }
     return result;
   };
 
@@ -32,7 +33,6 @@ export const useAuth = () => {
     console.log('Setting up auth state listener');
     let mounted = true;
 
-    // First set up the auth state listener
     const { data: { subscription } } = onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
@@ -40,38 +40,35 @@ export const useAuth = () => {
         if (!mounted) return;
         
         if (event === 'SIGNED_IN' && session?.user) {
-          // Use setTimeout to prevent potential conflicts
-          setTimeout(async () => {
-            if (!mounted) return;
-            
-            try {
-              console.log('Fetching user profile for signed in user:', session.user.id);
-              const profile = await fetchUserProfile(session.user.id);
-              if (profile && mounted) {
-                console.log('Successfully loaded profile for signed in user:', profile);
-                setUser(profile);
-                setLoading(false);
-              } else if (mounted) {
-                console.error('Profile not found for signed in user');
-                setLoading(false);
-              }
-            } catch (error) {
-              console.error('Error fetching profile for signed in user:', error);
-              if (mounted) {
-                setLoading(false);
-              }
+          try {
+            console.log('Fetching user profile for signed in user:', session.user.id);
+            const profile = await fetchUserProfile(session.user.id);
+            if (profile && mounted) {
+              console.log('Successfully loaded profile for signed in user:', profile);
+              setUser(profile);
+              setLoading(false);
+            } else if (mounted) {
+              console.log('Profile not found for signed in user');
+              setLoading(false);
             }
-          }, 100);
+          } catch (error) {
+            console.error('Error fetching profile for signed in user:', error);
+            if (mounted) {
+              setLoading(false);
+            }
+          }
         } else if (event === 'SIGNED_OUT') {
           if (mounted) {
             setUser(null);
             setLoading(false);
           }
+        } else if (event === 'INITIAL_SESSION' && session?.user) {
+          // Não fazer nada no INITIAL_SESSION para evitar duplicação
+          // O checkSession vai lidar com isso
         }
       }
     );
 
-    // Then check for existing session
     const checkSession = async () => {
       try {
         console.log('Checking initial session...');

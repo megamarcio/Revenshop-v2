@@ -15,18 +15,48 @@ export const fetchUserProfile = async (userId: string): Promise<User | null> => 
     if (error) {
       console.error('Supabase error fetching user profile:', error);
       
-      // If it's a PGRST116 error (no rows), the profile doesn't exist
+      // Se for erro PGRST116 (sem linhas), o perfil não existe
       if (error.code === 'PGRST116') {
-        console.error('Profile not found for user:', userId);
+        console.log('Profile not found for user:', userId);
         return null;
       }
       
-      // For other errors, throw so we can handle them properly
-      throw error;
+      // Para outros erros, tentar criar o perfil básico
+      if (error.code === 'PGRST301' || error.message.includes('violates row-level security')) {
+        console.log('RLS policy issue, creating basic profile for user:', userId);
+        
+        // Tentar obter dados do usuário autenticado
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user && user.id === userId) {
+          // Criar perfil básico
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              first_name: user.user_metadata?.first_name || 'User',
+              last_name: user.user_metadata?.last_name || '',
+              email: user.email || '',
+              role: 'seller'
+            })
+            .select()
+            .single();
+            
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+            return null;
+          }
+          
+          console.log('Created new profile:', newProfile);
+          return newProfile;
+        }
+      }
+      
+      return null;
     }
     
     if (!data) {
-      console.error('No data returned for user profile:', userId);
+      console.log('No data returned for user profile:', userId);
       return null;
     }
     
@@ -34,7 +64,6 @@ export const fetchUserProfile = async (userId: string): Promise<User | null> => 
     return data;
   } catch (error) {
     console.error('Error in fetchUserProfile service:', error);
-    // Return null instead of throwing to prevent app crashes
     return null;
   }
 };
