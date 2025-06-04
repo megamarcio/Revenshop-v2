@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -36,19 +35,13 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
     const remainingBalance = vehicle.salePrice - downPayment;
     
     // Compound interest calculation: PMT = PV * (r * (1 + r)^n) / ((1 + r)^n - 1)
-    const r = interestRate; // monthly interest rate
+    const r = interestRate; // monthly interest rate (12%)
     const n = installments; // number of payments
     const pv = remainingBalance; // present value (amount to finance)
     
-    let installmentValue;
-    if (r === 0) {
-      // If no interest, simple division
-      installmentValue = Math.round(pv / n);
-    } else {
-      // Compound interest formula
-      const factor = Math.pow(1 + r, n);
-      installmentValue = Math.round(pv * (r * factor) / (factor - 1));
-    }
+    // Compound interest formula
+    const factor = Math.pow(1 + r, n);
+    const installmentValue = Math.round(pv * (r * factor) / (factor - 1));
 
     const deal: Deal = {
       vehicle,
