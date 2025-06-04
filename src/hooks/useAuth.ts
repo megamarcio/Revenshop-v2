@@ -23,38 +23,56 @@ export const useAuth = () => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log('Fetching user profile for:', userId);
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        throw error;
+      }
+      
+      console.log('User profile fetched:', data);
       setUser(data);
+      return data;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error in fetchUserProfile:', error);
+      return null;
     }
   };
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('Attempting to sign in with:', email);
+      setLoading(true);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
-
-      if (data.user) {
-        await fetchUserProfile(data.user.id);
+      if (error) {
+        console.error('Sign in error:', error);
+        throw error;
       }
 
-      toast({
-        title: 'Sucesso',
-        description: 'Login realizado com sucesso!',
-      });
+      console.log('Sign in successful:', data);
 
-      return true;
+      if (data.user) {
+        const profile = await fetchUserProfile(data.user.id);
+        if (profile) {
+          toast({
+            title: 'Sucesso',
+            description: 'Login realizado com sucesso!',
+          });
+          return true;
+        }
+      }
+
+      return false;
     } catch (error) {
       console.error('Error signing in:', error);
       toast({
@@ -63,6 +81,8 @@ export const useAuth = () => {
         variant: 'destructive',
       });
       return false;
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -119,19 +139,18 @@ export const useAuth = () => {
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        fetchUserProfile(session.user.id);
-      }
-      setLoading(false);
-    });
-
-    // Listen for auth changes
+    console.log('Setting up auth state listener');
+    
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        
         if (session?.user) {
-          await fetchUserProfile(session.user.id);
+          // Use setTimeout to avoid potential auth callback issues
+          setTimeout(() => {
+            fetchUserProfile(session.user.id);
+          }, 0);
         } else {
           setUser(null);
         }
@@ -139,7 +158,20 @@ export const useAuth = () => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id);
+      if (session?.user) {
+        fetchUserProfile(session.user.id);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      console.log('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const isAuthenticated = !!user;

@@ -10,7 +10,9 @@ interface AuthWrapperProps {
 }
 
 const AuthWrapper = ({ children }: AuthWrapperProps) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+
+  console.log('AuthWrapper state:', { isAuthenticated, loading, user: user?.email });
 
   if (loading) {
     return (
@@ -26,13 +28,11 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
   }
 
   if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <LoginForm />
-      </div>
-    );
+    console.log('User not authenticated, showing login form');
+    return <LoginForm />;
   }
 
+  console.log('User authenticated, showing main app');
   return <>{children}</>;
 };
 

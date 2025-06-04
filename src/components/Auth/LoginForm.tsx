@@ -20,15 +20,16 @@ const LoginForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login form submitted with:', email);
     setIsLoading(true);
 
     try {
       const success = await signIn(email, password);
+      console.log('Login result:', success);
+      
       if (success) {
-        toast({
-          title: t('success'),
-          description: "Login realizado com sucesso!",
-        });
+        console.log('Login successful, user should be redirected');
+        // Don't show toast here as it's handled in signIn function
       } else {
         toast({
           title: t('error'),
@@ -37,6 +38,7 @@ const LoginForm = () => {
         });
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         title: t('error'),
         description: "Erro ao fazer login. Tente novamente.",
