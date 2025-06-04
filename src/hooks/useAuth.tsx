@@ -32,44 +32,49 @@ export const useAuth = () => {
   useEffect(() => {
     console.log('Setting up auth state listener');
     let mounted = true;
+    let isProcessing = false;
 
-    const { data: { subscription } } = onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
-        
-        if (!mounted) return;
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          try {
-            console.log('Fetching user profile for signed in user:', session.user.id);
-            const profile = await fetchUserProfile(session.user.id);
-            if (profile && mounted) {
-              console.log('Successfully loaded profile for signed in user:', profile);
-              setUser(profile);
-              setLoading(false);
-            } else if (mounted) {
-              console.log('Profile not found for signed in user');
-              setLoading(false);
-            }
-          } catch (error) {
-            console.error('Error fetching profile for signed in user:', error);
-            if (mounted) {
-              setLoading(false);
-            }
-          }
-        } else if (event === 'SIGNED_OUT') {
-          if (mounted) {
+    const handleAuthChange = async (event: string, session: any) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      
+      if (!mounted || isProcessing) return;
+      
+      if (event === 'SIGNED_IN' && session?.user) {
+        isProcessing = true;
+        try {
+          console.log('User signed in, fetching profile:', session.user.id);
+          const profile = await fetchUserProfile(session.user.id);
+          if (profile && mounted) {
+            console.log('Profile loaded successfully:', profile);
+            setUser(profile);
+          } else if (mounted) {
+            console.log('No profile found, user not authenticated');
             setUser(null);
-            setLoading(false);
           }
-        } else if (event === 'INITIAL_SESSION' && session?.user) {
-          // Não fazer nada no INITIAL_SESSION para evitar duplicação
-          // O checkSession vai lidar com isso
+        } catch (error) {
+          console.error('Error fetching profile after sign in:', error);
+          if (mounted) setUser(null);
+        } finally {
+          if (mounted) {
+            setLoading(false);
+            isProcessing = false;
+          }
+        }
+      } else if (event === 'SIGNED_OUT') {
+        if (mounted) {
+          console.log('User signed out');
+          setUser(null);
+          setLoading(false);
         }
       }
-    );
+    };
 
-    const checkSession = async () => {
+    const { data: { subscription } } = onAuthStateChange(handleAuthChange);
+
+    // Check initial session only once
+    const checkInitialSession = async () => {
+      if (isProcessing) return;
+      
       try {
         console.log('Checking initial session...');
         const { data: { session }, error } = await getSession();
@@ -80,31 +85,40 @@ export const useAuth = () => {
           return;
         }
         
-        console.log('Initial session check result:', session?.user?.id || 'No session');
-        
         if (session?.user && mounted) {
+          isProcessing = true;
+          console.log('Initial session found, fetching profile:', session.user.id);
           try {
-            console.log('Fetching initial user profile for:', session.user.id);
             const profile = await fetchUserProfile(session.user.id);
             if (profile && mounted) {
-              console.log('Successfully loaded initial profile:', profile);
+              console.log('Initial profile loaded:', profile);
               setUser(profile);
             } else if (mounted) {
-              console.log('No profile found during initial check');
+              console.log('No initial profile found');
+              setUser(null);
             }
           } catch (error) {
-            console.error('Error in initial profile fetch:', error);
+            console.error('Error fetching initial profile:', error);
+            if (mounted) setUser(null);
+          } finally {
+            if (mounted) {
+              setLoading(false);
+              isProcessing = false;
+            }
+          }
+        } else {
+          if (mounted) {
+            console.log('No initial session found');
+            setLoading(false);
           }
         }
-        
-        if (mounted) setLoading(false);
       } catch (error) {
-        console.error('Error in checkSession:', error);
+        console.error('Error in checkInitialSession:', error);
         if (mounted) setLoading(false);
       }
     };
 
-    checkSession();
+    checkInitialSession();
 
     return () => {
       console.log('Cleaning up auth subscription');
