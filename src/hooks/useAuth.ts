@@ -10,27 +10,40 @@ export const useAuth = () => {
   const { signIn, signUp, signOut } = useAuthActions(fetchUserProfile, clearUser);
 
   useEffect(() => {
+    let mounted = true;
+    
     console.log('Setting up auth state listener');
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (session?.user) {
           // Use setTimeout to avoid potential auth callback issues
           setTimeout(() => {
-            fetchUserProfile(session.user.id);
+            if (mounted) {
+              fetchUserProfile(session.user.id);
+            }
           }, 0);
         } else {
-          clearUser();
+          if (mounted) {
+            clearUser();
+          }
         }
-        setLoading(false);
+        
+        if (mounted) {
+          setLoading(false);
+        }
       }
     );
 
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('Initial session:', session?.user?.id);
       if (session?.user) {
         fetchUserProfile(session.user.id);
@@ -40,10 +53,11 @@ export const useAuth = () => {
     });
 
     return () => {
+      mounted = false;
       console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
     };
-  }, [fetchUserProfile, clearUser]);
+  }, []); // Remove dependencies to prevent infinite loops
 
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';

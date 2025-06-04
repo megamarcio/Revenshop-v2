@@ -32,6 +32,7 @@ const UserManagement = () => {
   const { canManageUsers, user: currentUser, isAdmin, loading: authLoading } = useAuth();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
@@ -46,7 +47,24 @@ const UserManagement = () => {
 
     try {
       setLoading(true);
+      setError(null);
       console.log('Fetching users from database...');
+
+      // Check if user has proper permissions before querying
+      const { data: currentUserProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', currentUser.id)
+        .single();
+
+      if (profileError) {
+        console.error('Error fetching current user profile:', profileError);
+        throw new Error('Erro ao verificar permissões do usuário');
+      }
+
+      if (!currentUserProfile || (currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'manager')) {
+        throw new Error('Usuário não tem permissão para acessar esta área');
+      }
 
       const { data, error } = await supabase
         .from('profiles')
@@ -62,11 +80,13 @@ const UserManagement = () => {
       
       console.log('Successfully fetched users:', data?.length || 0);
       setUsers(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching users:', error);
+      const errorMessage = error.message || 'Erro ao carregar usuários. Verifique as permissões.';
+      setError(errorMessage);
       toast({
         title: t('error'),
-        description: 'Erro ao carregar usuários. Verifique as permissões.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
@@ -76,14 +96,21 @@ const UserManagement = () => {
 
   useEffect(() => {
     // Only fetch users when auth is ready and user has permissions
-    if (!authLoading && canManageUsers && currentUser) {
-      console.log('UserManagement: Auth ready, fetching users');
-      fetchUsers();
-    } else if (!authLoading) {
-      console.log('UserManagement: Auth ready but no permissions or user');
+    if (!authLoading && currentUser) {
+      if (canManageUsers) {
+        console.log('UserManagement: Auth ready, fetching users');
+        fetchUsers();
+      } else {
+        console.log('UserManagement: Auth ready but no permissions');
+        setLoading(false);
+        setError('Você não tem permissão para acessar esta área');
+      }
+    } else if (!authLoading && !currentUser) {
+      console.log('UserManagement: Auth ready but no user');
       setLoading(false);
+      setError('Usuário não autenticado');
     }
-  }, [authLoading, canManageUsers, currentUser]);
+  }, [authLoading, currentUser, canManageUsers]);
 
   const canEditUser = (user: UserProfile) => {
     if (!currentUser) return false;
@@ -290,13 +317,24 @@ const UserManagement = () => {
     );
   }
 
-  if (!canManageUsers) {
+  // Show error state
+  if (error) {
     return (
       <div className="p-6">
         <Card>
           <CardContent className="p-6 text-center">
-            <h2 className="text-xl font-semibold text-gray-600">Acesso Negado</h2>
-            <p className="text-gray-500 mt-2">Você não tem permissão para acessar esta área.</p>
+            <h2 className="text-xl font-semibold text-red-600">Erro</h2>
+            <p className="text-gray-500 mt-2">{error}</p>
+            <Button 
+              onClick={() => {
+                setError(null);
+                fetchUsers();
+              }} 
+              className="mt-4"
+              variant="outline"
+            >
+              Tentar novamente
+            </Button>
           </CardContent>
         </Card>
       </div>
