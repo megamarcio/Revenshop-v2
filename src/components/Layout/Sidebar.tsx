@@ -8,7 +8,8 @@ import {
   Car, 
   Users, 
   Settings, 
-  User 
+  User,
+  CreditCard
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -23,6 +24,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const menuItems = [
     { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
     { id: 'vehicles', label: t('vehicles'), icon: Car },
+    { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
     ...(isAdmin ? [{ id: 'users', label: t('users'), icon: Users }] : []),
     ...(isAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),
     { id: 'profile', label: t('profile'), icon: User }

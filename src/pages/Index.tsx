@@ -11,6 +11,7 @@ import VehicleList from '../components/Vehicles/VehicleList';
 import UserManagement from '../components/Users/UserManagement';
 import AdminPanel from '../components/Admin/AdminPanel';
 import ProfilePage from '../components/Profile/ProfilePage';
+import BuyHerePayHere from '../components/BHPH/BuyHerePayHere';
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
@@ -19,6 +20,10 @@ const AppContent = () => {
   if (!isAuthenticated) {
     return <LoginForm />;
   }
+
+  const handleNavigateToUsers = () => {
+    setActiveTab('users');
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -29,9 +34,11 @@ const AppContent = () => {
       case 'users':
         return <UserManagement />;
       case 'admin':
-        return <AdminPanel />;
+        return <AdminPanel onNavigateToUsers={handleNavigateToUsers} />;
       case 'profile':
         return <ProfilePage />;
+      case 'bhph':
+        return <BuyHerePayHere />;
       default:
         return <Dashboard />;
     }

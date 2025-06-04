@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, User, Shield } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Shield, DollarSign } from 'lucide-react';
 import UserForm from './UserForm';
+import EditUserForm from './EditUserForm';
 
 interface User {
   id: string;
@@ -17,6 +18,9 @@ interface User {
   phone: string;
   role: 'admin' | 'seller';
   createdAt: string;
+  commissionClientReferral?: number;
+  commissionClientBrought?: number;
+  commissionFullSale?: number;
 }
 
 // Mock data para demonstração
@@ -28,7 +32,10 @@ const mockUsers: User[] = [
     email: 'admin@revenshop.com',
     phone: '+55 11 99999-9999',
     role: 'admin',
-    createdAt: '2024-01-01'
+    createdAt: '2024-01-01',
+    commissionClientReferral: 100,
+    commissionClientBrought: 250,
+    commissionFullSale: 500
   },
   {
     id: '2',
@@ -37,7 +44,10 @@ const mockUsers: User[] = [
     email: 'joao@revenshop.com',
     phone: '+55 11 88888-8888',
     role: 'seller',
-    createdAt: '2024-01-02'
+    createdAt: '2024-01-02',
+    commissionClientReferral: 75,
+    commissionClientBrought: 200,
+    commissionFullSale: 400
   },
   {
     id: '3',
@@ -46,7 +56,10 @@ const mockUsers: User[] = [
     email: 'maria@revenshop.com',
     phone: '+55 11 77777-7777',
     role: 'seller',
-    createdAt: '2024-01-03'
+    createdAt: '2024-01-03',
+    commissionClientReferral: 80,
+    commissionClientBrought: 220,
+    commissionFullSale: 450
   }
 ];
 
@@ -54,7 +67,9 @@ const UserManagement = () => {
   const { t } = useLanguage();
   const { isAdmin } = useAuth();
   const [users, setUsers] = useState<User[]>(mockUsers);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleCreateUser = async (userData: any) => {
@@ -69,11 +84,14 @@ const UserManagement = () => {
         email: userData.email,
         phone: userData.phone,
         role: userData.role,
-        createdAt: new Date().toISOString().split('T')[0]
+        createdAt: new Date().toISOString().split('T')[0],
+        commissionClientReferral: 0,
+        commissionClientBrought: 0,
+        commissionFullSale: 0
       };
 
       setUsers(prev => [...prev, newUser]);
-      setIsDialogOpen(false);
+      setIsCreateDialogOpen(false);
 
       toast({
         title: t('success'),
@@ -90,6 +108,39 @@ const UserManagement = () => {
     }
   };
 
+  const handleEditUser = async (userData: any) => {
+    if (!editingUser) return;
+    
+    setIsLoading(true);
+    
+    try {
+      const updatedUser: User = {
+        ...editingUser,
+        ...userData
+      };
+
+      setUsers(prev => prev.map(user => 
+        user.id === editingUser.id ? updatedUser : user
+      ));
+      
+      setIsEditDialogOpen(false);
+      setEditingUser(null);
+
+      toast({
+        title: t('success'),
+        description: 'Usuário atualizado com sucesso!',
+      });
+    } catch (error) {
+      toast({
+        title: t('error'),
+        description: 'Erro ao atualizar usuário. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleDeleteUser = (userId: string) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
       setUsers(prev => prev.filter(user => user.id !== userId));
@@ -98,6 +149,18 @@ const UserManagement = () => {
         description: 'Usuário excluído com sucesso!',
       });
     }
+  };
+
+  const openEditDialog = (user: User) => {
+    setEditingUser(user);
+    setIsEditDialogOpen(true);
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
   };
 
   if (!isAdmin) {
@@ -121,7 +184,7 @@ const UserManagement = () => {
           <p className="text-gray-600 mt-1">Gerencie usuários do sistema</p>
         </div>
         
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-revenshop-primary hover:bg-revenshop-primary/90">
               <Plus className="h-4 w-4 mr-2" />
@@ -155,7 +218,7 @@ const UserManagement = () => {
                     )}
                   </div>
                   
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">
                       {user.firstName} {user.lastName}
                     </h3>
@@ -173,6 +236,23 @@ const UserManagement = () => {
                         Criado em: {new Date(user.createdAt).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
+                    
+                    {user.role === 'seller' && (
+                      <div className="mt-2 flex items-center space-x-4 text-sm">
+                        <div className="flex items-center">
+                          <DollarSign className="h-3 w-3 mr-1 text-green-600" />
+                          <span className="text-gray-600">Indicação: {formatCurrency(user.commissionClientReferral || 0)}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <DollarSign className="h-3 w-3 mr-1 text-blue-600" />
+                          <span className="text-gray-600">Cliente: {formatCurrency(user.commissionClientBrought || 0)}</span>
+                        </div>
+                        <div className="flex items-center">
+                          <DollarSign className="h-3 w-3 mr-1 text-purple-600" />
+                          <span className="text-gray-600">Venda: {formatCurrency(user.commissionFullSale || 0)}</span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -180,12 +260,7 @@ const UserManagement = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => {
-                      toast({
-                        title: 'Em desenvolvimento',
-                        description: 'Funcionalidade de edição será implementada em breve.',
-                      });
-                    }}
+                    onClick={() => openEditDialog(user)}
                   >
                     <Edit className="h-4 w-4" />
                   </Button>
@@ -206,6 +281,22 @@ const UserManagement = () => {
           </Card>
         ))}
       </div>
+
+      {/* Dialog de Edição */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Usuário</DialogTitle>
+          </DialogHeader>
+          {editingUser && (
+            <EditUserForm 
+              user={editingUser} 
+              onSubmit={handleEditUser} 
+              isLoading={isLoading} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {users.length === 0 && (
         <Card>

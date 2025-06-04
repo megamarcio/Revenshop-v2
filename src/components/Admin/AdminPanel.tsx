@@ -39,7 +39,11 @@ const recentActivities = [
   { id: '5', user: 'Pedro Costa', action: 'Login falhado', timestamp: '2024-01-14 15:10', type: 'error' }
 ];
 
-const AdminPanel = () => {
+interface AdminPanelProps {
+  onNavigateToUsers?: () => void;
+}
+
+const AdminPanel = ({ onNavigateToUsers }: AdminPanelProps) => {
   const { t } = useLanguage();
   const { isAdmin } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
@@ -220,9 +224,12 @@ const AdminPanel = () => {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">
-                Esta funcionalidade está disponível na seção "Usuários" do menu lateral.
+                Acesse a seção completa de gerenciamento de usuários do sistema.
               </p>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={onNavigateToUsers}
+              >
                 <Users className="h-4 w-4 mr-2" />
                 Ir para Usuários
               </Button>
