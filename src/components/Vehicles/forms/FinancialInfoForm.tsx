@@ -27,7 +27,7 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="purchasePrice">Valor de Compra (R$) *</Label>
+          <Label htmlFor="purchasePrice">Valor de Compra ($) *</Label>
           <Input
             id="purchasePrice"
             type="number"
@@ -41,7 +41,7 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="salePrice">Valor de Venda (R$) *</Label>
+          <Label htmlFor="salePrice">Valor de Venda ($) *</Label>
           <Input
             id="salePrice"
             type="number"
@@ -64,7 +64,7 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="minNegotiable">Valor Mín. Negociável (R$)</Label>
+          <Label htmlFor="minNegotiable">Valor Mín. Negociável ($)</Label>
           <Input
             id="minNegotiable"
             type="number"
@@ -76,7 +76,7 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="carfaxPrice">Valor Carfax (R$)</Label>
+          <Label htmlFor="carfaxPrice">Valor Carfax ($)</Label>
           <Input
             id="carfaxPrice"
             type="number"
@@ -88,7 +88,7 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="mmrValue">Valor MMR (R$)</Label>
+          <Label htmlFor="mmrValue">Valor MMR ($)</Label>
           <Input
             id="mmrValue"
             type="number"

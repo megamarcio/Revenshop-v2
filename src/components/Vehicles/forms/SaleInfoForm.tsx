@@ -58,7 +58,7 @@ const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) =>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="finalSalePrice">Valor Final de Venda (R$)</Label>
+                <Label htmlFor="finalSalePrice">Valor Final de Venda ($)</Label>
                 <Input
                   id="finalSalePrice"
                   type="number"

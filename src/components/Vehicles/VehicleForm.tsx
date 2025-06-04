@@ -129,10 +129,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
 
   const formatCurrency = (value: string) => {
     const num = parseFloat(value);
-    if (isNaN(num)) return 'R$ 0,00';
-    return new Intl.NumberFormat('pt-BR', {
+    if (isNaN(num)) return '$0.00';
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'USD'
     }).format(num);
   };
 
