@@ -8,7 +8,6 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Car, Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
 
 const LoginForm = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -26,24 +25,8 @@ const LoginForm = () => {
     try {
       const success = await signIn(email, password);
       console.log('Login result:', success);
-      
-      if (success) {
-        console.log('Login successful, user should be redirected');
-        // Don't show toast here as it's handled in signIn function
-      } else {
-        toast({
-          title: t('error'),
-          description: "Credenciais inválidas. Tente novamente.",
-          variant: "destructive",
-        });
-      }
     } catch (error) {
       console.error('Login error:', error);
-      toast({
-        title: t('error'),
-        description: "Erro ao fazer login. Tente novamente.",
-        variant: "destructive",
-      });
     } finally {
       setIsLoading(false);
     }
