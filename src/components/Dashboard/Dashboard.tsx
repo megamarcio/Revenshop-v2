@@ -31,7 +31,7 @@ const Dashboard = () => {
           value={stats.totalToSell}
           icon={DollarSign}
           color="bg-green-500"
-          prefix="R$ "
+          prefix="$ "
         />
         
         <StatsCard
@@ -39,7 +39,7 @@ const Dashboard = () => {
           value={stats.totalSold}
           icon={TrendingUp}
           color="bg-blue-500"
-          prefix="R$ "
+          prefix="$ "
         />
         
         <StatsCard
@@ -74,7 +74,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-sm font-medium">Honda Civic 2020 - Vendido</p>
-              <p className="text-xs text-gray-500">Por João Silva - R$ 65.000</p>
+              <p className="text-xs text-gray-500">Por João Silva - $65.000</p>
             </div>
           </div>
           
@@ -84,7 +84,7 @@ const Dashboard = () => {
             </div>
             <div>
               <p className="text-sm font-medium">Toyota Corolla 2021 - Cadastrado</p>
-              <p className="text-xs text-gray-500">Adicionado ao estoque - R$ 75.000</p>
+              <p className="text-xs text-gray-500">Adicionado ao estoque - $75.000</p>
             </div>
           </div>
           
