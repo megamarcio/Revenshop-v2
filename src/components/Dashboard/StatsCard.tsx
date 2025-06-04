@@ -14,14 +14,16 @@ interface StatsCardProps {
 const StatsCard = ({ title, value, icon: Icon, color, prefix }: StatsCardProps) => {
   return (
     <Card className="animate-fade-in hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">{title}</CardTitle>
-        <div className={`p-2 rounded-lg ${color}`}>
-          <Icon className="h-5 w-5 text-white" />
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+        <CardTitle className="text-xs font-medium text-muted-foreground leading-tight">
+          {title}
+        </CardTitle>
+        <div className={`p-1.5 rounded-lg ${color}`}>
+          <Icon className="h-4 w-4 text-white" />
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold text-foreground">
+      <CardContent className="pt-1">
+        <div className="text-lg font-bold text-foreground">
           {prefix}{typeof value === 'number' ? value.toLocaleString() : value}
         </div>
       </CardContent>

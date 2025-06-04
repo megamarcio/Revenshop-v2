@@ -3,29 +3,37 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface DashboardStats {
-  totalVehicles: number;
   vehiclesForSale: number;
   vehiclesSold: number;
-  totalRevenue: number;
-  totalProfit: number;
-  totalSellers: number;
+  totalSoldValue: number;
+  totalBudgetValue: number;
   loading: boolean;
 }
 
+export interface DateFilter {
+  month: number;
+  year: number;
+}
+
 export const useDashboardStats = () => {
+  const currentDate = new Date();
+  const [dateFilter, setDateFilter] = useState<DateFilter>({
+    month: currentDate.getMonth() + 1,
+    year: currentDate.getFullYear()
+  });
+
   const [stats, setStats] = useState<DashboardStats>({
-    totalVehicles: 0,
     vehiclesForSale: 0,
     vehiclesSold: 0,
-    totalRevenue: 0,
-    totalProfit: 0,
-    totalSellers: 0,
+    totalSoldValue: 0,
+    totalBudgetValue: 0,
     loading: true,
   });
 
   const fetchStats = async () => {
     try {
-      console.log('Fetching dashboard stats...');
+      console.log('Fetching dashboard stats for:', dateFilter);
+      setStats(prev => ({ ...prev, loading: true }));
       
       // Fetch vehicles data
       const { data: vehicles, error: vehiclesError } = await supabase
@@ -37,56 +45,50 @@ export const useDashboardStats = () => {
         throw vehiclesError;
       }
 
-      // Fetch sales data
+      // Fetch sales data with date filter
+      const startDate = new Date(dateFilter.year, dateFilter.month - 1, 1);
+      const endDate = new Date(dateFilter.year, dateFilter.month, 0);
+      
       const { data: sales, error: salesError } = await supabase
         .from('sales')
-        .select('final_sale_price');
+        .select('final_sale_price, sale_date')
+        .gte('sale_date', startDate.toISOString().split('T')[0])
+        .lte('sale_date', endDate.toISOString().split('T')[0]);
 
       if (salesError) {
         console.error('Error fetching sales:', salesError);
         throw salesError;
       }
 
-      // Fetch sellers count
-      const { data: sellers, error: sellersError } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('role', 'seller');
+      // Fetch customer deals for budget calculations
+      const { data: deals, error: dealsError } = await supabase
+        .from('customer_deals')
+        .select('total_amount, created_at, status')
+        .gte('created_at', startDate.toISOString())
+        .lt('created_at', new Date(dateFilter.year, dateFilter.month, 1).toISOString());
 
-      if (sellersError) {
-        console.error('Error fetching sellers:', sellersError);
-        throw sellersError;
+      if (dealsError) {
+        console.error('Error fetching deals:', dealsError);
+        throw dealsError;
       }
 
-      const totalVehicles = vehicles?.length || 0;
       const vehiclesForSale = vehicles?.filter(v => v.category === 'forSale').length || 0;
-      const vehiclesSold = vehicles?.filter(v => v.category === 'sold').length || 0;
-      
-      const totalRevenue = sales?.reduce((sum, sale) => sum + (sale.final_sale_price || 0), 0) || 0;
-      
-      const soldVehicles = vehicles?.filter(v => v.category === 'sold') || [];
-      const totalProfit = soldVehicles.reduce((sum, vehicle) => {
-        return sum + (vehicle.sale_price - vehicle.purchase_price);
-      }, 0);
-      
-      const totalSellers = sellers?.length || 0;
+      const vehiclesSold = sales?.length || 0;
+      const totalSoldValue = sales?.reduce((sum, sale) => sum + (sale.final_sale_price || 0), 0) || 0;
+      const totalBudgetValue = deals?.reduce((sum, deal) => sum + (deal.total_amount || 0), 0) || 0;
 
       console.log('Dashboard stats calculated:', {
-        totalVehicles,
         vehiclesForSale,
         vehiclesSold,
-        totalRevenue,
-        totalProfit,
-        totalSellers
+        totalSoldValue,
+        totalBudgetValue
       });
 
       setStats({
-        totalVehicles,
         vehiclesForSale,
         vehiclesSold,
-        totalRevenue,
-        totalProfit,
-        totalSellers,
+        totalSoldValue,
+        totalBudgetValue,
         loading: false,
       });
     } catch (error) {
@@ -97,7 +99,12 @@ export const useDashboardStats = () => {
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [dateFilter]);
 
-  return { stats, refetch: fetchStats };
+  return { 
+    stats, 
+    dateFilter, 
+    setDateFilter, 
+    refetch: fetchStats 
+  };
 };
