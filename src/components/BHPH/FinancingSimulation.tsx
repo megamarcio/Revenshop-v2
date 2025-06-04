@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, Info } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { Vehicle, Deal } from './BuyHerePayHere';
 
 interface FinancingSimulationProps {
@@ -34,8 +34,21 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
 
   const calculateDeal = () => {
     const remainingBalance = vehicle.salePrice - downPayment;
-    const monthlyInterest = remainingBalance * interestRate;
-    const installmentValue = Math.round((remainingBalance / installments) + monthlyInterest);
+    
+    // Compound interest calculation: PMT = PV * (r * (1 + r)^n) / ((1 + r)^n - 1)
+    const r = interestRate; // monthly interest rate
+    const n = installments; // number of payments
+    const pv = remainingBalance; // present value (amount to finance)
+    
+    let installmentValue;
+    if (r === 0) {
+      // If no interest, simple division
+      installmentValue = Math.round(pv / n);
+    } else {
+      // Compound interest formula
+      const factor = Math.pow(1 + r, n);
+      installmentValue = Math.round(pv * (r * factor) / (factor - 1));
+    }
 
     const deal: Deal = {
       vehicle,
@@ -79,9 +92,7 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
           <Label>Entrada (Down Payment)</Label>
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">Sugerido:</span>
               <span className="font-semibold text-green-600">{formatCurrency(suggestedDownPayment)}</span>
-              <span className="text-xs text-gray-500">(60% do valor de compra)</span>
             </div>
             
             {isAdmin && (
@@ -136,14 +147,6 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
           />
         </div>
 
-        {/* Aviso sobre juros */}
-        <Alert>
-          <Info className="h-4 w-4" />
-          <AlertDescription>
-            Juros fixos de 12% ao mês aplicados sobre saldo devedor
-          </AlertDescription>
-        </Alert>
-
         {/* Preview dos cálculos */}
         <div className="mt-4 p-4 bg-blue-50 rounded-lg">
           <h4 className="font-semibold text-blue-900 mb-2">Cálculo Atual</h4>
@@ -151,7 +154,7 @@ const FinancingSimulation = ({ vehicle, isAdmin, onDealCalculated }: FinancingSi
             <p>Valor do veículo: {formatCurrency(vehicle.salePrice)}</p>
             <p>Entrada: {formatCurrency(downPayment)}</p>
             <p>Saldo a financiar: {formatCurrency(vehicle.salePrice - downPayment)}</p>
-            <p>Parcelas: {installments}x</p>
+            <p>Parcelas: {installments}x de {formatCurrency(Math.round((vehicle.salePrice - downPayment) * (interestRate * Math.pow(1 + interestRate, installments)) / (Math.pow(1 + interestRate, installments) - 1)))}</p>
           </div>
         </div>
       </CardContent>
