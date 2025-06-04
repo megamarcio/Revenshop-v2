@@ -40,25 +40,38 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     console.log('BasicInfoForm - handleTitleTypeChange:', value);
     setTitleType(value);
     setIsExpanded(!!value);
+    
     if (!value) {
+      // Se nenhum tipo foi selecionado, limpar titleInfo
       onInputChange('titleInfo', '');
     } else {
-      // Se já há um status selecionado, manter
-      const currentStatus = formData.titleInfo?.split('-').slice(1).join('-') || '';
+      // Verificar se já há um status selecionado
+      const currentStatus = getCurrentStatus();
       if (currentStatus) {
-        onInputChange('titleInfo', `${value}-${currentStatus}`);
+        // Se já há status, manter com o novo tipo
+        const newTitleInfo = `${value}-${currentStatus}`;
+        console.log('BasicInfoForm - updating titleInfo with existing status:', newTitleInfo);
+        onInputChange('titleInfo', newTitleInfo);
       } else {
+        // Se não há status, apenas definir o tipo
+        console.log('BasicInfoForm - setting only title type:', value);
         onInputChange('titleInfo', value);
       }
     }
   };
 
   const handleTitleStatusChange = (status: string) => {
-    console.log('BasicInfoForm - handleTitleStatusChange:', status);
+    console.log('BasicInfoForm - handleTitleStatusChange called with status:', status);
+    console.log('BasicInfoForm - current titleType:', titleType);
+    
     if (titleType && status) {
       const newTitleInfo = `${titleType}-${status}`;
-      console.log('BasicInfoForm - setting titleInfo to:', newTitleInfo);
+      console.log('BasicInfoForm - setting combined titleInfo:', newTitleInfo);
       onInputChange('titleInfo', newTitleInfo);
+    } else if (titleType && !status) {
+      // Se status foi desmarcado, manter apenas o tipo
+      console.log('BasicInfoForm - clearing status, keeping only type:', titleType);
+      onInputChange('titleInfo', titleType);
     }
   };
 
@@ -81,15 +94,27 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     }
   };
 
-  // Extrair o status atual do titleInfo
+  // Extrair o status atual do titleInfo - CORRIGIDO
   const getCurrentStatus = () => {
     if (!formData.titleInfo) return '';
+    
+    console.log('getCurrentStatus - formData.titleInfo:', formData.titleInfo);
+    
+    // Dividir por hífen e pegar tudo depois do primeiro hífen
     const parts = formData.titleInfo.split('-');
+    console.log('getCurrentStatus - parts:', parts);
+    
     if (parts.length > 1) {
-      return parts.slice(1).join('-');
+      const status = parts.slice(1).join('-');
+      console.log('getCurrentStatus - extracted status:', status);
+      return status;
     }
+    
+    console.log('getCurrentStatus - no status found');
     return '';
   };
+
+  const currentStatus = getCurrentStatus();
 
   return (
     <div className="space-y-4">
@@ -201,7 +226,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
       </div>
 
-      {/* Informações do Título - compacto e discreto */}
+      {/* Informações do Título - CORRIGIDO */}
       <div className="space-y-2">
         <Label className="text-sm text-gray-600">Informações do Título</Label>
         <div className="flex items-center space-x-2">
@@ -227,7 +252,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
                 <Label className="text-xs text-gray-500">Status</Label>
                 <ToggleGroup 
                   type="single" 
-                  value={getCurrentStatus()}
+                  value={currentStatus}
                   onValueChange={handleTitleStatusChange}
                   className="justify-start"
                 >
@@ -238,6 +263,9 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
                     Em Trânsito
                   </ToggleGroupItem>
                 </ToggleGroup>
+                <p className="text-xs text-gray-400 mt-1">
+                  Status atual: {currentStatus || 'Nenhum selecionado'}
+                </p>
               </div>
             )}
           </CollapsibleContent>
