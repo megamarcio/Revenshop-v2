@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Copy, Download } from 'lucide-react';
 import { Deal } from './BuyHerePayHere';
 import { useAuth } from '../../contexts/AuthContext';
+import { useBHPH } from '../../contexts/BHPHContext';
 
 interface DealSummaryProps {
   deal: Deal;
@@ -12,6 +12,8 @@ interface DealSummaryProps {
 }
 
 const DealSummary = ({ deal, isAdmin }: DealSummaryProps) => {
+  const { settings } = useBHPH();
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -192,7 +194,7 @@ Aprovação rápida. Veículo pronto para retirada.`;
                   </div>
                   <div>
                     <p className="text-gray-600">Taxa de Juros:</p>
-                    <p className="font-semibold">{(deal.interestRate * 100).toFixed(0)}% a.m.</p>
+                    <p className="font-semibold">{settings.monthlyInterestRate}% a.m.</p>
                   </div>
                 </div>
               </div>
