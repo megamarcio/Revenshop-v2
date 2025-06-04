@@ -13,10 +13,16 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
   const { isAuthenticated, loading, user } = useAuth();
 
   useEffect(() => {
-    console.log('AuthWrapper state updated:', { isAuthenticated, loading, user: user?.email });
+    console.log('AuthWrapper state updated:', { 
+      isAuthenticated, 
+      loading, 
+      userEmail: user?.email,
+      userRole: user?.role 
+    });
   }, [isAuthenticated, loading, user]);
 
   if (loading) {
+    console.log('AuthWrapper: Showing loading state');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <Card className="w-96">
@@ -30,11 +36,11 @@ const AuthWrapper = ({ children }: AuthWrapperProps) => {
   }
 
   if (!isAuthenticated) {
-    console.log('User not authenticated, showing login form');
+    console.log('AuthWrapper: User not authenticated, showing login form');
     return <LoginForm />;
   }
 
-  console.log('User authenticated, showing main app');
+  console.log('AuthWrapper: User authenticated, showing main app');
   return <>{children}</>;
 };
 

@@ -1,5 +1,4 @@
 
-
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { fetchUserProfile } from '@/services/profileService';
@@ -41,31 +40,28 @@ export const useAuth = () => {
         if (!mounted) return;
         
         if (event === 'SIGNED_IN' && session?.user) {
-          // Use setTimeout to prevent potential deadlocks with Supabase auth
+          // Use setTimeout to prevent potential conflicts
           setTimeout(async () => {
             if (!mounted) return;
             
             try {
-              console.log('Fetching user profile for:', session.user.id);
+              console.log('Fetching user profile for signed in user:', session.user.id);
               const profile = await fetchUserProfile(session.user.id);
               if (profile && mounted) {
-                console.log('Setting user from profile:', profile);
+                console.log('Successfully loaded profile for signed in user:', profile);
                 setUser(profile);
+                setLoading(false);
               } else if (mounted) {
-                console.error('Failed to fetch user profile - profile not found');
-                setUser(null);
+                console.error('Profile not found for signed in user');
+                setLoading(false);
               }
             } catch (error) {
-              console.error('Error fetching profile:', error);
+              console.error('Error fetching profile for signed in user:', error);
               if (mounted) {
-                setUser(null);
+                setLoading(false);
               }
             }
-            
-            if (mounted) {
-              setLoading(false);
-            }
-          }, 0);
+          }, 100);
         } else if (event === 'SIGNED_OUT') {
           if (mounted) {
             setUser(null);
@@ -78,6 +74,7 @@ export const useAuth = () => {
     // Then check for existing session
     const checkSession = async () => {
       try {
+        console.log('Checking initial session...');
         const { data: { session }, error } = await getSession();
         
         if (error) {
@@ -86,24 +83,20 @@ export const useAuth = () => {
           return;
         }
         
-        console.log('Initial session check:', session?.user?.id);
+        console.log('Initial session check result:', session?.user?.id || 'No session');
         
         if (session?.user && mounted) {
           try {
             console.log('Fetching initial user profile for:', session.user.id);
             const profile = await fetchUserProfile(session.user.id);
             if (profile && mounted) {
-              console.log('Setting initial user from profile:', profile);
+              console.log('Successfully loaded initial profile:', profile);
               setUser(profile);
             } else if (mounted) {
-              console.error('Initial profile fetch failed - profile not found');
-              setUser(null);
+              console.log('No profile found during initial check');
             }
           } catch (error) {
             console.error('Error in initial profile fetch:', error);
-            if (mounted) {
-              setUser(null);
-            }
           }
         }
         
@@ -146,4 +139,3 @@ export const useAuth = () => {
     signOut,
   };
 };
-
