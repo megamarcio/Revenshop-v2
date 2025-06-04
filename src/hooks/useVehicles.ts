@@ -77,7 +77,7 @@ export const useVehicles = () => {
         ca_note: parseInt(vehicleData.caNote),
         purchase_price: parseFloat(vehicleData.purchasePrice),
         sale_price: parseFloat(vehicleData.salePrice),
-        profit_margin: vehicleData.profitMargin || parseFloat((parseFloat(vehicleData.salePrice) / parseFloat(vehicleData.purchasePrice)).toFixed(2)),
+        // Removido profit_margin - parece ser uma coluna calculada/gerada
         min_negotiable: vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null,
         carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
         mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
@@ -140,7 +140,7 @@ export const useVehicles = () => {
       if (vehicleData.caNote) dbUpdateData.ca_note = parseInt(vehicleData.caNote);
       if (vehicleData.purchasePrice) dbUpdateData.purchase_price = parseFloat(vehicleData.purchasePrice);
       if (vehicleData.salePrice) dbUpdateData.sale_price = parseFloat(vehicleData.salePrice);
-      if (vehicleData.profitMargin) dbUpdateData.profit_margin = parseFloat(vehicleData.profitMargin);
+      // Removido profit_margin do update também
       if (vehicleData.minNegotiable) dbUpdateData.min_negotiable = parseFloat(vehicleData.minNegotiable);
       if (vehicleData.carfaxPrice) dbUpdateData.carfax_price = parseFloat(vehicleData.carfaxPrice);
       if (vehicleData.mmrValue) dbUpdateData.mmr_value = parseFloat(vehicleData.mmrValue);
