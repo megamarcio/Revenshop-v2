@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,12 @@ interface VehicleFormData {
   saleNotes?: string;
   customerName?: string;
   customerPhone?: string;
+  paymentMethod?: string;
+  financingCompany?: string;
+  checkDetails?: string;
+  otherPaymentDetails?: string;
+  sellerCommission?: string;
+  titleStatus?: string;
 }
 
 interface VehicleFormProps {
@@ -64,7 +69,13 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     saleDate: editingVehicle?.saleDate || '',
     saleNotes: editingVehicle?.saleNotes || '',
     customerName: editingVehicle?.customerName || '',
-    customerPhone: editingVehicle?.customerPhone || ''
+    customerPhone: editingVehicle?.customerPhone || '',
+    paymentMethod: editingVehicle?.paymentMethod || '',
+    financingCompany: editingVehicle?.financingCompany || '',
+    checkDetails: editingVehicle?.checkDetails || '',
+    otherPaymentDetails: editingVehicle?.otherPaymentDetails || '',
+    sellerCommission: editingVehicle?.sellerCommission?.toString() || '',
+    titleStatus: editingVehicle?.titleStatus || ''
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
@@ -181,6 +192,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         carfaxPrice: parseFloat(formData.carfaxPrice || '0'),
         mmrValue: parseFloat(formData.mmrValue || '0'),
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
+        sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         photos,
         video: video || undefined,
         id: editingVehicle?.id || Date.now().toString()

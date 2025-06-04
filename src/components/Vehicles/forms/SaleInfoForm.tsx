@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface SaleInfoFormProps {
   formData: {
@@ -14,12 +15,63 @@ interface SaleInfoFormProps {
     customerPhone?: string;
     seller?: string;
     saleNotes?: string;
+    paymentMethod?: string;
+    financingCompany?: string;
+    checkDetails?: string;
+    otherPaymentDetails?: string;
+    sellerCommission?: string;
+    titleStatus?: string;
   };
   errors: Record<string, string>;
   onInputChange: (field: string, value: string) => void;
 }
 
 const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) => {
+  const renderPaymentDetails = () => {
+    switch (formData.paymentMethod) {
+      case 'financing':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="financingCompany">Nome da Financeira</Label>
+            <Input
+              id="financingCompany"
+              value={formData.financingCompany || ''}
+              onChange={(e) => onInputChange('financingCompany', e.target.value)}
+              placeholder="Ex: Banco do Brasil, Santander..."
+            />
+          </div>
+        );
+      case 'check':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="checkDetails">Informações dos Cheques</Label>
+            <Textarea
+              id="checkDetails"
+              value={formData.checkDetails || ''}
+              onChange={(e) => onInputChange('checkDetails', e.target.value)}
+              placeholder="Ex: 3 cheques de $5000 cada, datas de vencimento..."
+              rows={3}
+            />
+          </div>
+        );
+      case 'other':
+        return (
+          <div className="space-y-2">
+            <Label htmlFor="otherPaymentDetails">Detalhes da Forma de Pagamento</Label>
+            <Textarea
+              id="otherPaymentDetails"
+              value={formData.otherPaymentDetails || ''}
+              onChange={(e) => onInputChange('otherPaymentDetails', e.target.value)}
+              placeholder="Descreva os detalhes da forma de pagamento..."
+              rows={3}
+            />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Status de Venda</h3>
@@ -39,6 +91,24 @@ const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) =>
           >
             Vendido
           </Button>
+        </div>
+
+        {/* Informações do Título - sempre visível */}
+        <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
+          <h4 className="font-medium text-gray-900">Informações do Título</h4>
+          <div className="space-y-2">
+            <Label htmlFor="titleStatus">Status do Título</Label>
+            <Select value={formData.titleStatus || ''} onValueChange={(value) => onInputChange('titleStatus', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o status do título" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="inHand">Em Mão</SelectItem>
+                <SelectItem value="dmv">DMV</SelectItem>
+                <SelectItem value="other">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {formData.category === 'sold' && (
@@ -102,6 +172,39 @@ const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) =>
                   placeholder="Ex: Maria Santos"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sellerCommission">Comissão do Vendedor ($)</Label>
+                <Input
+                  id="sellerCommission"
+                  type="number"
+                  step="0.01"
+                  value={formData.sellerCommission}
+                  onChange={(e) => onInputChange('sellerCommission', e.target.value)}
+                  placeholder="Ex: 1500"
+                />
+              </div>
+            </div>
+
+            {/* Forma de Pagamento */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="paymentMethod">Forma de Pagamento</Label>
+                <Select value={formData.paymentMethod || ''} onValueChange={(value) => onInputChange('paymentMethod', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione a forma de pagamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cash">Cash</SelectItem>
+                    <SelectItem value="financing">Financiamento</SelectItem>
+                    <SelectItem value="bhph">BHPH</SelectItem>
+                    <SelectItem value="check">Check</SelectItem>
+                    <SelectItem value="other">Outros</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {renderPaymentDetails()}
             </div>
 
             <div className="space-y-2">
