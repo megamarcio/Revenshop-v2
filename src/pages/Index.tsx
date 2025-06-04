@@ -8,6 +8,7 @@ import Sidebar from '../components/Layout/Sidebar';
 import Dashboard from '../components/Dashboard/Dashboard';
 import VehicleList from '../components/Vehicles/VehicleList';
 import UserManagement from '../components/Users/UserManagement';
+import AdminPanel from '../components/Admin/AdminPanel';
 
 const AppContent = () => {
   const { isAuthenticated } = useAuth();
@@ -26,12 +27,7 @@ const AppContent = () => {
       case 'users':
         return <UserManagement />;
       case 'admin':
-        return (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold">Administração</h1>
-            <p className="text-gray-600 mt-2">Funcionalidade em desenvolvimento</p>
-          </div>
-        );
+        return <AdminPanel />;
       case 'profile':
         return (
           <div className="p-6">
