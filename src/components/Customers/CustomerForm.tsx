@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -113,7 +112,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('vehicles')
-        .select('id, name, model, year')
+        .select('id, name, model, year, sale_price')
         .eq('category', 'forSale')
         .order('year', { ascending: false });
       if (error) throw error;
@@ -186,72 +185,78 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">{t('customerName')} *</Label>
-                <Input
-                  id="name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange('name', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">{t('customerPhone')} *</Label>
-                <Input
-                  id="phone"
-                  value={formData.phone}
-                  onChange={(e) => handleInputChange('phone', e.target.value)}
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="email">{t('customerEmail')}</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) => handleInputChange('email', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="address">{t('customerAddress')}</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) => handleInputChange('address', e.target.value)}
-                />
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Informações Básicas</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="name">{t('customerName')} *</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone">{t('customerPhone')} *</Label>
+                  <Input
+                    id="phone"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">{t('customerEmail')}</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address">{t('customerAddress')}</Label>
+                  <Input
+                    id="address"
+                    value={formData.address}
+                    onChange={(e) => handleInputChange('address', e.target.value)}
+                  />
+                </div>
               </div>
             </div>
 
             {/* Document Info */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="social_security_type">{t('socialSecurityType')}</Label>
-                <Select value={formData.social_security_type} onValueChange={(value) => handleInputChange('social_security_type', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ssn">{t('ssn')}</SelectItem>
-                    <SelectItem value="passport">{t('passport')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="social_security_number">{t('socialSecurityNumber')}</Label>
-                <Input
-                  id="social_security_number"
-                  value={formData.social_security_number}
-                  onChange={(e) => handleInputChange('social_security_number', e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="document_photo">{t('documentPhoto')}</Label>
-                <Button type="button" variant="outline" className="w-full">
-                  <Upload className="h-4 w-4 mr-2" />
-                  {t('uploadDocument')}
-                </Button>
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Documentação</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label htmlFor="social_security_type">{t('socialSecurityType')}</Label>
+                  <Select value={formData.social_security_type} onValueChange={(value) => handleInputChange('social_security_type', value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ssn">{t('ssn')}</SelectItem>
+                      <SelectItem value="passport">{t('passport')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="social_security_number">{t('socialSecurityNumber')}</Label>
+                  <Input
+                    id="social_security_number"
+                    value={formData.social_security_number}
+                    onChange={(e) => handleInputChange('social_security_number', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="document_photo">{t('documentPhoto')}</Label>
+                  <Button type="button" variant="outline" className="w-full">
+                    <Upload className="h-4 w-4 mr-2" />
+                    {t('uploadDocument')}
+                  </Button>
+                </div>
               </div>
             </div>
 
@@ -335,61 +340,64 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
             </div>
 
             {/* Business Info */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="responsible_seller_id">{t('responsibleSeller')}</Label>
-                <Select value={formData.responsible_seller_id} onValueChange={(value) => handleInputChange('responsible_seller_id', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('selectSeller')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {sellers.map((seller) => (
-                      <SelectItem key={seller.id} value={seller.id}>
-                        {seller.first_name} {seller.last_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="interested_vehicle_id">{t('interestedVehicle')}</Label>
-                <Select value={formData.interested_vehicle_id} onValueChange={(value) => handleInputChange('interested_vehicle_id', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={t('selectVehicle')} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {vehicles.map((vehicle) => (
-                      <SelectItem key={vehicle.id} value={vehicle.id}>
-                        {vehicle.year} {vehicle.name} {vehicle.model}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="deal_status">{t('dealStatus')}</Label>
-                <Select value={formData.deal_status} onValueChange={(value) => handleInputChange('deal_status', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="quote">{t('quote')}</SelectItem>
-                    <SelectItem value="completed">{t('completedSale')}</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label htmlFor="payment_type">{t('paymentType')}</Label>
-                <Select value={formData.payment_type} onValueChange={(value) => handleInputChange('payment_type', value)}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="cash">{t('cash')}</SelectItem>
-                    <SelectItem value="financing">{t('financing')}</SelectItem>
-                    <SelectItem value="bhph">{t('bhph')}</SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Informações Comerciais</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="responsible_seller_id">{t('responsibleSeller')}</Label>
+                  <Select value={formData.responsible_seller_id} onValueChange={(value) => handleInputChange('responsible_seller_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectSeller')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {sellers.map((seller) => (
+                        <SelectItem key={seller.id} value={seller.id}>
+                          {seller.first_name} {seller.last_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="interested_vehicle_id">{t('interestedVehicle')}</Label>
+                  <Select value={formData.interested_vehicle_id} onValueChange={(value) => handleInputChange('interested_vehicle_id', value)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('selectVehicle')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {vehicles.map((vehicle) => (
+                        <SelectItem key={vehicle.id} value={vehicle.id}>
+                          {vehicle.year} {vehicle.name} {vehicle.model} - R$ {vehicle.sale_price?.toLocaleString()}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="deal_status">{t('dealStatus')}</Label>
+                  <Select value={formData.deal_status} onValueChange={(value) => handleInputChange('deal_status', value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="quote">{t('quote')}</SelectItem>
+                      <SelectItem value="completed">{t('completedSale')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="payment_type">{t('paymentType')}</Label>
+                  <Select value={formData.payment_type} onValueChange={(value) => handleInputChange('payment_type', value)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="cash">{t('cash')}</SelectItem>
+                      <SelectItem value="financing">{t('financing')}</SelectItem>
+                      <SelectItem value="bhph">{t('bhph')}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
