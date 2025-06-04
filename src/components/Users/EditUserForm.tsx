@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -11,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { User, Mail, Phone, DollarSign } from 'lucide-react';
+import { Facebook } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 const editUserSchema = z.object({
@@ -18,6 +18,7 @@ const editUserSchema = z.object({
   lastName: z.string().min(2, 'Sobrenome deve ter pelo menos 2 caracteres'),
   email: z.string().email('E-mail inválido'),
   phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
+  facebook: z.string().url('URL do Facebook inválida').optional().or(z.literal('')),
   role: z.enum(['admin', 'seller']),
   commissionClientReferral: z.number().min(0, 'Valor deve ser positivo'),
   commissionClientBrought: z.number().min(0, 'Valor deve ser positivo'),
@@ -43,6 +44,7 @@ const EditUserForm = ({ user, onSubmit, isLoading = false }: EditUserFormProps) 
       lastName: user.lastName || '',
       email: user.email || '',
       phone: user.phone || '',
+      facebook: user.facebook || '',
       role: user.role || 'seller',
       commissionClientReferral: user.commissionClientReferral || 0,
       commissionClientBrought: user.commissionClientBrought || 0,
@@ -142,6 +144,27 @@ const EditUserForm = ({ user, onSubmit, isLoading = false }: EditUserFormProps) 
                       <Input
                         {...field}
                         placeholder="+55 11 99999-9999"
+                        className="pl-10"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="facebook"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Facebook (Opcional)</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Facebook className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        {...field}
+                        placeholder="https://facebook.com/seuusuario"
                         className="pl-10"
                       />
                     </div>

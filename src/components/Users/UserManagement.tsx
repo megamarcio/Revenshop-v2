@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, User, Shield, DollarSign } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Shield, DollarSign, ExternalLink } from 'lucide-react';
+import { Facebook } from 'lucide-react';
 import UserForm from './UserForm';
 import EditUserForm from './EditUserForm';
 
@@ -17,6 +18,7 @@ interface User {
   lastName: string;
   email: string;
   phone: string;
+  facebook?: string;
   role: 'admin' | 'seller';
   createdAt: string;
   photo?: string;
@@ -46,6 +48,7 @@ const mockUsers: User[] = [
     lastName: 'Silva',
     email: 'joao@revenshop.com',
     phone: '+55 11 88888-8888',
+    facebook: 'https://facebook.com/joaosilva',
     role: 'seller',
     createdAt: '2024-01-02',
     photo: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=face',
@@ -59,6 +62,7 @@ const mockUsers: User[] = [
     lastName: 'Santos',
     email: 'maria@revenshop.com',
     phone: '+55 11 77777-7777',
+    facebook: 'https://facebook.com/mariasantos',
     role: 'seller',
     createdAt: '2024-01-03',
     photo: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=face',
@@ -88,6 +92,7 @@ const UserManagement = () => {
         lastName: userData.lastName,
         email: userData.email,
         phone: userData.phone,
+        facebook: userData.facebook || '',
         role: userData.role,
         photo: userData.photo || '',
         createdAt: new Date().toISOString().split('T')[0],
@@ -225,6 +230,20 @@ const UserManagement = () => {
                     </h3>
                     <p className="text-gray-600">{user.email}</p>
                     <p className="text-sm text-gray-500">{user.phone}</p>
+                    {user.facebook && (
+                      <div className="flex items-center mt-1">
+                        <Facebook className="h-3 w-3 mr-1 text-blue-600" />
+                        <a 
+                          href={user.facebook} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 hover:underline flex items-center"
+                        >
+                          Facebook
+                          <ExternalLink className="h-3 w-3 ml-1" />
+                        </a>
+                      </div>
+                    )}
                     <div className="flex items-center mt-1">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         user.role === 'admin'

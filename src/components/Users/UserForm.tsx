@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -13,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { toast } from '@/hooks/use-toast';
 import { User, Mail, Phone, Lock, Eye, EyeOff } from 'lucide-react';
+import { Facebook } from 'lucide-react';
 import ImageUpload from '@/components/ui/image-upload';
 
 const userSchema = z.object({
@@ -20,6 +20,7 @@ const userSchema = z.object({
   lastName: z.string().min(2, 'Sobrenome deve ter pelo menos 2 caracteres'),
   email: z.string().email('E-mail inválido'),
   phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
+  facebook: z.string().url('URL do Facebook inválida').optional().or(z.literal('')),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   confirmPassword: z.string().min(6, 'Confirmação de senha obrigatória'),
   role: z.enum(['admin', 'seller']),
@@ -49,6 +50,7 @@ const UserForm = ({ onSubmit, isLoading = false }: UserFormProps) => {
       lastName: '',
       email: '',
       phone: '',
+      facebook: '',
       password: '',
       confirmPassword: '',
       role: 'seller',
@@ -168,6 +170,27 @@ const UserForm = ({ onSubmit, isLoading = false }: UserFormProps) => {
                       <Input
                         {...field}
                         placeholder="+55 11 99999-9999"
+                        className="pl-10"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="facebook"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Facebook (Opcional)</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Facebook className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        {...field}
+                        placeholder="https://facebook.com/seuusuario"
                         className="pl-10"
                       />
                     </div>
