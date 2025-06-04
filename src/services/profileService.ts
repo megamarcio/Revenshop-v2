@@ -13,7 +13,7 @@ export const fetchUserProfile = async (userId: string): Promise<User | null> => 
       .single();
 
     if (error) {
-      console.error('Supabase error fetching user profile:', error);
+      console.error('Error fetching user profile:', error);
       return null;
     }
     

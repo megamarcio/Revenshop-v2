@@ -32,34 +32,20 @@ export const useAuth = () => {
   useEffect(() => {
     console.log('Setting up auth state listener');
     let mounted = true;
-    let isProcessing = false;
 
     const handleAuthChange = async (event: string, session: any) => {
       console.log('Auth state changed:', event, session?.user?.id);
       
-      if (!mounted || isProcessing) return;
+      if (!mounted) return;
       
       if (event === 'SIGNED_IN' && session?.user) {
-        isProcessing = true;
-        try {
-          console.log('User signed in, fetching profile:', session.user.id);
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile && mounted) {
-            console.log('Profile loaded successfully:', profile);
-            setUser(profile);
-          } else if (mounted) {
-            console.log('No profile found, user not authenticated');
-            setUser(null);
-          }
-        } catch (error) {
-          console.error('Error fetching profile after sign in:', error);
-          if (mounted) setUser(null);
-        } finally {
-          if (mounted) {
-            setLoading(false);
-            isProcessing = false;
-          }
+        console.log('User signed in, fetching profile:', session.user.id);
+        const profile = await fetchUserProfile(session.user.id);
+        if (profile && mounted) {
+          console.log('Profile loaded successfully:', profile);
+          setUser(profile);
         }
+        if (mounted) setLoading(false);
       } else if (event === 'SIGNED_OUT') {
         if (mounted) {
           console.log('User signed out');
@@ -71,10 +57,8 @@ export const useAuth = () => {
 
     const { data: { subscription } } = onAuthStateChange(handleAuthChange);
 
-    // Check initial session only once
+    // Check initial session
     const checkInitialSession = async () => {
-      if (isProcessing) return;
-      
       try {
         console.log('Checking initial session...');
         const { data: { session }, error } = await getSession();
@@ -86,31 +70,17 @@ export const useAuth = () => {
         }
         
         if (session?.user && mounted) {
-          isProcessing = true;
           console.log('Initial session found, fetching profile:', session.user.id);
-          try {
-            const profile = await fetchUserProfile(session.user.id);
-            if (profile && mounted) {
-              console.log('Initial profile loaded:', profile);
-              setUser(profile);
-            } else if (mounted) {
-              console.log('No initial profile found');
-              setUser(null);
-            }
-          } catch (error) {
-            console.error('Error fetching initial profile:', error);
-            if (mounted) setUser(null);
-          } finally {
-            if (mounted) {
-              setLoading(false);
-              isProcessing = false;
-            }
+          const profile = await fetchUserProfile(session.user.id);
+          if (profile && mounted) {
+            console.log('Initial profile loaded:', profile);
+            setUser(profile);
           }
-        } else {
-          if (mounted) {
-            console.log('No initial session found');
-            setLoading(false);
-          }
+        }
+        
+        if (mounted) {
+          console.log('Initial check complete');
+          setLoading(false);
         }
       } catch (error) {
         console.error('Error in checkInitialSession:', error);
