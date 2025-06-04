@@ -4,7 +4,7 @@ import { fetchUserProfile } from '@/services/profileService';
 import { signIn as authSignIn, signUp as authSignUp, signOut as authSignOut, onAuthStateChange, getSession } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 
-export { User } from '@/types/auth';
+export type { User } from '@/types/auth';
 
 export const useAuth = () => {
   const [user, setUser] = useState<User | null>(null);
