@@ -8,7 +8,7 @@ export interface DashboardStats {
   vehiclesSold: number;
   totalRevenue: number;
   totalProfit: number;
-  averageProfit: number;
+  totalSellers: number;
   loading: boolean;
 }
 
@@ -19,25 +19,44 @@ export const useDashboardStats = () => {
     vehiclesSold: 0,
     totalRevenue: 0,
     totalProfit: 0,
-    averageProfit: 0,
+    totalSellers: 0,
     loading: true,
   });
 
   const fetchStats = async () => {
     try {
+      console.log('Fetching dashboard stats...');
+      
       // Fetch vehicles data
       const { data: vehicles, error: vehiclesError } = await supabase
         .from('vehicles')
         .select('category, purchase_price, sale_price');
 
-      if (vehiclesError) throw vehiclesError;
+      if (vehiclesError) {
+        console.error('Error fetching vehicles:', vehiclesError);
+        throw vehiclesError;
+      }
 
       // Fetch sales data
       const { data: sales, error: salesError } = await supabase
         .from('sales')
         .select('final_sale_price');
 
-      if (salesError) throw salesError;
+      if (salesError) {
+        console.error('Error fetching sales:', salesError);
+        throw salesError;
+      }
+
+      // Fetch sellers count
+      const { data: sellers, error: sellersError } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'seller');
+
+      if (sellersError) {
+        console.error('Error fetching sellers:', sellersError);
+        throw sellersError;
+      }
 
       const totalVehicles = vehicles?.length || 0;
       const vehiclesForSale = vehicles?.filter(v => v.category === 'forSale').length || 0;
@@ -50,7 +69,16 @@ export const useDashboardStats = () => {
         return sum + (vehicle.sale_price - vehicle.purchase_price);
       }, 0);
       
-      const averageProfit = vehiclesSold > 0 ? totalProfit / vehiclesSold : 0;
+      const totalSellers = sellers?.length || 0;
+
+      console.log('Dashboard stats calculated:', {
+        totalVehicles,
+        vehiclesForSale,
+        vehiclesSold,
+        totalRevenue,
+        totalProfit,
+        totalSellers
+      });
 
       setStats({
         totalVehicles,
@@ -58,7 +86,7 @@ export const useDashboardStats = () => {
         vehiclesSold,
         totalRevenue,
         totalProfit,
-        averageProfit,
+        totalSellers,
         loading: false,
       });
     } catch (error) {
