@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -182,7 +181,7 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
                   placeholder="https://..."
                 />
                 {errors.car_link && (
-                  <p className="text-red-500 text-sm">{errors.car_link.message}</p>
+                  <p className="text-red-500 text-sm">{String(errors.car_link.message)}</p>
                 )}
               </div>
 
@@ -203,7 +202,7 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
                   placeholder="Ex: Honda Civic EX"
                 />
                 {errors.car_name && (
-                  <p className="text-red-500 text-sm">{errors.car_name.message}</p>
+                  <p className="text-red-500 text-sm">{String(errors.car_name.message)}</p>
                 )}
               </div>
 
@@ -216,7 +215,7 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
                   placeholder="2020"
                 />
                 {errors.car_year && (
-                  <p className="text-red-500 text-sm">{errors.car_year.message}</p>
+                  <p className="text-red-500 text-sm">{String(errors.car_year.message)}</p>
                 )}
               </div>
 
