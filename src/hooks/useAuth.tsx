@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { User } from '@/types/auth';
 import { fetchUserProfile } from '@/services/profileService';
@@ -27,6 +28,23 @@ export const useAuth = () => {
     return result;
   };
 
+  // Helper function to create user from auth session when profile fetch fails
+  const createUserFromAuthSession = (authUser: any): User => {
+    return {
+      id: authUser.id,
+      first_name: authUser.user_metadata?.first_name || authUser.raw_user_meta_data?.first_name || 'User',
+      last_name: authUser.user_metadata?.last_name || authUser.raw_user_meta_data?.last_name || '',
+      email: authUser.email,
+      phone: authUser.phone || '',
+      role: 'seller', // Default role when we can't fetch from profiles
+      photo: authUser.user_metadata?.avatar_url || '',
+      facebook: '',
+      commission_client_referral: 0,
+      commission_client_brought: 0,
+      commission_full_sale: 0,
+    };
+  };
+
   useEffect(() => {
     console.log('Setting up auth state listener');
     let mounted = true;
@@ -42,10 +60,27 @@ export const useAuth = () => {
           // Use setTimeout to prevent potential deadlocks with Supabase auth
           setTimeout(async () => {
             if (!mounted) return;
-            const profile = await fetchUserProfile(session.user.id);
-            if (profile && mounted) {
-              console.log('Setting user in onAuthStateChange:', profile);
-              setUser(profile);
+            
+            try {
+              const profile = await fetchUserProfile(session.user.id);
+              if (profile && mounted) {
+                console.log('Setting user from profile:', profile);
+                setUser(profile);
+              } else if (mounted) {
+                // If we can't fetch profile, create user from auth session
+                console.log('Profile fetch failed, creating user from auth session');
+                const fallbackUser = createUserFromAuthSession(session.user);
+                setUser(fallbackUser);
+              }
+            } catch (error) {
+              console.error('Error fetching profile, using fallback user:', error);
+              if (mounted) {
+                const fallbackUser = createUserFromAuthSession(session.user);
+                setUser(fallbackUser);
+              }
+            }
+            
+            if (mounted) {
               setLoading(false);
             }
           }, 0);
@@ -72,10 +107,22 @@ export const useAuth = () => {
         console.log('Initial session check:', session?.user?.id);
         
         if (session?.user && mounted) {
-          const profile = await fetchUserProfile(session.user.id);
-          if (profile && mounted) {
-            console.log('Setting initial user from session:', profile);
-            setUser(profile);
+          try {
+            const profile = await fetchUserProfile(session.user.id);
+            if (profile && mounted) {
+              console.log('Setting initial user from profile:', profile);
+              setUser(profile);
+            } else if (mounted) {
+              console.log('Initial profile fetch failed, using fallback user');
+              const fallbackUser = createUserFromAuthSession(session.user);
+              setUser(fallbackUser);
+            }
+          } catch (error) {
+            console.error('Error in initial profile fetch, using fallback user:', error);
+            if (mounted) {
+              const fallbackUser = createUserFromAuthSession(session.user);
+              setUser(fallbackUser);
+            }
           }
         }
         
