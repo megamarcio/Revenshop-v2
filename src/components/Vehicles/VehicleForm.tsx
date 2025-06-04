@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -55,6 +56,25 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   // Determinar se é edição (tem ID válido) ou criação/duplicação (sem ID)
   const isEditing = editingVehicle && editingVehicle.id;
   
+  // Construir titleInfo a partir dos campos do banco
+  const buildTitleInfo = (vehicle: any) => {
+    if (!vehicle) return '';
+    
+    const parts = [];
+    
+    // Adicionar tipo do título
+    if (vehicle.title_type) {
+      parts.push(vehicle.title_type);
+    }
+    
+    // Adicionar status do título
+    if (vehicle.title_status) {
+      parts.push(vehicle.title_status);
+    }
+    
+    return parts.join('-');
+  };
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
@@ -64,7 +84,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
-    titleInfo: editingVehicle?.titleInfo || '',
+    titleInfo: editingVehicle?.titleInfo || buildTitleInfo(editingVehicle),
     purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '',
     salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '',
     minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
@@ -115,30 +135,30 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
   const validateForm = () => {
     const newErrors: Partial<VehicleFormData> = {};
 
-    if (!formData.name.trim()) newErrors.name = 'Nome é obrigatório';
-    if (!formData.vin.trim()) newErrors.vin = 'VIN é obrigatório';
-    if (!formData.year.trim()) newErrors.year = 'Ano é obrigatório';
-    if (!formData.model.trim()) newErrors.model = 'Modelo é obrigatório';
-    if (!formData.plate.trim()) newErrors.plate = 'Milhas são obrigatórias';
-    if (!formData.internalCode.trim()) newErrors.internalCode = 'Código interno é obrigatório';
-    if (!formData.color.trim()) newErrors.color = 'Cor é obrigatória';
-    if (!formData.purchasePrice.trim()) newErrors.purchasePrice = 'Valor de compra é obrigatório';
-    if (!formData.salePrice.trim()) newErrors.salePrice = 'Valor de venda é obrigatório';
+    if (!formData.name.trim()) newErrors.name = t('nameRequired') || 'Nome é obrigatório';
+    if (!formData.vin.trim()) newErrors.vin = t('vinRequired') || 'VIN é obrigatório';
+    if (!formData.year.trim()) newErrors.year = t('yearRequired') || 'Ano é obrigatório';
+    if (!formData.model.trim()) newErrors.model = t('modelRequired') || 'Modelo é obrigatório';
+    if (!formData.plate.trim()) newErrors.plate = t('milesRequired') || 'Milhas são obrigatórias';
+    if (!formData.internalCode.trim()) newErrors.internalCode = t('internalCodeRequired') || 'Código interno é obrigatório';
+    if (!formData.color.trim()) newErrors.color = t('colorRequired') || 'Cor é obrigatória';
+    if (!formData.purchasePrice.trim()) newErrors.purchasePrice = t('purchasePriceRequired') || 'Valor de compra é obrigatório';
+    if (!formData.salePrice.trim()) newErrors.salePrice = t('salePriceRequired') || 'Valor de venda é obrigatório';
 
     const miles = parseInt(formData.plate);
     if (isNaN(miles) || miles < 0 || miles > 500000) {
-      newErrors.plate = 'Milhas devem estar entre 0 e 500,000';
+      newErrors.plate = t('milesValidation') || 'Milhas devem estar entre 0 e 500,000';
     }
 
     const caNote = parseInt(formData.caNote);
     if (isNaN(caNote) || caNote < 0 || caNote > 50 || caNote % 5 !== 0) {
-      newErrors.caNote = 'Nota CA deve ser múltiplo de 5 entre 0 e 50';
+      newErrors.caNote = t('caNoteValidation') || 'Nota CA deve ser múltiplo de 5 entre 0 e 50';
     }
 
     if (formData.category === 'sold') {
-      if (!formData.customerName?.trim()) newErrors.customerName = 'Nome do cliente é obrigatório';
-      if (!formData.customerPhone?.trim()) newErrors.customerPhone = 'Telefone do cliente é obrigatório';
-      if (!formData.saleDate?.trim()) newErrors.saleDate = 'Data da venda é obrigatória';
+      if (!formData.customerName?.trim()) newErrors.customerName = t('customerNameRequired') || 'Nome do cliente é obrigatório';
+      if (!formData.customerPhone?.trim()) newErrors.customerPhone = t('customerPhoneRequired') || 'Telefone do cliente é obrigatório';
+      if (!formData.saleDate?.trim()) newErrors.saleDate = t('saleDateRequired') || 'Data da venda é obrigatória';
     }
 
     setErrors(newErrors);
@@ -175,9 +195,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     let titleInfo = 'Clean Title';
     if (formData.titleInfo) {
       const parts = formData.titleInfo.split('-');
-      if (parts.length >= 3) {
+      if (parts.length >= 2) {
         const titleType = parts[0] === 'clean-title' ? 'Clean Title' : 'Rebuilt';
-        const status = parts.slice(-2).join(' ');
+        const status = parts.slice(1).join('-');
         const statusFormatted = status === 'em-maos' ? 'In Hands' : 
                                status === 'em-transito' ? 'In Transit' : status;
         titleInfo = `${titleType} - ${statusFormatted}`;
@@ -220,8 +240,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
 
     setFormData(prev => ({ ...prev, description }));
     toast({
-      title: 'Sucesso',
-      description: 'Descrição gerada automaticamente!',
+      title: t('success'),
+      description: t('descriptionGenerated') || 'Descrição gerada automaticamente!',
     });
   };
 
@@ -230,8 +250,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     
     if (!validateForm()) {
       toast({
-        title: 'Erro',
-        description: 'Por favor, corrija os campos obrigatórios.',
+        title: t('error'),
+        description: t('fixRequiredFields') || 'Por favor, corrija os campos obrigatórios.',
         variant: 'destructive',
       });
       return;
@@ -240,7 +260,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
     // Validar número de fotos para evitar timeouts
     if (photos.length > 8) {
       const confirmed = window.confirm(
-        `Você está tentando salvar ${photos.length} fotos. Isso pode tornar o processo mais lento. Deseja continuar?`
+        t('photoWarning') || `Você está tentando salvar ${photos.length} fotos. Isso pode tornar o processo mais lento. Deseja continuar?`
       );
       if (!confirmed) return;
     }
@@ -260,26 +280,29 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         photos: photos,
         video: video || undefined,
+        // Garantir que titleInfo seja incluída
+        titleInfo: formData.titleInfo,
         // Não incluir ID para duplicações (quando isEditing é false)
         ...(isEditing && { id: editingVehicle.id })
       };
 
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
       console.log('VehicleForm - operation type:', isEditing ? 'update' : 'create');
+      console.log('VehicleForm - titleInfo being sent:', vehicleData.titleInfo);
 
       // Mostrar loading com timeout estimado baseado no número de fotos
       const estimatedTime = Math.max(5, photos.length * 2);
       if (photos.length > 5) {
         toast({
-          title: 'Processando...',
-          description: `Salvando ${photos.length} fotos. Isso pode levar até ${estimatedTime} segundos.`,
+          title: t('processing') || 'Processando...',
+          description: t('savingPhotos') || `Salvando ${photos.length} fotos. Isso pode levar até ${estimatedTime} segundos.`,
         });
       }
 
       await onSave(vehicleData);
       toast({
-        title: 'Sucesso',
-        description: `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`,
+        title: t('success'),
+        description: t('vehicleSaved') || `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`,
       });
       onClose();
     } catch (error) {
@@ -296,7 +319,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center space-x-2">
             <Car className="h-6 w-6 text-revenshop-primary" />
-            <CardTitle>{isEditing ? 'Editar Veículo' : 'Adicionar Veículo'}</CardTitle>
+            <CardTitle>{isEditing ? t('editVehicle') : t('addVehicle')}</CardTitle>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
             <X className="h-4 w-4" />
@@ -339,21 +362,21 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
 
             <div className="flex justify-end space-x-4 pt-6 border-t">
               <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                Cancelar
+                {t('cancel')}
               </Button>
               <Button type="submit" disabled={isLoading}>
                 <Save className="h-4 w-4 mr-2" />
                 {isLoading ? 
-                  `${isEditing ? 'Atualizando' : 'Salvando'}...` : 
-                  isEditing ? 'Atualizar' : 'Salvar'
+                  `${isEditing ? t('updating') : t('saving')}...` : 
+                  isEditing ? t('update') : t('save')
                 }
               </Button>
             </div>
             
             {isLoading && photos.length > 5 && (
               <div className="text-center text-sm text-gray-600">
-                <p>Processando {photos.length} fotos... Isso pode levar alguns minutos.</p>
-                <p>Por favor, não feche esta janela.</p>
+                <p>{t('processingPhotos') || `Processando ${photos.length} fotos... Isso pode levar alguns minutos.`}</p>
+                <p>{t('dontCloseWindow') || 'Por favor, não feche esta janela.'}</p>
               </div>
             )}
           </form>
