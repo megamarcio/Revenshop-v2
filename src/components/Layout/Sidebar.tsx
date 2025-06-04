@@ -22,7 +22,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { isAdmin } = useAuth();
 
   const menuItems = [
-    { id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard },
+    ...(isAdmin ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
     { id: 'vehicles', label: t('vehicles'), icon: Car },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
     ...(isAdmin ? [{ id: 'users', label: t('users'), icon: Users }] : []),
