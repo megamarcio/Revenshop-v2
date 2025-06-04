@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserCheck, DollarSign } from 'lucide-react';
+import { UserCheck, DollarSign, UserPlus } from 'lucide-react';
 
 interface SaleInfoFormProps {
   formData: {
@@ -26,9 +26,10 @@ interface SaleInfoFormProps {
   };
   errors: Record<string, string>;
   onInputChange: (field: string, value: string) => void;
+  onNavigateToCustomers?: () => void;
 }
 
-const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) => {
+const SaleInfoForm = ({ formData, errors, onInputChange, onNavigateToCustomers }: SaleInfoFormProps) => {
   const renderPaymentDetails = () => {
     switch (formData.paymentMethod) {
       case 'financing':
@@ -102,9 +103,23 @@ const SaleInfoForm = ({ formData, errors, onInputChange }: SaleInfoFormProps) =>
                 <DollarSign className="h-5 w-5" />
                 Informações da Venda
               </CardTitle>
-              <p className="text-sm text-green-600">
-                Os dados do cliente serão automaticamente salvos no sistema de clientes
-              </p>
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-green-600">
+                  Para registrar a venda, primeiro cadastre o cliente
+                </p>
+                {onNavigateToCustomers && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={onNavigateToCustomers}
+                    className="border-green-300 text-green-700 hover:bg-green-50"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Cadastrar Cliente
+                  </Button>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">

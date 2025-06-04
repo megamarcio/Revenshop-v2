@@ -19,10 +19,15 @@ interface Customer {
   payment_type: string;
 }
 
-const CustomerManagement = () => {
+interface CustomerManagementProps {
+  showAddForm?: boolean;
+  onBackToVehicles?: () => void;
+}
+
+const CustomerManagement = ({ showAddForm = false, onBackToVehicles }: CustomerManagementProps) => {
   const { t } = useLanguage();
   const { canEditVehicles } = useAuth();
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(showAddForm);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
@@ -35,6 +40,9 @@ const CustomerManagement = () => {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingCustomer(null);
+    if (onBackToVehicles) {
+      onBackToVehicles();
+    }
   };
 
   if (showQuoteGenerator && selectedCustomer) {
@@ -70,15 +78,25 @@ const CustomerManagement = () => {
               </CardTitle>
               <p className="text-gray-600">{t('managingCustomers')}</p>
             </div>
-            {canEditVehicles && (
-              <Button 
-                onClick={handleAddCustomer}
-                className="bg-revenshop-primary hover:bg-revenshop-primary/90"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {t('addCustomer')}
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {onBackToVehicles && (
+                <Button 
+                  variant="outline"
+                  onClick={onBackToVehicles}
+                >
+                  Voltar aos Veículos
+                </Button>
+              )}
+              {canEditVehicles && (
+                <Button 
+                  onClick={handleAddCustomer}
+                  className="bg-revenshop-primary hover:bg-revenshop-primary/90"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  {t('addCustomer')}
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>

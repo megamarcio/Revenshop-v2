@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -46,9 +45,10 @@ interface VehicleFormProps {
   onClose: () => void;
   onSave: (vehicle: any) => void;
   editingVehicle?: any;
+  onNavigateToCustomers?: () => void;
 }
 
-const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
+const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }: VehicleFormProps) => {
   const { t } = useLanguage();
   
   console.log('VehicleForm - editingVehicle received:', editingVehicle);
@@ -158,13 +158,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
       newErrors.caNote = t('caNoteValidation') || 'Nota CA deve ser múltiplo de 5 entre 0 e 50';
     }
 
-    // Validações específicas para veículos vendidos
-    if (formData.category === 'sold') {
-      if (!formData.customerName?.trim()) newErrors.customerName = t('customerNameRequired') || 'Nome do cliente é obrigatório';
-      if (!formData.customerPhone?.trim()) newErrors.customerPhone = t('customerPhoneRequired') || 'Telefone do cliente é obrigatório';
-      if (!formData.saleDate?.trim()) newErrors.saleDate = t('saleDateRequired') || 'Data da venda é obrigatória';
-      if (!formData.finalSalePrice?.trim()) newErrors.finalSalePrice = 'Valor final de venda é obrigatório';
-    }
+    // Para veículos vendidos, não validamos mais os dados do cliente aqui
+    // O usuário precisa cadastrar o cliente separadamente
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -301,19 +296,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
         });
       }
 
-      // Mostrar aviso especial para vendas
-      if (vehicleData.category === 'sold') {
-        toast({
-          title: 'Processando Venda',
-          description: 'Criando cliente e registrando venda...',
-        });
-      }
-
       await onSave(vehicleData);
       
-      const successMessage = vehicleData.category === 'sold' ? 
-        `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} e venda registrada com sucesso!` :
-        `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`;
+      const successMessage = `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`;
         
       toast({
         title: t('success'),
@@ -360,6 +345,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle }: VehicleFormProps) => {
               formData={formData}
               errors={errors}
               onInputChange={handleInputChange}
+              onNavigateToCustomers={onNavigateToCustomers}
             />
 
             <MediaUploadForm

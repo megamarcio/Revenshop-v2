@@ -1,7 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useCustomers } from './useCustomers';
 
 export interface Vehicle {
   id: string;
@@ -33,7 +33,6 @@ export interface Vehicle {
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
-  const { createCustomer, createSaleRecord } = useCustomers();
 
   const fetchVehicles = async () => {
     try {
@@ -106,11 +105,6 @@ export const useVehicles = () => {
       }
       
       console.log('Vehicle created successfully:', data);
-
-      // Se o veículo está sendo criado como vendido, criar cliente e venda
-      if (vehicleData.category === 'sold' && vehicleData.customerName && vehicleData.customerPhone) {
-        await handleVehicleSale(data.id, vehicleData);
-      }
 
       setVehicles(prev => [data, ...prev]);
       toast({
@@ -215,11 +209,6 @@ export const useVehicles = () => {
       
       console.log('Vehicle updated successfully:', data);
 
-      // Verificar se o status mudou para vendido e criar cliente/venda
-      if (vehicleData.category === 'sold' && vehicleData.customerName && vehicleData.customerPhone) {
-        await handleVehicleSale(id, vehicleData);
-      }
-
       setVehicles(prev => prev.map(v => v.id === id ? data : v));
       toast({
         title: 'Sucesso',
@@ -242,77 +231,6 @@ export const useVehicles = () => {
         variant: 'destructive',
       });
       throw error;
-    }
-  };
-
-  const handleVehicleSale = async (vehicleId: string, saleData: any) => {
-    try {
-      console.log('Processing vehicle sale for vehicle:', vehicleId);
-      
-      // Verificar se o cliente já existe pelo telefone
-      const { data: existingCustomer } = await supabase
-        .from('bhph_customers')
-        .select('*')
-        .eq('phone', saleData.customerPhone)
-        .single();
-
-      let customerId = existingCustomer?.id;
-
-      // Se o cliente não existe, criar um novo
-      if (!existingCustomer) {
-        console.log('Creating new customer for sale');
-        const newCustomer = await createCustomer({
-          name: saleData.customerName,
-          phone: saleData.customerPhone,
-          email: saleData.customerEmail || undefined,
-          address: saleData.customerAddress || undefined,
-        });
-        customerId = newCustomer.id;
-        toast({
-          title: 'Cliente Criado',
-          description: `Cliente ${saleData.customerName} foi criado automaticamente.`,
-        });
-      } else {
-        console.log('Using existing customer:', existingCustomer.name);
-        toast({
-          title: 'Cliente Existente',
-          description: `Venda vinculada ao cliente existente: ${existingCustomer.name}`,
-        });
-      }
-
-      // Criar registro de venda
-      if (customerId && saleData.saleDate && saleData.finalSalePrice) {
-        const currentUser = await supabase.auth.getUser();
-        
-        await createSaleRecord({
-          customer_id: customerId,
-          vehicle_id: vehicleId,
-          seller_id: currentUser.data.user?.id || null,
-          final_sale_price: parseFloat(saleData.finalSalePrice),
-          sale_date: saleData.saleDate,
-          customer_name: saleData.customerName,
-          customer_phone: saleData.customerPhone,
-          payment_method: saleData.paymentMethod || null,
-          financing_company: saleData.financingCompany || null,
-          check_details: saleData.checkDetails || null,
-          other_payment_details: saleData.otherPaymentDetails || null,
-          seller_commission: saleData.sellerCommission ? parseFloat(saleData.sellerCommission) : null,
-          sale_notes: saleData.saleNotes || null,
-        });
-
-        toast({
-          title: 'Venda Registrada',
-          description: 'Registro de venda criado com sucesso!',
-        });
-      }
-
-    } catch (error) {
-      console.error('Error handling vehicle sale:', error);
-      toast({
-        title: 'Erro na Venda',
-        description: 'Erro ao processar dados da venda. Verifique os detalhes.',
-        variant: 'destructive',
-      });
     }
   };
 

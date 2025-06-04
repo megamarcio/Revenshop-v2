@@ -86,7 +86,7 @@ export const useCustomers = () => {
     sale_date: string;
     customer_name: string;
     customer_phone: string;
-    payment_method?: string;
+    payment_method?: 'cash' | 'financing' | 'bhph' | 'check' | 'other';
     financing_company?: string;
     check_details?: string;
     other_payment_details?: string;

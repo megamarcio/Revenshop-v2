@@ -17,15 +17,31 @@ import BuyHerePayHere from "../components/BHPH/BuyHerePayHere";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('vehicles');
+  const [showCustomerForm, setShowCustomerForm] = useState(false);
+
+  const handleNavigateToCustomers = () => {
+    setActiveTab('customers');
+    setShowCustomerForm(true);
+  };
+
+  const handleBackToVehicles = () => {
+    setActiveTab('vehicles');
+    setShowCustomerForm(false);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard />;
       case 'vehicles':
-        return <VehicleList />;
+        return <VehicleList onNavigateToCustomers={handleNavigateToCustomers} />;
       case 'customers':
-        return <CustomerManagement />;
+        return (
+          <CustomerManagement 
+            showAddForm={showCustomerForm}
+            onBackToVehicles={showCustomerForm ? handleBackToVehicles : undefined}
+          />
+        );
       case 'bhph':
         return <BuyHerePayHere />;
       case 'users':
@@ -35,7 +51,7 @@ const Index = () => {
       case 'profile':
         return <ProfilePage />;
       default:
-        return <VehicleList />;
+        return <VehicleList onNavigateToCustomers={handleNavigateToCustomers} />;
     }
   };
 
