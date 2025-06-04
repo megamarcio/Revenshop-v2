@@ -14,6 +14,7 @@ import UserManagement from "../components/Users/UserManagement";
 import AdminPanel from "../components/Admin/AdminPanel";
 import ProfilePage from "../components/Profile/ProfilePage";
 import BuyHerePayHere from "../components/BHPH/BuyHerePayHere";
+import AuctionManagement from "../components/Auctions/AuctionManagement";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('vehicles');
@@ -42,6 +43,8 @@ const Index = () => {
             onBackToVehicles={showCustomerForm ? handleBackToVehicles : undefined}
           />
         );
+      case 'auctions':
+        return <AuctionManagement />;
       case 'bhph':
         return <BuyHerePayHere />;
       case 'users':

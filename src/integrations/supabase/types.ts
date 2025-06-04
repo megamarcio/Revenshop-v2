@@ -9,6 +9,93 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      auctions: {
+        Row: {
+          actual_auction_fees: number | null
+          actual_freight_fee: number | null
+          auction_city: string | null
+          auction_date: string | null
+          auction_house: string
+          bid_accepted: boolean | null
+          bid_value: number | null
+          buyer_name: string | null
+          car_link: string
+          car_name: string
+          car_year: number
+          carfax_link: string | null
+          carfax_value: number | null
+          created_at: string
+          created_by: string | null
+          estimated_auction_fees: number | null
+          estimated_freight_fee: number | null
+          estimated_repair_value: number | null
+          id: string
+          max_payment_value: number | null
+          mmr_value: number | null
+          observations: string | null
+          purchase_date: string | null
+          purchase_value: number | null
+          total_vehicle_cost: number | null
+          updated_at: string
+        }
+        Insert: {
+          actual_auction_fees?: number | null
+          actual_freight_fee?: number | null
+          auction_city?: string | null
+          auction_date?: string | null
+          auction_house?: string
+          bid_accepted?: boolean | null
+          bid_value?: number | null
+          buyer_name?: string | null
+          car_link: string
+          car_name: string
+          car_year: number
+          carfax_link?: string | null
+          carfax_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          estimated_auction_fees?: number | null
+          estimated_freight_fee?: number | null
+          estimated_repair_value?: number | null
+          id?: string
+          max_payment_value?: number | null
+          mmr_value?: number | null
+          observations?: string | null
+          purchase_date?: string | null
+          purchase_value?: number | null
+          total_vehicle_cost?: number | null
+          updated_at?: string
+        }
+        Update: {
+          actual_auction_fees?: number | null
+          actual_freight_fee?: number | null
+          auction_city?: string | null
+          auction_date?: string | null
+          auction_house?: string
+          bid_accepted?: boolean | null
+          bid_value?: number | null
+          buyer_name?: string | null
+          car_link?: string
+          car_name?: string
+          car_year?: number
+          carfax_link?: string | null
+          carfax_value?: number | null
+          created_at?: string
+          created_by?: string | null
+          estimated_auction_fees?: number | null
+          estimated_freight_fee?: number | null
+          estimated_repair_value?: number | null
+          id?: string
+          max_payment_value?: number | null
+          mmr_value?: number | null
+          observations?: string | null
+          purchase_date?: string | null
+          purchase_value?: number | null
+          total_vehicle_cost?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bhph_customers: {
         Row: {
           address: string | null
