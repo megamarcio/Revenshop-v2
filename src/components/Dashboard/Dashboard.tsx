@@ -8,9 +8,9 @@ import { DollarSign, Car, ShoppingCart, Users, TrendingUp } from 'lucide-react';
 
 const Dashboard = () => {
   const { t } = useLanguage();
-  const { stats, loading } = useDashboardStats();
+  const { stats, refetch } = useDashboardStats();
 
-  if (loading) {
+  if (stats.loading) {
     return (
       <div className="p-6 space-y-6">
         {/* Welcome Section */}
