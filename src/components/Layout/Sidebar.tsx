@@ -9,7 +9,8 @@ import {
   Users, 
   Settings, 
   User,
-  CreditCard
+  CreditCard,
+  UserCheck
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -24,6 +25,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const menuItems = [
     ...(canAccessAdmin ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
     { id: 'vehicles', label: t('vehicles'), icon: Car },
+    { id: 'customers', label: t('customers'), icon: UserCheck },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
     ...(canManageUsers ? [{ id: 'users', label: t('users'), icon: Users }] : []),
     ...(canAccessAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),

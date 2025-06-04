@@ -9,6 +9,7 @@ import Header from "../components/Layout/Header";
 import Sidebar from "../components/Layout/Sidebar";
 import Dashboard from "../components/Dashboard/Dashboard";
 import VehicleList from "../components/Vehicles/VehicleList";
+import CustomerManagement from "../components/Customers/CustomerManagement";
 import UserManagement from "../components/Users/UserManagement";
 import AdminPanel from "../components/Admin/AdminPanel";
 import ProfilePage from "../components/Profile/ProfilePage";
@@ -23,6 +24,8 @@ const Index = () => {
         return <Dashboard />;
       case 'vehicles':
         return <VehicleList />;
+      case 'customers':
+        return <CustomerManagement />;
       case 'bhph':
         return <BuyHerePayHere />;
       case 'users':

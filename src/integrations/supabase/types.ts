@@ -14,39 +14,102 @@ export type Database = {
           address: string | null
           created_at: string | null
           credit_score: number | null
+          deal_status: string | null
+          document_photo: string | null
           email: string | null
           employment_info: string | null
           id: string
           income: number | null
+          interested_vehicle_id: string | null
           name: string
+          payment_details: Json | null
+          payment_type: string | null
           phone: string
+          reference1_address: string | null
+          reference1_email: string | null
+          reference1_name: string | null
+          reference1_phone: string | null
+          reference2_address: string | null
+          reference2_email: string | null
+          reference2_name: string | null
+          reference2_phone: string | null
+          responsible_seller_id: string | null
+          social_security_number: string | null
+          social_security_type: string | null
           updated_at: string | null
         }
         Insert: {
           address?: string | null
           created_at?: string | null
           credit_score?: number | null
+          deal_status?: string | null
+          document_photo?: string | null
           email?: string | null
           employment_info?: string | null
           id?: string
           income?: number | null
+          interested_vehicle_id?: string | null
           name: string
+          payment_details?: Json | null
+          payment_type?: string | null
           phone: string
+          reference1_address?: string | null
+          reference1_email?: string | null
+          reference1_name?: string | null
+          reference1_phone?: string | null
+          reference2_address?: string | null
+          reference2_email?: string | null
+          reference2_name?: string | null
+          reference2_phone?: string | null
+          responsible_seller_id?: string | null
+          social_security_number?: string | null
+          social_security_type?: string | null
           updated_at?: string | null
         }
         Update: {
           address?: string | null
           created_at?: string | null
           credit_score?: number | null
+          deal_status?: string | null
+          document_photo?: string | null
           email?: string | null
           employment_info?: string | null
           id?: string
           income?: number | null
+          interested_vehicle_id?: string | null
           name?: string
+          payment_details?: Json | null
+          payment_type?: string | null
           phone?: string
+          reference1_address?: string | null
+          reference1_email?: string | null
+          reference1_name?: string | null
+          reference1_phone?: string | null
+          reference2_address?: string | null
+          reference2_email?: string | null
+          reference2_name?: string | null
+          reference2_phone?: string | null
+          responsible_seller_id?: string | null
+          social_security_number?: string | null
+          social_security_type?: string | null
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bhph_customers_interested_vehicle_id_fkey"
+            columns: ["interested_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bhph_customers_responsible_seller_id_fkey"
+            columns: ["responsible_seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       bhph_deals: {
         Row: {
@@ -101,6 +164,70 @@ export type Database = {
           },
           {
             foreignKeyName: "bhph_deals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_deals: {
+        Row: {
+          created_at: string | null
+          customer_id: string
+          deal_details: Json | null
+          deal_type: string
+          id: string
+          payment_method: string | null
+          seller_id: string | null
+          status: string | null
+          total_amount: number | null
+          updated_at: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id: string
+          deal_details?: Json | null
+          deal_type: string
+          id?: string
+          payment_method?: string | null
+          seller_id?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string
+          deal_details?: Json | null
+          deal_type?: string
+          id?: string
+          payment_method?: string | null
+          seller_id?: string | null
+          status?: string | null
+          total_amount?: number | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_deals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "bhph_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_deals_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_deals_vehicle_id_fkey"
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
