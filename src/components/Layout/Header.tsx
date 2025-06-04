@@ -12,7 +12,7 @@ const Header = () => {
   const { user, logout } = useAuth();
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200 px-4 py-3">
+    <header className="bg-card shadow-sm border-b border-border px-4 py-3">
       <div className="flex items-center justify-between max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center space-x-3">
@@ -21,7 +21,7 @@ const Header = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-revenshop-primary">REVENSHOP</h1>
-            <p className="text-sm text-gray-600">{t('subtitle')}</p>
+            <p className="text-sm text-muted-foreground">{t('subtitle')}</p>
           </div>
         </div>
 
@@ -46,10 +46,10 @@ const Header = () => {
           {user && (
             <div className="flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-gray-900">
+                <p className="text-sm font-medium text-foreground">
                   {user.firstName} {user.lastName}
                 </p>
-                <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
               </div>
               <Button
                 variant="outline"
