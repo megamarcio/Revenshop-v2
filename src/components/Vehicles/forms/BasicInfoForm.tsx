@@ -1,8 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown } from 'lucide-react';
 
 interface BasicInfoFormProps {
   formData: {
@@ -21,6 +23,28 @@ interface BasicInfoFormProps {
 }
 
 const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) => {
+  const [titleType, setTitleType] = useState(() => {
+    if (formData.titleInfo?.includes('clean-title')) return 'clean-title';
+    if (formData.titleInfo?.includes('rebuilt')) return 'rebuilt';
+    return '';
+  });
+  
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const handleTitleTypeChange = (value: string) => {
+    setTitleType(value);
+    setIsExpanded(!!value);
+    if (!value) {
+      onInputChange('titleInfo', '');
+    }
+  };
+
+  const handleTitleStatusChange = (status: string) => {
+    if (titleType && status) {
+      onInputChange('titleInfo', `${titleType}-${status}`);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Informações Básicas</h3>
@@ -126,25 +150,47 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
       </div>
 
-      {/* Informações do Título - seção compacta */}
-      <div className="space-y-3 p-3 bg-gray-50 rounded-lg border">
-        <h4 className="text-sm font-medium text-gray-900">Informações do Título</h4>
-        <div className="space-y-2">
-          <Label htmlFor="titleInfo" className="text-sm">Status do Título</Label>
-          <Select value={formData.titleInfo || ''} onValueChange={(value) => onInputChange('titleInfo', value)}>
-            <SelectTrigger className="h-9">
-              <SelectValue placeholder="Selecione o status do título" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="clean-title">Clean Title</SelectItem>
-              <SelectItem value="rebuilt">Rebuilt</SelectItem>
-              <SelectItem value="clean-title-em-maos">Clean Title - Em Mãos</SelectItem>
-              <SelectItem value="clean-title-em-transito">Clean Title - Em trânsito</SelectItem>
-              <SelectItem value="rebuilt-em-maos">Rebuilt - Em Mãos</SelectItem>
-              <SelectItem value="rebuilt-em-transito">Rebuilt - Em Trânsito</SelectItem>
-            </SelectContent>
-          </Select>
+      {/* Informações do Título - compacto e discreto */}
+      <div className="space-y-2">
+        <Label className="text-sm text-gray-600">Informações do Título</Label>
+        <div className="flex items-center space-x-2">
+          <ToggleGroup 
+            type="single" 
+            value={titleType} 
+            onValueChange={handleTitleTypeChange}
+            className="justify-start"
+          >
+            <ToggleGroupItem value="clean-title" className="text-xs px-3 py-1">
+              Clean Title
+            </ToggleGroupItem>
+            <ToggleGroupItem value="rebuilt" className="text-xs px-3 py-1">
+              Rebuilt
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
+
+        <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+          <CollapsibleContent className="space-y-2">
+            {titleType && (
+              <div className="ml-4">
+                <Label className="text-xs text-gray-500">Status</Label>
+                <ToggleGroup 
+                  type="single" 
+                  value={formData.titleInfo?.split('-').slice(-2).join('-') || ''}
+                  onValueChange={handleTitleStatusChange}
+                  className="justify-start"
+                >
+                  <ToggleGroupItem value="em-maos" className="text-xs px-2 py-1">
+                    Em Mãos
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="em-transito" className="text-xs px-2 py-1">
+                    Em Trânsito
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
+            )}
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );
