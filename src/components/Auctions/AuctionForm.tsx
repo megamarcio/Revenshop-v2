@@ -48,7 +48,7 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
       const formData = {
         ...data,
         bid_accepted: data.bid_accepted === 'true' || data.bid_accepted === true,
-        car_year: parseInt(data.car_year),
+        car_year: data.car_year ? parseInt(data.car_year) : null,
         carfax_value: data.carfax_value ? parseFloat(data.carfax_value) : null,
         mmr_value: data.mmr_value ? parseFloat(data.mmr_value) : null,
         estimated_repair_value: data.estimated_repair_value ? parseFloat(data.estimated_repair_value) : null,
@@ -59,7 +59,11 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
         purchase_value: data.purchase_value ? parseFloat(data.purchase_value) : null,
         actual_auction_fees: data.actual_auction_fees ? parseFloat(data.actual_auction_fees) : null,
         actual_freight_fee: data.actual_freight_fee ? parseFloat(data.actual_freight_fee) : null,
+        auction_date: data.auction_date || null,
+        purchase_date: data.purchase_date || null,
       };
+
+      console.log('Saving auction data:', formData);
 
       if (auction) {
         const { data: result, error } = await supabase
@@ -68,15 +72,22 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
           .eq('id', auction.id)
           .select()
           .single();
-        if (error) throw error;
+        if (error) {
+          console.error('Error updating auction:', error);
+          throw error;
+        }
         return result;
       } else {
+        const { data: user } = await supabase.auth.getUser();
         const { data: result, error } = await supabase
           .from('auctions')
-          .insert([{ ...formData, created_by: (await supabase.auth.getUser()).data.user?.id }])
+          .insert([{ ...formData, created_by: user.user?.id }])
           .select()
           .single();
-        if (error) throw error;
+        if (error) {
+          console.error('Error creating auction:', error);
+          throw error;
+        }
         return result;
       }
     },
@@ -89,15 +100,17 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
       onSave();
     },
     onError: (error) => {
+      console.error('Error saving auction:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao salvar leilão. Tente novamente.',
+        description: 'Erro ao salvar leilão. Verifique os dados e tente novamente.',
         variant: 'destructive',
       });
     },
   });
 
   const onSubmit = (data: any) => {
+    console.log('Form submitted with data:', data);
     saveMutation.mutate(data);
   };
 
@@ -116,8 +129,8 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
               {watchCarfaxValue && watchMmrValue && (
                 <div className="mt-2">
                   <ProfitMarginBadge 
-                    carfaxValue={watchCarfaxValue}
-                    mmrValue={watchMmrValue}
+                    carfaxValue={parseFloat(watchCarfaxValue)}
+                    mmrValue={parseFloat(watchMmrValue)}
                   />
                 </div>
               )}
@@ -148,7 +161,10 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
             />
 
             {showBidAcceptedFields && (
-              <AuctionPurchaseForm register={register} />
+              <AuctionPurchaseForm 
+                register={register} 
+                watch={watch}
+              />
             )}
 
             <div className="space-y-2">
