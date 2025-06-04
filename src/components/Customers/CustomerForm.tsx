@@ -10,6 +10,8 @@ import { ArrowLeft, Upload } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ImageUpload from '../ui/image-upload';
+import MultipleFileUpload from '../ui/multiple-file-upload';
 
 interface Customer {
   id: string;
@@ -32,6 +34,13 @@ interface Customer {
   interested_vehicle_id?: string;
   deal_status?: string;
   payment_type?: string;
+  monthly_income?: number;
+  current_job?: string;
+  employer_name?: string;
+  employer_phone?: string;
+  employment_duration?: string;
+  payment_proof_documents?: string[];
+  bank_statements?: string[];
 }
 
 interface CustomerFormProps {
@@ -65,6 +74,13 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     interested_vehicle_id: '',
     deal_status: 'quote',
     payment_type: 'cash',
+    monthly_income: 0,
+    current_job: '',
+    employer_name: '',
+    employer_phone: '',
+    employment_duration: '',
+    payment_proof_documents: [] as string[],
+    bank_statements: [] as string[],
   });
 
   useEffect(() => {
@@ -89,6 +105,13 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
         interested_vehicle_id: customer.interested_vehicle_id || '',
         deal_status: customer.deal_status || 'quote',
         payment_type: customer.payment_type || 'cash',
+        monthly_income: customer.monthly_income || 0,
+        current_job: customer.current_job || '',
+        employer_name: customer.employer_name || '',
+        employer_phone: customer.employer_phone || '',
+        employment_duration: customer.employment_duration || '',
+        payment_proof_documents: customer.payment_proof_documents || [],
+        bank_statements: customer.bank_statements || [],
       });
     }
   }, [customer]);
@@ -165,7 +188,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     saveCustomerMutation.mutate(formData);
   };
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | number | string[]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -251,18 +274,95 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="document_photo">{t('documentPhoto')}</Label>
-                  <Button type="button" variant="outline" className="w-full">
-                    <Upload className="h-4 w-4 mr-2" />
-                    {t('uploadDocument')}
-                  </Button>
+                  <Label>Foto do Documento</Label>
+                  <ImageUpload
+                    value={formData.document_photo}
+                    onChange={(value) => handleInputChange('document_photo', value)}
+                    size="md"
+                  />
                 </div>
+              </div>
+            </div>
+
+            {/* Employment and Income Info */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Informações de Emprego e Renda</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="monthly_income">Rendimento Mensal (R$)</Label>
+                  <Input
+                    id="monthly_income"
+                    type="number"
+                    value={formData.monthly_income}
+                    onChange={(e) => handleInputChange('monthly_income', Number(e.target.value))}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="current_job">Emprego Atual</Label>
+                  <Input
+                    id="current_job"
+                    value={formData.current_job}
+                    onChange={(e) => handleInputChange('current_job', e.target.value)}
+                    placeholder="Ex: Vendedor, Motorista, etc."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="employer_name">Nome do Empregador</Label>
+                  <Input
+                    id="employer_name"
+                    value={formData.employer_name}
+                    onChange={(e) => handleInputChange('employer_name', e.target.value)}
+                    placeholder="Nome da empresa"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="employer_phone">Telefone do Empregador</Label>
+                  <Input
+                    id="employer_phone"
+                    value={formData.employer_phone}
+                    onChange={(e) => handleInputChange('employer_phone', e.target.value)}
+                    placeholder="(11) 99999-9999"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <Label htmlFor="employment_duration">Há quanto tempo trabalha no local?</Label>
+                  <Input
+                    id="employment_duration"
+                    value={formData.employment_duration}
+                    onChange={(e) => handleInputChange('employment_duration', e.target.value)}
+                    placeholder="Ex: 2 anos, 6 meses, etc."
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Document Uploads */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-lg border-b pb-2">Comprovantes e Documentos</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <MultipleFileUpload
+                  title="Comprovantes de Pagamento"
+                  description="Upload dos comprovantes de pagamento da compra"
+                  value={formData.payment_proof_documents}
+                  onChange={(value) => handleInputChange('payment_proof_documents', value)}
+                  accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                  maxFiles={5}
+                />
+                <MultipleFileUpload
+                  title="Extratos Bancários"
+                  description="Upload dos extratos bancários dos últimos 3 meses"
+                  value={formData.bank_statements}
+                  onChange={(value) => handleInputChange('bank_statements', value)}
+                  accept=".pdf,.jpg,.jpeg,.png"
+                  maxFiles={3}
+                />
               </div>
             </div>
 
             {/* References */}
             <div className="space-y-4">
-              <h3 className="font-semibold">{t('reference1')}</h3>
+              <h3 className="font-semibold text-lg border-b pb-2">{t('reference1')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="reference1_name">{t('referenceName')}</Label>
@@ -301,7 +401,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
             </div>
 
             <div className="space-y-4">
-              <h3 className="font-semibold">{t('reference2')}</h3>
+              <h3 className="font-semibold text-lg border-b pb-2">{t('reference2')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="reference2_name">{t('referenceName')}</Label>

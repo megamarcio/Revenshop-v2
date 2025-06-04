@@ -12,17 +12,24 @@ export type Database = {
       bhph_customers: {
         Row: {
           address: string | null
+          bank_statements: string[] | null
           created_at: string | null
           credit_score: number | null
+          current_job: string | null
           deal_status: string | null
           document_photo: string | null
           email: string | null
+          employer_name: string | null
+          employer_phone: string | null
+          employment_duration: string | null
           employment_info: string | null
           id: string
           income: number | null
           interested_vehicle_id: string | null
+          monthly_income: number | null
           name: string
           payment_details: Json | null
+          payment_proof_documents: string[] | null
           payment_type: string | null
           phone: string
           reference1_address: string | null
@@ -40,17 +47,24 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          bank_statements?: string[] | null
           created_at?: string | null
           credit_score?: number | null
+          current_job?: string | null
           deal_status?: string | null
           document_photo?: string | null
           email?: string | null
+          employer_name?: string | null
+          employer_phone?: string | null
+          employment_duration?: string | null
           employment_info?: string | null
           id?: string
           income?: number | null
           interested_vehicle_id?: string | null
+          monthly_income?: number | null
           name: string
           payment_details?: Json | null
+          payment_proof_documents?: string[] | null
           payment_type?: string | null
           phone: string
           reference1_address?: string | null
@@ -68,17 +82,24 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          bank_statements?: string[] | null
           created_at?: string | null
           credit_score?: number | null
+          current_job?: string | null
           deal_status?: string | null
           document_photo?: string | null
           email?: string | null
+          employer_name?: string | null
+          employer_phone?: string | null
+          employment_duration?: string | null
           employment_info?: string | null
           id?: string
           income?: number | null
           interested_vehicle_id?: string | null
+          monthly_income?: number | null
           name?: string
           payment_details?: Json | null
+          payment_proof_documents?: string[] | null
           payment_type?: string | null
           phone?: string
           reference1_address?: string | null
