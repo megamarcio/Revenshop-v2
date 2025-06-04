@@ -1,95 +1,78 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, User, Shield, DollarSign, ExternalLink } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Shield, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
 import { Facebook } from 'lucide-react';
 import UserForm from './UserForm';
 import EditUserForm from './EditUserForm';
 
-interface User {
+interface UserProfile {
   id: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
-  phone: string;
+  phone?: string;
   facebook?: string;
   role: 'admin' | 'manager' | 'seller';
-  createdAt: string;
+  created_at: string;
   photo?: string;
-  commissionClientReferral?: number;
-  commissionClientBrought?: number;
-  commissionFullSale?: number;
+  commission_client_referral?: number;
+  commission_client_brought?: number;
+  commission_full_sale?: number;
 }
-
-// Mock data para demonstração
-const mockUsers: User[] = [
-  {
-    id: '1',
-    firstName: 'Admin',
-    lastName: 'Sistema',
-    email: 'admin@revenshop.com',
-    phone: '+55 11 99999-9999',
-    role: 'admin',
-    createdAt: '2024-01-01',
-    photo: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?w=150&h=150&fit=crop&crop=face',
-    commissionClientReferral: 100,
-    commissionClientBrought: 250,
-    commissionFullSale: 500
-  },
-  {
-    id: '2',
-    firstName: 'João',
-    lastName: 'Silva',
-    email: 'joao@revenshop.com',
-    phone: '+55 11 88888-8888',
-    facebook: 'https://facebook.com/joaosilva',
-    role: 'seller',
-    createdAt: '2024-01-02',
-    photo: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=150&h=150&fit=crop&crop=face',
-    commissionClientReferral: 75,
-    commissionClientBrought: 200,
-    commissionFullSale: 400
-  },
-  {
-    id: '3',
-    firstName: 'Maria',
-    lastName: 'Santos',
-    email: 'maria@revenshop.com',
-    phone: '+55 11 77777-7777',
-    facebook: 'https://facebook.com/mariasantos',
-    role: 'manager',
-    createdAt: '2024-01-03',
-    photo: 'https://images.unsplash.com/photo-1581092795360-fd1ca04f0952?w=150&h=150&fit=crop&crop=face',
-    commissionClientReferral: 80,
-    commissionClientBrought: 220,
-    commissionFullSale: 450
-  }
-];
 
 const UserManagement = () => {
   const { t } = useLanguage();
   const { canManageUsers, user: currentUser, isAdmin } = useAuth();
-  const [users, setUsers] = useState<User[]>(mockUsers);
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const canEditUser = (user: User) => {
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast({
+        title: t('error'),
+        description: 'Erro ao carregar usuários.',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (canManageUsers) {
+      fetchUsers();
+    }
+  }, [canManageUsers]);
+
+  const canEditUser = (user: UserProfile) => {
     if (!currentUser) return false;
     
-    // Admins can edit everyone except other admins (unless it's themselves)
     if (isAdmin) {
       if (user.role === 'admin' && user.id !== currentUser.id) return false;
       return true;
     }
     
-    // Managers can edit sellers but not admins or other managers
     if (currentUser.role === 'manager') {
       return user.role === 'seller';
     }
@@ -97,18 +80,14 @@ const UserManagement = () => {
     return false;
   };
 
-  const canDeleteUser = (user: User) => {
+  const canDeleteUser = (user: UserProfile) => {
     if (!currentUser) return false;
-    
-    // Can't delete yourself
     if (user.id === currentUser.id) return false;
     
-    // Admins can delete managers and sellers
     if (isAdmin) {
       return user.role !== 'admin';
     }
     
-    // Managers can delete sellers
     if (currentUser.role === 'manager') {
       return user.role === 'seller';
     }
@@ -135,26 +114,39 @@ const UserManagement = () => {
   };
 
   const handleCreateUser = async (userData: any) => {
-    setIsLoading(true);
+    setIsSubmitting(true);
     
     try {
-      // Simular criação de usuário
-      const newUser: User = {
-        id: Date.now().toString(),
-        firstName: userData.firstName,
-        lastName: userData.lastName,
+      // First create auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
-        phone: userData.phone,
-        facebook: userData.facebook || '',
-        role: userData.role,
-        photo: userData.photo || '',
-        createdAt: new Date().toISOString().split('T')[0],
-        commissionClientReferral: 0,
-        commissionClientBrought: 0,
-        commissionFullSale: 0
-      };
+        password: userData.password || 'TempPass123!',
+        options: {
+          data: {
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+          },
+        },
+      });
 
-      setUsers(prev => [...prev, newUser]);
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Update the profile with additional data
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({
+            phone: userData.phone,
+            facebook: userData.facebook,
+            role: userData.role,
+            photo: userData.photo,
+          })
+          .eq('id', authData.user.id);
+
+        if (profileError) throw profileError;
+      }
+
+      await fetchUsers();
       setIsCreateDialogOpen(false);
 
       toast({
@@ -162,31 +154,41 @@ const UserManagement = () => {
         description: 'Usuário criado com sucesso!',
       });
     } catch (error) {
+      console.error('Error creating user:', error);
       toast({
         title: t('error'),
         description: 'Erro ao criar usuário. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleEditUser = async (userData: any) => {
     if (!editingUser) return;
     
-    setIsLoading(true);
+    setIsSubmitting(true);
     
     try {
-      const updatedUser: User = {
-        ...editingUser,
-        ...userData
-      };
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          phone: userData.phone,
+          facebook: userData.facebook,
+          role: userData.role,
+          photo: userData.photo,
+          commission_client_referral: userData.commissionClientReferral,
+          commission_client_brought: userData.commissionClientBrought,
+          commission_full_sale: userData.commissionFullSale,
+        })
+        .eq('id', editingUser.id);
 
-      setUsers(prev => prev.map(user => 
-        user.id === editingUser.id ? updatedUser : user
-      ));
-      
+      if (error) throw error;
+
+      await fetchUsers();
       setIsEditDialogOpen(false);
       setEditingUser(null);
 
@@ -195,27 +197,45 @@ const UserManagement = () => {
         description: 'Usuário atualizado com sucesso!',
       });
     } catch (error) {
+      console.error('Error updating user:', error);
       toast({
         title: t('error'),
         description: 'Erro ao atualizar usuário. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
-  const handleDeleteUser = (userId: string) => {
+  const handleDeleteUser = async (userId: string) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
-      setUsers(prev => prev.filter(user => user.id !== userId));
-      toast({
-        title: t('success'),
-        description: 'Usuário excluído com sucesso!',
-      });
+      try {
+        // Delete from profiles first (cascades to auth.users)
+        const { error } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', userId);
+
+        if (error) throw error;
+
+        await fetchUsers();
+        toast({
+          title: t('success'),
+          description: 'Usuário excluído com sucesso!',
+        });
+      } catch (error) {
+        console.error('Error deleting user:', error);
+        toast({
+          title: t('error'),
+          description: 'Erro ao excluir usuário.',
+          variant: 'destructive',
+        });
+      }
     }
   };
 
-  const openEditDialog = (user: User) => {
+  const openEditDialog = (user: UserProfile) => {
     setEditingUser(user);
     setIsEditDialogOpen(true);
   };
@@ -234,6 +254,19 @@ const UserManagement = () => {
           <CardContent className="p-6 text-center">
             <h2 className="text-xl font-semibold text-gray-600">Acesso Negado</h2>
             <p className="text-gray-500 mt-2">Você não tem permissão para acessar esta área.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
+            <p className="text-gray-600">Carregando usuários...</p>
           </CardContent>
         </Card>
       </div>
@@ -259,7 +292,7 @@ const UserManagement = () => {
             <DialogHeader>
               <DialogTitle>{t('addUser')}</DialogTitle>
             </DialogHeader>
-            <UserForm onSubmit={handleCreateUser} isLoading={isLoading} />
+            <UserForm onSubmit={handleCreateUser} isLoading={isSubmitting} />
           </DialogContent>
         </Dialog>
       </div>
@@ -271,15 +304,15 @@ const UserManagement = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar className="h-16 w-16">
-                    <AvatarImage src={user.photo} alt={`${user.firstName} ${user.lastName}`} />
+                    <AvatarImage src={user.photo} alt={`${user.first_name} ${user.last_name}`} />
                     <AvatarFallback className="text-lg">
-                      {user.firstName.charAt(0)}{user.lastName.charAt(0)}
+                      {user.first_name.charAt(0)}{user.last_name.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                   
                   <div className="flex-1">
                     <h3 className="text-lg font-semibold text-gray-900">
-                      {user.firstName} {user.lastName}
+                      {user.first_name} {user.last_name}
                     </h3>
                     <p className="text-gray-600">{user.email}</p>
                     <p className="text-sm text-gray-500">{user.phone}</p>
@@ -302,7 +335,7 @@ const UserManagement = () => {
                         {getRoleLabel(user.role)}
                       </span>
                       <span className="text-xs text-gray-400 ml-3">
-                        Criado em: {new Date(user.createdAt).toLocaleDateString('pt-BR')}
+                        Criado em: {new Date(user.created_at).toLocaleDateString('pt-BR')}
                       </span>
                     </div>
                     
@@ -310,15 +343,15 @@ const UserManagement = () => {
                       <div className="mt-2 flex items-center space-x-4 text-sm">
                         <div className="flex items-center">
                           <DollarSign className="h-3 w-3 mr-1 text-green-600" />
-                          <span className="text-gray-600">Indicação: {formatCurrency(user.commissionClientReferral || 0)}</span>
+                          <span className="text-gray-600">Indicação: {formatCurrency(user.commission_client_referral || 0)}</span>
                         </div>
                         <div className="flex items-center">
                           <DollarSign className="h-3 w-3 mr-1 text-blue-600" />
-                          <span className="text-gray-600">Cliente: {formatCurrency(user.commissionClientBrought || 0)}</span>
+                          <span className="text-gray-600">Cliente: {formatCurrency(user.commission_client_brought || 0)}</span>
                         </div>
                         <div className="flex items-center">
                           <DollarSign className="h-3 w-3 mr-1 text-purple-600" />
-                          <span className="text-gray-600">Venda: {formatCurrency(user.commissionFullSale || 0)}</span>
+                          <span className="text-gray-600">Venda: {formatCurrency(user.commission_full_sale || 0)}</span>
                         </div>
                       </div>
                     )}
@@ -353,7 +386,6 @@ const UserManagement = () => {
         ))}
       </div>
 
-      {/* Dialog de Edição */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -363,13 +395,13 @@ const UserManagement = () => {
             <EditUserForm 
               user={editingUser} 
               onSubmit={handleEditUser} 
-              isLoading={isLoading} 
+              isLoading={isSubmitting} 
             />
           )}
         </DialogContent>
       </Dialog>
 
-      {users.length === 0 && (
+      {users.length === 0 && !loading && (
         <Card>
           <CardContent className="p-12 text-center">
             <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />

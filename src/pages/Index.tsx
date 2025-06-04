@@ -1,31 +1,21 @@
 
-import React, { useState } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { LanguageProvider } from '../contexts/LanguageContext';
-import { AuthProvider } from '../contexts/AuthContext';
-import { BHPHProvider } from '../contexts/BHPHContext';
-import ThemeProvider from '../components/Providers/ThemeProvider';
-import LoginForm from '../components/Auth/LoginForm';
-import Header from '../components/Layout/Header';
-import Sidebar from '../components/Layout/Sidebar';
-import Dashboard from '../components/Dashboard/Dashboard';
-import VehicleList from '../components/Vehicles/VehicleList';
-import UserManagement from '../components/Users/UserManagement';
-import AdminPanel from '../components/Admin/AdminPanel';
-import ProfilePage from '../components/Profile/ProfilePage';
-import BuyHerePayHere from '../components/BHPH/BuyHerePayHere';
+import { useState } from "react";
+import { AuthProvider } from "../contexts/AuthContext";
+import { LanguageProvider } from "../contexts/LanguageContext";
+import { BHPHProvider } from "../contexts/BHPHContext";
+import { ThemeProvider } from "../components/Providers/ThemeProvider";
+import AuthWrapper from "../components/Auth/AuthWrapper";
+import Header from "../components/Layout/Header";
+import Sidebar from "../components/Layout/Sidebar";
+import Dashboard from "../components/Dashboard/Dashboard";
+import VehicleList from "../components/Vehicles/VehicleList";
+import UserManagement from "../components/Users/UserManagement";
+import AdminPanel from "../components/Admin/AdminPanel";
+import ProfilePage from "../components/Profile/ProfilePage";
+import BuyHerePayHere from "../components/BHPH/BuyHerePayHere";
 
-const AppContent = () => {
-  const { isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
-
-  if (!isAuthenticated) {
-    return <LoginForm />;
-  }
-
-  const handleNavigateToUsers = () => {
-    setActiveTab('users');
-  };
+const Index = () => {
+  const [activeTab, setActiveTab] = useState('vehicles');
 
   const renderContent = () => {
     switch (activeTab) {
@@ -33,42 +23,38 @@ const AppContent = () => {
         return <Dashboard />;
       case 'vehicles':
         return <VehicleList />;
+      case 'bhph':
+        return <BuyHerePayHere />;
       case 'users':
         return <UserManagement />;
       case 'admin':
-        return <AdminPanel onNavigateToUsers={handleNavigateToUsers} />;
+        return <AdminPanel />;
       case 'profile':
         return <ProfilePage />;
-      case 'bhph':
-        return <BuyHerePayHere />;
       default:
-        return <Dashboard />;
+        return <VehicleList />;
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <div className="flex flex-1">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <main className="flex-1 overflow-hidden">
-          {renderContent()}
-        </main>
-      </div>
-    </div>
-  );
-};
-
-const Index = () => {
-  return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
+    <ThemeProvider defaultTheme="light" storageKey="revenshop-theme">
+      <AuthProvider>
+        <LanguageProvider>
           <BHPHProvider>
-            <AppContent />
+            <AuthWrapper>
+              <div className="min-h-screen bg-background">
+                <Header />
+                <div className="flex">
+                  <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+                  <main className="flex-1">
+                    {renderContent()}
+                  </main>
+                </div>
+              </div>
+            </AuthWrapper>
           </BHPHProvider>
-        </AuthProvider>
-      </LanguageProvider>
+        </LanguageProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 };

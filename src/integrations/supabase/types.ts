@@ -9,7 +9,308 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      bhph_customers: {
+        Row: {
+          address: string | null
+          created_at: string | null
+          credit_score: number | null
+          email: string | null
+          employment_info: string | null
+          id: string
+          income: number | null
+          name: string
+          phone: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string | null
+          credit_score?: number | null
+          email?: string | null
+          employment_info?: string | null
+          id?: string
+          income?: number | null
+          name: string
+          phone: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          created_at?: string | null
+          credit_score?: number | null
+          email?: string | null
+          employment_info?: string | null
+          id?: string
+          income?: number | null
+          name?: string
+          phone?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      bhph_deals: {
+        Row: {
+          created_at: string | null
+          customer_id: string | null
+          down_payment: number
+          financed_amount: number
+          id: string
+          interest_rate: number
+          monthly_payment: number
+          status: string | null
+          term_months: number
+          total_amount: number
+          updated_at: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          customer_id?: string | null
+          down_payment: number
+          financed_amount: number
+          id?: string
+          interest_rate: number
+          monthly_payment: number
+          status?: string | null
+          term_months: number
+          total_amount: number
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          customer_id?: string | null
+          down_payment?: number
+          financed_amount?: number
+          id?: string
+          interest_rate?: number
+          monthly_payment?: number
+          status?: string | null
+          term_months?: number
+          total_amount?: number
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bhph_deals_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "bhph_customers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bhph_deals_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          commission_client_brought: number | null
+          commission_client_referral: number | null
+          commission_full_sale: number | null
+          created_at: string | null
+          email: string
+          facebook: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone: string | null
+          photo: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string | null
+        }
+        Insert: {
+          commission_client_brought?: number | null
+          commission_client_referral?: number | null
+          commission_full_sale?: number | null
+          created_at?: string | null
+          email: string
+          facebook?: string | null
+          first_name: string
+          id: string
+          last_name: string
+          phone?: string | null
+          photo?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Update: {
+          commission_client_brought?: number | null
+          commission_client_referral?: number | null
+          commission_full_sale?: number | null
+          created_at?: string | null
+          email?: string
+          facebook?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          photo?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sales: {
+        Row: {
+          check_details: string | null
+          created_at: string | null
+          customer_name: string
+          customer_phone: string
+          final_sale_price: number
+          financing_company: string | null
+          id: string
+          other_payment_details: string | null
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
+          sale_date: string
+          sale_notes: string | null
+          seller_commission: number | null
+          seller_id: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          check_details?: string | null
+          created_at?: string | null
+          customer_name: string
+          customer_phone: string
+          final_sale_price: number
+          financing_company?: string | null
+          id?: string
+          other_payment_details?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          sale_date: string
+          sale_notes?: string | null
+          seller_commission?: number | null
+          seller_id?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          check_details?: string | null
+          created_at?: string | null
+          customer_name?: string
+          customer_phone?: string
+          final_sale_price?: number
+          financing_company?: string | null
+          id?: string
+          other_payment_details?: string | null
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
+          sale_date?: string
+          sale_notes?: string | null
+          seller_commission?: number | null
+          seller_id?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sales_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sales_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicles: {
+        Row: {
+          ca_note: number
+          carfax_price: number | null
+          category: Database["public"]["Enums"]["vehicle_category"]
+          color: string
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: string
+          internal_code: string
+          miles: number
+          min_negotiable: number | null
+          mmr_value: number | null
+          model: string
+          name: string
+          photos: string[] | null
+          profit_margin: number | null
+          purchase_price: number
+          sale_price: number
+          title_status: Database["public"]["Enums"]["title_status"] | null
+          title_type: Database["public"]["Enums"]["title_type"] | null
+          updated_at: string | null
+          video: string | null
+          vin: string
+          year: number
+        }
+        Insert: {
+          ca_note: number
+          carfax_price?: number | null
+          category?: Database["public"]["Enums"]["vehicle_category"]
+          color: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          internal_code: string
+          miles: number
+          min_negotiable?: number | null
+          mmr_value?: number | null
+          model: string
+          name: string
+          photos?: string[] | null
+          profit_margin?: number | null
+          purchase_price: number
+          sale_price: number
+          title_status?: Database["public"]["Enums"]["title_status"] | null
+          title_type?: Database["public"]["Enums"]["title_type"] | null
+          updated_at?: string | null
+          video?: string | null
+          vin: string
+          year: number
+        }
+        Update: {
+          ca_note?: number
+          carfax_price?: number | null
+          category?: Database["public"]["Enums"]["vehicle_category"]
+          color?: string
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          internal_code?: string
+          miles?: number
+          min_negotiable?: number | null
+          mmr_value?: number | null
+          model?: string
+          name?: string
+          photos?: string[] | null
+          profit_margin?: number | null
+          purchase_price?: number
+          sale_price?: number
+          title_status?: Database["public"]["Enums"]["title_status"] | null
+          title_type?: Database["public"]["Enums"]["title_type"] | null
+          updated_at?: string | null
+          video?: string | null
+          vin?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +319,11 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      payment_method: "cash" | "financing" | "bhph" | "check" | "other"
+      title_status: "em-maos" | "em-transito"
+      title_type: "clean-title" | "rebuilt"
+      user_role: "admin" | "manager" | "seller"
+      vehicle_category: "forSale" | "sold"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +438,12 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      payment_method: ["cash", "financing", "bhph", "check", "other"],
+      title_status: ["em-maos", "em-transito"],
+      title_type: ["clean-title", "rebuilt"],
+      user_role: ["admin", "manager", "seller"],
+      vehicle_category: ["forSale", "sold"],
+    },
   },
 } as const
