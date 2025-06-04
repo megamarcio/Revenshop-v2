@@ -37,7 +37,7 @@ const Index = () => {
   };
 
   return (
-    <ThemeProvider defaultTheme="light" storageKey="revenshop-theme">
+    <ThemeProvider>
       <AuthProvider>
         <LanguageProvider>
           <BHPHProvider>
