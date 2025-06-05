@@ -66,9 +66,9 @@ export const useTasks = () => {
         completed_at: task.completed_at,
         created_at: task.created_at,
         updated_at: task.updated_at,
-        assignee: task.assignee,
-        creator: task.creator,
-        collaborators: task.collaborators || []
+        assignee: task.assignee?.error ? null : task.assignee,
+        creator: task.creator?.error ? null : task.creator,
+        collaborators: []
       }));
 
       setTasks(validatedTasks);

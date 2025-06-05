@@ -27,13 +27,13 @@ export const useCustomers = () => {
       console.log('Customers fetched successfully:', data?.length || 0, 'customers');
       
       // Transform the data to match our Customer interface
-      const transformedCustomers = data?.map(customer => ({
+      const transformedCustomers: Customer[] = data?.map(customer => ({
         id: customer.id,
         first_name: customer.name?.split(' ')[0] || '',
         last_name: customer.name?.split(' ').slice(1).join(' ') || '',
         email: customer.email || '',
         phone: customer.phone || '',
-        address: customer.address,
+        address: customer.address || '',
         city: '',
         state: '',
         zip_code: '',
@@ -44,7 +44,7 @@ export const useCustomers = () => {
         notes: '',
         created_at: customer.created_at,
         updated_at: customer.updated_at,
-        assigned_user: customer.assigned_user
+        assigned_user: Array.isArray(customer.assigned_user) ? customer.assigned_user[0] : customer.assigned_user
       })) || [];
       
       setCustomers(transformedCustomers);

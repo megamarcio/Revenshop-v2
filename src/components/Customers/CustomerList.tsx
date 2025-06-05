@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -12,33 +11,16 @@ import { supabase } from '../../integrations/supabase/client';
 import CustomerForm from './CustomerForm';
 import QuoteGenerator from './QuoteGenerator';
 import DealDetails from './DealDetails';
-
-interface Customer {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  deal_status: string;
-  payment_type: string;
-  interested_vehicle?: {
-    id: string;
-    name: string;
-    model: string;
-    year: number;
-    sale_price: number;
-  };
-  responsible_seller?: {
-    first_name: string;
-    last_name: string;
-  };
-}
+import { Customer } from '../../types/customer';
 
 interface CustomerListProps {
+  customers?: Customer[];
+  onEdit?: (customer: Customer) => void;
+  onDelete?: (customerId: string) => Promise<boolean>;
   onCustomerSelect?: (customer: Customer) => void;
 }
 
-const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
+const CustomerList = ({ customers: propCustomers, onEdit, onDelete, onCustomerSelect }: CustomerListProps) => {
   const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -47,7 +29,7 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
   const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
   const [showDealDetails, setShowDealDetails] = useState(false);
 
-  const { data: customers = [], isLoading } = useQuery({
+  const { data: fetchedCustomers = [], isLoading } = useQuery({
     queryKey: ['customers', searchTerm, statusFilter],
     queryFn: async () => {
       let query = supabase
@@ -69,9 +51,13 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
 
       const { data, error } = await query;
       if (error) throw error;
-      return data as Customer[];
+      return data as any[];
     },
+    enabled: !propCustomers, // Only fetch if customers are not provided as props
   });
+
+  // Use provided customers or fetched customers
+  const customers = propCustomers || fetchedCustomers;
 
   const getPaymentTypeIcon = (paymentType: string) => {
     switch (paymentType) {
