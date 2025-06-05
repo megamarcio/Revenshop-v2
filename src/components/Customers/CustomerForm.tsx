@@ -144,16 +144,23 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
 
   const saveCustomerMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
+      // Clean up UUID fields - convert empty strings to null
+      const cleanedData = {
+        ...data,
+        responsible_seller_id: data.responsible_seller_id || null,
+        interested_vehicle_id: data.interested_vehicle_id || null,
+      };
+
       if (customer?.id) {
         const { error } = await supabase
           .from('bhph_customers')
-          .update(data)
+          .update(cleanedData)
           .eq('id', customer.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from('bhph_customers')
-          .insert([data]);
+          .insert([cleanedData]);
         if (error) throw error;
       }
     },
@@ -166,6 +173,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
       onSave();
     },
     onError: (error) => {
+      console.error('Error saving customer:', error);
       toast({
         title: t('error'),
         description: `Erro ao salvar cliente: ${error.message}`,
