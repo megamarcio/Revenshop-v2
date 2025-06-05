@@ -1,142 +1,121 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Calendar, Palette, Hash, Eye } from 'lucide-react';
-
-interface Vehicle {
-  id: string;
-  name: string;
-  year: number;
-  model: string;
-  color: string;
-  miles: number;
-  vin: string;
-  internal_code: string;
-  purchase_price: number;
-  sale_price: number;
-  mmr_value?: number;
-  description?: string;
-  photos?: string[];
-  category: string;
-  created_at: string;
-}
+import { Button } from '@/components/ui/button';
+import { Edit, Trash2, Eye, Car, Fuel, Calendar, MapPin } from 'lucide-react';
 
 interface VehicleCardProps {
-  vehicle: Vehicle;
-  onEdit?: (vehicle: Vehicle) => void;
+  vehicle: {
+    id: string;
+    name: string;
+    model: string;
+    year: number;
+    miles: number;
+    color: string;
+    vin: string;
+    internal_code: string;
+    purchase_price: number;
+    sale_price: number;
+    category: 'forSale' | 'sold';
+    photos: string[];
+    description?: string;
+  };
+  onEdit?: (vehicle: any) => void;
   onDelete?: (vehicleId: string) => void;
-  onView?: (vehicle: Vehicle) => void;
-  showCostInfo?: boolean;
+  onView?: (vehicle: any) => void;
+  showCostInfo: boolean;
 }
 
-const VehicleCard = ({ vehicle, onEdit, onDelete, onView, showCostInfo = true }: VehicleCardProps) => {
+const VehicleCard = ({ vehicle, onEdit, onDelete, onView, showCostInfo }: VehicleCardProps) => {
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'forSale': return 'bg-green-100 text-green-800';
-      case 'sold': return 'bg-red-100 text-red-800';
+      case 'sold': return 'bg-green-100 text-green-800';
+      case 'forSale': return 'bg-blue-100 text-blue-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getCategoryLabel = (category: string) => {
     switch (category) {
-      case 'forSale': return 'À Venda';
       case 'sold': return 'Vendido';
+      case 'forSale': return 'À Venda';
       default: return category;
     }
   };
 
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-      <div className="aspect-video bg-gray-100 relative">
-        {vehicle.photos && vehicle.photos.length > 0 ? (
-          <img
-            src={vehicle.photos[0]}
-            alt={vehicle.name}
-            className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full text-gray-400">
-            <span>Sem foto</span>
-          </div>
-        )}
-        
-        <Badge className={`absolute top-2 right-2 ${getCategoryColor(vehicle.category)}`}>
-          {getCategoryLabel(vehicle.category)}
-        </Badge>
-      </div>
-
-      <CardContent className="p-4">
-        <div className="mb-3">
-          <h3 className="text-lg font-semibold text-gray-900 truncate">
-            {vehicle.year} {vehicle.name}
-          </h3>
-          <p className="text-sm text-gray-600">{vehicle.model}</p>
+    <Card className="hover:shadow-lg transition-shadow duration-200">
+      <CardContent className="p-0">
+        {/* Image */}
+        <div className="aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
+          {vehicle.photos && vehicle.photos.length > 0 ? (
+            <img
+              src={vehicle.photos[0]}
+              alt={`${vehicle.year} ${vehicle.name}`}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Car className="h-12 w-12 text-gray-400" />
+            </div>
+          )}
         </div>
 
-        <div className="space-y-2 mb-4">
-          <div className="flex items-center text-sm text-gray-600">
-            <Palette className="h-4 w-4 mr-2" />
-            <span>{vehicle.color}</span>
+        {/* Content */}
+        <div className="p-4 space-y-3">
+          <div className="flex items-start justify-between">
+            <div>
+              <h3 className="font-semibold text-lg text-gray-900">
+                {vehicle.year} {vehicle.name}
+              </h3>
+              <p className="text-gray-600">{vehicle.model}</p>
+              <p className="text-sm text-gray-500">Código: {vehicle.internal_code}</p>
+            </div>
+            <Badge className={getCategoryColor(vehicle.category)}>
+              {getCategoryLabel(vehicle.category)}
+            </Badge>
           </div>
 
-          <div className="flex items-center text-sm text-gray-600">
-            <Hash className="h-4 w-4 mr-2" />
-            <span>{vehicle.miles.toLocaleString()} milhas</span>
+          {/* Vehicle Details */}
+          <div className="grid grid-cols-2 gap-2 text-sm">
+            <div className="flex items-center space-x-1">
+              <MapPin className="h-4 w-4 text-gray-400" />
+              <span>{vehicle.miles?.toLocaleString()} milhas</span>
+            </div>
+            <div className="flex items-center space-x-1">
+              <span className="w-3 h-3 rounded-full border-2 border-gray-300" style={{ backgroundColor: vehicle.color?.toLowerCase() }}></span>
+              <span className="capitalize">{vehicle.color}</span>
+            </div>
           </div>
 
-          <div className="flex items-center text-sm text-gray-600">
-            <Calendar className="h-4 w-4 mr-2" />
-            <span>{new Date(vehicle.created_at).toLocaleDateString('pt-BR')}</span>
+          {/* VIN */}
+          <div className="text-xs text-gray-500 font-mono">
+            VIN: {vehicle.vin}
           </div>
-        </div>
 
-        <div className="space-y-1 mb-4">
-          <div className="text-sm">
-            <span className="text-gray-600">Código: </span>
-            <span className="font-medium">{vehicle.internal_code}</span>
-          </div>
-          
-          <div className="text-sm">
-            <span className="text-gray-600">VIN: </span>
-            <span className="font-mono text-xs">{vehicle.vin}</span>
-          </div>
-        </div>
-
-        {/* Informações de preço - condicionais baseadas em permissões */}
-        <div className="space-y-2 mb-4">
-          {showCostInfo && (
-            <>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Custo:</span>
-                <span className="font-semibold text-red-600">
-                  ${vehicle.purchase_price.toLocaleString('en-US')}
+          {/* Pricing */}
+          <div className="border-t pt-3">
+            {showCostInfo && (
+              <div className="flex justify-between text-sm mb-2">
+                <span className="text-gray-600">Custo:</span>
+                <span className="font-medium text-red-600">
+                  ${vehicle.purchase_price?.toLocaleString()}
                 </span>
               </div>
-
-              {vehicle.mmr_value && (
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-600">MMR:</span>
-                  <span className="font-medium text-blue-600">
-                    ${vehicle.mmr_value.toLocaleString('en-US')}
-                  </span>
-                </div>
-              )}
-            </>
-          )}
-
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-gray-600">Venda:</span>
-            <span className="font-bold text-green-600 text-lg">
-              ${vehicle.sale_price.toLocaleString('en-US')}
-            </span>
+            )}
+            <div className="flex justify-between">
+              <span className="text-gray-600">Preço:</span>
+              <span className="font-bold text-lg text-green-600">
+                ${vehicle.sale_price?.toLocaleString()}
+              </span>
+            </div>
           </div>
         </div>
+      </CardContent>
 
-        {/* Botões de ação */}
-        <div className="flex space-x-2">
+      <CardFooter className="p-4 pt-0">
+        <div className="flex space-x-2 w-full">
           {onView && (
             <Button
               variant="outline"
@@ -144,11 +123,10 @@ const VehicleCard = ({ vehicle, onEdit, onDelete, onView, showCostInfo = true }:
               onClick={() => onView(vehicle)}
               className="flex-1"
             >
-              <Eye className="h-4 w-4 mr-1" />
-              Visualizar
+              <Eye className="h-4 w-4 mr-2" />
+              Ver
             </Button>
           )}
-          
           {onEdit && (
             <Button
               variant="outline"
@@ -156,23 +134,23 @@ const VehicleCard = ({ vehicle, onEdit, onDelete, onView, showCostInfo = true }:
               onClick={() => onEdit(vehicle)}
               className="flex-1"
             >
-              <Edit className="h-4 w-4 mr-1" />
+              <Edit className="h-4 w-4 mr-2" />
               Editar
             </Button>
           )}
-          
           {onDelete && (
             <Button
               variant="outline"
               size="sm"
               onClick={() => onDelete(vehicle.id)}
-              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-4 w-4 mr-2" />
+              Excluir
             </Button>
           )}
         </div>
-      </CardContent>
+      </CardFooter>
     </Card>
   );
 };

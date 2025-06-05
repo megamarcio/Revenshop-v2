@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -22,6 +21,7 @@ interface Customer {
   interested_vehicle_id?: string;
   responsible_seller_id?: string;
   deal_status?: string;
+  payment_type?: string;
   created_at: string;
   vehicle?: {
     id: string;
@@ -96,32 +96,9 @@ const CustomerManagement = ({ showAddForm = false, onBackToVehicles }: CustomerM
     setIsCreateDialogOpen(showAddForm);
   }, [showAddForm]);
 
-  const handleCreateCustomer = async (customerData: any) => {
-    try {
-      const { error } = await supabase
-        .from('bhph_customers')
-        .insert({
-          ...customerData,
-          responsible_seller_id: user?.id,
-        });
-
-      if (error) throw error;
-
-      await fetchCustomers();
-      setIsCreateDialogOpen(false);
-      
-      toast({
-        title: t('success'),
-        description: 'Cliente criado com sucesso!',
-      });
-    } catch (error) {
-      console.error('Error creating customer:', error);
-      toast({
-        title: t('error'),
-        description: 'Erro ao criar cliente.',
-        variant: 'destructive',
-      });
-    }
+  const handleCreateCustomer = () => {
+    setIsCreateDialogOpen(false);
+    fetchCustomers();
   };
 
   const handleGeneratePDF = async (customer: Customer) => {
@@ -257,7 +234,10 @@ const CustomerManagement = ({ showAddForm = false, onBackToVehicles }: CustomerM
             <DialogHeader>
               <DialogTitle>Adicionar Novo Cliente</DialogTitle>
             </DialogHeader>
-            <CustomerForm onSubmit={handleCreateCustomer} />
+            <CustomerForm 
+              onSave={handleCreateCustomer}
+              onCancel={() => setIsCreateDialogOpen(false)}
+            />
           </DialogContent>
         </Dialog>
       </div>
