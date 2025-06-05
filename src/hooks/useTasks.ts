@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -66,8 +65,8 @@ export const useTasks = () => {
         completed_at: task.completed_at,
         created_at: task.created_at,
         updated_at: task.updated_at,
-        assignee: task.assignee?.error ? null : task.assignee,
-        creator: task.creator?.error ? null : task.creator,
+        assignee: task.assignee && !task.assignee.error ? task.assignee : null,
+        creator: task.creator && !task.creator.error ? task.creator : null,
         collaborators: []
       }));
 
@@ -203,9 +202,109 @@ export const useTasks = () => {
     tasks,
     loading,
     unreadTasksCount,
-    createTask,
-    updateTask,
-    deleteTask,
+    createTask: async (taskData: {
+      title: string;
+      description?: string;
+      priority: 'low' | 'medium' | 'high';
+      assigned_to?: string;
+      due_date?: string;
+    }) => {
+      if (!user) return false;
+
+      try {
+        const { data, error } = await supabase
+          .from('tasks')
+          .insert({
+            ...taskData,
+            created_by: user.id,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Enviar email se tarefa foi atribuída a outro usuário
+        if (taskData.assigned_to && taskData.assigned_to !== user.id) {
+          await supabase.functions.invoke('send-task-notification', {
+            body: {
+              taskId: data.id,
+              taskTitle: taskData.title,
+              assigneeId: taskData.assigned_to,
+              creatorName: `${user.first_name} ${user.last_name}`
+            }
+          });
+        }
+
+        await fetchTasks();
+        toast({
+          title: 'Sucesso',
+          description: 'Tarefa criada com sucesso!',
+        });
+        return true;
+      } catch (error) {
+        console.error('Error creating task:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao criar tarefa',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    updateTask: async (taskId: string, updates: Partial<Task>) => {
+      try {
+        const { error } = await supabase
+          .from('tasks')
+          .update({
+            ...updates,
+            updated_at: new Date().toISOString(),
+            ...(updates.status === 'completed' && { completed_at: new Date().toISOString() })
+          })
+          .eq('id', taskId);
+
+        if (error) throw error;
+
+        await fetchTasks();
+        toast({
+          title: 'Sucesso',
+          description: 'Tarefa atualizada com sucesso!',
+        });
+        return true;
+      } catch (error) {
+        console.error('Error updating task:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao atualizar tarefa',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
+    deleteTask: async (taskId: string) => {
+      try {
+        const { error } = await supabase
+          .from('tasks')
+          .delete()
+          .eq('id', taskId);
+
+        if (error) throw error;
+
+        await fetchTasks();
+        toast({
+          title: 'Sucesso',
+          description: 'Tarefa excluída com sucesso!',
+        });
+        return true;
+      } catch (error) {
+        console.error('Error deleting task:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao excluir tarefa',
+          variant: 'destructive',
+        });
+        return false;
+      }
+    },
     fetchTasks,
   };
 };

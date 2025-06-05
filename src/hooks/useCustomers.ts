@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -29,6 +28,7 @@ export const useCustomers = () => {
       // Transform the data to match our Customer interface
       const transformedCustomers: Customer[] = data?.map(customer => ({
         id: customer.id,
+        name: customer.name || '',
         first_name: customer.name?.split(' ')[0] || '',
         last_name: customer.name?.split(' ').slice(1).join(' ') || '',
         email: customer.email || '',
@@ -42,6 +42,8 @@ export const useCustomers = () => {
         income: customer.income,
         down_payment: 0,
         notes: '',
+        deal_status: customer.deal_status || 'lead',
+        payment_type: customer.payment_type || '',
         created_at: customer.created_at,
         updated_at: customer.updated_at,
         assigned_user: Array.isArray(customer.assigned_user) ? customer.assigned_user[0] : customer.assigned_user
@@ -67,13 +69,15 @@ export const useCustomers = () => {
       const { data, error } = await supabase
         .from('bhph_customers')
         .insert({
-          name: `${customerData.first_name} ${customerData.last_name}`.trim(),
+          name: customerData.name || `${customerData.first_name} ${customerData.last_name}`.trim(),
           email: customerData.email || null,
           phone: customerData.phone,
           address: customerData.address || null,
           responsible_seller_id: customerData.assigned_to || null,
           credit_score: customerData.credit_score || null,
           income: customerData.income || null,
+          deal_status: customerData.deal_status || 'lead',
+          payment_type: customerData.payment_type || null,
         })
         .select()
         .single();
@@ -110,13 +114,15 @@ export const useCustomers = () => {
       const { data, error } = await supabase
         .from('bhph_customers')
         .update({
-          name: `${customerData.first_name} ${customerData.last_name}`.trim(),
+          name: customerData.name || `${customerData.first_name} ${customerData.last_name}`.trim(),
           email: customerData.email || null,
           phone: customerData.phone,
           address: customerData.address || null,
           responsible_seller_id: customerData.assigned_to || null,
           credit_score: customerData.credit_score || null,
           income: customerData.income || null,
+          deal_status: customerData.deal_status || 'lead',
+          payment_type: customerData.payment_type || null,
           updated_at: new Date().toISOString(),
         })
         .eq('id', customerId)
@@ -229,7 +235,28 @@ export const useCustomers = () => {
     createCustomer,
     updateCustomer,
     deleteCustomer,
-    createSaleRecord,
+    createSaleRecord: async (saleData: any) => {
+      try {
+        console.log('Creating sale record with data:', saleData);
+        
+        const { data, error } = await supabase
+          .from('sales')
+          .insert(saleData)
+          .select()
+          .single();
+
+        if (error) {
+          console.error('Supabase error creating sale:', error);
+          throw error;
+        }
+        
+        console.log('Sale record created successfully:', data);
+        return data;
+      } catch (error) {
+        console.error('Error creating sale record:', error);
+        throw error;
+      }
+    },
     refetch: fetchCustomers,
   };
 };

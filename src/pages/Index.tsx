@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React from 'react';
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Sidebar from '../components/Layout/Sidebar';
 import Header from '../components/Layout/Header';
@@ -17,15 +17,32 @@ import BuyHerePayHere from '../components/BHPH/BuyHerePayHere';
 
 const Index = () => {
   const { isAdmin, isManager } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get active tab from current route
+  const getActiveTabFromPath = (pathname: string) => {
+    if (pathname === '/') return 'dashboard';
+    return pathname.substring(1); // Remove leading slash
+  };
+
+  const activeTab = getActiveTabFromPath(location.pathname);
+
+  const handleTabChange = (tab: string) => {
+    if (tab === 'dashboard') {
+      navigate('/');
+    } else {
+      navigate(`/${tab}`);
+    }
+  };
 
   const handleNavigateToUsers = () => {
-    setActiveTab('users');
+    navigate('/users');
   };
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 overflow-auto">
