@@ -1,130 +1,176 @@
 
 import React from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Copy, Trash2, Car } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
+import { Edit, Trash2, Calendar, Palette, Hash, Eye } from 'lucide-react';
 
 interface Vehicle {
   id: string;
   name: string;
-  vin: string;
   year: number;
   model: string;
-  plate: string;
-  internalCode: string;
   color: string;
-  caNote: number;
-  purchasePrice: number;
-  salePrice: number;
-  profitMargin: number;
-  minNegotiable: number;
-  carfaxPrice: number;
-  mmrValue: number;
-  description: string;
-  category: 'forSale' | 'sold';
-  seller?: string;
-  finalSalePrice?: number;
-  photos: string[];
-  video?: string;
+  miles: number;
+  vin: string;
+  internal_code: string;
+  purchase_price: number;
+  sale_price: number;
+  mmr_value?: number;
+  description?: string;
+  photos?: string[];
+  category: string;
+  created_at: string;
 }
 
 interface VehicleCardProps {
   vehicle: Vehicle;
-  onEdit: (vehicle: Vehicle) => void;
-  onDuplicate: (vehicle: Vehicle) => void;
-  onDelete?: (vehicle: Vehicle) => void;
+  onEdit?: (vehicle: Vehicle) => void;
+  onDelete?: (vehicleId: string) => void;
+  onView?: (vehicle: Vehicle) => void;
+  showCostInfo?: boolean;
 }
 
-const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProps) => {
-  const { t } = useLanguage();
+const VehicleCard = ({ vehicle, onEdit, onDelete, onView, showCostInfo = true }: VehicleCardProps) => {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'forSale': return 'bg-green-100 text-green-800';
+      case 'sold': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(value);
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'forSale': return 'À Venda';
+      case 'sold': return 'Vendido';
+      default: return category;
+    }
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="bg-revenshop-primary/10 p-2 rounded-lg">
-              <Car className="h-5 w-5 text-revenshop-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-semibold">{vehicle.name}</CardTitle>
-              <p className="text-sm text-gray-500">{vehicle.year} • {vehicle.color}</p>
-            </div>
-          </div>
-          <Badge 
-            variant={vehicle.category === 'forSale' ? 'default' : 'secondary'}
-            className={vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
-          >
-            {vehicle.category === 'forSale' ? t('forSale') : t('sold')}
-          </Badge>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="text-gray-500">VIN:</span>
-            <p className="font-medium">{vehicle.vin}</p>
-          </div>
-          <div>
-            <span className="text-gray-500">{t('plate')}:</span>
-            <p className="font-medium">{vehicle.plate}</p>
-          </div>
-          <div>
-            <span className="text-gray-500">{t('purchasePrice')}:</span>
-            <p className="font-medium text-green-600">{formatCurrency(vehicle.purchasePrice)}</p>
-          </div>
-          <div>
-            <span className="text-gray-500">{t('salePrice')}:</span>
-            <p className="font-medium text-blue-600">{formatCurrency(vehicle.salePrice)}</p>
-          </div>
-        </div>
-
-        {vehicle.category === 'sold' && vehicle.seller && (
-          <div className="bg-gray-50 p-2 rounded text-sm">
-            <span className="text-gray-500">{t('seller')}:</span>
-            <p className="font-medium">{vehicle.seller}</p>
-            <span className="text-gray-500">{t('finalSalePrice')}:</span>
-            <p className="font-medium text-green-600">{formatCurrency(vehicle.finalSalePrice || 0)}</p>
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
+      <div className="aspect-video bg-gray-100 relative">
+        {vehicle.photos && vehicle.photos.length > 0 ? (
+          <img
+            src={vehicle.photos[0]}
+            alt={vehicle.name}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="flex items-center justify-center h-full text-gray-400">
+            <span>Sem foto</span>
           </div>
         )}
+        
+        <Badge className={`absolute top-2 right-2 ${getCategoryColor(vehicle.category)}`}>
+          {getCategoryLabel(vehicle.category)}
+        </Badge>
+      </div>
 
+      <CardContent className="p-4">
+        <div className="mb-3">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            {vehicle.year} {vehicle.name}
+          </h3>
+          <p className="text-sm text-gray-600">{vehicle.model}</p>
+        </div>
+
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center text-sm text-gray-600">
+            <Palette className="h-4 w-4 mr-2" />
+            <span>{vehicle.color}</span>
+          </div>
+
+          <div className="flex items-center text-sm text-gray-600">
+            <Hash className="h-4 w-4 mr-2" />
+            <span>{vehicle.miles.toLocaleString()} milhas</span>
+          </div>
+
+          <div className="flex items-center text-sm text-gray-600">
+            <Calendar className="h-4 w-4 mr-2" />
+            <span>{new Date(vehicle.created_at).toLocaleDateString('pt-BR')}</span>
+          </div>
+        </div>
+
+        <div className="space-y-1 mb-4">
+          <div className="text-sm">
+            <span className="text-gray-600">Código: </span>
+            <span className="font-medium">{vehicle.internal_code}</span>
+          </div>
+          
+          <div className="text-sm">
+            <span className="text-gray-600">VIN: </span>
+            <span className="font-mono text-xs">{vehicle.vin}</span>
+          </div>
+        </div>
+
+        {/* Informações de preço - condicionais baseadas em permissões */}
+        <div className="space-y-2 mb-4">
+          {showCostInfo && (
+            <>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Custo:</span>
+                <span className="font-semibold text-red-600">
+                  ${vehicle.purchase_price.toLocaleString('en-US')}
+                </span>
+              </div>
+
+              {vehicle.mmr_value && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600">MMR:</span>
+                  <span className="font-medium text-blue-600">
+                    ${vehicle.mmr_value.toLocaleString('en-US')}
+                  </span>
+                </div>
+              )}
+            </>
+          )}
+
+          <div className="flex justify-between items-center">
+            <span className="text-sm text-gray-600">Venda:</span>
+            <span className="font-bold text-green-600 text-lg">
+              ${vehicle.sale_price.toLocaleString('en-US')}
+            </span>
+          </div>
+        </div>
+
+        {/* Botões de ação */}
         <div className="flex space-x-2">
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => onEdit(vehicle)}
-          >
-            <Edit className="h-3 w-3 mr-1" />
-            {t('edit')}
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="flex-1"
-            onClick={() => onDuplicate(vehicle)}
-          >
-            <Copy className="h-3 w-3 mr-1" />
-            {t('duplicate')}
-          </Button>
-          <Button 
-            size="sm" 
-            variant="outline" 
-            className="text-red-600 hover:text-red-700"
-            onClick={() => onDelete && onDelete(vehicle)}
-          >
-            <Trash2 className="h-3 w-3" />
-          </Button>
+          {onView && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onView(vehicle)}
+              className="flex-1"
+            >
+              <Eye className="h-4 w-4 mr-1" />
+              Visualizar
+            </Button>
+          )}
+          
+          {onEdit && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEdit(vehicle)}
+              className="flex-1"
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              Editar
+            </Button>
+          )}
+          
+          {onDelete && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onDelete(vehicle.id)}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </CardContent>
     </Card>

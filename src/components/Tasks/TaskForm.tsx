@@ -1,0 +1,152 @@
+
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '../../contexts/AuthContext';
+
+interface TaskFormProps {
+  initialData?: any;
+  onSubmit: (data: any) => void;
+}
+
+const TaskForm = ({ initialData, onSubmit }: TaskFormProps) => {
+  const { user } = useAuth();
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    priority: 'medium',
+    assigned_to: '',
+    due_date: '',
+  });
+  const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title || '',
+        description: initialData.description || '',
+        priority: initialData.priority || 'medium',
+        assigned_to: initialData.assigned_to || '',
+        due_date: initialData.due_date || '',
+      });
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
+
+  const fetchUsers = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .order('first_name');
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    const submitData = {
+      ...formData,
+      assigned_to: formData.assigned_to || null,
+      due_date: formData.due_date || null,
+    };
+
+    await onSubmit(submitData);
+    setLoading(false);
+  };
+
+  const handleChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label htmlFor="title">Título *</Label>
+        <Input
+          id="title"
+          value={formData.title}
+          onChange={(e) => handleChange('title', e.target.value)}
+          placeholder="Digite o título da tarefa"
+          required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description">Descrição</Label>
+        <Textarea
+          id="description"
+          value={formData.description}
+          onChange={(e) => handleChange('description', e.target.value)}
+          placeholder="Descreva os detalhes da tarefa"
+          rows={3}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="priority">Prioridade</Label>
+          <Select value={formData.priority} onValueChange={(value) => handleChange('priority', value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Baixa</SelectItem>
+              <SelectItem value="medium">Média</SelectItem>
+              <SelectItem value="high">Alta</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="due_date">Data de Vencimento</Label>
+          <Input
+            id="due_date"
+            type="date"
+            value={formData.due_date}
+            onChange={(e) => handleChange('due_date', e.target.value)}
+          />
+        </div>
+      </div>
+
+      <div>
+        <Label htmlFor="assigned_to">Atribuir para</Label>
+        <Select value={formData.assigned_to} onValueChange={(value) => handleChange('assigned_to', value)}>
+          <SelectTrigger>
+            <SelectValue placeholder="Selecione um usuário (opcional)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">Nenhum usuário</SelectItem>
+            {users.map((userOption) => (
+              <SelectItem key={userOption.id} value={userOption.id}>
+                {userOption.first_name} {userOption.last_name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="submit" disabled={loading}>
+          {loading ? 'Salvando...' : (initialData ? 'Atualizar' : 'Criar')} Tarefa
+        </Button>
+      </div>
+    </form>
+  );
+};
+
+export default TaskForm;

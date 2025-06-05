@@ -15,6 +15,7 @@ import AdminPanel from "../components/Admin/AdminPanel";
 import ProfilePage from "../components/Profile/ProfilePage";
 import BuyHerePayHere from "../components/BHPH/BuyHerePayHere";
 import AuctionManagement from "../components/Auctions/AuctionManagement";
+import TaskManagement from "../components/Tasks/TaskManagement";
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('vehicles');
@@ -47,6 +48,8 @@ const Index = () => {
         return <AuctionManagement />;
       case 'bhph':
         return <BuyHerePayHere />;
+      case 'tasks':
+        return <TaskManagement />;
       case 'users':
         return <UserManagement />;
       case 'admin':
