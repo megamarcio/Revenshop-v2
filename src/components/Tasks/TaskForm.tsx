@@ -61,7 +61,7 @@ const TaskForm = ({ initialData, onSubmit }: TaskFormProps) => {
 
     const submitData = {
       ...formData,
-      assigned_to: formData.assigned_to || null,
+      assigned_to: formData.assigned_to === 'unassigned' ? null : formData.assigned_to,
       due_date: formData.due_date || null,
     };
 
@@ -125,12 +125,12 @@ const TaskForm = ({ initialData, onSubmit }: TaskFormProps) => {
 
       <div>
         <Label htmlFor="assigned_to">Atribuir para</Label>
-        <Select value={formData.assigned_to} onValueChange={(value) => handleChange('assigned_to', value)}>
+        <Select value={formData.assigned_to || 'unassigned'} onValueChange={(value) => handleChange('assigned_to', value)}>
           <SelectTrigger>
             <SelectValue placeholder="Selecione um usuário (opcional)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhum usuário</SelectItem>
+            <SelectItem value="unassigned">Nenhum usuário</SelectItem>
             {users.map((userOption) => (
               <SelectItem key={userOption.id} value={userOption.id}>
                 {userOption.first_name} {userOption.last_name}

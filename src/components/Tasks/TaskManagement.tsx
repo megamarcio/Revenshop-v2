@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTasks } from '../../hooks/useTasks';
 import { useAuth } from '../../contexts/AuthContext';
@@ -40,7 +39,7 @@ const TaskManagement = () => {
     }
   };
 
-  const handleStatusChange = async (taskId: string, newStatus: string) => {
+  const handleStatusChange = async (taskId: string, newStatus: 'pending' | 'in_progress' | 'completed') => {
     await updateTask(taskId, { status: newStatus });
   };
 
@@ -206,7 +205,7 @@ const TaskManagement = () => {
                   {(task.created_by === user?.id || task.assigned_to === user?.id) && (
                     <Select 
                       value={task.status} 
-                      onValueChange={(value) => handleStatusChange(task.id, value)}
+                      onValueChange={(value) => handleStatusChange(task.id, value as 'pending' | 'in_progress' | 'completed')}
                     >
                       <SelectTrigger className="w-32">
                         <SelectValue />

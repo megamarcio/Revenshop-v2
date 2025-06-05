@@ -49,10 +49,17 @@ export const useTasks = () => {
 
       if (error) throw error;
       
-      setTasks(data || []);
+      // Type assertion to ensure proper typing
+      const typedTasks = (data || []).map(task => ({
+        ...task,
+        status: task.status as 'pending' | 'in_progress' | 'completed',
+        priority: task.priority as 'low' | 'medium' | 'high'
+      }));
+      
+      setTasks(typedTasks);
       
       // Contar tarefas não lidas (novas tarefas atribuídas ao usuário)
-      const newTasksAssignedToMe = data?.filter(task => 
+      const newTasksAssignedToMe = typedTasks.filter(task => 
         task.assigned_to === user.id && 
         task.status === 'pending' &&
         new Date(task.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000) // Últimas 24h
