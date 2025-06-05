@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -30,9 +29,6 @@ interface Customer {
   reference2_name?: string;
   reference2_email?: string;
   reference2_phone?: string;
-  spouse_name?: string;
-  spouse_email?: string;
-  spouse_phone?: string;
   responsible_seller_id?: string;
   interested_vehicle_id?: string;
   deal_status?: string;
@@ -71,9 +67,6 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     reference2_name: '',
     reference2_email: '',
     reference2_phone: '',
-    spouse_name: '',
-    spouse_email: '',
-    spouse_phone: '',
     responsible_seller_id: '',
     interested_vehicle_id: '',
     deal_status: 'quote',
@@ -107,9 +100,6 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
         reference2_name: customer.reference2_name || '',
         reference2_email: customer.reference2_email || '',
         reference2_phone: customer.reference2_phone || '',
-        spouse_name: customer.spouse_name || '',
-        spouse_email: customer.spouse_email || '',
-        spouse_phone: customer.spouse_phone || '',
         responsible_seller_id: customer.responsible_seller_id || '',
         interested_vehicle_id: customer.interested_vehicle_id || '',
         deal_status: customer.deal_status || 'quote',
@@ -393,38 +383,6 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-6 mt-4">
-                {/* Spouse */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-md border-b pb-2">Cônjuge</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="spouse_name">Nome do Cônjuge</Label>
-                      <Input
-                        id="spouse_name"
-                        value={formData.spouse_name}
-                        onChange={(e) => handleInputChange('spouse_name', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="spouse_email">Email do Cônjuge</Label>
-                      <Input
-                        id="spouse_email"
-                        type="email"
-                        value={formData.spouse_email}
-                        onChange={(e) => handleInputChange('spouse_email', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="spouse_phone">Telefone do Cônjuge</Label>
-                      <Input
-                        id="spouse_phone"
-                        value={formData.spouse_phone}
-                        onChange={(e) => handleInputChange('spouse_phone', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-
                 {/* Reference 1 */}
                 <div className="space-y-4">
                   <h4 className="font-medium text-md border-b pb-2">{t('reference1')}</h4>
