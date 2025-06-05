@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import Sidebar from '../components/Layout/Sidebar';
@@ -17,10 +17,15 @@ import BuyHerePayHere from '../components/BHPH/BuyHerePayHere';
 
 const Index = () => {
   const { isAdmin, isManager } = useAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
+
+  const handleNavigateToUsers = () => {
+    setActiveTab('users');
+  };
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <Sidebar />
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       <div className="flex-1 flex flex-col">
         <Header />
         <main className="flex-1 overflow-auto">
@@ -33,7 +38,7 @@ const Index = () => {
               <>
                 <Route path="/auctions" element={<AuctionManagement />} />
                 <Route path="/users" element={<UserManagement />} />
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/admin" element={<AdminPanel onNavigateToUsers={handleNavigateToUsers} />} />
               </>
             )}
             <Route path="/bhph" element={<BuyHerePayHere />} />

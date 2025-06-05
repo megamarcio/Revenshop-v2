@@ -1,38 +1,37 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
-interface Task {
+export interface Task {
   id: string;
   title: string;
-  description?: string;
+  description: string;
   status: 'pending' | 'in_progress' | 'completed';
   priority: 'low' | 'medium' | 'high';
+  assigned_to: string | null;
   created_by: string;
-  assigned_to?: string;
-  due_date?: string;
+  due_date: string | null;
+  completed_at: string | null;
   created_at: string;
   updated_at: string;
-  completed_at?: string;
+  assignee?: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  } | null;
   creator?: {
     first_name: string;
     last_name: string;
     email: string;
   };
-  assignee?: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
+  collaborators?: string[];
 }
 
 export const useTasks = () => {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
-  const [unreadTasksCount, setUnreadTasksCount] = useState(0);
-  const { user } = useAuth();
 
   const fetchTasks = async () => {
     if (!user) return;
@@ -42,35 +41,19 @@ export const useTasks = () => {
         .from('tasks')
         .select(`
           *,
-          creator:created_by(first_name, last_name, email),
-          assignee:assigned_to(first_name, last_name, email)
+          assignee:assigned_to(first_name, last_name, email),
+          creator:created_by(first_name, last_name, email)
         `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      
-      // Type assertion to ensure proper typing
-      const typedTasks = (data || []).map(task => ({
-        ...task,
-        status: task.status as 'pending' | 'in_progress' | 'completed',
-        priority: task.priority as 'low' | 'medium' | 'high'
-      }));
-      
-      setTasks(typedTasks);
-      
-      // Contar tarefas não lidas (novas tarefas atribuídas ao usuário)
-      const newTasksAssignedToMe = typedTasks.filter(task => 
-        task.assigned_to === user.id && 
-        task.status === 'pending' &&
-        new Date(task.created_at) > new Date(Date.now() - 24 * 60 * 60 * 1000) // Últimas 24h
-      ).length || 0;
-      
-      setUnreadTasksCount(newTasksAssignedToMe);
+
+      setTasks(data || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao carregar tarefas',
+        description: 'Erro ao carregar tarefas.',
         variant: 'destructive',
       });
     } finally {
@@ -191,10 +174,9 @@ export const useTasks = () => {
   return {
     tasks,
     loading,
-    unreadTasksCount,
-    fetchTasks,
     createTask,
     updateTask,
-    deleteTask
+    deleteTask,
+    fetchTasks,
   };
 };
