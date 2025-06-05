@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -166,41 +167,91 @@ const UserManagement = () => {
     try {
       console.log('Creating user with data:', userData);
       
+      // Generate a temporary password if none provided
+      const tempPassword = userData.password || `TempPass${Math.random().toString(36).slice(-8)}!`;
+      
+      console.log('Attempting to create auth user...');
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: userData.email,
-        password: userData.password || 'TempPass123!',
+        password: tempPassword,
         options: {
           data: {
             first_name: userData.firstName,
             last_name: userData.lastName,
           },
+          emailRedirectTo: undefined, // Prevent email confirmation for admin-created users
         },
       });
 
       if (authError) {
         console.error('Auth error:', authError);
-        throw authError;
-      }
-
-      console.log('Auth user created:', authData.user?.id);
-
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            phone: userData.phone,
-            facebook: userData.facebook,
-            role: userData.role,
-            photo: userData.photo,
-          })
-          .eq('id', authData.user.id);
-
-        if (profileError) {
-          console.error('Profile update error:', profileError);
-          throw profileError;
+        // Check if it's an email already exists error
+        if (authError.message.includes('already registered') || authError.message.includes('already exists')) {
+          // Try to find existing user and update their profile
+          console.log('User already exists, trying to update profile...');
+          
+          // Get existing user by email
+          const { data: existingUsers, error: fetchError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('email', userData.email);
+          
+          if (fetchError) {
+            console.error('Error fetching existing user:', fetchError);
+            throw new Error('Usuário já existe mas não foi possível atualizar o perfil');
+          }
+          
+          if (existingUsers && existingUsers.length > 0) {
+            // Update existing user's profile
+            const { error: updateError } = await supabase
+              .from('profiles')
+              .update({
+                first_name: userData.firstName,
+                last_name: userData.lastName,
+                phone: userData.phone,
+                facebook: userData.facebook,
+                role: userData.role,
+                photo: userData.photo,
+              })
+              .eq('id', existingUsers[0].id);
+            
+            if (updateError) {
+              console.error('Error updating existing user:', updateError);
+              throw updateError;
+            }
+            
+            console.log('Existing user profile updated successfully');
+          } else {
+            throw new Error('Usuário já existe mas não foi encontrado na base de dados');
+          }
+        } else {
+          throw authError;
         }
+      } else {
+        console.log('Auth user created:', authData.user?.id);
 
-        console.log('Profile updated successfully');
+        // If new user was created, update their profile
+        if (authData.user) {
+          console.log('Updating new user profile...');
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({
+              first_name: userData.firstName,
+              last_name: userData.lastName,
+              phone: userData.phone,
+              facebook: userData.facebook,
+              role: userData.role,
+              photo: userData.photo,
+            })
+            .eq('id', authData.user.id);
+
+          if (profileError) {
+            console.error('Profile update error:', profileError);
+            throw profileError;
+          }
+
+          console.log('New user profile updated successfully');
+        }
       }
 
       await fetchUsers();
@@ -208,13 +259,19 @@ const UserManagement = () => {
 
       toast({
         title: t('success'),
-        description: 'Usuário criado com sucesso!',
+        description: 'Usuário criado/atualizado com sucesso!',
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating user:', error);
+      let errorMessage = 'Erro ao criar usuário. Tente novamente.';
+      
+      if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: t('error'),
-        description: 'Erro ao criar usuário. Tente novamente.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
