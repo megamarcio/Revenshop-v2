@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { BHPHProvider } from "./contexts/BHPHContext";
 import AuthWrapper from "./components/Auth/AuthWrapper";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
@@ -17,16 +18,18 @@ const App = () => (
     <TooltipProvider>
       <LanguageProvider>
         <AuthProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AuthWrapper>
-              <Routes>
-                <Route path="/*" element={<Index />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AuthWrapper>
-          </BrowserRouter>
+          <BHPHProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AuthWrapper>
+                <Routes>
+                  <Route path="/*" element={<Index />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </AuthWrapper>
+            </BrowserRouter>
+          </BHPHProvider>
         </AuthProvider>
       </LanguageProvider>
     </TooltipProvider>
