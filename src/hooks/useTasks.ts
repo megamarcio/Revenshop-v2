@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '../contexts/AuthContext';
@@ -48,7 +49,29 @@ export const useTasks = () => {
 
       if (error) throw error;
 
-      setTasks(data || []);
+      // Transform and validate the data to match our Task interface
+      const validatedTasks: Task[] = (data || []).map(task => ({
+        id: task.id,
+        title: task.title,
+        description: task.description || '',
+        status: ['pending', 'in_progress', 'completed'].includes(task.status) 
+          ? task.status as 'pending' | 'in_progress' | 'completed'
+          : 'pending',
+        priority: ['low', 'medium', 'high'].includes(task.priority)
+          ? task.priority as 'low' | 'medium' | 'high'
+          : 'medium',
+        assigned_to: task.assigned_to,
+        created_by: task.created_by,
+        due_date: task.due_date,
+        completed_at: task.completed_at,
+        created_at: task.created_at,
+        updated_at: task.updated_at,
+        assignee: task.assignee,
+        creator: task.creator,
+        collaborators: task.collaborators || []
+      }));
+
+      setTasks(validatedTasks);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       toast({
@@ -167,6 +190,11 @@ export const useTasks = () => {
     }
   };
 
+  // Calculate unread tasks count (tasks assigned to current user that are pending)
+  const unreadTasksCount = tasks.filter(
+    task => task.assigned_to === user?.id && task.status === 'pending'
+  ).length;
+
   useEffect(() => {
     fetchTasks();
   }, [user]);
@@ -174,6 +202,7 @@ export const useTasks = () => {
   return {
     tasks,
     loading,
+    unreadTasksCount,
     createTask,
     updateTask,
     deleteTask,

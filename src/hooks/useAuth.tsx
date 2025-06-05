@@ -185,6 +185,7 @@ export const useAuth = () => {
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
   const canEditVehicles = isAdmin || isManager;
+  const canEditCustomers = isAdmin || isManager;
   const canManageUsers = isAdmin || isManager;
   const canAccessAdmin = isAdmin || isManager;
   const canEditBHPHSettings = isAdmin;
@@ -196,6 +197,7 @@ export const useAuth = () => {
     isAdmin,
     isManager,
     canEditVehicles,
+    canEditCustomers,
     canManageUsers,
     canAccessAdmin,
     canEditBHPHSettings,
