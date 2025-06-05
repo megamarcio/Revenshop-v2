@@ -1,7 +1,17 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { Customer } from '../types/customer';
+
+export interface Customer {
+  id: string;
+  name: string;
+  email?: string;
+  phone: string;
+  address?: string;
+  created_at: string;
+  updated_at: string;
+}
 
 export const useCustomers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -12,10 +22,7 @@ export const useCustomers = () => {
       console.log('Fetching customers from database...');
       const { data, error } = await supabase
         .from('bhph_customers')
-        .select(`
-          *,
-          assigned_user:profiles!assigned_to(first_name, last_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
@@ -24,32 +31,7 @@ export const useCustomers = () => {
       }
       
       console.log('Customers fetched successfully:', data?.length || 0, 'customers');
-      
-      // Transform the data to match our Customer interface
-      const transformedCustomers: Customer[] = data?.map(customer => ({
-        id: customer.id,
-        name: customer.name || '',
-        first_name: customer.name?.split(' ')[0] || '',
-        last_name: customer.name?.split(' ').slice(1).join(' ') || '',
-        email: customer.email || '',
-        phone: customer.phone || '',
-        address: customer.address || '',
-        city: '',
-        state: '',
-        zip_code: '',
-        assigned_to: customer.responsible_seller_id,
-        credit_score: customer.credit_score,
-        income: customer.income,
-        down_payment: 0,
-        notes: '',
-        deal_status: customer.deal_status || 'lead',
-        payment_type: customer.payment_type || '',
-        created_at: customer.created_at,
-        updated_at: customer.updated_at,
-        assigned_user: Array.isArray(customer.assigned_user) ? customer.assigned_user[0] : customer.assigned_user
-      })) || [];
-      
-      setCustomers(transformedCustomers);
+      setCustomers(data || []);
     } catch (error) {
       console.error('Error fetching customers:', error);
       toast({
@@ -62,22 +44,22 @@ export const useCustomers = () => {
     }
   };
 
-  const createCustomer = async (customerData: Omit<Customer, 'id' | 'created_at' | 'updated_at'>) => {
+  const createCustomer = async (customerData: {
+    name: string;
+    email?: string;
+    phone: string;
+    address?: string;
+  }) => {
     try {
       console.log('Creating customer with data:', customerData);
       
       const { data, error } = await supabase
         .from('bhph_customers')
         .insert({
-          name: customerData.name || `${customerData.first_name} ${customerData.last_name}`.trim(),
+          name: customerData.name,
           email: customerData.email || null,
           phone: customerData.phone,
           address: customerData.address || null,
-          responsible_seller_id: customerData.assigned_to || null,
-          credit_score: customerData.credit_score || null,
-          income: customerData.income || null,
-          deal_status: customerData.deal_status || 'lead',
-          payment_type: customerData.payment_type || null,
         })
         .select()
         .single();
@@ -88,103 +70,11 @@ export const useCustomers = () => {
       }
       
       console.log('Customer created successfully:', data);
-      await fetchCustomers();
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Cliente criado com sucesso!',
-      });
-      
-      return true;
+      setCustomers(prev => [data, ...prev]);
+      return data;
     } catch (error) {
       console.error('Error creating customer:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao criar cliente',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  const updateCustomer = async (customerId: string, customerData: Omit<Customer, 'id' | 'created_at' | 'updated_at'>) => {
-    try {
-      console.log('Updating customer with data:', customerData);
-      
-      const { data, error } = await supabase
-        .from('bhph_customers')
-        .update({
-          name: customerData.name || `${customerData.first_name} ${customerData.last_name}`.trim(),
-          email: customerData.email || null,
-          phone: customerData.phone,
-          address: customerData.address || null,
-          responsible_seller_id: customerData.assigned_to || null,
-          credit_score: customerData.credit_score || null,
-          income: customerData.income || null,
-          deal_status: customerData.deal_status || 'lead',
-          payment_type: customerData.payment_type || null,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', customerId)
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Supabase error updating customer:', error);
-        throw error;
-      }
-      
-      console.log('Customer updated successfully:', data);
-      await fetchCustomers();
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Cliente atualizado com sucesso!',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error updating customer:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao atualizar cliente',
-        variant: 'destructive',
-      });
-      return false;
-    }
-  };
-
-  const deleteCustomer = async (customerId: string) => {
-    try {
-      console.log('Deleting customer:', customerId);
-      
-      const { error } = await supabase
-        .from('bhph_customers')
-        .delete()
-        .eq('id', customerId);
-
-      if (error) {
-        console.error('Supabase error deleting customer:', error);
-        throw error;
-      }
-      
-      console.log('Customer deleted successfully');
-      await fetchCustomers();
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Cliente excluído com sucesso!',
-      });
-      
-      return true;
-    } catch (error) {
-      console.error('Error deleting customer:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao excluir cliente',
-        variant: 'destructive',
-      });
-      return false;
+      throw error;
     }
   };
 
@@ -233,30 +123,7 @@ export const useCustomers = () => {
     customers,
     loading,
     createCustomer,
-    updateCustomer,
-    deleteCustomer,
-    createSaleRecord: async (saleData: any) => {
-      try {
-        console.log('Creating sale record with data:', saleData);
-        
-        const { data, error } = await supabase
-          .from('sales')
-          .insert(saleData)
-          .select()
-          .single();
-
-        if (error) {
-          console.error('Supabase error creating sale:', error);
-          throw error;
-        }
-        
-        console.log('Sale record created successfully:', data);
-        return data;
-      } catch (error) {
-        console.error('Error creating sale record:', error);
-        throw error;
-      }
-    },
+    createSaleRecord,
     refetch: fetchCustomers,
   };
 };

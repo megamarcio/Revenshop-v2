@@ -1,156 +1,132 @@
 
 import React from 'react';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, Eye, Car, Fuel, Calendar, MapPin } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Edit, Copy, Trash2, Car } from 'lucide-react';
+import { useLanguage } from '../../contexts/LanguageContext';
 
-interface VehicleCardProps {
-  vehicle: {
-    id: string;
-    name: string;
-    model: string;
-    year: number;
-    miles: number;
-    color: string;
-    vin: string;
-    internal_code: string;
-    purchase_price: number;
-    sale_price: number;
-    category: 'forSale' | 'sold';
-    photos: string[];
-    description?: string;
-  };
-  onEdit?: (vehicle: any) => void;
-  onDelete?: (vehicleId: string) => void;
-  onView?: (vehicle: any) => void;
-  showCostInfo: boolean;
+interface Vehicle {
+  id: string;
+  name: string;
+  vin: string;
+  year: number;
+  model: string;
+  plate: string;
+  internalCode: string;
+  color: string;
+  caNote: number;
+  purchasePrice: number;
+  salePrice: number;
+  profitMargin: number;
+  minNegotiable: number;
+  carfaxPrice: number;
+  mmrValue: number;
+  description: string;
+  category: 'forSale' | 'sold';
+  seller?: string;
+  finalSalePrice?: number;
+  photos: string[];
+  video?: string;
 }
 
-const VehicleCard = ({ vehicle, onEdit, onDelete, onView, showCostInfo }: VehicleCardProps) => {
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'sold': return 'bg-green-100 text-green-800';
-      case 'forSale': return 'bg-blue-100 text-blue-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+interface VehicleCardProps {
+  vehicle: Vehicle;
+  onEdit: (vehicle: Vehicle) => void;
+  onDuplicate: (vehicle: Vehicle) => void;
+  onDelete?: (vehicle: Vehicle) => void;
+}
 
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'sold': return 'Vendido';
-      case 'forSale': return 'À Venda';
-      default: return category;
-    }
+const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProps) => {
+  const { t } = useLanguage();
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
   };
 
   return (
     <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardContent className="p-0">
-        {/* Image */}
-        <div className="aspect-video bg-gray-200 rounded-t-lg overflow-hidden">
-          {vehicle.photos && vehicle.photos.length > 0 ? (
-            <img
-              src={vehicle.photos[0]}
-              alt={`${vehicle.year} ${vehicle.name}`}
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <Car className="h-12 w-12 text-gray-400" />
+      <CardHeader className="pb-3">
+        <div className="flex items-start justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="bg-revenshop-primary/10 p-2 rounded-lg">
+              <Car className="h-5 w-5 text-revenshop-primary" />
             </div>
-          )}
+            <div>
+              <CardTitle className="text-lg font-semibold">{vehicle.name}</CardTitle>
+              <p className="text-sm text-gray-500">{vehicle.year} • {vehicle.color}</p>
+            </div>
+          </div>
+          <Badge 
+            variant={vehicle.category === 'forSale' ? 'default' : 'secondary'}
+            className={vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+          >
+            {vehicle.category === 'forSale' ? t('forSale') : t('sold')}
+          </Badge>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-3">
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div>
+            <span className="text-gray-500">VIN:</span>
+            <p className="font-medium">{vehicle.vin}</p>
+          </div>
+          <div>
+            <span className="text-gray-500">{t('plate')}:</span>
+            <p className="font-medium">{vehicle.plate}</p>
+          </div>
+          <div>
+            <span className="text-gray-500">{t('purchasePrice')}:</span>
+            <p className="font-medium text-green-600">{formatCurrency(vehicle.purchasePrice)}</p>
+          </div>
+          <div>
+            <span className="text-gray-500">{t('salePrice')}:</span>
+            <p className="font-medium text-blue-600">{formatCurrency(vehicle.salePrice)}</p>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="p-4 space-y-3">
-          <div className="flex items-start justify-between">
-            <div>
-              <h3 className="font-semibold text-lg text-gray-900">
-                {vehicle.year} {vehicle.name}
-              </h3>
-              <p className="text-gray-600">{vehicle.model}</p>
-              <p className="text-sm text-gray-500">Código: {vehicle.internal_code}</p>
-            </div>
-            <Badge className={getCategoryColor(vehicle.category)}>
-              {getCategoryLabel(vehicle.category)}
-            </Badge>
+        {vehicle.category === 'sold' && vehicle.seller && (
+          <div className="bg-gray-50 p-2 rounded text-sm">
+            <span className="text-gray-500">{t('seller')}:</span>
+            <p className="font-medium">{vehicle.seller}</p>
+            <span className="text-gray-500">{t('finalSalePrice')}:</span>
+            <p className="font-medium text-green-600">{formatCurrency(vehicle.finalSalePrice || 0)}</p>
           </div>
+        )}
 
-          {/* Vehicle Details */}
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div className="flex items-center space-x-1">
-              <MapPin className="h-4 w-4 text-gray-400" />
-              <span>{vehicle.miles?.toLocaleString()} milhas</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span className="w-3 h-3 rounded-full border-2 border-gray-300" style={{ backgroundColor: vehicle.color?.toLowerCase() }}></span>
-              <span className="capitalize">{vehicle.color}</span>
-            </div>
-          </div>
-
-          {/* VIN */}
-          <div className="text-xs text-gray-500 font-mono">
-            VIN: {vehicle.vin}
-          </div>
-
-          {/* Pricing */}
-          <div className="border-t pt-3">
-            {showCostInfo && (
-              <div className="flex justify-between text-sm mb-2">
-                <span className="text-gray-600">Custo:</span>
-                <span className="font-medium text-red-600">
-                  ${vehicle.purchase_price?.toLocaleString()}
-                </span>
-              </div>
-            )}
-            <div className="flex justify-between">
-              <span className="text-gray-600">Preço:</span>
-              <span className="font-bold text-lg text-green-600">
-                ${vehicle.sale_price?.toLocaleString()}
-              </span>
-            </div>
-          </div>
+        <div className="flex space-x-2">
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => onEdit(vehicle)}
+          >
+            <Edit className="h-3 w-3 mr-1" />
+            {t('edit')}
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="flex-1"
+            onClick={() => onDuplicate(vehicle)}
+          >
+            <Copy className="h-3 w-3 mr-1" />
+            {t('duplicate')}
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="text-red-600 hover:text-red-700"
+            onClick={() => onDelete && onDelete(vehicle)}
+          >
+            <Trash2 className="h-3 w-3" />
+          </Button>
         </div>
       </CardContent>
-
-      <CardFooter className="p-4 pt-0">
-        <div className="flex space-x-2 w-full">
-          {onView && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onView(vehicle)}
-              className="flex-1"
-            >
-              <Eye className="h-4 w-4 mr-2" />
-              Ver
-            </Button>
-          )}
-          {onEdit && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEdit(vehicle)}
-              className="flex-1"
-            >
-              <Edit className="h-4 w-4 mr-2" />
-              Editar
-            </Button>
-          )}
-          {onDelete && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onDelete(vehicle.id)}
-              className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Excluir
-            </Button>
-          )}
-        </div>
-      </CardFooter>
     </Card>
   );
 };

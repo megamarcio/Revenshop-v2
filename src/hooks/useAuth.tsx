@@ -1,49 +1,170 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useUserProfile } from './useUserProfile';
-import { useAuthActions } from './useAuthActions';
+import type { User } from '@/types/auth';
+import { toast } from '@/hooks/use-toast';
 
 export const useAuth = () => {
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { user, setUser, fetchUserProfile, clearUser } = useUserProfile();
-  const { signIn, signUp, signOut } = useAuthActions(fetchUserProfile, clearUser);
+  const subscriptionRef = useRef<any>(null);
+
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    try {
+      console.log('Fetching user profile for:', userId);
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching user profile:', error);
+        return null;
+      }
+      
+      if (data) {
+        console.log('User profile fetched:', data);
+        setUser(data);
+        return data;
+      } else {
+        console.log('No profile found for user:', userId);
+        return null;
+      }
+    } catch (error) {
+      console.error('Error in fetchUserProfile:', error);
+      return null;
+    }
+  }, []);
+
+  const clearUser = useCallback(() => {
+    setUser(null);
+  }, []);
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      console.log('Attempting to sign in with:', email);
+      
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error('Sign in error:', error);
+        throw error;
+      }
+
+      console.log('Sign in successful:', data);
+
+      if (data.user) {
+        const profile = await fetchUserProfile(data.user.id);
+        if (profile) {
+          toast({
+            title: 'Sucesso',
+            description: 'Login realizado com sucesso!',
+          });
+          return true;
+        } else {
+          console.log('User authenticated but no profile found');
+          return true;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error('Error signing in:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao fazer login. Verifique suas credenciais.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  const signUp = async (email: string, password: string, firstName: string, lastName: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            last_name: lastName,
+          },
+        },
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Sucesso',
+        description: 'Conta criada com sucesso! Verifique seu email.',
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error signing up:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao criar conta.',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  const signOut = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      clearUser();
+      toast({
+        title: 'Sucesso',
+        description: 'Logout realizado com sucesso!',
+      });
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao fazer logout.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   useEffect(() => {
-    let mounted = true;
-    
     console.log('Setting up auth state listener');
+    
+    // Clean up any existing subscription
+    if (subscriptionRef.current) {
+      subscriptionRef.current.unsubscribe();
+    }
     
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        if (!mounted) return;
-        
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (session?.user) {
           // Use setTimeout to avoid potential auth callback issues
           setTimeout(() => {
-            if (mounted) {
-              fetchUserProfile(session.user.id);
-            }
+            fetchUserProfile(session.user.id);
           }, 0);
         } else {
-          if (mounted) {
-            clearUser();
-          }
+          clearUser();
         }
-        
-        if (mounted) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     );
 
+    subscriptionRef.current = subscription;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
       console.log('Initial session:', session?.user?.id);
       if (session?.user) {
         fetchUserProfile(session.user.id);
@@ -53,17 +174,17 @@ export const useAuth = () => {
     });
 
     return () => {
-      mounted = false;
       console.log('Cleaning up auth subscription');
-      subscription.unsubscribe();
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+      }
     };
-  }, []); // Remove dependencies to prevent infinite loops
+  }, []); // Remove dependencies to prevent recreation
 
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
   const canEditVehicles = isAdmin || isManager;
-  const canEditCustomers = isAdmin || isManager;
   const canManageUsers = isAdmin || isManager;
   const canAccessAdmin = isAdmin || isManager;
   const canEditBHPHSettings = isAdmin;
@@ -75,7 +196,6 @@ export const useAuth = () => {
     isAdmin,
     isManager,
     canEditVehicles,
-    canEditCustomers,
     canManageUsers,
     canAccessAdmin,
     canEditBHPHSettings,

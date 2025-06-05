@@ -142,26 +142,8 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     },
   });
 
-  // Verificar se já existe cliente com o mesmo telefone
-  const checkPhoneExists = async (phone: string, excludeId?: string) => {
-    const { data, error } = await supabase
-      .from('bhph_customers')
-      .select('id')
-      .eq('phone', phone)
-      .neq('id', excludeId || '');
-
-    if (error) throw error;
-    return data && data.length > 0;
-  };
-
   const saveCustomerMutation = useMutation({
     mutationFn: async (data: typeof formData) => {
-      // Verificar telefone duplicado
-      const phoneExists = await checkPhoneExists(data.phone, customer?.id);
-      if (phoneExists) {
-        throw new Error('Já existe um cliente cadastrado com este telefone.');
-      }
-
       // Clean up UUID fields - convert empty strings to null
       const cleanedData = {
         ...data,

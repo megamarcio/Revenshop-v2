@@ -7,10 +7,9 @@ import { useAuth } from '../../contexts/AuthContext';
 
 interface VehicleListHeaderProps {
   onAddVehicle: () => void;
-  totalVehicles?: number;
 }
 
-const VehicleListHeader = ({ onAddVehicle, totalVehicles }: VehicleListHeaderProps) => {
+const VehicleListHeader = ({ onAddVehicle }: VehicleListHeaderProps) => {
   const { t } = useLanguage();
   const { canEditVehicles } = useAuth();
 
@@ -18,12 +17,7 @@ const VehicleListHeader = ({ onAddVehicle, totalVehicles }: VehicleListHeaderPro
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">{t('vehicles')}</h1>
-        <p className="text-gray-600">
-          {totalVehicles !== undefined 
-            ? `${totalVehicles} veículos cadastrados` 
-            : t('subtitle')
-          }
-        </p>
+        <p className="text-gray-600">{t('subtitle')}</p>
       </div>
       {canEditVehicles && (
         <Button 
