@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -9,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Search, FileText, DollarSign, Edit } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../integrations/supabase/client';
 import CustomerForm from './CustomerForm';
 import QuoteGenerator from './QuoteGenerator';
@@ -22,6 +22,7 @@ interface Customer {
   address: string;
   deal_status: string;
   payment_type: string;
+  responsible_seller_id?: string;
   interested_vehicle?: {
     id: string;
     name: string;
@@ -41,6 +42,7 @@ interface CustomerListProps {
 
 const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
   const { t } = useLanguage();
+  const { user, isAdmin, isManager } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
@@ -49,7 +51,7 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
   const [showDealDetails, setShowDealDetails] = useState(false);
 
   const { data: customers = [], isLoading } = useQuery({
-    queryKey: ['customers', searchTerm, statusFilter],
+    queryKey: ['customers', searchTerm, statusFilter, user?.id],
     queryFn: async () => {
       let query = supabase
         .from('bhph_customers')
@@ -59,6 +61,11 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
           responsible_seller:profiles(first_name, last_name)
         `)
         .order('created_at', { ascending: false });
+
+      // Se não for admin ou manager, mostrar apenas clientes do vendedor
+      if (!isAdmin && !isManager && user?.id) {
+        query = query.eq('responsible_seller_id', user.id);
+      }
 
       if (searchTerm) {
         query = query.or(`name.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);

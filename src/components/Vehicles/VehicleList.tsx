@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles';
@@ -21,7 +20,7 @@ const VehicleList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid'); // Mudança: padrão agora é 'grid'
   const [sortBy, setSortBy] = useState('internal_code');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
