@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Edit, ExternalLink, Eye } from 'lucide-react';
+import { Edit, Eye } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useState } from 'react';
 import AuctionDetailsModal from './AuctionDetailsModal';
@@ -77,24 +77,30 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
                     </div>
                   </TableCell>
                   <TableCell className="py-1 px-2">
-                    <div>
-                      <div className="font-medium text-[11px] leading-tight">{auction.car_name}</div>
-                      <a 
-                        href={auction.car_link} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-[9px] flex items-center gap-1 mt-1"
-                      >
-                        Ver Carro <ExternalLink className="h-2 w-2" />
-                      </a>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1">
+                        <div className="font-bold text-[11px] leading-tight">{auction.car_name}</div>
+                      </div>
+                      {auction.car_link && (
+                        <a 
+                          href={auction.car_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </a>
+                      )}
                     </div>
                   </TableCell>
                   <TableCell className="py-1 px-2 text-xs">{auction.car_year}</TableCell>
                   <TableCell className="py-1 px-2 text-xs">
                     {auction.auction_date ? new Date(auction.auction_date).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
-                  <TableCell className="py-1 px-2 text-xs">
-                    {auction.bid_value ? `R$ ${auction.bid_value.toLocaleString('pt-BR')}` : '-'}
+                  <TableCell className="py-1 px-2">
+                    <span className="font-bold text-xs">
+                      {auction.bid_value ? `R$ ${auction.bid_value.toLocaleString('pt-BR')}` : '-'}
+                    </span>
                   </TableCell>
                   <TableCell className="py-1 px-2">
                     <Badge 
