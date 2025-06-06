@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
@@ -12,6 +11,7 @@ import ProfilePage from './components/Profile/ProfilePage';
 import BuyHerePayHere from './components/BHPH/BuyHerePayHere';
 import AuctionManagement from './components/Auctions/AuctionManagement';
 import TaskManagement from './components/Tasks/TaskManagement';
+import FinancingSimulation from './components/FinancingSimulation/FinancingSimulation';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -42,6 +42,7 @@ const App: React.FC = () => {
           {activeTab === 'auctions' && <AuctionManagement />}
           {activeTab === 'tasks' && <TaskManagement />}
           {activeTab === 'bhph' && <BuyHerePayHere />}
+          {activeTab === 'financing' && <FinancingSimulation />}
           {activeTab === 'users' && canManageUsers && <UserManagement />}
           {activeTab === 'admin' && canAccessAdmin && <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />}
           {activeTab === 'profile' && <ProfilePage />}
