@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Copy, Trash2, Car, ExternalLink, DollarSign } from 'lucide-react';
+import { Edit, Copy, Trash2, Car, Eye, DollarSign } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Vehicle {
@@ -89,20 +89,21 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
         
         {/* Conteúdo do card */}
         <CardContent className="p-3 space-y-2">
-          {/* Título com código e ano */}
+          {/* Título com código */}
           <div>
             <h3 className="text-[11px] font-bold text-gray-900 leading-tight mb-0.5">
               {vehicle.internalCode} - {vehicle.name}
             </h3>
-            <p className="text-xs text-gray-600">{vehicle.year} • {vehicle.color}</p>
+            {/* Ano e cor centralizados */}
+            <p className="text-xs text-gray-600 text-center">{vehicle.year} • {vehicle.color}</p>
           </div>
 
-          {/* VIN e Milhas */}
+          {/* VIN e Milhas com fonte 11 em negrito */}
           <div className="bg-gray-50 p-1.5 rounded text-center">
-            <span className="text-[10px] text-gray-500 font-mono tracking-wide block">
+            <span className="text-[11px] text-gray-500 font-bold tracking-wide block">
               VIN: {vehicle.vin}
             </span>
-            <span className="text-[10px] text-gray-600 mt-1 block">
+            <span className="text-[11px] text-gray-600 mt-1 block font-bold">
               Milhas: {vehicle.plate}
             </span>
           </div>
@@ -113,12 +114,12 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
             <p className="text-sm font-bold text-green-700 text-center">{formatCurrency(vehicle.salePrice)}</p>
           </div>
 
-          {/* Preço de compra com tooltip */}
+          {/* Preço de compra com ícone de olho */}
           <div className="flex justify-center">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                  <DollarSign className="h-3 w-3 mr-1" />
+                  <Eye className="h-3 w-3 mr-1" />
                   Preço de Compra
                 </Button>
               </TooltipTrigger>
@@ -168,7 +169,11 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
               onClick={() => handleCarfaxLookup(vehicle.vin)}
               title="Consultar Carfax"
             >
-              <ExternalLink className="h-3 w-3" />
+              <img 
+                src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
+                alt="Carfax" 
+                className="h-3 w-3 object-contain"
+              />
             </Button>
             <Button 
               size="sm" 
