@@ -31,6 +31,7 @@ const TaskTable = ({
             <TableHead className="text-xs font-medium">Responsável</TableHead>
             <TableHead className="text-xs font-medium">Prioridade</TableHead>
             <TableHead className="text-xs font-medium">Vencimento</TableHead>
+            <TableHead className="text-xs font-medium w-20">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

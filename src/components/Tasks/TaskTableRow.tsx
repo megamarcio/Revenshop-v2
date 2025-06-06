@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertTriangle, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -49,11 +50,18 @@ const TaskTableRow = ({
     return new Date(dueDate) < new Date();
   };
 
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onEdit(task);
+  };
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDelete(task.id);
+  };
+
   return (
-    <TableRow 
-      className="hover:bg-gray-50 cursor-pointer" 
-      onClick={() => onEdit(task)}
-    >
+    <TableRow className="hover:bg-gray-50">
       <TableCell className="py-2">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-gray-900">
@@ -87,6 +95,27 @@ const TaskTableRow = ({
             '-'
           )}
         </span>
+      </TableCell>
+      <TableCell className="py-2">
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEdit}
+            className="h-7 w-7 p-0 hover:bg-blue-100"
+          >
+            <Edit className="h-3 w-3 text-blue-600" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDelete}
+            disabled={isDeleting}
+            className="h-7 w-7 p-0 hover:bg-red-100"
+          >
+            <Trash2 className="h-3 w-3 text-red-600" />
+          </Button>
+        </div>
       </TableCell>
     </TableRow>
   );
