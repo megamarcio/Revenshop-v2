@@ -144,7 +144,11 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
                           onClick={() => handleCarfaxClick(auction.vin_number)}
                           title="Ver Carfax"
                         >
-                          <span className="text-[10px] font-bold">C</span>
+                          <img 
+                            src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
+                            alt="Carfax" 
+                            className="h-3 w-3"
+                          />
                         </Button>
                       )}
                       {canEditVehicles && (
