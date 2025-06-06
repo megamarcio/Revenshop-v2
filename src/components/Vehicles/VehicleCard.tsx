@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -103,6 +102,22 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
       });
     } finally {
       setDownloading(false);
+    }
+  };
+
+  const handleCopyDescription = () => {
+    if (vehicle.description) {
+      navigator.clipboard.writeText(vehicle.description);
+      toast({
+        title: 'Copiado!',
+        description: 'Descrição copiada para a área de transferência.',
+      });
+    } else {
+      toast({
+        title: 'Aviso',
+        description: 'Nenhuma descrição disponível para copiar.',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -242,8 +257,9 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
               size="sm" 
               variant="outline" 
               className="h-7 w-7 p-0"
-              onClick={() => onDuplicate(vehicle)}
-              title="Duplicar"
+              onClick={handleCopyDescription}
+              title="Copiar Descrição"
+              disabled={!vehicle.description}
             >
               <Copy className="h-3 w-3" />
             </Button>
