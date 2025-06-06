@@ -34,14 +34,20 @@ interface SidebarProps {
 
 const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { t } = useLanguage();
-  const { canAccessAdmin, canManageUsers } = useAuth();
+  const { 
+    canAccessAdmin, 
+    canManageUsers, 
+    canAccessDashboard,
+    canAccessAuctions,
+    isInternalSeller
+  } = useAuth();
   const { state } = useSidebar();
 
   const menuItems = [
-    ...(canAccessAdmin ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
+    ...(canAccessDashboard ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
     { id: 'vehicles', label: t('vehicles'), icon: Car },
     { id: 'customers', label: t('customers'), icon: UserCheck },
-    { id: 'auctions', label: 'Leilões', icon: Gavel },
+    ...(canAccessAuctions ? [{ id: 'auctions', label: 'Leilões', icon: Gavel }] : []),
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
     { id: 'financing', label: 'Simulação de Financiamento', icon: Calculator },

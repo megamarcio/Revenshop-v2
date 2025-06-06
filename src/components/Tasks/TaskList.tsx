@@ -14,12 +14,34 @@ interface TaskListProps {
 
 const TaskList = ({ onEditTask, compact = false, limit }: TaskListProps) => {
   const { tasks, updateTask, deleteTask, isDeleting } = useTasks();
-  const { canEditVehicles, user } = useAuth();
+  const { canEditVehicles, canViewAllTasks, user } = useAuth();
   const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
 
-  const filteredTasks = tasks
-    .filter(task => filter === 'all' || task.status === filter)
-    .slice(0, limit);
+  // Filter tasks based on user role
+  const getFilteredTasks = () => {
+    let filteredTasks = tasks;
+
+    // If user cannot view all tasks, show only their own tasks
+    if (!canViewAllTasks && user) {
+      filteredTasks = tasks.filter(task => 
+        task.assigned_to === user.id || task.created_by === user.id
+      );
+    }
+
+    // Apply status filter
+    if (filter !== 'all') {
+      filteredTasks = filteredTasks.filter(task => task.status === filter);
+    }
+
+    // Apply limit if specified
+    if (limit) {
+      filteredTasks = filteredTasks.slice(0, limit);
+    }
+
+    return filteredTasks;
+  };
+
+  const filteredTasks = getFilteredTasks();
 
   const handleStatusChange = (taskId: string, newStatus: string) => {
     const updates: any = { status: newStatus };
@@ -40,7 +62,9 @@ const TaskList = ({ onEditTask, compact = false, limit }: TaskListProps) => {
       <div className="space-y-3">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-8">
-            <p className="text-muted-foreground">Nenhuma tarefa encontrada</p>
+            <p className="text-muted-foreground">
+              {!canViewAllTasks ? 'Nenhuma tarefa atribuída a você' : 'Nenhuma tarefa encontrada'}
+            </p>
           </div>
         ) : (
           filteredTasks.map((task) => (

@@ -139,18 +139,15 @@ export const useAuth = () => {
   useEffect(() => {
     console.log('Setting up auth state listener');
     
-    // Clean up any existing subscription
     if (subscriptionRef.current) {
       subscriptionRef.current.unsubscribe();
     }
     
-    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (session?.user) {
-          // Use setTimeout to avoid potential auth callback issues
           setTimeout(() => {
             fetchUserProfile(session.user.id);
           }, 0);
@@ -163,7 +160,6 @@ export const useAuth = () => {
 
     subscriptionRef.current = subscription;
 
-    // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
       console.log('Initial session:', session?.user?.id);
       if (session?.user) {
@@ -179,16 +175,24 @@ export const useAuth = () => {
         subscriptionRef.current.unsubscribe();
       }
     };
-  }, []); // Remove dependencies to prevent recreation
+  }, []);
 
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
+  const isInternalSeller = user?.role === 'internal_seller';
+  const isSeller = user?.role === 'seller';
   const canEditVehicles = isAdmin || isManager;
   const canEditCustomers = isAdmin || isManager;
   const canManageUsers = isAdmin || isManager;
   const canAccessAdmin = isAdmin || isManager;
   const canEditBHPHSettings = isAdmin;
+  const canViewCostPrices = isAdmin || isManager;
+  const canAccessAuctions = isAdmin || isManager || isSeller;
+  const canViewAllTasks = isAdmin || isManager;
+  const canViewAllCustomers = isAdmin || isManager;
+  const canViewBHPHDetails = isAdmin || isManager;
+  const canAccessDashboard = isAdmin || isManager || isSeller || isInternalSeller;
 
   return {
     user,
@@ -196,11 +200,19 @@ export const useAuth = () => {
     isAuthenticated,
     isAdmin,
     isManager,
+    isInternalSeller,
+    isSeller,
     canEditVehicles,
     canEditCustomers,
     canManageUsers,
     canAccessAdmin,
     canEditBHPHSettings,
+    canViewCostPrices,
+    canAccessAuctions,
+    canViewAllTasks,
+    canViewAllCustomers,
+    canViewBHPHDetails,
+    canAccessDashboard,
     signIn,
     signUp,
     signOut,

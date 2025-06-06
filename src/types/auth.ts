@@ -5,7 +5,7 @@ export interface User {
   last_name: string;
   email: string;
   phone?: string;
-  role: 'admin' | 'manager' | 'seller';
+  role: 'admin' | 'manager' | 'seller' | 'internal_seller';
   photo?: string;
   facebook?: string;
   commission_client_referral?: number;

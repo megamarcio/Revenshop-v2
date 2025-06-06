@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
@@ -27,7 +26,7 @@ const LoadingFallback = () => (
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { canAccessAdmin, canManageUsers } = useAuth();
+  const { canAccessAdmin, canManageUsers, canAccessDashboard } = useAuth();
 
   useEffect(() => {
     const storedTab = localStorage.getItem('activeTab');
@@ -43,7 +42,7 @@ const App: React.FC = () => {
   const renderActiveComponent = () => {
     switch (activeTab) {
       case 'dashboard':
-        return canAccessAdmin ? <Dashboard /> : null;
+        return canAccessDashboard ? <Dashboard /> : null;
       case 'vehicles':
         return <VehicleList />;
       case 'customers':
