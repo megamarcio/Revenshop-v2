@@ -1,7 +1,5 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { Vehicle } from './types';
 import { 
   fetchVehicles as fetchVehiclesOperation, 
   createVehicle as createVehicleOperation, 
@@ -9,7 +7,7 @@ import {
   deleteVehicle as deleteVehicleOperation 
 } from './vehicleOperations';
 
-export { Vehicle } from './types';
+export type { Vehicle } from './types';
 
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
