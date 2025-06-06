@@ -83,9 +83,15 @@ export const useAuthActions = (
 
   const signOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      // Check if there's an active session before attempting to sign out
+      const { data: { session } } = await supabase.auth.getSession();
       
+      if (session) {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+      }
+      
+      // Always clear the user state, even if there was no active session
       clearUser();
       toast({
         title: 'Sucesso',
@@ -93,6 +99,8 @@ export const useAuthActions = (
       });
     } catch (error) {
       console.error('Error signing out:', error);
+      // Still clear the user state even if logout failed
+      clearUser();
       toast({
         title: 'Erro',
         description: 'Erro ao fazer logout.',
