@@ -32,7 +32,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
             <div className="text-center">
               <DollarSign className="h-10 w-10 mx-auto text-blue-600 mb-3" />
               <p className="text-sm text-blue-600 font-medium mb-1">Down Payment</p>
-              <p className="text-3xl font-bold text-blue-900">
+              <p className="text-base font-bold text-blue-900">
                 {formatCurrency(results.downPaymentAmount)}
               </p>
             </div>
@@ -40,7 +40,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
             <div className="text-center">
               <CreditCard className="h-10 w-10 mx-auto text-green-600 mb-3" />
               <p className="text-sm text-green-600 font-medium mb-1">Financiamento</p>
-              <p className="text-3xl font-bold text-green-900">
+              <p className="text-base font-bold text-green-900">
                 {data.installments}x de {formatCurrency(results.monthlyPayment)}
               </p>
             </div>

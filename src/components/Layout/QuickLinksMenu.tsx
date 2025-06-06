@@ -8,7 +8,7 @@ const QuickLinksMenu = () => {
   const quickLinks = [
     {
       name: 'Carfax Online',
-      url: 'https://www.carfaxonline.com/',
+      url: 'https://www.carfax.com/',
       icon: Car,
       description: 'Relatórios de histórico de veículos'
     },
@@ -51,28 +51,28 @@ const QuickLinksMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center space-x-1">
+        <Button variant="outline" size="sm" className="flex items-center space-x-2">
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">Links Úteis</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-64 bg-white border border-gray-200 shadow-lg z-50"
+        className="w-64 z-50"
       >
         {quickLinks.map((link, index) => (
           <React.Fragment key={link.name}>
             <DropdownMenuItem
-              className="flex items-start space-x-3 p-3 hover:bg-gray-50 cursor-pointer"
+              className="flex items-start space-x-3 p-3 cursor-pointer"
               onClick={() => handleLinkClick(link.url)}
             >
-              <link.icon className="h-4 w-4 mt-0.5 text-blue-600 flex-shrink-0" />
+              <link.icon className="h-4 w-4 mt-0.5 text-primary flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-1">
-                  <span className="font-medium text-gray-900 text-sm">{link.name}</span>
-                  <ExternalLink className="h-3 w-3 text-gray-400" />
+                  <span className="font-medium text-sm">{link.name}</span>
+                  <ExternalLink className="h-3 w-3 text-muted-foreground" />
                 </div>
-                <p className="text-xs text-gray-500 mt-0.5">{link.description}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{link.description}</p>
               </div>
             </DropdownMenuItem>
             {index < quickLinks.length - 1 && <DropdownMenuSeparator />}
