@@ -6,19 +6,10 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Calculator, Percent, DollarSign, CreditCard, FileText, Settings } from 'lucide-react';
+import { FinancingData } from './types';
 
 interface FinancingCalculatorProps {
-  data: {
-    vehiclePrice: number;
-    downPayment: number;
-    interestRate: number;
-    installments: number;
-    dealerFee: number;
-    taxRate: number;
-    registrationFee: number;
-    otherFees: number;
-    otherFeesDescription: string;
-  };
+  data: FinancingData;
   onChange: (field: string, value: any) => void;
   onCalculate: () => void;
 }

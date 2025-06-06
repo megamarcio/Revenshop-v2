@@ -1,32 +1,12 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { CheckCircle, DollarSign, CreditCard, TrendingUp, Car } from 'lucide-react';
+import { FinancingData, CalculationResults } from './types';
 
 interface FinancingResultsProps {
-  data: {
-    vehicle?: any;
-    customer?: any;
-    vehiclePrice: number;
-    downPayment: number;
-    interestRate: number;
-    installments: number;
-    dealerFee: number;
-    taxRate: number;
-    registrationFee: number;
-    otherFees: number;
-    otherFeesDescription: string;
-  };
-  results: {
-    downPaymentAmount: number;
-    financedAmount: number;
-    totalTaxes: number;
-    totalFees: number;
-    totalLoanAmount: number;
-    monthlyPayment: number;
-    totalAmount: number;
-  };
+  data: FinancingData;
+  results: CalculationResults;
 }
 
 const FinancingResults = ({ data, results }: FinancingResultsProps) => {
