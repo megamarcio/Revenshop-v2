@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Search, FileText, Download, DollarSign, CreditCard, Banknote } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Plus, Search, FileText, DollarSign, Edit } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../integrations/supabase/client';
 import CustomerForm from './CustomerForm';
@@ -72,19 +73,6 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
       return data as Customer[];
     },
   });
-
-  const getPaymentTypeIcon = (paymentType: string) => {
-    switch (paymentType) {
-      case 'cash':
-        return <Banknote className="h-4 w-4" />;
-      case 'financing':
-        return <CreditCard className="h-4 w-4" />;
-      case 'bhph':
-        return <DollarSign className="h-4 w-4" />;
-      default:
-        return <DollarSign className="h-4 w-4" />;
-    }
-  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -193,80 +181,101 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4">
-          {customers.map((customer) => (
-            <Card key={customer.id} className="hover:shadow-md transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{customer.name}</h3>
-                    <div className="text-sm text-gray-600 space-y-1">
-                      <p>📞 {customer.phone}</p>
-                      {customer.email && <p>✉️ {customer.email}</p>}
-                      {customer.address && <p>📍 {customer.address}</p>}
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge className={getStatusBadgeColor(customer.deal_status)}>
-                      {customer.deal_status === 'quote' ? t('quote') : t('completedSale')}
-                    </Badge>
-                    <div className="flex items-center gap-1 px-2 py-1 bg-gray-100 rounded-md">
-                      {getPaymentTypeIcon(customer.payment_type)}
-                      <span className="text-xs">
-                        {customer.payment_type === 'cash' ? t('cash') :
-                         customer.payment_type === 'financing' ? t('financing') : t('bhph')}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {customer.interested_vehicle && (
-                  <div className="bg-gray-50 p-3 rounded-md mb-4">
-                    <p className="text-sm font-medium">🚗 Veículo de Interesse:</p>
-                    <p className="text-sm text-gray-600">
-                      {customer.interested_vehicle.year} {customer.interested_vehicle.name} {customer.interested_vehicle.model}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Preço: R$ {customer.interested_vehicle.sale_price?.toLocaleString()}
-                    </p>
-                  </div>
-                )}
-
-                {customer.responsible_seller && (
-                  <div className="text-sm text-gray-600 mb-4">
-                    <p>👤 Vendedor: {customer.responsible_seller.first_name} {customer.responsible_seller.last_name}</p>
-                  </div>
-                )}
-
-                <div className="flex gap-2 flex-wrap">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditCustomer(customer)}
-                  >
-                    {t('edit')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleShowDealDetails(customer)}
-                  >
-                    <DollarSign className="h-4 w-4 mr-1" />
-                    Detalhes do Deal
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleGenerateQuote(customer)}
-                  >
-                    <FileText className="h-4 w-4 mr-1" />
-                    {t('generateQuote')}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-xs font-medium">Nome</TableHead>
+                  <TableHead className="text-xs font-medium">Telefone</TableHead>
+                  <TableHead className="text-xs font-medium">Veículo de Interesse</TableHead>
+                  <TableHead className="text-xs font-medium">Preço</TableHead>
+                  <TableHead className="text-xs font-medium">Vendedor</TableHead>
+                  <TableHead className="text-xs font-medium">Status</TableHead>
+                  <TableHead className="text-xs font-medium text-right">Ações</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {customers.map((customer) => (
+                  <TableRow key={customer.id} className="hover:bg-gray-50">
+                    <TableCell className="text-xs">
+                      <div>
+                        <div className="font-medium">{customer.name}</div>
+                        {customer.email && (
+                          <div className="text-gray-500 text-xs">{customer.email}</div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs">{customer.phone}</TableCell>
+                    <TableCell className="text-xs">
+                      {customer.interested_vehicle ? (
+                        <div>
+                          <div className="font-medium">
+                            {customer.interested_vehicle.year} {customer.interested_vehicle.name}
+                          </div>
+                          <div className="text-gray-500">{customer.interested_vehicle.model}</div>
+                        </div>
+                      ) : (
+                        <span className="text-gray-400">Não informado</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {customer.interested_vehicle?.sale_price ? (
+                        <span className="font-medium">
+                          R$ {customer.interested_vehicle.sale_price.toLocaleString()}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">-</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      {customer.responsible_seller ? (
+                        <span>
+                          {customer.responsible_seller.first_name} {customer.responsible_seller.last_name}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">Não atribuído</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-xs">
+                      <Badge className={`text-xs ${getStatusBadgeColor(customer.deal_status)}`}>
+                        {customer.deal_status === 'quote' ? t('quote') : t('completedSale')}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex gap-1 justify-end">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEditCustomer(customer)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleShowDealDetails(customer)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <DollarSign className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleGenerateQuote(customer)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <FileText className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
