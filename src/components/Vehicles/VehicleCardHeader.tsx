@@ -42,7 +42,7 @@ const VehicleCardHeader = ({
           <img 
             src={currentPhoto} 
             alt={vehicle.name}
-            className="w-full h-72 object-cover rounded-t-lg"
+            className="w-full h-56 object-cover rounded-t-lg"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';
@@ -119,7 +119,7 @@ const VehicleCardHeader = ({
           </div>
         </div>
       ) : (
-        <div className="w-full h-72 bg-gray-200 rounded-t-lg flex items-center justify-center">
+        <div className="w-full h-56 bg-gray-200 rounded-t-lg flex items-center justify-center">
           <ImageIcon className="h-12 w-12 text-gray-400" />
         </div>
       )}
