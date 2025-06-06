@@ -64,7 +64,7 @@ export const useAuth = () => {
   const isManager = user?.role === 'manager';
   const isInternalSeller = user?.role === 'internal_seller';
   const isSeller = user?.role === 'seller' || user?.role === 'internal_seller';
-  const canEditVehicles = isAdmin || isManager;
+  const canEditVehicles = isAdmin || isManager || isInternalSeller;
   const canEditCustomers = isAdmin || isManager;
   const canManageUsers = isAdmin || isManager;
   const canAccessAdmin = isAdmin || isManager;
