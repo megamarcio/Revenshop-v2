@@ -18,7 +18,7 @@ const VehicleList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list'); // Mudança: padrão agora é 'list'
   const [sortBy, setSortBy] = useState('internal_code');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
@@ -238,13 +238,14 @@ const VehicleList = () => {
       />
 
       {viewMode === 'grid' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
           {filteredAndSortedVehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
               vehicle={convertVehicleForCard(vehicle)}
               onEdit={() => handleEditVehicle(vehicle)}
               onDuplicate={() => handleDuplicateVehicle(vehicle)}
+              onDelete={() => handleDeleteVehicle(vehicle)}
             />
           ))}
         </div>

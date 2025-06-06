@@ -48,82 +48,119 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow duration-200">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="bg-revenshop-primary/10 p-2 rounded-lg">
-              <Car className="h-5 w-5 text-revenshop-primary" />
-            </div>
-            <div>
-              <CardTitle className="text-lg font-semibold">{vehicle.name}</CardTitle>
-              <p className="text-sm text-gray-500">{vehicle.year} • {vehicle.color}</p>
-            </div>
+    <Card className="hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden">
+      {/* Header com foto e badge */}
+      <div className="relative">
+        {vehicle.photos && vehicle.photos.length > 0 ? (
+          <div className="h-32 w-full overflow-hidden bg-gray-100">
+            <img 
+              src={vehicle.photos[0]} 
+              alt={vehicle.name}
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+            />
           </div>
+        ) : (
+          <div className="h-32 w-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+            <Car className="h-12 w-12 text-gray-400" />
+          </div>
+        )}
+        
+        {/* Badge de status */}
+        <div className="absolute top-2 right-2">
           <Badge 
             variant={vehicle.category === 'forSale' ? 'default' : 'secondary'}
-            className={vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}
+            className={`text-[7px] px-1.5 py-0.5 font-medium ${
+              vehicle.category === 'forSale' 
+                ? 'bg-green-500 text-white hover:bg-green-600' 
+                : 'bg-red-500 text-white hover:bg-red-600'
+            }`}
           >
             {vehicle.category === 'forSale' ? t('forSale') : t('sold')}
           </Badge>
         </div>
-      </CardHeader>
+      </div>
       
-      <CardContent className="space-y-3">
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <span className="text-gray-500">VIN:</span>
-            <p className="font-medium">{vehicle.vin}</p>
+      {/* Conteúdo do card */}
+      <CardContent className="p-3 space-y-2">
+        {/* Título e ano */}
+        <div>
+          <h3 className="text-[10px] font-semibold text-gray-900 leading-tight mb-0.5">
+            {vehicle.name}
+          </h3>
+          <p className="text-[10px] text-gray-600">{vehicle.year} • {vehicle.color}</p>
+        </div>
+
+        {/* VIN em fonte menor */}
+        <div className="bg-gray-50 p-1.5 rounded text-center">
+          <span className="text-[7px] text-gray-500 font-mono tracking-wide">
+            VIN: {vehicle.vin}
+          </span>
+        </div>
+
+        {/* Grid de informações principais */}
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-blue-50 p-1.5 rounded">
+            <span className="text-[8px] text-blue-600 block">{t('purchasePrice')}:</span>
+            <p className="text-[10px] font-semibold text-blue-700">{formatCurrency(vehicle.purchasePrice)}</p>
           </div>
-          <div>
-            <span className="text-gray-500">{t('plate')}:</span>
-            <p className="font-medium">{vehicle.plate}</p>
-          </div>
-          <div>
-            <span className="text-gray-500">{t('purchasePrice')}:</span>
-            <p className="font-medium text-green-600">{formatCurrency(vehicle.purchasePrice)}</p>
-          </div>
-          <div>
-            <span className="text-gray-500">{t('salePrice')}:</span>
-            <p className="font-medium text-blue-600">{formatCurrency(vehicle.salePrice)}</p>
+          <div className="bg-green-50 p-1.5 rounded">
+            <span className="text-[8px] text-green-600 block">{t('salePrice')}:</span>
+            <p className="text-[10px] font-semibold text-green-700">{formatCurrency(vehicle.salePrice)}</p>
           </div>
         </div>
 
+        {/* Informações secundárias */}
+        <div className="space-y-1">
+          <div className="flex justify-between items-center">
+            <span className="text-[8px] text-gray-500">{t('plate')}:</span>
+            <span className="text-[10px] font-medium">{vehicle.plate}</span>
+          </div>
+          <div className="flex justify-between items-center">
+            <span className="text-[8px] text-gray-500">Código:</span>
+            <span className="text-[10px] font-medium">{vehicle.internalCode}</span>
+          </div>
+        </div>
+
+        {/* Informações de venda se vendido */}
         {vehicle.category === 'sold' && vehicle.seller && (
-          <div className="bg-gray-50 p-2 rounded text-sm">
-            <span className="text-gray-500">{t('seller')}:</span>
-            <p className="font-medium">{vehicle.seller}</p>
-            <span className="text-gray-500">{t('finalSalePrice')}:</span>
-            <p className="font-medium text-green-600">{formatCurrency(vehicle.finalSalePrice || 0)}</p>
+          <div className="bg-gray-50 p-2 rounded text-center border-t">
+            <div className="text-[8px] text-gray-500 mb-1">Vendido por:</div>
+            <div className="text-[10px] font-medium text-gray-700">{vehicle.seller}</div>
+            {vehicle.finalSalePrice && (
+              <div className="text-[10px] font-semibold text-green-600 mt-1">
+                {formatCurrency(vehicle.finalSalePrice)}
+              </div>
+            )}
           </div>
         )}
 
-        <div className="flex space-x-2">
+        {/* Botões de ação */}
+        <div className="flex gap-1 pt-2 border-t border-gray-100">
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex-1"
+            className="flex-1 h-7 text-[9px] px-2"
             onClick={() => onEdit(vehicle)}
           >
-            <Edit className="h-3 w-3 mr-1" />
+            <Edit className="h-2.5 w-2.5 mr-1" />
             {t('edit')}
           </Button>
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex-1"
+            className="flex-1 h-7 text-[9px] px-2"
             onClick={() => onDuplicate(vehicle)}
           >
-            <Copy className="h-3 w-3 mr-1" />
+            <Copy className="h-2.5 w-2.5 mr-1" />
             {t('duplicate')}
           </Button>
           <Button 
             size="sm" 
             variant="outline" 
-            className="text-red-600 hover:text-red-700"
+            className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
             onClick={() => onDelete && onDelete(vehicle)}
           >
-            <Trash2 className="h-3 w-3" />
+            <Trash2 className="h-2.5 w-2.5" />
           </Button>
         </div>
       </CardContent>
