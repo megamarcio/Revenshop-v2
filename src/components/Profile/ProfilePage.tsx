@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -13,11 +12,13 @@ import { Separator } from '@/components/ui/separator';
 import { User, Mail, Phone, Shield, Car, DollarSign, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
+import { useUserStats } from '../../hooks/useUserStats';
 
 const ProfilePage = () => {
   const { user } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const { stats, loading: statsLoading } = useUserStats();
   
   const [formData, setFormData] = useState({
     firstName: user?.first_name || '',
@@ -31,14 +32,6 @@ const ProfilePage = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
-
-  // Mock statistics data
-  const userStats = {
-    vehiclesListed: 24,
-    totalSales: 156000,
-    avgSaleTime: 15,
-    memberSince: '2023-01-15'
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -90,6 +83,21 @@ const ProfilePage = () => {
 
   if (!user) return null;
 
+  const getRoleName = (role: string) => {
+    switch (role) {
+      case 'admin':
+        return 'Administrador';
+      case 'manager':
+        return 'Gerente';
+      case 'seller':
+        return 'Vendedor';
+      case 'internal_seller':
+        return 'Vendedor Interno';
+      default:
+        return 'Usuário';
+    }
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
@@ -98,7 +106,7 @@ const ProfilePage = () => {
           <p className="text-gray-600">Gerencie suas informações pessoais e configurações</p>
         </div>
         <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-sm">
-          {user.role === 'admin' ? 'Administrador' : 'Vendedor'}
+          {getRoleName(user.role)}
         </Badge>
       </div>
 
@@ -267,66 +275,83 @@ const ProfilePage = () => {
         </TabsContent>
 
         <TabsContent value="stats" className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Veículos Listados</CardTitle>
-                <Car className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userStats.vehiclesListed}</div>
-                <p className="text-xs text-muted-foreground">
-                  +2 desde o último mês
-                </p>
-              </CardContent>
-            </Card>
+          {statsLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <div className="bg-gray-300 h-4 w-20 rounded"></div>
+                    <div className="bg-gray-300 h-4 w-4 rounded"></div>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="bg-gray-300 h-8 w-16 rounded mb-1"></div>
+                    <div className="bg-gray-300 h-3 w-24 rounded"></div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Veículos Listados</CardTitle>
+                  <Car className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.vehiclesListed}</div>
+                  <p className="text-xs text-muted-foreground">
+                    Veículos ativos no sistema
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  $ {userStats.totalSales.toLocaleString('en-US')}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  +12% desde o último mês
-                </p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total de Vendas</CardTitle>
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    $ {stats.totalSalesValue.toLocaleString('en-US')}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.totalSalesCount} vendas realizadas
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tempo Médio de Venda</CardTitle>
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{userStats.avgSaleTime} dias</div>
-                <p className="text-xs text-muted-foreground">
-                  -3 dias desde o último mês
-                </p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Tempo Médio de Venda</CardTitle>
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.avgSaleTime} dias</div>
+                  <p className="text-xs text-muted-foreground">
+                    Tempo médio para venda
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Membro desde</CardTitle>
-                <User className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {new Date(userStats.memberSince).toLocaleDateString('pt-BR', { 
-                    month: 'short', 
-                    year: 'numeric' 
-                  })}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {Math.floor((Date.now() - new Date(userStats.memberSince).getTime()) / (1000 * 60 * 60 * 24 * 30))} meses
-                </p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Membro desde</CardTitle>
+                  <User className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {new Date(stats.memberSince).toLocaleDateString('pt-BR', { 
+                      month: 'short', 
+                      year: 'numeric' 
+                    })}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {stats.monthsActive} meses ativo
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
           <Card>
             <CardHeader>
@@ -337,20 +362,21 @@ const ProfilePage = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {[
-                  { action: 'Veículo adicionado', detail: 'Honda Civic 2020', time: '2 horas atrás' },
-                  { action: 'Perfil atualizado', detail: 'Informações pessoais', time: '1 dia atrás' },
-                  { action: 'Veículo vendido', detail: 'Toyota Corolla 2019', time: '3 dias atrás' },
-                  { action: 'Senha alterada', detail: 'Configurações de segurança', time: '1 semana atrás' }
-                ].map((activity, index) => (
-                  <div key={index} className="flex items-center justify-between py-2">
-                    <div>
-                      <p className="font-medium">{activity.action}</p>
-                      <p className="text-sm text-gray-600">{activity.detail}</p>
+                {stats.recentActivities?.length > 0 ? (
+                  stats.recentActivities.map((activity, index) => (
+                    <div key={index} className="flex items-center justify-between py-2">
+                      <div>
+                        <p className="font-medium">{activity.action}</p>
+                        <p className="text-sm text-gray-600">{activity.detail}</p>
+                      </div>
+                      <p className="text-sm text-gray-500">{activity.time}</p>
                     </div>
-                    <p className="text-sm text-gray-500">{activity.time}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-muted-foreground text-center py-4">
+                    Nenhuma atividade recente encontrada
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
