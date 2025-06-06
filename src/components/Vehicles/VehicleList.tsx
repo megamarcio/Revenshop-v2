@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles';
@@ -18,7 +17,7 @@ const VehicleList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list'); // Mudança: padrão agora é 'list'
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [sortBy, setSortBy] = useState('internal_code');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
@@ -136,7 +135,7 @@ const VehicleList = () => {
     vin: vehicle.vin,
     year: vehicle.year,
     model: vehicle.model,
-    plate: vehicle.miles?.toString() || '', // Usar miles do banco
+    plate: vehicle.miles?.toString() || '',
     internalCode: vehicle.internal_code,
     color: vehicle.color,
     caNote: vehicle.ca_note,
@@ -163,46 +162,22 @@ const VehicleList = () => {
       return matchesSearch && matchesFilter;
     });
 
+    // Força a ordenação por internal_code sempre
     filtered.sort((a, b) => {
-      let aValue: any, bValue: any;
+      // Ordenação numérica do código interno
+      const aCode = parseInt(a.internal_code) || 0;
+      const bCode = parseInt(b.internal_code) || 0;
       
-      switch (sortBy) {
-        case 'name':
-          aValue = a.name.toLowerCase();
-          bValue = b.name.toLowerCase();
-          break;
-        case 'year':
-          aValue = a.year;
-          bValue = b.year;
-          break;
-        case 'purchase_price':
-          aValue = a.purchase_price;
-          bValue = b.purchase_price;
-          break;
-        case 'sale_price':
-          aValue = a.sale_price;
-          bValue = b.sale_price;
-          break;
-        case 'internal_code':
-          aValue = a.internal_code.toLowerCase();
-          bValue = b.internal_code.toLowerCase();
-          break;
-        case 'color':
-          aValue = a.color.toLowerCase();
-          bValue = b.color.toLowerCase();
-          break;
-        default:
-          aValue = a.internal_code.toLowerCase();
-          bValue = b.internal_code.toLowerCase();
+      if (aCode !== bCode) {
+        return aCode - bCode; // Sempre do menor para o maior
       }
-
-      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-      return 0;
+      
+      // Se os códigos numéricos forem iguais, ordenar alfabeticamente
+      return a.internal_code.localeCompare(b.internal_code, undefined, { numeric: true });
     });
 
     return filtered;
-  }, [vehicles, searchTerm, filterBy, sortBy, sortOrder]);
+  }, [vehicles, searchTerm, filterBy]);
 
   if (loading) {
     return (

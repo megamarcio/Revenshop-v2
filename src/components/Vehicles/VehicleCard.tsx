@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Copy, Trash2, Car } from 'lucide-react';
+import { Edit, Copy, Trash2, Car, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Vehicle {
@@ -47,6 +47,11 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
     }).format(value);
   };
 
+  const handleCarfaxLookup = (vin: string) => {
+    const carfaxUrl = `https://www.carfax.com/VehicleHistory/p/Report.cfx?partner=DVG_0&vin=${vin}`;
+    window.open(carfaxUrl, '_blank');
+  };
+
   return (
     <Card className="hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden">
       {/* Header com foto e badge */}
@@ -69,7 +74,7 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
         <div className="absolute top-2 right-2">
           <Badge 
             variant={vehicle.category === 'forSale' ? 'default' : 'secondary'}
-            className={`text-[7px] px-1.5 py-0.5 font-medium ${
+            className={`text-xs px-2 py-1 font-medium ${
               vehicle.category === 'forSale' 
                 ? 'bg-green-500 text-white hover:bg-green-600' 
                 : 'bg-red-500 text-white hover:bg-red-600'
@@ -82,17 +87,17 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
       
       {/* Conteúdo do card */}
       <CardContent className="p-3 space-y-2">
-        {/* Título e ano */}
+        {/* Título com código e ano */}
         <div>
-          <h3 className="text-[10px] font-semibold text-gray-900 leading-tight mb-0.5">
-            {vehicle.name}
+          <h3 className="text-[11px] font-bold text-gray-900 leading-tight mb-0.5">
+            {vehicle.internalCode} - {vehicle.name}
           </h3>
-          <p className="text-[10px] text-gray-600">{vehicle.year} • {vehicle.color}</p>
+          <p className="text-xs text-gray-600">{vehicle.year} • {vehicle.color}</p>
         </div>
 
         {/* VIN em fonte menor */}
         <div className="bg-gray-50 p-1.5 rounded text-center">
-          <span className="text-[7px] text-gray-500 font-mono tracking-wide">
+          <span className="text-[10px] text-gray-500 font-mono tracking-wide">
             VIN: {vehicle.vin}
           </span>
         </div>
@@ -100,67 +105,73 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
         {/* Grid de informações principais */}
         <div className="grid grid-cols-2 gap-2">
           <div className="bg-blue-50 p-1.5 rounded">
-            <span className="text-[8px] text-blue-600 block">{t('purchasePrice')}:</span>
-            <p className="text-[10px] font-semibold text-blue-700">{formatCurrency(vehicle.purchasePrice)}</p>
+            <span className="text-xs text-blue-600 block">{t('purchasePrice')}:</span>
+            <p className="text-xs font-semibold text-blue-700">{formatCurrency(vehicle.purchasePrice)}</p>
           </div>
           <div className="bg-green-50 p-1.5 rounded">
-            <span className="text-[8px] text-green-600 block">{t('salePrice')}:</span>
-            <p className="text-[10px] font-semibold text-green-700">{formatCurrency(vehicle.salePrice)}</p>
+            <span className="text-xs text-green-600 block">{t('salePrice')}:</span>
+            <p className="text-xs font-semibold text-green-700">{formatCurrency(vehicle.salePrice)}</p>
           </div>
         </div>
 
         {/* Informações secundárias */}
         <div className="space-y-1">
           <div className="flex justify-between items-center">
-            <span className="text-[8px] text-gray-500">{t('plate')}:</span>
-            <span className="text-[10px] font-medium">{vehicle.plate}</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-[8px] text-gray-500">Código:</span>
-            <span className="text-[10px] font-medium">{vehicle.internalCode}</span>
+            <span className="text-xs text-gray-500">{t('plate')}:</span>
+            <span className="text-xs font-medium">{vehicle.plate}</span>
           </div>
         </div>
 
         {/* Informações de venda se vendido */}
         {vehicle.category === 'sold' && vehicle.seller && (
           <div className="bg-gray-50 p-2 rounded text-center border-t">
-            <div className="text-[8px] text-gray-500 mb-1">Vendido por:</div>
-            <div className="text-[10px] font-medium text-gray-700">{vehicle.seller}</div>
+            <div className="text-xs text-gray-500 mb-1">Vendido por:</div>
+            <div className="text-xs font-medium text-gray-700">{vehicle.seller}</div>
             {vehicle.finalSalePrice && (
-              <div className="text-[10px] font-semibold text-green-600 mt-1">
+              <div className="text-xs font-semibold text-green-600 mt-1">
                 {formatCurrency(vehicle.finalSalePrice)}
               </div>
             )}
           </div>
         )}
 
-        {/* Botões de ação */}
+        {/* Botões de ação - apenas ícones */}
         <div className="flex gap-1 pt-2 border-t border-gray-100">
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex-1 h-7 text-[9px] px-2"
+            className="h-7 w-7 p-0"
             onClick={() => onEdit(vehicle)}
+            title="Editar"
           >
-            <Edit className="h-2.5 w-2.5 mr-1" />
-            {t('edit')}
+            <Edit className="h-3 w-3" />
           </Button>
           <Button 
             size="sm" 
             variant="outline" 
-            className="flex-1 h-7 text-[9px] px-2"
+            className="h-7 w-7 p-0"
             onClick={() => onDuplicate(vehicle)}
+            title="Duplicar"
           >
-            <Copy className="h-2.5 w-2.5 mr-1" />
-            {t('duplicate')}
+            <Copy className="h-3 w-3" />
+          </Button>
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="h-7 w-7 p-0"
+            onClick={() => handleCarfaxLookup(vehicle.vin)}
+            title="Consultar Carfax"
+          >
+            <ExternalLink className="h-3 w-3" />
           </Button>
           <Button 
             size="sm" 
             variant="outline" 
             className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
             onClick={() => onDelete && onDelete(vehicle)}
+            title="Excluir"
           >
-            <Trash2 className="h-2.5 w-2.5" />
+            <Trash2 className="h-3 w-3" />
           </Button>
         </div>
       </CardContent>
