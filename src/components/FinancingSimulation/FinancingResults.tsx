@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle, DollarSign, CreditCard, TrendingUp } from 'lucide-react';
+import { CheckCircle, DollarSign, CreditCard, TrendingUp, Car } from 'lucide-react';
 
 interface FinancingResultsProps {
   data: {
@@ -37,8 +37,6 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
     }).format(value);
   };
 
-  const downPaymentPercentage = data.vehiclePrice > 0 ? ((data.downPayment / data.vehiclePrice) * 100).toFixed(1) : '0';
-
   return (
     <Card>
       <CardHeader>
@@ -48,78 +46,63 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Resumo Principal */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <DollarSign className="h-8 w-8 mx-auto text-blue-600 mb-2" />
-            <p className="text-sm text-blue-600 font-medium">Down Payment</p>
-            <p className="text-xl font-bold text-blue-900">
-              {formatCurrency(results.downPaymentAmount)}
-            </p>
-            <p className="text-xs text-blue-500">
-              {downPaymentPercentage}% do valor
-            </p>
-          </div>
+        {/* Destaque Principal - Down Payment + Parcelas */}
+        <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border-2 border-blue-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="text-center">
+              <DollarSign className="h-10 w-10 mx-auto text-blue-600 mb-3" />
+              <p className="text-sm text-blue-600 font-medium mb-1">Down Payment</p>
+              <p className="text-3xl font-bold text-blue-900">
+                {formatCurrency(results.downPaymentAmount)}
+              </p>
+            </div>
 
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <TrendingUp className="h-8 w-8 mx-auto text-green-600 mb-2" />
-            <p className="text-sm text-green-600 font-medium">Valor Financiado</p>
-            <p className="text-xl font-bold text-green-900">
-              {formatCurrency(results.financedAmount)}
-            </p>
-            <p className="text-xs text-green-500">
-              Incluindo taxas e impostos
-            </p>
+            <div className="text-center">
+              <CreditCard className="h-10 w-10 mx-auto text-green-600 mb-3" />
+              <p className="text-sm text-green-600 font-medium mb-1">Financiamento</p>
+              <p className="text-lg font-bold text-green-900">
+                {data.installments}x de {formatCurrency(results.monthlyPayment)}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Detalhes do Pagamento */}
         <div className="space-y-3">
           <h4 className="font-semibold text-gray-900 flex items-center">
-            <CreditCard className="h-4 w-4 mr-2" />
+            <TrendingUp className="h-4 w-4 mr-2" />
             Detalhes do Pagamento
           </h4>
           
           <div className="grid grid-cols-1 gap-2 text-sm">
-            <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span className="text-gray-600">Quantidade de Parcelas:</span>
-              <Badge variant="outline">{data.installments}x</Badge>
-            </div>
-            
-            <div className="flex justify-between items-center p-2 bg-yellow-50 rounded">
-              <span className="text-gray-600">Valor da Parcela:</span>
-              <span className="font-bold text-yellow-700 text-lg">
-                {formatCurrency(results.monthlyPayment)}
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span className="text-gray-600">Valor Financiado:</span>
+              <span className="font-medium text-gray-900">
+                {formatCurrency(results.financedAmount)}
               </span>
             </div>
             
-            <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
-              <span className="text-gray-600">Total de Impostos:</span>
-              <span className="font-medium">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span className="text-gray-600">Taxa de Juros:</span>
+              <span className="font-medium text-gray-900">
+                {data.interestRate}% ao ano
+              </span>
+            </div>
+            
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
+              <span className="text-gray-600">Sales Tax:</span>
+              <span className="font-medium text-gray-900">
                 {formatCurrency(results.totalTaxes)}
               </span>
             </div>
             
-            <div className="flex justify-between items-center p-2 bg-gray-50 rounded">
+            <div className="flex justify-between items-center p-3 bg-gray-50 rounded">
               <span className="text-gray-600">Total de Taxas:</span>
-              <span className="font-medium">
+              <span className="font-medium text-gray-900">
                 {formatCurrency(results.totalFees)}
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Resumo Total */}
-        <div className="border-t pt-4">
-          <div className="flex justify-between items-center text-lg font-bold">
-            <span>Total a Pagar:</span>
-            <span className="text-red-600">
-              {formatCurrency(results.totalAmount)}
-            </span>
-          </div>
-          <p className="text-sm text-gray-500 mt-1">
-            Down payment + {data.installments} parcelas de {formatCurrency(results.monthlyPayment)}
-          </p>
         </div>
 
         {/* Breakdown de Custos */}
@@ -135,7 +118,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
               <span>{formatCurrency(data.dealerFee)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Impostos ({data.taxRate}%):</span>
+              <span>Sales Tax ({data.taxRate}%):</span>
               <span>{formatCurrency(results.totalTaxes)}</span>
             </div>
             <div className="flex justify-between">
@@ -173,6 +156,32 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
               <p className="text-sm text-gray-600">
                 <span className="font-medium">Observações:</span> {data.otherFeesDescription}
               </p>
+            )}
+          </div>
+        )}
+
+        {/* Foto do Veículo */}
+        {data.vehicle && (
+          <div className="border-t pt-4">
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
+              <Car className="h-4 w-4 mr-2" />
+              Veículo
+            </h4>
+            {data.vehicle.image_url ? (
+              <div className="flex justify-center">
+                <img 
+                  src={data.vehicle.image_url} 
+                  alt={`${data.vehicle.name} ${data.vehicle.year}`}
+                  className="max-w-full h-48 object-cover rounded-lg border"
+                />
+              </div>
+            ) : (
+              <div className="h-48 bg-gray-100 rounded-lg border flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <Car className="h-12 w-12 mx-auto mb-2" />
+                  <p className="text-sm">Imagem não disponível</p>
+                </div>
+              </div>
             )}
           </div>
         )}

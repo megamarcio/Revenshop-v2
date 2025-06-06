@@ -121,12 +121,12 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
           </div>
         </div>
 
-        {/* Terceira linha - Taxa do Imposto e Emplacamento */}
+        {/* Terceira linha - Sales Tax e Emplacamento */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label className="flex items-center space-x-2">
               <Percent className="h-4 w-4" />
-              <span>Taxa do Imposto (%)</span>
+              <span>Sales Tax (%)</span>
             </Label>
             <Input
               type="number"
