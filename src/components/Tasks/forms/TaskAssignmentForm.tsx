@@ -61,7 +61,7 @@ const TaskAssignmentForm = ({
             <SelectValue placeholder="Selecionar veículo" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Nenhum veículo</SelectItem>
+            <SelectItem value="none">Nenhum veículo</SelectItem>
             {vehicles?.map((vehicle) => (
               <SelectItem key={vehicle.id} value={vehicle.id}>
                 {vehicle.name} - {vehicle.internal_code}
@@ -78,7 +78,7 @@ const TaskAssignmentForm = ({
             <SelectValue placeholder="Selecionar responsável" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Não atribuída</SelectItem>
+            <SelectItem value="unassigned">Não atribuída</SelectItem>
             {users?.map((user) => (
               <SelectItem key={user.id} value={user.id}>
                 {user.first_name} {user.last_name} ({user.role})
