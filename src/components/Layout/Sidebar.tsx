@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -12,7 +11,8 @@ import {
   CreditCard,
   UserCheck,
   Gavel,
-  CheckSquare
+  CheckSquare,
+  Calculator
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -31,6 +31,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'auctions', label: 'Leilões', icon: Gavel },
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
+    { id: 'financing', label: 'Simulação de Financiamento', icon: Calculator },
     ...(canManageUsers ? [{ id: 'users', label: t('users'), icon: Users }] : []),
     ...(canAccessAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),
     { id: 'profile', label: t('profile'), icon: User }
