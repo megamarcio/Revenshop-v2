@@ -33,18 +33,18 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2">
-          <Calculator className="h-5 w-5" />
+      <CardHeader className="pb-4">
+        <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+          <Calculator className="h-4 w-4 sm:h-5 sm:w-5" />
           <span>Calculadora de Financiamento</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Primeira linha - Down Payment e Taxa de Juros */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4">
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <DollarSign className="h-4 w-4" />
+            <Label className="flex items-center space-x-2 text-sm">
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Down Payment</span>
             </Label>
             <Input
@@ -54,17 +54,18 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               placeholder={`Sugerido: ${formatCurrency(suggestedDownPayment)}`}
               min="0"
               step="100"
+              className="text-sm h-9 sm:h-10"
             />
             {data.vehiclePrice > 0 && (
-              <p className="text-sm text-gray-500">
-                Sugerido: {formatCurrency(suggestedDownPayment)} (20% do valor)
+              <p className="text-xs text-gray-500">
+                Sugerido: {formatCurrency(suggestedDownPayment)} (20%)
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <Percent className="h-4 w-4" />
+            <Label className="flex items-center space-x-2 text-sm">
+              <Percent className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Taxa de Juros (% ao ano)</span>
             </Label>
             <Input
@@ -75,16 +76,17 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               min="0"
               max="50"
               step="0.1"
+              className="text-sm h-9 sm:h-10"
             />
           </div>
         </div>
 
         {/* Segunda linha - Parcelas e Dealer Fee */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <CreditCard className="h-4 w-4" />
-              <span>Quantidade de Parcelas</span>
+            <Label className="flex items-center space-x-2 text-sm">
+              <CreditCard className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Parcelas</span>
             </Label>
             <Input
               type="number"
@@ -93,12 +95,13 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               placeholder="72"
               min="1"
               max="120"
+              className="text-sm h-9 sm:h-10"
             />
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <DollarSign className="h-4 w-4" />
+            <Label className="flex items-center space-x-2 text-sm">
+              <DollarSign className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Dealer Fee</span>
             </Label>
             <Input
@@ -108,15 +111,16 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               placeholder="499"
               min="0"
               step="1"
+              className="text-sm h-9 sm:h-10"
             />
           </div>
         </div>
 
         {/* Terceira linha - Sales Tax e Emplacamento */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <Percent className="h-4 w-4" />
+            <Label className="flex items-center space-x-2 text-sm">
+              <Percent className="h-3 w-3 sm:h-4 sm:w-4" />
               <span>Sales Tax (%)</span>
             </Label>
             <Input
@@ -127,18 +131,19 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               min="0"
               max="20"
               step="0.1"
+              className="text-sm h-9 sm:h-10"
             />
             {data.vehiclePrice > 0 && (
-              <p className="text-sm text-gray-500">
+              <p className="text-xs text-gray-500">
                 Valor: {formatCurrency((data.vehiclePrice * data.taxRate) / 100)}
               </p>
             )}
           </div>
 
           <div className="space-y-2">
-            <Label className="flex items-center space-x-2">
-              <FileText className="h-4 w-4" />
-              <span>Valor do Emplacamento</span>
+            <Label className="flex items-center space-x-2 text-sm">
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span>Emplacamento</span>
             </Label>
             <Input
               type="number"
@@ -147,17 +152,18 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               placeholder="450"
               min="0"
               step="1"
+              className="text-sm h-9 sm:h-10"
             />
           </div>
         </div>
 
         {/* Outros */}
         <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <Settings className="h-4 w-4" />
+          <Label className="flex items-center space-x-2 text-sm">
+            <Settings className="h-3 w-3 sm:h-4 sm:w-4" />
             <span>Outros</span>
           </Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-2">
             <Input
               type="number"
               value={data.otherFees}
@@ -165,16 +171,18 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               placeholder="0"
               min="0"
               step="1"
+              className="text-sm h-9 sm:h-10"
             />
             <Textarea
               value={data.otherFeesDescription}
               onChange={(e) => onChange('otherFeesDescription', e.target.value)}
               placeholder="Descrição dos outros custos..."
-              rows={1}
+              rows={2}
+              className="text-sm resize-none"
             />
           </div>
           {data.otherFees > 0 && (
-            <p className="text-sm text-gray-500">
+            <p className="text-xs text-gray-500">
               Valor: {formatCurrency(data.otherFees)}
             </p>
           )}
@@ -183,16 +191,16 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
         {/* Botão de Calcular */}
         <Button 
           onClick={onCalculate} 
-          className="w-full" 
+          className="w-full h-10 sm:h-11" 
           size="lg"
           disabled={!isCalculationValid}
         >
-          <Calculator className="h-4 w-4 mr-2" />
-          Calcular Financiamento
+          <Calculator className="h-3 w-3 sm:h-4 sm:w-4 mr-2" />
+          <span className="text-sm sm:text-base">Calcular Financiamento</span>
         </Button>
 
         {!isCalculationValid && (
-          <p className="text-sm text-red-500 text-center">
+          <p className="text-xs sm:text-sm text-red-500 text-center">
             Informe o valor do veículo para realizar o cálculo
           </p>
         )}

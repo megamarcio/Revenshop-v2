@@ -1,19 +1,29 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
 import Navbar from './components/Layout/Navbar';
-import Dashboard from './components/Dashboard/Dashboard';
-import VehicleList from './components/Vehicles/VehicleList';
-import CustomerManagement from './components/Customers/CustomerManagement';
-import UserManagement from './components/Users/UserManagement';
-import AdminPanel from './components/Admin/AdminPanel';
-import ProfilePage from './components/Profile/ProfilePage';
-import BuyHerePayHere from './components/BHPH/BuyHerePayHere';
-import AuctionManagement from './components/Auctions/AuctionManagement';
-import TaskManagement from './components/Tasks/TaskManagement';
-import FinancingSimulation from './components/FinancingSimulation/FinancingSimulation';
 import { SidebarProvider } from '@/components/ui/sidebar';
+import { Loader2 } from 'lucide-react';
+
+// Lazy loading dos componentes para melhor performance
+const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
+const VehicleList = lazy(() => import('./components/Vehicles/VehicleList'));
+const CustomerManagement = lazy(() => import('./components/Customers/CustomerManagement'));
+const UserManagement = lazy(() => import('./components/Users/UserManagement'));
+const AdminPanel = lazy(() => import('./components/Admin/AdminPanel'));
+const ProfilePage = lazy(() => import('./components/Profile/ProfilePage'));
+const BuyHerePayHere = lazy(() => import('./components/BHPH/BuyHerePayHere'));
+const AuctionManagement = lazy(() => import('./components/Auctions/AuctionManagement'));
+const TaskManagement = lazy(() => import('./components/Tasks/TaskManagement'));
+const FinancingSimulation = lazy(() => import('./components/FinancingSimulation/FinancingSimulation'));
+
+// Componente de loading
+const LoadingFallback = () => (
+  <div className="flex items-center justify-center h-64">
+    <Loader2 className="h-8 w-8 animate-spin" />
+  </div>
+);
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -30,25 +40,45 @@ const App: React.FC = () => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
 
+  const renderActiveComponent = () => {
+    switch (activeTab) {
+      case 'dashboard':
+        return canAccessAdmin ? <Dashboard /> : null;
+      case 'vehicles':
+        return <VehicleList />;
+      case 'customers':
+        return <CustomerManagement />;
+      case 'auctions':
+        return <AuctionManagement />;
+      case 'tasks':
+        return <TaskManagement />;
+      case 'bhph':
+        return <BuyHerePayHere />;
+      case 'financing':
+        return <FinancingSimulation />;
+      case 'users':
+        return canManageUsers ? <UserManagement /> : null;
+      case 'admin':
+        return canAccessAdmin ? <AdminPanel onNavigateToUsers={() => setActiveTab('users')} /> : null;
+      case 'profile':
+        return <ProfilePage />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <SidebarProvider>
-      <div className="flex h-screen bg-background w-full">
+      <div className="flex h-screen bg-background w-full overflow-hidden">
         <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           <Navbar />
 
           <main className="flex-1 overflow-auto bg-background">
-            {activeTab === 'dashboard' && canAccessAdmin && <Dashboard />}
-            {activeTab === 'vehicles' && <VehicleList />}
-            {activeTab === 'customers' && <CustomerManagement />}
-            {activeTab === 'auctions' && <AuctionManagement />}
-            {activeTab === 'tasks' && <TaskManagement />}
-            {activeTab === 'bhph' && <BuyHerePayHere />}
-            {activeTab === 'financing' && <FinancingSimulation />}
-            {activeTab === 'users' && canManageUsers && <UserManagement />}
-            {activeTab === 'admin' && canAccessAdmin && <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />}
-            {activeTab === 'profile' && <ProfilePage />}
+            <Suspense fallback={<LoadingFallback />}>
+              {renderActiveComponent()}
+            </Suspense>
           </main>
         </div>
       </div>

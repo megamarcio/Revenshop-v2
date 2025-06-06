@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -25,13 +25,14 @@ export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
 
   const { limit = 20, searchTerm } = options;
 
-  const fetchCustomers = async (offset = 0) => {
+  const fetchCustomers = useCallback(async (offset = 0) => {
     try {
       console.log('Fetching customers with options:', { limit, offset, searchTerm });
       
       let query = supabase
         .from('bhph_customers')
-        .select('*');
+        .select('id, name, email, phone, address, created_at, updated_at')
+        .order('created_at', { ascending: false });
 
       // Adicionar busca por termo se especificado
       if (searchTerm && searchTerm.length > 0) {
@@ -39,9 +40,7 @@ export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
       }
 
       // Adicionar paginação
-      query = query
-        .range(offset, offset + limit - 1)
-        .order('created_at', { ascending: false });
+      query = query.range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 
@@ -69,9 +68,9 @@ export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [limit, searchTerm]);
 
-  const createCustomer = async (customerData: {
+  const createCustomer = useCallback(async (customerData: {
     name: string;
     email?: string;
     phone: string;
@@ -103,18 +102,27 @@ export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
       console.error('Error creating customer:', error);
       throw error;
     }
-  };
+  }, []);
+
+  const loadMore = useCallback(() => {
+    fetchCustomers(customers.length);
+  }, [fetchCustomers, customers.length]);
+
+  const refetch = useCallback(() => {
+    setLoading(true);
+    fetchCustomers();
+  }, [fetchCustomers]);
 
   useEffect(() => {
     fetchCustomers();
-  }, [searchTerm]);
+  }, [fetchCustomers]);
 
   return {
     customers,
     loading,
     hasMore,
-    loadMore: () => fetchCustomers(customers.length),
+    loadMore,
     createCustomer,
-    refetch: () => fetchCustomers(),
+    refetch,
   };
 };

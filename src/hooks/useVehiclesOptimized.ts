@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -44,13 +44,14 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
 
   const { category, limit = 20, searchTerm } = options;
 
-  const fetchVehicles = async (offset = 0) => {
+  const fetchVehicles = useCallback(async (offset = 0) => {
     try {
       console.log('Fetching vehicles with options:', { category, limit, offset, searchTerm });
       
       let query = supabase
         .from('vehicles')
-        .select('*');
+        .select('id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at')
+        .order('created_at', { ascending: false });
 
       // Filtrar por categoria se especificado
       if (category) {
@@ -63,9 +64,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
       }
 
       // Adicionar paginação
-      query = query
-        .range(offset, offset + limit - 1)
-        .order('created_at', { ascending: false });
+      query = query.range(offset, offset + limit - 1);
 
       const { data, error } = await query;
 
@@ -99,22 +98,31 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, limit, searchTerm]);
 
   // Memoizar veículos para venda especificamente para a calculadora
   const forSaleVehicles = useMemo(() => {
     return vehicles.filter(v => v.category === 'forSale');
   }, [vehicles]);
 
+  const loadMore = useCallback(() => {
+    fetchVehicles(vehicles.length);
+  }, [fetchVehicles, vehicles.length]);
+
+  const refetch = useCallback(() => {
+    setLoading(true);
+    fetchVehicles();
+  }, [fetchVehicles]);
+
   useEffect(() => {
     fetchVehicles();
-  }, [category, searchTerm]);
+  }, [fetchVehicles]);
 
   return {
     vehicles: category === 'forSale' ? forSaleVehicles : vehicles,
     loading,
     hasMore,
-    loadMore: () => fetchVehicles(vehicles.length),
-    refetch: () => fetchVehicles(),
+    loadMore,
+    refetch,
   };
 };
