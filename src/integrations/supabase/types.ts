@@ -460,6 +460,73 @@ export type Database = {
           },
         ]
       }
+      tasks: {
+        Row: {
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           ca_note: number

@@ -4,7 +4,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useDashboardStats } from '../../hooks/useDashboardStats';
 import StatsCard from './StatsCard';
 import DateFilter from './DateFilter';
-import RecentActivities from './RecentActivities';
+import PendingTasks from './PendingTasks';
 import { DollarSign, Car, ShoppingCart, FileText } from 'lucide-react';
 
 const Dashboard = () => {
@@ -93,8 +93,8 @@ const Dashboard = () => {
         />
       </div>
 
-      {/* Recent Activity */}
-      <RecentActivities />
+      {/* Pending Tasks - Replaced Recent Activity */}
+      <PendingTasks />
     </div>
   );
 };

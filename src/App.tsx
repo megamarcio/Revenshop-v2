@@ -1,27 +1,54 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+import React, { useState, useEffect } from 'react';
+import { useAuth } from './contexts/AuthContext';
+import { LanguageContext } from './contexts/LanguageContext';
+import Sidebar from './components/Layout/Sidebar';
+import Navbar from './components/Layout/Navbar';
+import Dashboard from './components/Dashboard/Dashboard';
+import VehicleListView from './components/Vehicles/VehicleListView';
+import CustomerManagement from './components/Customers/CustomerManagement';
+import UserManagement from './components/Users/UserManagement';
+import AdminPanel from './components/Admin/AdminPanel';
+import ProfilePage from './components/Profile/ProfilePage';
+import BuyHerePayHere from './components/BHPH/BuyHerePayHere';
+import AuctionManagement from './components/Auctions/AuctionManagement';
+import TaskManagement from './components/Tasks/TaskManagement';
 
-const queryClient = new QueryClient();
+const App: React.FC = () => {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const { canAccessAdmin, canManageUsers } = useAuth();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  useEffect(() => {
+    const storedTab = localStorage.getItem('activeTab');
+    if (storedTab) {
+      setActiveTab(storedTab);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem('activeTab', activeTab);
+  }, [activeTab]);
+
+  return (
+    <div className="flex h-screen bg-background">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <div className="flex flex-col flex-1">
+        <Navbar />
+
+        <main className="flex-1 overflow-auto bg-background">
+          {activeTab === 'dashboard' && canAccessAdmin && <Dashboard />}
+          {activeTab === 'vehicles' && <VehicleListView />}
+          {activeTab === 'customers' && <CustomerManagement />}
+          {activeTab === 'auctions' && <AuctionManagement />}
+          {activeTab === 'tasks' && <TaskManagement />}
+          {activeTab === 'bhph' && <BuyHerePayHere />}
+          {activeTab === 'users' && canManageUsers && <UserManagement />}
+          {activeTab === 'admin' && canAccessAdmin && <AdminPanel />}
+          {activeTab === 'profile' && <ProfilePage />}
+        </main>
+      </div>
+    </div>
+  );
+};
 
 export default App;

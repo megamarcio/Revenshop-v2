@@ -11,7 +11,8 @@ import {
   User,
   CreditCard,
   UserCheck,
-  Gavel
+  Gavel,
+  CheckSquare
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -28,6 +29,7 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'vehicles', label: t('vehicles'), icon: Car },
     { id: 'customers', label: t('customers'), icon: UserCheck },
     { id: 'auctions', label: 'Leilões', icon: Gavel },
+    { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
     ...(canManageUsers ? [{ id: 'users', label: t('users'), icon: Users }] : []),
     ...(canAccessAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),
