@@ -20,7 +20,7 @@ interface UserProfile {
   email: string;
   phone?: string;
   facebook?: string;
-  role: 'admin' | 'manager' | 'seller';
+  role: 'admin' | 'manager' | 'seller' | 'internal_seller';
   created_at: string;
   photo?: string;
   commission_client_referral?: number;
@@ -207,6 +207,7 @@ const UserManagement = () => {
       case 'admin': return 'Administrador';
       case 'manager': return 'Gerente';
       case 'seller': return 'Vendedor';
+      case 'internal_seller': return 'Vendedor Interno';
       default: return role;
     }
   };
@@ -216,6 +217,7 @@ const UserManagement = () => {
       case 'admin': return 'bg-red-100 text-red-800';
       case 'manager': return 'bg-purple-100 text-purple-800';
       case 'seller': return 'bg-blue-100 text-blue-800';
+      case 'internal_seller': return 'bg-green-100 text-green-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };

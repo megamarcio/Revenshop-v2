@@ -23,7 +23,7 @@ const userSchema = z.object({
   facebook: z.string().url('URL do Facebook inválida').optional().or(z.literal('')),
   password: z.string().min(6, 'Senha deve ter pelo menos 6 caracteres'),
   confirmPassword: z.string().min(6, 'Confirmação de senha obrigatória'),
-  role: z.enum(['admin', 'seller']),
+  role: z.enum(['admin', 'manager', 'seller', 'internal_seller']),
   photo: z.string().optional()
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Senhas não coincidem",
@@ -279,6 +279,8 @@ const UserForm = ({ onSubmit, isLoading = false }: UserFormProps) => {
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="seller">Vendedor</SelectItem>
+                        <SelectItem value="internal_seller">Vendedor Interno</SelectItem>
+                        <SelectItem value="manager">Gerente</SelectItem>
                         <SelectItem value="admin">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
