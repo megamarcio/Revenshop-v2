@@ -75,6 +75,7 @@ export const useAuth = () => {
   const canViewAllCustomers = isAdmin || isManager;
   const canViewBHPHDetails = isAdmin || isManager;
   const canAccessDashboard = isAdmin || isManager || isSeller || isInternalSeller;
+  const canCreateTasks = isAdmin || isManager || isInternalSeller;
 
   return {
     user,
@@ -95,6 +96,7 @@ export const useAuth = () => {
     canViewAllCustomers,
     canViewBHPHDetails,
     canAccessDashboard,
+    canCreateTasks,
     signIn,
     signUp,
     signOut,
