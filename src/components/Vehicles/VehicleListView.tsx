@@ -3,7 +3,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Copy, Trash2 } from 'lucide-react';
+import { Edit, Copy, Trash2, ExternalLink } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 
 interface Vehicle {
@@ -47,29 +47,43 @@ const VehicleListView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleLis
     }).format(value);
   };
 
+  const handleCarfaxLookup = (vin: string) => {
+    const carfaxUrl = `https://www.carfax.com/VehicleHistory/p/Report.cfx?partner=DVG_0&vin=${vin}`;
+    window.open(carfaxUrl, '_blank');
+  };
+
+  // Sort vehicles by internal code from smallest to largest
+  const sortedVehicles = [...vehicles].sort((a, b) => {
+    return a.internalCode.localeCompare(b.internalCode, undefined, { numeric: true });
+  });
+
   return (
-    <div className="border rounded-lg text-xs">
+    <div className="border rounded-lg text-sm">
       <Table>
         <TableHeader>
-          <TableRow className="text-xs">
-            <TableHead className="text-xs">Código</TableHead>
-            <TableHead className="text-xs">Nome</TableHead>
-            <TableHead className="text-xs">Cor</TableHead>
-            <TableHead className="text-xs">Valor de Venda</TableHead>
-            <TableHead className="text-xs">VIN</TableHead>
-            <TableHead className="text-xs">Status</TableHead>
-            <TableHead className="text-xs">Ações</TableHead>
+          <TableRow className="text-sm">
+            <TableHead className="text-sm">Código/Nome</TableHead>
+            <TableHead className="text-sm">Cor</TableHead>
+            <TableHead className="text-sm">Valor de Venda</TableHead>
+            <TableHead className="text-sm">VIN</TableHead>
+            <TableHead className="text-sm">Status</TableHead>
+            <TableHead className="text-sm">Ações</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {vehicles.map((vehicle) => (
-            <TableRow key={vehicle.id} className="text-xs">
-              <TableCell className="font-medium text-xs whitespace-nowrap">{vehicle.internalCode}</TableCell>
-              <TableCell className="text-xs whitespace-nowrap">{vehicle.name}</TableCell>
-              <TableCell className="text-xs whitespace-nowrap">{vehicle.color}</TableCell>
-              <TableCell className="text-blue-600 text-xs whitespace-nowrap">{formatCurrency(vehicle.salePrice)}</TableCell>
-              <TableCell className="text-xs whitespace-nowrap" style={{ fontSize: '10px' }}>{vehicle.vin}</TableCell>
-              <TableCell className="text-xs whitespace-nowrap">
+          {sortedVehicles.map((vehicle) => (
+            <TableRow key={vehicle.id} className="text-sm">
+              <TableCell className="text-sm">
+                <div>
+                  <div className="font-bold text-[11px]">
+                    {vehicle.internalCode} - {vehicle.name}
+                  </div>
+                </div>
+              </TableCell>
+              <TableCell className="text-sm whitespace-nowrap">{vehicle.color}</TableCell>
+              <TableCell className="text-blue-600 text-sm whitespace-nowrap">{formatCurrency(vehicle.salePrice)}</TableCell>
+              <TableCell className="text-sm whitespace-nowrap" style={{ fontSize: '10px' }}>{vehicle.vin}</TableCell>
+              <TableCell className="text-sm whitespace-nowrap">
                 <Badge 
                   variant={vehicle.category === 'forSale' ? 'default' : 'secondary'}
                   className={`text-xs ${vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
@@ -77,13 +91,14 @@ const VehicleListView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleLis
                   {vehicle.category === 'forSale' ? t('forSale') : t('sold')}
                 </Badge>
               </TableCell>
-              <TableCell className="text-xs">
+              <TableCell className="text-sm">
                 <div className="flex space-x-1">
                   <Button 
                     size="sm" 
                     variant="outline" 
                     onClick={() => onEdit(vehicle)}
                     className="h-6 w-6 p-0"
+                    title="Editar"
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
@@ -92,14 +107,25 @@ const VehicleListView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleLis
                     variant="outline" 
                     onClick={() => onDuplicate(vehicle)}
                     className="h-6 w-6 p-0"
+                    title="Duplicar"
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
                   <Button 
                     size="sm" 
                     variant="outline" 
+                    onClick={() => handleCarfaxLookup(vehicle.vin)}
+                    className="h-6 w-6 p-0"
+                    title="Consultar Carfax"
+                  >
+                    <ExternalLink className="h-3 w-3" />
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
                     className="text-red-600 hover:text-red-700 h-6 w-6 p-0"
                     onClick={() => onDelete && onDelete(vehicle)}
+                    title="Excluir"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
