@@ -27,7 +27,7 @@ const CustomerSearch = ({
     <div className="space-y-2">
       <Label className="flex items-center space-x-2 text-sm">
         <User className="h-3 w-3 sm:h-4 sm:w-4" />
-        <span>Cliente (Opcional)</span>
+        <span>Cliente (Obrigatório)</span>
       </Label>
 
       <div className="relative">
@@ -52,14 +52,20 @@ const CustomerSearch = ({
           <SelectValue placeholder={isLoading ? "Carregando..." : "Selecione um cliente"} />
         </SelectTrigger>
         <SelectContent className="max-h-48 sm:max-h-60">
-          {customers.map((customer) => (
-            <SelectItem key={customer.id} value={customer.id} className="text-sm">
-              <div className="flex flex-col">
-                <span>{customer.name}</span>
-                <span className="text-xs text-muted-foreground">{customer.phone}</span>
-              </div>
+          {customers.length > 0 ? (
+            customers.map((customer) => (
+              <SelectItem key={customer.id} value={customer.id} className="text-sm">
+                <div className="flex flex-col">
+                  <span>{customer.name}</span>
+                  <span className="text-xs text-muted-foreground">{customer.phone}</span>
+                </div>
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="no-customers" disabled className="text-sm text-gray-500">
+              Nenhum cliente atribuído a você
             </SelectItem>
-          ))}
+          )}
         </SelectContent>
       </Select>
     </div>

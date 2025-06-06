@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Car } from 'lucide-react';
 import { useVehiclesOptimized } from '@/hooks/useVehiclesOptimized';
 import { useCustomersOptimized } from '@/hooks/useCustomersOptimized';
+import { useAuth } from '@/contexts/AuthContext';
 
 import VehicleSearch from './VehicleSearch';
 import VehiclePrice from './VehiclePrice';
@@ -30,6 +31,7 @@ const VehicleClientSelector = ({
 }: VehicleClientSelectorProps) => {
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [customerSearch, setCustomerSearch] = useState('');
+  const { user, isAdmin, isManager } = useAuth();
 
   // Usar hooks otimizados com filtros específicos
   const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ 
@@ -38,8 +40,10 @@ const VehicleClientSelector = ({
     limit: 50
   });
 
+  // Filtrar clientes baseado no vendedor (apenas se não for admin/manager)
   const { customers, loading: customersLoading } = useCustomersOptimized({
     searchTerm: customerSearch,
+    sellerId: (!isAdmin && !isManager) ? user?.id : undefined,
     limit: 50
   });
 
