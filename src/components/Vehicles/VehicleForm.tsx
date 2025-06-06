@@ -107,7 +107,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
-  const [video, setVideo] = useState<string>(editingVehicle?.video || '');
+  const [videos, setVideos] = useState<string[]>(
+    editingVehicle?.video ? [editingVehicle.video] : []
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<VehicleFormData>>({});
 
@@ -291,7 +293,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         photos: photos,
-        video: video || undefined,
+        video: videos.length > 0 ? videos[0] : undefined, // Manter compatibilidade com o campo único
+        videos: videos, // Novo campo para múltiplos vídeos
         titleInfo: formData.titleInfo,
         ...(isEditing && { id: editingVehicle.id })
       };
@@ -381,9 +384,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
 
             <MediaUploadForm
               photos={photos}
-              video={video}
+              videos={videos}
               setPhotos={setPhotos}
-              setVideo={setVideo}
+              setVideos={setVideos}
             />
 
             <DescriptionForm

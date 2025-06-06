@@ -5,12 +5,12 @@ import { Plus, X, Upload, Image, Video } from 'lucide-react';
 
 interface MediaUploadFormProps {
   photos: string[];
-  video: string;
+  videos: string[];
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
-  setVideo: React.Dispatch<React.SetStateAction<string>>;
+  setVideos: React.Dispatch<React.SetStateAction<string[]>>;
 }
 
-const MediaUploadForm = ({ photos, video, setPhotos, setVideo }: MediaUploadFormProps) => {
+const MediaUploadForm = ({ photos, videos, setPhotos, setVideos }: MediaUploadFormProps) => {
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || photos.length >= 10) return;
@@ -72,28 +72,37 @@ const MediaUploadForm = ({ photos, video, setPhotos, setVideo }: MediaUploadForm
   };
 
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+    const files = event.target.files;
+    if (!files || videos.length >= 2) return;
 
-    // Limit video file size to 10MB
-    if (file.size > 10 * 1024 * 1024) {
-      console.warn('Video file is too large. Maximum size is 10MB.');
-      return;
-    }
+    const maxFiles = Math.min(files.length, 2 - videos.length);
+    const fileArray = Array.from(files).slice(0, maxFiles);
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setVideo(e.target.result as string);
+    fileArray.forEach(file => {
+      // Limit video file size to 10MB
+      if (file.size > 10 * 1024 * 1024) {
+        console.warn('Video file is too large. Maximum size is 10MB.');
+        return;
       }
-    };
-    reader.onerror = () => {
-      console.error('Error reading video file');
-    };
-    reader.readAsDataURL(file);
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        if (e.target?.result) {
+          setVideos(prev => [...prev, e.target.result as string]);
+        }
+      };
+      reader.onerror = () => {
+        console.error('Error reading video file');
+      };
+      reader.readAsDataURL(file);
+    });
     
     // Clear the input
     event.target.value = '';
+  };
+
+  const removeVideo = (index: number) => {
+    setVideos(prev => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -145,42 +154,43 @@ const MediaUploadForm = ({ photos, video, setPhotos, setVideo }: MediaUploadForm
         )}
       </div>
 
-      {/* Upload de Vídeo */}
+      {/* Upload de Vídeos */}
       <div className="space-y-4">
         <h3 className="text-lg font-semibold flex items-center space-x-2">
           <Video className="h-5 w-5" />
-          <span>Vídeo</span>
+          <span>Vídeos ({videos.length}/2)</span>
         </h3>
         
-        {video ? (
-          <div className="relative">
-            <video
-              src={video}
-              controls
-              className="w-full h-48 object-cover rounded-lg"
-            />
-            <button
-              type="button"
-              onClick={() => setVideo('')}
-              className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          <label className="border-2 border-dashed border-gray-300 rounded-lg h-32 flex items-center justify-center cursor-pointer hover:border-revenshop-primary">
-            <div className="text-center">
-              <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <span className="text-gray-600">Clique para adicionar vídeo (máx. 10MB)</span>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          {videos.map((video, index) => (
+            <div key={index} className="relative group">
+              <video
+                src={video}
+                className="w-full h-24 object-cover rounded-lg"
+              />
+              <button
+                type="button"
+                onClick={() => removeVideo(index)}
+                className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <X className="h-3 w-3" />
+              </button>
             </div>
-            <input
-              type="file"
-              accept="video/*"
-              onChange={handleVideoUpload}
-              className="hidden"
-            />
-          </label>
-        )}
+          ))}
+          
+          {videos.length < 2 && (
+            <label className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex items-center justify-center cursor-pointer hover:border-revenshop-primary">
+              <Plus className="h-6 w-6 text-gray-400" />
+              <input
+                type="file"
+                multiple
+                accept="video/*"
+                onChange={handleVideoUpload}
+                className="hidden"
+              />
+            </label>
+          )}
+        </div>
       </div>
     </>
   );

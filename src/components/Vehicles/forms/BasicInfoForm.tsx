@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,8 +25,8 @@ interface BasicInfoFormProps {
 const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) => {
   const [titleType, setTitleType] = useState(() => {
     console.log('BasicInfoForm - initializing titleType from formData.titleInfo:', formData.titleInfo);
-    if (formData.titleInfo?.includes('clean-title')) return 'clean-title';
-    if (formData.titleInfo?.includes('rebuilt')) return 'rebuilt';
+    if (formData.titleInfo?.startsWith('clean-title')) return 'clean-title';
+    if (formData.titleInfo?.startsWith('rebuilt')) return 'rebuilt';
     return '';
   });
   
@@ -94,19 +95,20 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     }
   };
 
-  // Extrair o status atual do titleInfo - CORRIGIDO
+  // Extrair o status atual do titleInfo - CORRIGIDO para usar startsWith
   const getCurrentStatus = () => {
     if (!formData.titleInfo) return '';
     
     console.log('getCurrentStatus - formData.titleInfo:', formData.titleInfo);
     
-    // Dividir por hífen e pegar tudo depois do primeiro hífen
-    const parts = formData.titleInfo.split('-');
-    console.log('getCurrentStatus - parts:', parts);
-    
-    if (parts.length > 1) {
-      const status = parts.slice(1).join('-');
-      console.log('getCurrentStatus - extracted status:', status);
+    // Verificar se começa com clean-title ou rebuilt e extrair o status
+    if (formData.titleInfo.startsWith('clean-title-')) {
+      const status = formData.titleInfo.substring('clean-title-'.length);
+      console.log('getCurrentStatus - extracted status from clean-title:', status);
+      return status;
+    } else if (formData.titleInfo.startsWith('rebuilt-')) {
+      const status = formData.titleInfo.substring('rebuilt-'.length);
+      console.log('getCurrentStatus - extracted status from rebuilt:', status);
       return status;
     }
     
