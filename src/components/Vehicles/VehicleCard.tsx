@@ -114,21 +114,6 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
             <p className="text-sm font-bold text-green-700 text-center">{formatCurrency(vehicle.salePrice)}</p>
           </div>
 
-          {/* Preço de compra com ícone de olho */}
-          <div className="flex justify-center">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-6 px-2 text-xs">
-                  <Eye className="h-3 w-3 mr-1" />
-                  Preço de Compra
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-semibold">{formatCurrency(vehicle.purchasePrice)}</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-
           {/* Informações de venda se vendido */}
           {vehicle.category === 'sold' && vehicle.seller && (
             <div className="bg-gray-50 p-2 rounded text-center border-t">
@@ -175,6 +160,21 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
                 className="h-3 w-3 object-contain"
               />
             </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="h-7 w-7 p-0"
+                  title="Ver Preço de Compra"
+                >
+                  <Eye className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p className="font-semibold">{formatCurrency(vehicle.purchasePrice)}</p>
+              </TooltipContent>
+            </Tooltip>
             <Button 
               size="sm" 
               variant="outline" 
