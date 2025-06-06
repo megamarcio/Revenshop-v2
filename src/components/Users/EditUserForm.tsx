@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -19,7 +20,7 @@ const editUserSchema = z.object({
   email: z.string().email('E-mail inválido'),
   phone: z.string().min(10, 'Telefone deve ter pelo menos 10 dígitos'),
   facebook: z.string().url('URL do Facebook inválida').optional().or(z.literal('')),
-  role: z.enum(['admin', 'seller']),
+  role: z.enum(['admin', 'manager', 'seller', 'internal_seller']),
   commissionClientReferral: z.number().min(0, 'Valor deve ser positivo'),
   commissionClientBrought: z.number().min(0, 'Valor deve ser positivo'),
   commissionFullSale: z.number().min(0, 'Valor deve ser positivo')
@@ -40,15 +41,15 @@ const EditUserForm = ({ user, onSubmit, isLoading = false }: EditUserFormProps) 
   const form = useForm<EditUserFormData>({
     resolver: zodResolver(editUserSchema),
     defaultValues: {
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
+      firstName: user.first_name || '',
+      lastName: user.last_name || '',
       email: user.email || '',
       phone: user.phone || '',
       facebook: user.facebook || '',
       role: user.role || 'seller',
-      commissionClientReferral: user.commissionClientReferral || 0,
-      commissionClientBrought: user.commissionClientBrought || 0,
-      commissionFullSale: user.commissionFullSale || 0
+      commissionClientReferral: user.commission_client_referral || 0,
+      commissionClientBrought: user.commission_client_brought || 0,
+      commissionFullSale: user.commission_full_sale || 0
     }
   });
 
@@ -189,6 +190,8 @@ const EditUserForm = ({ user, onSubmit, isLoading = false }: EditUserFormProps) 
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="seller">Vendedor</SelectItem>
+                        <SelectItem value="internal_seller">Vendedor Interno</SelectItem>
+                        <SelectItem value="manager">Gerente</SelectItem>
                         <SelectItem value="admin">Administrador</SelectItem>
                       </SelectContent>
                     </Select>
