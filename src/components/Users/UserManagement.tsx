@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -6,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from '@/hooks/use-toast';
-import { Plus, Edit, Trash2, User, Shield, DollarSign, ExternalLink, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, User, Shield, DollarSign, ExternalLink, Loader2, AlertTriangle } from 'lucide-react';
 import { Facebook } from 'lucide-react';
 import UserForm from './UserForm';
 import EditUserForm from './EditUserForm';
@@ -38,6 +38,7 @@ const UserManagement = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     if (!canManageUsers || !currentUser) {
@@ -112,6 +113,64 @@ const UserManagement = () => {
       setError('Usuário não autenticado');
     }
   }, [authLoading, currentUser, canManageUsers]);
+
+  const checkUserDependencies = async (userId: string) => {
+    try {
+      console.log('Checking dependencies for user:', userId);
+      
+      // Check if user has any BHPH customers
+      const { data: bhphCustomers, error: bhphError } = await supabase
+        .from('bhph_customers')
+        .select('id')
+        .eq('responsible_seller_id', userId)
+        .limit(1);
+
+      if (bhphError) {
+        console.error('Error checking BHPH customers:', bhphError);
+        throw bhphError;
+      }
+
+      // Check if user has any vehicles
+      const { data: vehicles, error: vehiclesError } = await supabase
+        .from('vehicles')
+        .select('id')
+        .eq('created_by', userId)
+        .limit(1);
+
+      if (vehiclesError) {
+        console.error('Error checking vehicles:', vehiclesError);
+        throw vehiclesError;
+      }
+
+      // Check if user has any tasks
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select('id')
+        .eq('assigned_to', userId)
+        .limit(1);
+
+      if (tasksError) {
+        console.error('Error checking tasks:', tasksError);
+        throw tasksError;
+      }
+
+      const dependencies = [];
+      if (bhphCustomers && bhphCustomers.length > 0) {
+        dependencies.push('clientes BHPH');
+      }
+      if (vehicles && vehicles.length > 0) {
+        dependencies.push('veículos');
+      }
+      if (tasks && tasks.length > 0) {
+        dependencies.push('tarefas');
+      }
+
+      return dependencies;
+    } catch (error) {
+      console.error('Error checking user dependencies:', error);
+      throw error;
+    }
+  };
 
   const canEditUser = (user: UserProfile) => {
     if (!currentUser) return false;
@@ -323,28 +382,57 @@ const UserManagement = () => {
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (confirm('Tem certeza que deseja excluir este usuário?')) {
-      try {
-        const { error } = await supabase
-          .from('profiles')
-          .delete()
-          .eq('id', userId);
-
-        if (error) throw error;
-
-        await fetchUsers();
+    try {
+      setDeletingUserId(userId);
+      
+      // First check if the user has any dependencies
+      const dependencies = await checkUserDependencies(userId);
+      
+      if (dependencies.length > 0) {
         toast({
-          title: t('success'),
-          description: 'Usuário excluído com sucesso!',
-        });
-      } catch (error) {
-        console.error('Error deleting user:', error);
-        toast({
-          title: t('error'),
-          description: 'Erro ao excluir usuário.',
+          title: 'Não é possível excluir o usuário',
+          description: `Este usuário possui ${dependencies.join(', ')} associados. Remova essas associações antes de excluir o usuário.`,
           variant: 'destructive',
         });
+        return;
       }
+
+      // If no dependencies, proceed with deletion
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userId);
+
+      if (error) {
+        console.error('Error deleting user:', error);
+        
+        // Handle specific foreign key constraint errors
+        if (error.code === '23503') {
+          toast({
+            title: 'Não é possível excluir o usuário',
+            description: 'Este usuário possui dados associados no sistema. Remova todas as associações antes de excluir.',
+            variant: 'destructive',
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      await fetchUsers();
+      toast({
+        title: t('success'),
+        description: 'Usuário excluído com sucesso!',
+      });
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      toast({
+        title: t('error'),
+        description: 'Erro ao excluir usuário. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingUserId(null);
     }
   };
 
@@ -509,14 +597,46 @@ const UserManagement = () => {
                   )}
                   
                   {canDeleteUser(user) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteUser(user.id)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          disabled={deletingUserId === user.id}
+                        >
+                          {deletingUserId === user.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle className="flex items-center space-x-2">
+                            <AlertTriangle className="h-5 w-5 text-red-600" />
+                            <span>Confirmar Exclusão</span>
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir o usuário <strong>{user.first_name} {user.last_name}</strong>?
+                            <br />
+                            <br />
+                            Esta ação não pode ser desfeita. Se o usuário tiver dados associados (veículos, clientes, tarefas), 
+                            a exclusão será bloqueada para manter a integridade dos dados.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleDeleteUser(user.id)}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Excluir Usuário
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               </div>
