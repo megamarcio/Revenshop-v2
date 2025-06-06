@@ -43,7 +43,7 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-4 text-[10px]">Carregando leilões...</div>;
+    return <div className="text-center py-4 text-xs">Carregando leilões...</div>;
   }
 
   return (
@@ -51,15 +51,15 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="text-[10px]">
-              <TableHead className="text-[10px] py-2 px-2 w-32">Leilão</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-80">Carro</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-16">Ano</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-24">Data</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-24">Valor Lance</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-20">Lance Aceito</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-20">Margem Lucro</TableHead>
-              <TableHead className="text-[10px] py-2 px-2 w-24">Ações</TableHead>
+            <TableRow className="text-xs">
+              <TableHead className="text-xs py-1 px-2 w-32">Leilão</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-96">Carro</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-16">Ano</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-24">Data</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-24">Valor Lance</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-20">Lance Aceito</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-20">Margem Lucro</TableHead>
+              <TableHead className="text-xs py-1 px-2 w-24">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,54 +67,54 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
               const profitMargin = calculateProfitMargin(auction.carfax_value, auction.mmr_value);
               
               return (
-                <TableRow key={auction.id} className="text-[10px]">
-                  <TableCell className="py-2 px-2">
+                <TableRow key={auction.id} className="text-xs">
+                  <TableCell className="py-1 px-2">
                     <div>
-                      <div className="font-medium text-[10px]">{auction.auction_house}</div>
+                      <div className="font-medium text-xs">{auction.auction_house}</div>
                       {auction.auction_city && (
-                        <div className="text-[8px] text-gray-500">{auction.auction_city}</div>
+                        <div className="text-[10px] text-gray-500">{auction.auction_city}</div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-2">
+                  <TableCell className="py-1 px-2">
                     <div>
-                      <div className="font-medium text-[8px] leading-tight">{auction.car_name}</div>
+                      <div className="font-medium text-[11px] leading-tight">{auction.car_name}</div>
                       <a 
                         href={auction.car_link} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-[7px] flex items-center gap-1 mt-1"
+                        className="text-blue-600 hover:underline text-[9px] flex items-center gap-1 mt-1"
                       >
                         Ver Carro <ExternalLink className="h-2 w-2" />
                       </a>
                     </div>
                   </TableCell>
-                  <TableCell className="py-2 px-2 text-[10px]">{auction.car_year}</TableCell>
-                  <TableCell className="py-2 px-2 text-[10px]">
+                  <TableCell className="py-1 px-2 text-xs">{auction.car_year}</TableCell>
+                  <TableCell className="py-1 px-2 text-xs">
                     {auction.auction_date ? new Date(auction.auction_date).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
-                  <TableCell className="py-2 px-2 text-[10px]">
+                  <TableCell className="py-1 px-2 text-xs">
                     {auction.bid_value ? `R$ ${auction.bid_value.toLocaleString('pt-BR')}` : '-'}
                   </TableCell>
-                  <TableCell className="py-2 px-2">
+                  <TableCell className="py-1 px-2">
                     <Badge 
                       variant={auction.bid_accepted ? "default" : "secondary"}
-                      className="text-[8px] px-1 py-0"
+                      className="text-[10px] px-1 py-0"
                     >
                       {auction.bid_accepted ? 'Sim' : 'Não'}
                     </Badge>
                   </TableCell>
-                  <TableCell className="py-2 px-2">
+                  <TableCell className="py-1 px-2">
                     {profitMargin !== null ? (
                       <Badge 
                         variant={parseFloat(profitMargin) > 0 ? "default" : "destructive"}
-                        className={`text-[8px] px-1 py-0 ${parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}`}
+                        className={`text-[10px] px-1 py-0 ${parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}`}
                       >
                         {profitMargin}%
                       </Badge>
                     ) : '-'}
                   </TableCell>
-                  <TableCell className="py-2 px-2">
+                  <TableCell className="py-1 px-2">
                     <div className="flex gap-1">
                       <Button
                         variant="outline"
