@@ -43,7 +43,7 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
   };
 
   if (isLoading) {
-    return <div className="text-center py-4">Carregando leilões...</div>;
+    return <div className="text-center py-4 text-[10px]">Carregando leilões...</div>;
   }
 
   return (
@@ -51,15 +51,15 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead>Leilão</TableHead>
-              <TableHead>Carro</TableHead>
-              <TableHead>Ano</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead>Valor Lance</TableHead>
-              <TableHead>Lance Aceito</TableHead>
-              <TableHead>Margem Lucro</TableHead>
-              <TableHead>Ações</TableHead>
+            <TableRow className="text-[10px]">
+              <TableHead className="text-[10px] py-2 px-2 w-32">Leilão</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-80">Carro</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-16">Ano</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-24">Data</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-24">Valor Lance</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-20">Lance Aceito</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-20">Margem Lucro</TableHead>
+              <TableHead className="text-[10px] py-2 px-2 w-24">Ações</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,66 +67,71 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
               const profitMargin = calculateProfitMargin(auction.carfax_value, auction.mmr_value);
               
               return (
-                <TableRow key={auction.id}>
-                  <TableCell>
+                <TableRow key={auction.id} className="text-[10px]">
+                  <TableCell className="py-2 px-2">
                     <div>
-                      <div className="font-medium">{auction.auction_house}</div>
+                      <div className="font-medium text-[10px]">{auction.auction_house}</div>
                       {auction.auction_city && (
-                        <div className="text-sm text-gray-500">{auction.auction_city}</div>
+                        <div className="text-[8px] text-gray-500">{auction.auction_city}</div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2 px-2">
                     <div>
-                      <div className="font-medium">{auction.car_name}</div>
+                      <div className="font-medium text-[8px] leading-tight">{auction.car_name}</div>
                       <a 
                         href={auction.car_link} 
                         target="_blank" 
                         rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline text-sm flex items-center gap-1"
+                        className="text-blue-600 hover:underline text-[7px] flex items-center gap-1 mt-1"
                       >
-                        Ver Carro <ExternalLink className="h-3 w-3" />
+                        Ver Carro <ExternalLink className="h-2 w-2" />
                       </a>
                     </div>
                   </TableCell>
-                  <TableCell>{auction.car_year}</TableCell>
-                  <TableCell>
+                  <TableCell className="py-2 px-2 text-[10px]">{auction.car_year}</TableCell>
+                  <TableCell className="py-2 px-2 text-[10px]">
                     {auction.auction_date ? new Date(auction.auction_date).toLocaleDateString('pt-BR') : '-'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2 px-2 text-[10px]">
                     {auction.bid_value ? `R$ ${auction.bid_value.toLocaleString('pt-BR')}` : '-'}
                   </TableCell>
-                  <TableCell>
-                    <Badge variant={auction.bid_accepted ? "default" : "secondary"}>
+                  <TableCell className="py-2 px-2">
+                    <Badge 
+                      variant={auction.bid_accepted ? "default" : "secondary"}
+                      className="text-[8px] px-1 py-0"
+                    >
                       {auction.bid_accepted ? 'Sim' : 'Não'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2 px-2">
                     {profitMargin !== null ? (
                       <Badge 
                         variant={parseFloat(profitMargin) > 0 ? "default" : "destructive"}
-                        className={parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}
+                        className={`text-[8px] px-1 py-0 ${parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}`}
                       >
                         {profitMargin}%
                       </Badge>
                     ) : '-'}
                   </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
+                  <TableCell className="py-2 px-2">
+                    <div className="flex gap-1">
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-6 w-6 p-0"
                         onClick={() => handleViewDetails(auction)}
                       >
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3 w-3" />
                       </Button>
                       {canEditVehicles && (
                         <Button
                           variant="outline"
                           size="sm"
+                          className="h-6 w-6 p-0"
                           onClick={() => onEditAuction(auction)}
                         >
-                          <Edit className="h-4 w-4" />
+                          <Edit className="h-3 w-3" />
                         </Button>
                       )}
                     </div>
