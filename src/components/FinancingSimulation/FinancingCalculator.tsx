@@ -32,6 +32,13 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
   };
 
   const isCalculationValid = data.vehiclePrice > 0;
+  const suggestedDownPayment = data.vehiclePrice * 0.2; // 20% do valor
+
+  React.useEffect(() => {
+    if (data.vehiclePrice > 0 && data.downPayment === 0) {
+      onChange('downPayment', suggestedDownPayment);
+    }
+  }, [data.vehiclePrice]);
 
   return (
     <Card>
@@ -42,119 +49,115 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Down Payment */}
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <Percent className="h-4 w-4" />
-            <span>Down Payment (%)</span>
-          </Label>
-          <Input
-            type="number"
-            value={data.downPayment}
-            onChange={(e) => onChange('downPayment', parseFloat(e.target.value) || 0)}
-            placeholder="Ex: 20"
-            min="0"
-            max="100"
-            step="0.1"
-          />
-          {data.vehiclePrice > 0 && (
-            <p className="text-sm text-gray-500">
-              Valor: {formatCurrency((data.vehiclePrice * data.downPayment) / 100)}
-            </p>
-          )}
+        {/* Primeira linha - Down Payment e Taxa de Juros */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4" />
+              <span>Down Payment</span>
+            </Label>
+            <Input
+              type="number"
+              value={data.downPayment}
+              onChange={(e) => onChange('downPayment', parseFloat(e.target.value) || 0)}
+              placeholder={`Sugerido: ${formatCurrency(suggestedDownPayment)}`}
+              min="0"
+              step="100"
+            />
+            {data.vehiclePrice > 0 && (
+              <p className="text-sm text-gray-500">
+                Sugerido: {formatCurrency(suggestedDownPayment)} (20% do valor)
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center space-x-2">
+              <Percent className="h-4 w-4" />
+              <span>Taxa de Juros (% ao ano)</span>
+            </Label>
+            <Input
+              type="number"
+              value={data.interestRate}
+              onChange={(e) => onChange('interestRate', parseFloat(e.target.value) || 0)}
+              placeholder="12"
+              min="0"
+              max="50"
+              step="0.1"
+            />
+          </div>
         </div>
 
-        {/* Taxa de Juros */}
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <Percent className="h-4 w-4" />
-            <span>Taxa de Juros (% ao ano)</span>
-          </Label>
-          <Input
-            type="number"
-            value={data.interestRate}
-            onChange={(e) => onChange('interestRate', parseFloat(e.target.value) || 0)}
-            placeholder="12"
-            min="0"
-            max="50"
-            step="0.1"
-          />
+        {/* Segunda linha - Parcelas e Dealer Fee */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="flex items-center space-x-2">
+              <CreditCard className="h-4 w-4" />
+              <span>Quantidade de Parcelas</span>
+            </Label>
+            <Input
+              type="number"
+              value={data.installments}
+              onChange={(e) => onChange('installments', parseInt(e.target.value) || 0)}
+              placeholder="72"
+              min="1"
+              max="120"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label className="flex items-center space-x-2">
+              <DollarSign className="h-4 w-4" />
+              <span>Dealer Fee</span>
+            </Label>
+            <Input
+              type="number"
+              value={data.dealerFee}
+              onChange={(e) => onChange('dealerFee', parseFloat(e.target.value) || 0)}
+              placeholder="499"
+              min="0"
+              step="1"
+            />
+          </div>
         </div>
 
-        {/* Quantidade de Parcelas */}
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <CreditCard className="h-4 w-4" />
-            <span>Quantidade de Parcelas</span>
-          </Label>
-          <Input
-            type="number"
-            value={data.installments}
-            onChange={(e) => onChange('installments', parseInt(e.target.value) || 0)}
-            placeholder="72"
-            min="1"
-            max="120"
-          />
-        </div>
+        {/* Terceira linha - Taxa do Imposto e Emplacamento */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label className="flex items-center space-x-2">
+              <Percent className="h-4 w-4" />
+              <span>Taxa do Imposto (%)</span>
+            </Label>
+            <Input
+              type="number"
+              value={data.taxRate}
+              onChange={(e) => onChange('taxRate', parseFloat(e.target.value) || 0)}
+              placeholder="6"
+              min="0"
+              max="20"
+              step="0.1"
+            />
+            {data.vehiclePrice > 0 && (
+              <p className="text-sm text-gray-500">
+                Valor: {formatCurrency((data.vehiclePrice * data.taxRate) / 100)}
+              </p>
+            )}
+          </div>
 
-        {/* Dealer Fee */}
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <DollarSign className="h-4 w-4" />
-            <span>Dealer Fee</span>
-          </Label>
-          <Input
-            type="number"
-            value={data.dealerFee}
-            onChange={(e) => onChange('dealerFee', parseFloat(e.target.value) || 0)}
-            placeholder="499"
-            min="0"
-            step="1"
-          />
-          <p className="text-sm text-gray-500">
-            Valor: {formatCurrency(data.dealerFee)}
-          </p>
-        </div>
-
-        {/* Taxa do Imposto */}
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <Percent className="h-4 w-4" />
-            <span>Taxa do Imposto (%)</span>
-          </Label>
-          <Input
-            type="number"
-            value={data.taxRate}
-            onChange={(e) => onChange('taxRate', parseFloat(e.target.value) || 0)}
-            placeholder="6"
-            min="0"
-            max="20"
-            step="0.1"
-          />
-          {data.vehiclePrice > 0 && (
-            <p className="text-sm text-gray-500">
-              Valor: {formatCurrency((data.vehiclePrice * data.taxRate) / 100)}
-            </p>
-          )}
-        </div>
-
-        {/* Valor do Emplacamento */}
-        <div className="space-y-2">
-          <Label className="flex items-center space-x-2">
-            <FileText className="h-4 w-4" />
-            <span>Valor do Emplacamento</span>
-          </Label>
-          <Input
-            type="number"
-            value={data.registrationFee}
-            onChange={(e) => onChange('registrationFee', parseFloat(e.target.value) || 0)}
-            placeholder="450"
-            min="0"
-            step="1"
-          />
-          <p className="text-sm text-gray-500">
-            Valor: {formatCurrency(data.registrationFee)}
-          </p>
+          <div className="space-y-2">
+            <Label className="flex items-center space-x-2">
+              <FileText className="h-4 w-4" />
+              <span>Valor do Emplacamento</span>
+            </Label>
+            <Input
+              type="number"
+              value={data.registrationFee}
+              onChange={(e) => onChange('registrationFee', parseFloat(e.target.value) || 0)}
+              placeholder="450"
+              min="0"
+              step="1"
+            />
+          </div>
         </div>
 
         {/* Outros */}
@@ -163,20 +166,22 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
             <Settings className="h-4 w-4" />
             <span>Outros</span>
           </Label>
-          <Input
-            type="number"
-            value={data.otherFees}
-            onChange={(e) => onChange('otherFees', parseFloat(e.target.value) || 0)}
-            placeholder="0"
-            min="0"
-            step="1"
-          />
-          <Textarea
-            value={data.otherFeesDescription}
-            onChange={(e) => onChange('otherFeesDescription', e.target.value)}
-            placeholder="Descrição dos outros custos..."
-            rows={2}
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Input
+              type="number"
+              value={data.otherFees}
+              onChange={(e) => onChange('otherFees', parseFloat(e.target.value) || 0)}
+              placeholder="0"
+              min="0"
+              step="1"
+            />
+            <Textarea
+              value={data.otherFeesDescription}
+              onChange={(e) => onChange('otherFeesDescription', e.target.value)}
+              placeholder="Descrição dos outros custos..."
+              rows={1}
+            />
+          </div>
           {data.otherFees > 0 && (
             <p className="text-sm text-gray-500">
               Valor: {formatCurrency(data.otherFees)}

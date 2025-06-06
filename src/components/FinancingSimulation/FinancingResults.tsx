@@ -37,6 +37,8 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
     }).format(value);
   };
 
+  const downPaymentPercentage = data.vehiclePrice > 0 ? ((data.downPayment / data.vehiclePrice) * 100).toFixed(1) : '0';
+
   return (
     <Card>
       <CardHeader>
@@ -55,7 +57,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
               {formatCurrency(results.downPaymentAmount)}
             </p>
             <p className="text-xs text-blue-500">
-              {data.downPayment}% do valor
+              {downPaymentPercentage}% do valor
             </p>
           </div>
 
@@ -148,7 +150,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
             )}
             <div className="flex justify-between">
               <span>Juros ({data.interestRate}% ao ano):</span>
-              <span>{formatCurrency(results.totalAmount - results.financedAmount)}</span>
+              <span>{formatCurrency(results.totalAmount - results.downPaymentAmount - data.vehiclePrice - results.totalTaxes - results.totalFees)}</span>
             </div>
           </div>
         </div>
