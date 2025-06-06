@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Search, FileText, DollarSign, Edit } from 'lucide-react';
+import { Search, FileText, DollarSign, Edit } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../integrations/supabase/client';
 import CustomerForm from './CustomerForm';
@@ -141,16 +141,8 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">{t('customers')}</h1>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          {t('addCustomer')}
-        </Button>
-      </div>
-
-      <div className="flex gap-4 mb-6">
+    <div className="space-y-4">
+      <div className="flex gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
@@ -186,69 +178,69 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-xs font-medium">Nome</TableHead>
-                  <TableHead className="text-xs font-medium">Telefone</TableHead>
-                  <TableHead className="text-xs font-medium">Veículo de Interesse</TableHead>
-                  <TableHead className="text-xs font-medium">Preço</TableHead>
-                  <TableHead className="text-xs font-medium">Vendedor</TableHead>
-                  <TableHead className="text-xs font-medium">Status</TableHead>
-                  <TableHead className="text-xs font-medium text-right">Ações</TableHead>
+                  <TableHead className="text-xs font-medium w-36">Nome</TableHead>
+                  <TableHead className="text-xs font-medium w-28">Telefone</TableHead>
+                  <TableHead className="text-xs font-medium w-64">Veículo de Interesse</TableHead>
+                  <TableHead className="text-xs font-medium w-24">Preço</TableHead>
+                  <TableHead className="text-xs font-medium w-32">Vendedor</TableHead>
+                  <TableHead className="text-xs font-medium w-20">Status</TableHead>
+                  <TableHead className="text-xs font-medium text-right w-24">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {customers.map((customer) => (
                   <TableRow key={customer.id} className="hover:bg-gray-50">
-                    <TableCell className="text-xs">
+                    <TableCell className="text-xs py-2">
                       <div>
-                        <div className="font-medium">{customer.name}</div>
+                        <div className="font-medium text-xs">{customer.name}</div>
                         {customer.email && (
-                          <div className="text-gray-500 text-xs">{customer.email}</div>
+                          <div className="text-gray-500 text-[9px]">{customer.email}</div>
                         )}
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs">{customer.phone}</TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="text-xs py-2">{customer.phone}</TableCell>
+                    <TableCell className="py-2">
                       {customer.interested_vehicle ? (
                         <div>
-                          <div className="font-medium">
+                          <div className="font-medium text-[9px]">
                             {customer.interested_vehicle.year} {customer.interested_vehicle.name}
                           </div>
-                          <div className="text-gray-500">{customer.interested_vehicle.model}</div>
+                          <div className="text-gray-500 text-[9px]">{customer.interested_vehicle.model}</div>
                         </div>
                       ) : (
-                        <span className="text-gray-400">Não informado</span>
+                        <span className="text-gray-400 text-[9px]">Não informado</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="text-xs py-2">
                       {customer.interested_vehicle?.sale_price ? (
-                        <span className="font-medium">
+                        <span className="font-medium text-xs">
                           R$ {customer.interested_vehicle.sale_price.toLocaleString()}
                         </span>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-400 text-xs">-</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs">
+                    <TableCell className="text-xs py-2">
                       {customer.responsible_seller ? (
-                        <span>
+                        <span className="text-xs">
                           {customer.responsible_seller.first_name} {customer.responsible_seller.last_name}
                         </span>
                       ) : (
-                        <span className="text-gray-400">Não atribuído</span>
+                        <span className="text-gray-400 text-xs">Não atribuído</span>
                       )}
                     </TableCell>
-                    <TableCell className="text-xs">
-                      <Badge className={`text-xs ${getStatusBadgeColor(customer.deal_status)}`}>
+                    <TableCell className="py-2">
+                      <Badge className={`text-[7px] px-1 py-0 ${getStatusBadgeColor(customer.deal_status)}`}>
                         {customer.deal_status === 'quote' ? t('quote') : t('completedSale')}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell className="text-right py-2">
                       <div className="flex gap-1 justify-end">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEditCustomer(customer)}
-                          className="h-8 w-8 p-0"
+                          className="h-6 w-6 p-0"
                         >
                           <Edit className="h-3 w-3" />
                         </Button>
@@ -256,7 +248,7 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleShowDealDetails(customer)}
-                          className="h-8 w-8 p-0"
+                          className="h-6 w-6 p-0"
                         >
                           <DollarSign className="h-3 w-3" />
                         </Button>
@@ -264,7 +256,7 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleGenerateQuote(customer)}
-                          className="h-8 w-8 p-0"
+                          className="h-6 w-6 p-0"
                         >
                           <FileText className="h-3 w-3" />
                         </Button>
