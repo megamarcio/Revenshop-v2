@@ -4,7 +4,7 @@ import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
 import Navbar from './components/Layout/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
-import VehicleListView from './components/Vehicles/VehicleListView';
+import VehicleList from './components/Vehicles/VehicleList';
 import CustomerManagement from './components/Customers/CustomerManagement';
 import UserManagement from './components/Users/UserManagement';
 import AdminPanel from './components/Admin/AdminPanel';
@@ -37,7 +37,7 @@ const App: React.FC = () => {
 
         <main className="flex-1 overflow-auto bg-background">
           {activeTab === 'dashboard' && canAccessAdmin && <Dashboard />}
-          {activeTab === 'vehicles' && <VehicleListView />}
+          {activeTab === 'vehicles' && <VehicleList />}
           {activeTab === 'customers' && <CustomerManagement />}
           {activeTab === 'auctions' && <AuctionManagement />}
           {activeTab === 'tasks' && <TaskManagement />}
