@@ -152,6 +152,7 @@ const AuctionForm = ({ auction, onSave, onCancel }: AuctionFormProps) => {
             <AuctionVehicleForm
               register={register}
               errors={errors}
+              watch={watch}
             />
 
             <AuctionValuesForm
