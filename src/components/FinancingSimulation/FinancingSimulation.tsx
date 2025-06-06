@@ -1,6 +1,6 @@
 
 import React, { useState, useCallback } from 'react';
-import VehicleClientSelector from './VehicleClientSelector';
+import VehicleClientSelector from './VehicleSelector';
 import FinancingCalculator from './FinancingCalculator';
 import FinancingResults from './FinancingResults';
 import FinancingActions from './FinancingActions';
