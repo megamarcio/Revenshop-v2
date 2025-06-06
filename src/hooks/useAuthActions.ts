@@ -85,34 +85,26 @@ export const useAuthActions = (
     try {
       console.log('Starting sign out process...');
       
-      // Get current session first
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Error getting session:', sessionError);
-      }
-      
-      console.log('Current session:', session?.user?.id || 'No session');
-      
-      // Clear user state first to avoid UI issues
+      // Clear user state immediately
+      console.log('Clearing user state...');
       clearUser();
       
-      // Only attempt to sign out if there's an active session
-      if (session?.access_token) {
-        console.log('Signing out from Supabase...');
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-          console.error('Supabase signOut error:', error);
-          // Don't throw here, user state is already cleared
-        }
+      // Sign out from Supabase
+      console.log('Signing out from Supabase...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Supabase signOut error:', error);
+        // Don't throw here, user state is already cleared
       } else {
-        console.log('No active session, skipping Supabase signOut');
+        console.log('Supabase signOut successful');
       }
       
       toast({
         title: 'Sucesso',
         description: 'Logout realizado com sucesso!',
       });
+      
     } catch (error) {
       console.error('Error during sign out:', error);
       // Still clear the user state even if logout failed

@@ -37,6 +37,7 @@ export const useUserProfile = () => {
   };
 
   const clearUser = () => {
+    console.log('Clearing user state in useUserProfile');
     setUser(null);
   };
 

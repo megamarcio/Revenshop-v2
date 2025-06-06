@@ -19,23 +19,23 @@ export const useAuth = () => {
       async (event, session) => {
         if (!mounted) return;
         
-        console.log('Auth state changed:', event, session?.user?.id);
+        console.log('Auth state changed:', event, 'Session:', session?.user?.id || 'null');
         
-        if (session?.user) {
+        if (event === 'SIGNED_OUT' || !session?.user) {
+          console.log('User signed out or no session, clearing user state');
+          if (mounted) {
+            clearUser();
+            setLoading(false);
+          }
+        } else if (session?.user) {
+          console.log('User session found, fetching profile');
           // Use setTimeout to avoid potential auth callback issues
           setTimeout(() => {
             if (mounted) {
               fetchUserProfile(session.user.id);
+              setLoading(false);
             }
           }, 0);
-        } else {
-          if (mounted) {
-            clearUser();
-          }
-        }
-        
-        if (mounted) {
-          setLoading(false);
         }
       }
     );
@@ -44,7 +44,7 @@ export const useAuth = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       
-      console.log('Initial session:', session?.user?.id);
+      console.log('Initial session check:', session?.user?.id || 'no session');
       if (session?.user) {
         fetchUserProfile(session.user.id);
       } else {
@@ -76,6 +76,12 @@ export const useAuth = () => {
   const canViewBHPHDetails = isAdmin || isManager;
   const canAccessDashboard = isAdmin || isManager || isSeller || isInternalSeller;
   const canCreateTasks = isAdmin || isManager || isInternalSeller;
+
+  console.log('useAuth state:', { 
+    user: user?.email || 'null', 
+    isAuthenticated, 
+    loading 
+  });
 
   return {
     user,
