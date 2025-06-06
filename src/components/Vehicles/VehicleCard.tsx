@@ -43,7 +43,7 @@ interface VehicleCardProps {
 
 const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProps) => {
   const { t } = useLanguage();
-  const { canEditVehicles, canViewCostPrices, isInternalSeller } = useAuth();
+  const { canEditVehicles, canViewCostPrices, isInternalSeller, isSeller } = useAuth();
   const [showMinNegotiable, setShowMinNegotiable] = useState(false);
   const [downloading, setDownloading] = useState(false);
 
@@ -168,11 +168,11 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
         </div>
         
         <CardContent className="p-3 space-y-2">
-          <div>
+          <div className="text-center">
             <h3 className="text-[11px] font-bold text-gray-900 leading-tight mb-0.5">
               {vehicle.internalCode} - {vehicle.name}
             </h3>
-            <p className="text-xs text-gray-600 text-center">{vehicle.year} • {vehicle.color}</p>
+            <p className="text-xs text-gray-600">{vehicle.year} • {vehicle.color}</p>
           </div>
 
           <div className="bg-gray-50 p-1.5 rounded text-center">
@@ -190,22 +190,27 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
           </div>
 
           {/* Minimum negotiable price for internal sellers */}
-          {isInternalSeller && (
+          {isInternalSeller && showMinNegotiable && (
             <div className="bg-yellow-50 p-2 rounded border border-yellow-200">
+              <p className="text-sm font-bold text-yellow-700 text-center">
+                {formatCurrency(vehicle.minNegotiable)}
+              </p>
+            </div>
+          )}
+
+          {/* Seller download photos button */}
+          {isSeller && vehicle.photos && vehicle.photos.length > 0 && (
+            <div className="bg-blue-50 p-2 rounded border border-blue-200">
               <Button
                 size="sm"
                 variant="outline"
-                className="w-full h-6 text-xs"
-                onClick={() => setShowMinNegotiable(!showMinNegotiable)}
+                className="w-full h-7 text-xs"
+                onClick={handleDownloadAll}
+                disabled={downloading}
               >
-                {showMinNegotiable ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
-                {showMinNegotiable ? 'Ocultar' : 'Ver'} Mín. Negociável
+                <Archive className="h-3 w-3 mr-1" />
+                {downloading ? 'Baixando...' : 'Baixar Fotos (ZIP)'}
               </Button>
-              {showMinNegotiable && (
-                <p className="text-sm font-bold text-yellow-700 text-center mt-1">
-                  {formatCurrency(vehicle.minNegotiable)}
-                </p>
-              )}
             </div>
           )}
 
@@ -221,7 +226,7 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
             </div>
           )}
 
-          <div className="flex gap-1 pt-2 border-t border-gray-100">
+          <div className="flex gap-1 pt-2 border-t border-gray-100 justify-center">
             {canEditVehicles && (
               <Button 
                 size="sm" 
@@ -255,6 +260,17 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
                 className="h-3 w-3 object-contain"
               />
             </Button>
+            {isInternalSeller && (
+              <Button
+                size="sm"
+                variant="outline"
+                className="h-7 w-7 p-0"
+                onClick={() => setShowMinNegotiable(!showMinNegotiable)}
+                title="Ver Mín. Negociável"
+              >
+                {showMinNegotiable ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              </Button>
+            )}
             {canViewCostPrices && (
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -264,7 +280,7 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
                     className="h-7 w-7 p-0"
                     title="Ver Preço de Compra"
                   >
-                    <Eye className="h-3 w-3" />
+                    <DollarSign className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
