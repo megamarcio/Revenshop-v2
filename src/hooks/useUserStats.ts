@@ -37,14 +37,14 @@ export const useUserStats = () => {
       try {
         setLoading(true);
         
-        // Fetch vehicles data
+        // Fetch vehicles data - only select existing columns
         let vehiclesQuery = supabase
           .from('vehicles')
-          .select('id, category, sale_date, created_at');
+          .select('id, category, created_at');
 
         // For non-admin/manager users, filter by their own vehicles
         if (!isAdmin && !isManager) {
-          vehiclesQuery = vehiclesQuery.eq('seller_id', user.id);
+          vehiclesQuery = vehiclesQuery.eq('created_by', user.id);
         }
 
         const { data: vehicles, error: vehiclesError } = await vehiclesQuery;
@@ -54,10 +54,16 @@ export const useUserStats = () => {
           throw vehiclesError;
         }
 
-        // Fetch sales data
+        // Fetch sales data with vehicle information
         let salesQuery = supabase
           .from('sales')
-          .select('id, final_sale_price, sale_date, vehicle_id');
+          .select(`
+            id, 
+            final_sale_price, 
+            sale_date, 
+            vehicle_id,
+            vehicles!inner(id, created_at, created_by)
+          `);
 
         const { data: sales, error: salesError } = await salesQuery;
 
@@ -80,12 +86,12 @@ export const useUserStats = () => {
 
         // Calculate average sale time
         let avgSaleTime = 0;
-        if (userSales.length > 0 && vehicles) {
+        if (userSales.length > 0) {
           const salesWithDuration = userSales
             .map(sale => {
-              const vehicle = vehicles.find(v => v.id === sale.vehicle_id);
-              if (vehicle && vehicle.created_at && sale.sale_date) {
-                const listDate = new Date(vehicle.created_at);
+              const vehicleData = sale.vehicles as any;
+              if (vehicleData && vehicleData.created_at && sale.sale_date) {
+                const listDate = new Date(vehicleData.created_at);
                 const saleDate = new Date(sale.sale_date);
                 return Math.floor((saleDate.getTime() - listDate.getTime()) / (1000 * 60 * 60 * 24));
               }
