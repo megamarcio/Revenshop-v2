@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,7 +48,7 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
   };
 
   const handleCarfaxLookup = (vin: string) => {
-    const carfaxUrl = `https://www.carfax.com/VehicleHistory/p/Report.cfx?partner=DVG_0&vin=${vin}`;
+    const carfaxUrl = `https://www.carfaxonline.com/vhr/${vin}`;
     window.open(carfaxUrl, '_blank');
   };
 

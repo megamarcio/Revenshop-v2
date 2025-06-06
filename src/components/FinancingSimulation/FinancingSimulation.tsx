@@ -4,15 +4,10 @@ import VehicleClientSelector from './VehicleClientSelector';
 import FinancingCalculator from './FinancingCalculator';
 import FinancingResults from './FinancingResults';
 import FinancingActions from './FinancingActions';
-import { useVehicles } from '@/hooks/useVehicles';
-import { useCustomers } from '@/hooks/useCustomers';
 import { FinancingData, CalculationResults } from './types';
 import { calculateFinancing } from './utils/financingCalculations';
 
 const FinancingSimulation = () => {
-  const { vehicles } = useVehicles();
-  const { customers } = useCustomers();
-  
   const [financingData, setFinancingData] = useState<FinancingData>({
     vehiclePrice: 0,
     downPayment: 0,
@@ -54,8 +49,6 @@ const FinancingSimulation = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-6">
           <VehicleClientSelector
-            vehicles={vehicles}
-            customers={customers}
             selectedVehicle={financingData.vehicle}
             selectedCustomer={financingData.customer}
             vehiclePrice={financingData.vehiclePrice}

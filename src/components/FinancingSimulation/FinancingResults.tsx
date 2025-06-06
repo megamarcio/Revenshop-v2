@@ -26,7 +26,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Destaque Principal - Down Payment + Parcelas */}
+        {/* Destaque Principal - Down Payment + Parcelas com fontes padronizadas */}
         <div className="bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-lg border-2 border-blue-200">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="text-center">
@@ -40,7 +40,7 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
             <div className="text-center">
               <CreditCard className="h-10 w-10 mx-auto text-green-600 mb-3" />
               <p className="text-sm text-green-600 font-medium mb-1">Financiamento</p>
-              <p className="text-lg font-bold text-green-900">
+              <p className="text-3xl font-bold text-green-900">
                 {data.installments}x de {formatCurrency(results.monthlyPayment)}
               </p>
             </div>

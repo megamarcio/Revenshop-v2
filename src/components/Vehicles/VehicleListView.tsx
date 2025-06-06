@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,7 @@ const VehicleListView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleLis
   };
 
   const handleCarfaxLookup = (vin: string) => {
-    const carfaxUrl = `https://www.carfax.com/VehicleHistory/p/Report.cfx?partner=DVG_0&vin=${vin}`;
+    const carfaxUrl = `https://www.carfaxonline.com/vhr/${vin}`;
     window.open(carfaxUrl, '_blank');
   };
 

@@ -1,14 +1,16 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Car, User, DollarSign } from 'lucide-react';
+import { Car, User, DollarSign, Search } from 'lucide-react';
+import { useVehiclesOptimized } from '@/hooks/useVehiclesOptimized';
+import { useCustomersOptimized } from '@/hooks/useCustomersOptimized';
 
 interface VehicleClientSelectorProps {
-  vehicles: any[];
-  customers: any[];
+  vehicles?: any[];
+  customers?: any[];
   selectedVehicle?: any;
   selectedCustomer?: any;
   vehiclePrice: number;
@@ -18,8 +20,6 @@ interface VehicleClientSelectorProps {
 }
 
 const VehicleClientSelector = ({
-  vehicles,
-  customers,
   selectedVehicle,
   selectedCustomer,
   vehiclePrice,
@@ -27,12 +27,32 @@ const VehicleClientSelector = ({
   onCustomerSelect,
   onVehiclePriceChange
 }: VehicleClientSelectorProps) => {
+  const [vehicleSearch, setVehicleSearch] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
+
+  // Usar hooks otimizados com filtros específicos
+  const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ 
+    category: 'forSale',
+    searchTerm: vehicleSearch,
+    limit: 50
+  });
+
+  const { customers, loading: customersLoading } = useCustomersOptimized({
+    searchTerm: customerSearch,
+    limit: 50
+  });
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD'
     }).format(value);
   };
+
+  // Memoizar veículos filtrados para melhor performance
+  const filteredVehicles = useMemo(() => {
+    return vehicles.filter(v => v.category === 'forSale');
+  }, [vehicles]);
 
   return (
     <Card>
@@ -49,18 +69,31 @@ const VehicleClientSelector = ({
             <Car className="h-4 w-4" />
             <span>Veículo (Opcional)</span>
           </Label>
+          
+          {/* Campo de busca para veículos */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar veículo por nome, código ou VIN..."
+              value={vehicleSearch}
+              onChange={(e) => setVehicleSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
           <Select
             value={selectedVehicle?.id || ''}
             onValueChange={(value) => {
-              const vehicle = vehicles.find(v => v.id === value);
+              const vehicle = filteredVehicles.find(v => v.id === value);
               onVehicleSelect(vehicle);
             }}
+            disabled={vehiclesLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione um veículo" />
+              <SelectValue placeholder={vehiclesLoading ? "Carregando veículos..." : "Selecione um veículo"} />
             </SelectTrigger>
-            <SelectContent>
-              {vehicles.filter(v => v.category === 'forSale').map((vehicle) => (
+            <SelectContent className="max-h-60">
+              {filteredVehicles.map((vehicle) => (
                 <SelectItem key={vehicle.id} value={vehicle.id}>
                   {vehicle.name} {vehicle.year} - {vehicle.color} - {formatCurrency(vehicle.sale_price)}
                 </SelectItem>
@@ -96,17 +129,30 @@ const VehicleClientSelector = ({
             <User className="h-4 w-4" />
             <span>Cliente (Opcional)</span>
           </Label>
+
+          {/* Campo de busca para clientes */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Buscar cliente por nome, telefone ou email..."
+              value={customerSearch}
+              onChange={(e) => setCustomerSearch(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
           <Select
             value={selectedCustomer?.id || ''}
             onValueChange={(value) => {
               const customer = customers.find(c => c.id === value);
               onCustomerSelect(customer);
             }}
+            disabled={customersLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Selecione um cliente" />
+              <SelectValue placeholder={customersLoading ? "Carregando clientes..." : "Selecione um cliente"} />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-60">
               {customers.map((customer) => (
                 <SelectItem key={customer.id} value={customer.id}>
                   {customer.name} - {customer.phone}

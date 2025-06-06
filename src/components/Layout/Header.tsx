@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LogOut, User, Car } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
+import QuickLinksMenu from './QuickLinksMenu';
 
 const Header = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -27,6 +28,9 @@ const Header = () => {
 
         {/* Right side */}
         <div className="flex items-center space-x-4">
+          {/* Quick Links Menu */}
+          <QuickLinksMenu />
+
           {/* Theme Toggle */}
           <ThemeToggle />
 
