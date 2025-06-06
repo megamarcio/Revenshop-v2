@@ -16,181 +16,175 @@ export const exportToPDF = (financingData: FinancingData, results: CalculationRe
         <head>
           <title>Simulação de Financiamento - RevenShop</title>
           <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
+            @page {
+              size: A4;
+              margin: 15mm;
+            }
+            * { 
+              margin: 0; 
+              padding: 0; 
+              box-sizing: border-box; 
+            }
             body { 
               font-family: 'Segoe UI', 'Arial', sans-serif; 
-              margin: 30px; 
               color: #1a1a1a;
-              line-height: 1.5;
+              line-height: 1.3;
               background: #ffffff;
+              font-size: 12px;
             }
             .header { 
               display: flex;
               align-items: center;
               justify-content: space-between;
-              border-bottom: 2px solid #e5e7eb;
-              padding-bottom: 25px;
-              margin-bottom: 40px;
+              padding-bottom: 15px;
+              margin-bottom: 20px;
+              border-bottom: 1px solid #e5e7eb;
             }
             .logo-section {
               display: flex;
               align-items: center;
-              gap: 20px;
+              gap: 15px;
             }
             .logo {
-              width: 70px;
-              height: 70px;
+              width: 50px;
+              height: 50px;
               background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-              border-radius: 12px;
+              border-radius: 8px;
               display: flex;
               align-items: center;
               justify-content: center;
               color: white;
               font-weight: bold;
-              font-size: 24px;
-              box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+              font-size: 20px;
             }
             .company-info h1 {
               color: #1f2937;
-              font-size: 32px;
+              font-size: 24px;
               font-weight: 700;
-              margin-bottom: 5px;
+              margin-bottom: 3px;
             }
             .company-info p {
               color: #6b7280;
-              font-size: 16px;
-              font-weight: 500;
+              font-size: 14px;
             }
             .document-info {
               text-align: right;
               color: #6b7280;
+              font-size: 11px;
             }
             .document-info h2 {
               color: #1f2937;
-              margin-bottom: 8px;
-              font-size: 20px;
-            }
-            .document-info p {
-              font-size: 14px;
-              margin-bottom: 2px;
+              margin-bottom: 5px;
+              font-size: 16px;
             }
 
             .highlight-section {
               background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-              border: 2px solid #0ea5e9;
-              border-radius: 16px;
-              padding: 30px;
-              margin: 30px 0;
+              padding: 20px;
+              margin: 15px 0;
               text-align: center;
+              border-radius: 8px;
             }
             .highlight-section h3 {
               color: #0369a1;
-              font-size: 24px;
-              margin-bottom: 25px;
+              font-size: 18px;
+              margin-bottom: 15px;
               font-weight: 600;
             }
             .payment-grid {
               display: grid;
               grid-template-columns: 1fr 1fr;
-              gap: 25px;
-              max-width: 600px;
+              gap: 15px;
+              max-width: 500px;
               margin: 0 auto;
             }
             .payment-item {
               background: white;
-              padding: 20px;
-              border-radius: 12px;
-              border: 1px solid #cbd5e1;
-              box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+              padding: 15px;
+              border-radius: 6px;
             }
             .payment-label {
               color: #64748b;
-              font-size: 14px;
+              font-size: 12px;
               font-weight: 500;
-              margin-bottom: 8px;
+              margin-bottom: 5px;
             }
             .payment-value {
               color: #0f172a;
-              font-size: 28px;
+              font-size: 20px;
               font-weight: 700;
             }
 
             .section { 
-              margin: 35px 0;
+              margin: 15px 0;
               background: #fafafa;
-              padding: 25px;
-              border-radius: 12px;
-              border-left: 4px solid #3b82f6;
+              padding: 15px;
+              border-radius: 6px;
             }
             .section h3 {
               color: #1f2937;
-              margin-bottom: 20px;
-              font-size: 20px;
+              margin-bottom: 10px;
+              font-size: 14px;
               font-weight: 600;
-              border-bottom: 1px solid #e5e7eb;
-              padding-bottom: 10px;
             }
             .info-grid { 
               display: grid; 
               grid-template-columns: 1fr 1fr; 
-              gap: 18px; 
+              gap: 10px; 
             }
             .info-item {
               background: white;
-              padding: 15px;
-              border-radius: 8px;
-              border: 1px solid #e5e7eb;
+              padding: 8px;
+              border-radius: 4px;
+              font-size: 11px;
             }
             .label { 
               font-weight: 600; 
               color: #374151;
               display: block;
-              margin-bottom: 6px;
-              font-size: 14px;
+              margin-bottom: 3px;
             }
             .value {
               color: #1f2937;
-              font-size: 16px;
-              font-weight: 500;
+              font-size: 12px;
             }
 
             .vehicle-section {
-              margin: 35px 0;
+              margin: 15px 0;
               text-align: center;
             }
             .vehicle-image {
-              max-width: 400px;
-              max-height: 250px;
-              border-radius: 12px;
-              box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-              margin: 20px auto;
+              max-width: 200px;
+              max-height: 120px;
+              border-radius: 6px;
+              margin: 10px auto;
               display: block;
             }
             .no-image {
-              width: 400px;
-              height: 200px;
+              width: 200px;
+              height: 100px;
               background: #f1f5f9;
-              border: 2px dashed #cbd5e1;
-              border-radius: 12px;
+              border-radius: 6px;
               display: flex;
               align-items: center;
               justify-content: center;
-              margin: 20px auto;
+              margin: 10px auto;
               color: #64748b;
               font-style: italic;
+              font-size: 11px;
             }
 
             .breakdown-table {
               width: 100%;
               border-collapse: collapse;
-              margin-top: 15px;
+              margin-top: 8px;
             }
             .breakdown-table tr {
               border-bottom: 1px solid #e5e7eb;
             }
             .breakdown-table td {
-              padding: 12px 0;
-              font-size: 14px;
+              padding: 6px 0;
+              font-size: 11px;
             }
             .breakdown-table td:first-child {
               color: #6b7280;
@@ -200,6 +194,24 @@ export const exportToPDF = (financingData: FinancingData, results: CalculationRe
               text-align: right;
               color: #1f2937;
               font-weight: 600;
+            }
+
+            .two-column {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 15px;
+            }
+
+            .compact-section {
+              margin: 10px 0;
+              background: #fafafa;
+              padding: 10px;
+              border-radius: 4px;
+            }
+            .compact-section h3 {
+              font-size: 12px;
+              margin-bottom: 8px;
+              color: #1f2937;
             }
           </style>
         </head>
@@ -219,62 +231,50 @@ export const exportToPDF = (financingData: FinancingData, results: CalculationRe
             </div>
           </div>
 
-          ${financingData.customer ? `
-            <div class="section">
-              <h3>Informações do Cliente</h3>
-              <div class="info-grid">
-                <div class="info-item">
-                  <span class="label">Nome:</span>
-                  <span class="value">${financingData.customer.name}</span>
-                </div>
-                <div class="info-item">
-                  <span class="label">Telefone:</span>
-                  <span class="value">${financingData.customer.phone}</span>
-                </div>
-                ${financingData.customer.email ? `
-                  <div class="info-item">
-                    <span class="label">Email:</span>
-                    <span class="value">${financingData.customer.email}</span>
+          <div class="two-column">
+            <div>
+              ${financingData.customer ? `
+                <div class="compact-section">
+                  <h3>Informações do Cliente</h3>
+                  <div style="font-size: 10px; line-height: 1.4;">
+                    <p><strong>Nome:</strong> ${financingData.customer.name}</p>
+                    <p><strong>Telefone:</strong> ${financingData.customer.phone}</p>
+                    ${financingData.customer.email ? `<p><strong>Email:</strong> ${financingData.customer.email}</p>` : ''}
                   </div>
-                ` : ''}
-              </div>
-            </div>
-          ` : ''}
+                </div>
+              ` : ''}
 
-          ${financingData.vehicle ? `
-            <div class="section">
-              <h3>Informações do Veículo</h3>
-              <div class="info-grid">
-                <div class="info-item">
-                  <span class="label">Veículo:</span>
-                  <span class="value">${financingData.vehicle.name} ${financingData.vehicle.year}</span>
+              ${financingData.vehicle ? `
+                <div class="compact-section">
+                  <h3>Informações do Veículo</h3>
+                  <div style="font-size: 10px; line-height: 1.4;">
+                    <p><strong>Veículo:</strong> ${financingData.vehicle.name} ${financingData.vehicle.year}</p>
+                    <p><strong>Cor:</strong> ${financingData.vehicle.color}</p>
+                    <p><strong>VIN:</strong> ${financingData.vehicle.vin}</p>
+                    <p><strong>Preço:</strong> ${formatCurrency(financingData.vehicle.sale_price)}</p>
+                  </div>
+                  ${financingData.vehicle.image_url ? `
+                    <img src="${financingData.vehicle.image_url}" alt="${financingData.vehicle.name} ${financingData.vehicle.year}" class="vehicle-image" />
+                  ` : `
+                    <div class="no-image">Imagem não disponível</div>
+                  `}
                 </div>
-                <div class="info-item">
-                  <span class="label">Cor:</span>
-                  <span class="value">${financingData.vehicle.color}</span>
-                </div>
-                <div class="info-item">
-                  <span class="label">VIN:</span>
-                  <span class="value">${financingData.vehicle.vin}</span>
-                </div>
-                <div class="info-item">
-                  <span class="label">Preço de Venda:</span>
-                  <span class="value">${formatCurrency(financingData.vehicle.sale_price)}</span>
-                </div>
-              </div>
+              ` : ''}
             </div>
-          ` : ''}
 
-          <div class="highlight-section">
-            <h3>Proposta de Financiamento</h3>
-            <div class="payment-grid">
-              <div class="payment-item">
-                <div class="payment-label">Down Payment</div>
-                <div class="payment-value">${formatCurrency(results.downPaymentAmount)}</div>
-              </div>
-              <div class="payment-item">
-                <div class="payment-label">Financiamento</div>
-                <div class="payment-value">${financingData.installments}x de ${formatCurrency(results.monthlyPayment)}</div>
+            <div>
+              <div class="highlight-section">
+                <h3>Proposta de Financiamento</h3>
+                <div class="payment-grid">
+                  <div class="payment-item">
+                    <div class="payment-label">Down Payment</div>
+                    <div class="payment-value">${formatCurrency(results.downPaymentAmount)}</div>
+                  </div>
+                  <div class="payment-item">
+                    <div class="payment-label">Financiamento</div>
+                    <div class="payment-value">${financingData.installments}x de ${formatCurrency(results.monthlyPayment)}</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -319,23 +319,10 @@ export const exportToPDF = (financingData: FinancingData, results: CalculationRe
             </table>
           </div>
 
-          ${financingData.vehicle ? `
-            <div class="vehicle-section">
-              <h3>Veículo</h3>
-              ${financingData.vehicle.image_url ? `
-                <img src="${financingData.vehicle.image_url}" alt="${financingData.vehicle.name} ${financingData.vehicle.year}" class="vehicle-image" />
-              ` : `
-                <div class="no-image">
-                  Imagem do veículo não disponível
-                </div>
-              `}
-            </div>
-          ` : ''}
-
           ${financingData.otherFeesDescription ? `
-            <div class="section">
+            <div class="compact-section">
               <h3>Observações</h3>
-              <p style="color: #4b5563; line-height: 1.6;">${financingData.otherFeesDescription}</p>
+              <p style="color: #4b5563; line-height: 1.4; font-size: 10px;">${financingData.otherFeesDescription}</p>
             </div>
           ` : ''}
         </body>

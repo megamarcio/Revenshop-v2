@@ -116,10 +116,25 @@ const VehicleClientSelector = ({
           </Select>
         </div>
 
-        {/* Informações do veículo selecionado */}
+        {/* Informações do veículo selecionado com imagem */}
         {selectedVehicle && (
           <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900 mb-2">Veículo Selecionado</h4>
+            <h4 className="font-medium text-blue-900 mb-3">Veículo Selecionado</h4>
+            
+            {/* Imagem do veículo */}
+            {selectedVehicle.image_url && (
+              <div className="mb-3 flex justify-center">
+                <img 
+                  src={selectedVehicle.image_url} 
+                  alt={`${selectedVehicle.name} ${selectedVehicle.year}`}
+                  className="max-w-full h-32 object-cover rounded border"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
+            
             <div className="text-sm text-blue-700 space-y-1">
               <p><span className="font-medium">Nome:</span> {selectedVehicle.name}</p>
               <p><span className="font-medium">Ano:</span> {selectedVehicle.year}</p>
