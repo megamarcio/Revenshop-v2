@@ -1,5 +1,7 @@
+
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { Vehicle } from './types';
 import { 
   fetchVehicles as fetchVehiclesOperation, 
   createVehicle as createVehicleOperation, 
