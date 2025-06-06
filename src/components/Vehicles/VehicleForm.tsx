@@ -3,7 +3,7 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Car, X, Save } from 'lucide-react';
+import { Car, X, Save, ExternalLink } from 'lucide-react';
 import BasicInfoForm from './forms/BasicInfoForm';
 import FinancialInfoForm from './forms/FinancialInfoForm';
 import SaleInfoForm from './forms/SaleInfoForm';
@@ -131,6 +131,18 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
         const margin = (sale / purchase).toFixed(2);
         console.log(`Margem de lucro calculada: ${margin}x`);
       }
+    }
+  };
+
+  const handleCarfaxClick = () => {
+    if (formData.vin) {
+      window.open(`https://www.carfaxonline.com/vhr/${formData.vin}`, '_blank');
+    } else {
+      toast({
+        title: 'Aviso',
+        description: 'VIN é necessário para consultar o Carfax',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -321,9 +333,28 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
             <Car className="h-6 w-6 text-revenshop-primary" />
             <CardTitle>{isEditing ? t('editVehicle') : t('addVehicle')}</CardTitle>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
-            <X className="h-4 w-4" />
-          </Button>
+          <div className="flex items-center space-x-2">
+            {formData.vin && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleCarfaxClick}
+                className="flex items-center gap-2"
+                title="Ver Carfax"
+              >
+                <img 
+                  src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
+                  alt="Carfax" 
+                  className="h-4 w-4"
+                />
+                Carfax
+              </Button>
+            )}
+            <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
         </CardHeader>
         
         <CardContent>
