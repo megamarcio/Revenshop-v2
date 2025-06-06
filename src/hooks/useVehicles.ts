@@ -37,10 +37,19 @@ export const useVehicles = () => {
   const fetchVehicles = async () => {
     try {
       console.log('Fetching vehicles from database...');
+      
+      // Otimizar consulta selecionando apenas campos necessários e limitando resultados
       const { data, error } = await supabase
         .from('vehicles')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select(`
+          id, name, vin, year, model, miles, internal_code, color, 
+          ca_note, purchase_price, sale_price, profit_margin, 
+          min_negotiable, carfax_price, mmr_value, description, 
+          category, title_type, title_status, photos, video, 
+          created_at, updated_at, created_by
+        `)
+        .order('created_at', { ascending: false })
+        .limit(100); // Limitar para evitar consultas muito pesadas
 
       if (error) {
         console.error('Supabase error fetching vehicles:', error);
@@ -53,9 +62,12 @@ export const useVehicles = () => {
       console.error('Error fetching vehicles:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao carregar veículos',
+        description: 'Erro ao carregar veículos. Tente novamente.',
         variant: 'destructive',
       });
+      
+      // Em caso de erro, definir array vazio para evitar estados indefinidos
+      setVehicles([]);
     } finally {
       setLoading(false);
     }
@@ -127,9 +139,6 @@ export const useVehicles = () => {
     try {
       console.log('Updating vehicle:', id, 'with data:', vehicleData);
       
-      // Timeout personalizado para operações com muitas fotos
-      const timeoutDuration = vehicleData.photos && vehicleData.photos.length > 5 ? 60000 : 30000;
-      
       // Mapear os dados de atualização
       const dbUpdateData: any = {};
       
@@ -149,7 +158,7 @@ export const useVehicles = () => {
       if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
       if (vehicleData.category) dbUpdateData.category = vehicleData.category;
       
-      // Processar informações do título com parsing melhorado
+      // Processar informações do título
       if (vehicleData.titleInfo !== undefined) {
         console.log('Processing titleInfo:', vehicleData.titleInfo);
         
@@ -189,18 +198,12 @@ export const useVehicles = () => {
 
       console.log('Update data being sent to database:', dbUpdateData);
 
-      const updatePromise = supabase
+      const { data, error } = await supabase
         .from('vehicles')
         .update(dbUpdateData)
         .eq('id', id)
         .select()
         .single();
-
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Operação excedeu o tempo limite')), timeoutDuration)
-      );
-
-      const { data, error } = await Promise.race([updatePromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('Supabase error updating vehicle:', error);
@@ -219,9 +222,7 @@ export const useVehicles = () => {
       console.error('Error updating vehicle:', error);
       
       let errorMessage = 'Erro desconhecido';
-      if (error.message?.includes('tempo limite')) {
-        errorMessage = 'Operação demorou muito para completar. Tente reduzir o número de fotos ou verificar sua conexão.';
-      } else if (error.message) {
+      if (error.message) {
         errorMessage = error.message;
       }
       
