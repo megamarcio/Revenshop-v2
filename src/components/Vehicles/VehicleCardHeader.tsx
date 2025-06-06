@@ -4,10 +4,10 @@ import { CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Download, Image as ImageIcon, ChevronLeft, ChevronRight } from 'lucide-react';
-import { VehicleCardData } from './VehicleCardTypes';
+import { Vehicle } from './VehicleCardTypes';
 
 interface VehicleCardHeaderProps {
-  vehicle: VehicleCardData;
+  vehicle: Vehicle;
   onDownloadSingle: (photoUrl: string, index: number) => void;
   onDownloadAll: () => void;
   downloading: boolean;
@@ -42,7 +42,7 @@ const VehicleCardHeader = ({
           <img 
             src={currentPhoto} 
             alt={vehicle.name}
-            className="w-full h-64 object-cover rounded-t-lg"
+            className="w-full h-72 object-cover rounded-t-lg"
             onError={(e) => {
               const target = e.target as HTMLImageElement;
               target.src = '/placeholder.svg';
@@ -119,7 +119,7 @@ const VehicleCardHeader = ({
           </div>
         </div>
       ) : (
-        <div className="w-full h-64 bg-gray-200 rounded-t-lg flex items-center justify-center">
+        <div className="w-full h-72 bg-gray-200 rounded-t-lg flex items-center justify-center">
           <ImageIcon className="h-12 w-12 text-gray-400" />
         </div>
       )}
