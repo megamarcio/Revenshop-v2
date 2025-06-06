@@ -62,10 +62,19 @@ export const useAuth = () => {
   const isAuthenticated = !!user;
   const isAdmin = user?.role === 'admin';
   const isManager = user?.role === 'manager';
+  const isInternalSeller = user?.role === 'internal_seller';
+  const isSeller = user?.role === 'seller';
   const canEditVehicles = isAdmin || isManager;
+  const canEditCustomers = isAdmin || isManager;
   const canManageUsers = isAdmin || isManager;
   const canAccessAdmin = isAdmin || isManager;
   const canEditBHPHSettings = isAdmin;
+  const canViewCostPrices = isAdmin || isManager;
+  const canAccessAuctions = isAdmin || isManager || isSeller;
+  const canViewAllTasks = isAdmin || isManager;
+  const canViewAllCustomers = isAdmin || isManager;
+  const canViewBHPHDetails = isAdmin || isManager;
+  const canAccessDashboard = isAdmin || isManager || isSeller || isInternalSeller;
 
   return {
     user,
@@ -73,10 +82,19 @@ export const useAuth = () => {
     isAuthenticated,
     isAdmin,
     isManager,
+    isInternalSeller,
+    isSeller,
     canEditVehicles,
+    canEditCustomers,
     canManageUsers,
     canAccessAdmin,
     canEditBHPHSettings,
+    canViewCostPrices,
+    canAccessAuctions,
+    canViewAllTasks,
+    canViewAllCustomers,
+    canViewBHPHDetails,
+    canAccessDashboard,
     signIn,
     signUp,
     signOut,
