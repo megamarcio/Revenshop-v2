@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -16,6 +15,7 @@ export interface Customer {
 interface UseCustomersOptions {
   limit?: number;
   searchTerm?: string;
+  sellerId?: string;
 }
 
 export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
@@ -23,16 +23,21 @@ export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
-  const { limit = 20, searchTerm } = options;
+  const { limit = 20, searchTerm, sellerId } = options;
 
   const fetchCustomers = useCallback(async (offset = 0) => {
     try {
-      console.log('Fetching customers with options:', { limit, offset, searchTerm });
+      console.log('Fetching customers with options:', { limit, offset, searchTerm, sellerId });
       
       let query = supabase
         .from('bhph_customers')
         .select('id, name, email, phone, address, created_at, updated_at')
         .order('created_at', { ascending: false });
+
+      // Filtrar por vendedor se especificado
+      if (sellerId) {
+        query = query.eq('responsible_seller_id', sellerId);
+      }
 
       // Adicionar busca por termo se especificado
       if (searchTerm && searchTerm.length > 0) {
@@ -68,7 +73,7 @@ export const useCustomersOptimized = (options: UseCustomersOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [limit, searchTerm]);
+  }, [limit, searchTerm, sellerId]);
 
   const createCustomer = useCallback(async (customerData: {
     name: string;
