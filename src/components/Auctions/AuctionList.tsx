@@ -42,6 +42,12 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
     setShowDetailsModal(true);
   };
 
+  const handleCarfaxClick = (vinNumber: string) => {
+    if (vinNumber) {
+      window.open(`https://www.carfaxonline.com/vhr/${vinNumber}`, '_blank');
+    }
+  };
+
   if (isLoading) {
     return <div className="text-center py-4 text-xs">Carregando leilões...</div>;
   }
@@ -130,6 +136,17 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
                       >
                         <Eye className="h-3 w-3" />
                       </Button>
+                      {auction.vin_number && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-6 w-6 p-0"
+                          onClick={() => handleCarfaxClick(auction.vin_number)}
+                          title="Ver Carfax"
+                        >
+                          <span className="text-[10px] font-bold">C</span>
+                        </Button>
+                      )}
                       {canEditVehicles && (
                         <Button
                           variant="outline"

@@ -37,6 +37,7 @@ export type Database = {
           purchase_value: number | null
           total_vehicle_cost: number | null
           updated_at: string
+          vin_number: string | null
         }
         Insert: {
           actual_auction_fees?: number | null
@@ -65,6 +66,7 @@ export type Database = {
           purchase_value?: number | null
           total_vehicle_cost?: number | null
           updated_at?: string
+          vin_number?: string | null
         }
         Update: {
           actual_auction_fees?: number | null
@@ -93,6 +95,7 @@ export type Database = {
           purchase_value?: number | null
           total_vehicle_cost?: number | null
           updated_at?: string
+          vin_number?: string | null
         }
         Relationships: []
       }
