@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,12 +18,18 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
   const [selectedAuction, setSelectedAuction] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
+  // Query otimizada selecionando apenas os campos necessários
   const { data: auctions, isLoading } = useQuery({
     queryKey: ['auctions'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('auctions')
-        .select('*')
+        .select(`
+          id, auction_date, car_year, car_name, 
+          auction_house, auction_city, car_link,
+          bid_value, bid_accepted, carfax_value, 
+          mmr_value, vin_number, created_at
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

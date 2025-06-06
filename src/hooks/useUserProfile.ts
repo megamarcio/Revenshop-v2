@@ -10,10 +10,10 @@ export const useUserProfile = () => {
     try {
       console.log('Fetching user profile for:', userId);
       
-      // Try to get the profile, but don't fail if it doesn't exist yet
+      // Selecionando apenas os campos necessários em vez de todos (*)
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select('id, first_name, last_name, email, phone, photo, role')
         .eq('id', userId)
         .maybeSingle();
 

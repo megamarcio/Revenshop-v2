@@ -1,5 +1,4 @@
 
-import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -38,10 +37,13 @@ export const useTasks = () => {
     queryKey: ['tasks'],
     queryFn: async () => {
       console.log('Fetching tasks...');
+      // Otimizando seleção de campos para tabelas relacionadas
       const { data, error } = await supabase
         .from('tasks')
         .select(`
-          *,
+          id, title, description, status, priority, 
+          vehicle_id, assigned_to, created_by, due_date, 
+          completed_at, created_at, updated_at,
           vehicle:vehicles(name, internal_code),
           assigned_user:profiles!tasks_assigned_to_fkey(first_name, last_name),
           created_user:profiles!tasks_created_by_fkey(first_name, last_name)

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface Activity {
@@ -16,16 +16,22 @@ export const useRecentActivities = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchRecentActivities = async () => {
+  const fetchRecentActivities = useCallback(async () => {
     try {
       console.log('Fetching recent activities...');
       
       const activities: Activity[] = [];
 
-      // Fetch recent vehicle additions
+      // Usando JOINs implícitos com select aninhado para veículos recentes
       const { data: recentVehicles, error: vehiclesError } = await supabase
         .from('vehicles')
-        .select('id, name, created_at, category')
+        .select(`
+          id, 
+          name, 
+          created_at, 
+          category,
+          sales:sales(id, final_sale_price, sale_date)
+        `)
         .order('created_at', { ascending: false })
         .limit(5);
 
@@ -57,7 +63,7 @@ export const useRecentActivities = () => {
         });
       }
 
-      // Fetch recent user creations
+      // Usando JOINs implícitos com campos selecionados para usuários recentes
       const { data: recentUsers, error: usersError } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, created_at, role')
@@ -91,11 +97,11 @@ export const useRecentActivities = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchRecentActivities();
-  }, []);
+  }, [fetchRecentActivities]);
 
   return { activities, loading, refetch: fetchRecentActivities };
 };

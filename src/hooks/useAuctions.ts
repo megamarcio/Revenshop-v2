@@ -10,9 +10,15 @@ export const useAuctions = () => {
   const { data: auctions, isLoading } = useQuery({
     queryKey: ['auctions'],
     queryFn: async () => {
+      // Selecionando apenas os campos necessários em vez de todos (*)
       const { data, error } = await supabase
         .from('auctions')
-        .select('*')
+        .select(`
+          id, auction_date, car_year, car_name, auction_house, 
+          auction_city, car_link, bid_value, bid_accepted, 
+          carfax_value, mmr_value, purchase_value, 
+          total_vehicle_cost, vin_number, created_at, created_by
+        `)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

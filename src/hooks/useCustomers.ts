@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -17,13 +17,15 @@ export const useCustomers = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = useCallback(async () => {
     try {
       console.log('Fetching customers from database...');
+      // Selecionamos apenas os campos que realmente precisamos
       const { data, error } = await supabase
         .from('bhph_customers')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('id, name, email, phone, address, created_at, updated_at')
+        .order('created_at', { ascending: false })
+        .limit(100); // Limitando resultados para melhor performance
 
       if (error) {
         console.error('Supabase error fetching customers:', error);
@@ -42,7 +44,7 @@ export const useCustomers = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const createCustomer = async (customerData: {
     name: string;
@@ -61,7 +63,7 @@ export const useCustomers = () => {
           phone: customerData.phone,
           address: customerData.address || null,
         })
-        .select()
+        .select('id, name, email, phone, address, created_at, updated_at')
         .single();
 
       if (error) {
@@ -99,7 +101,7 @@ export const useCustomers = () => {
       const { data, error } = await supabase
         .from('sales')
         .insert(saleData)
-        .select()
+        .select('id, final_sale_price, sale_date, customer_name, payment_method')
         .single();
 
       if (error) {
@@ -117,7 +119,7 @@ export const useCustomers = () => {
 
   useEffect(() => {
     fetchCustomers();
-  }, []);
+  }, [fetchCustomers]);
 
   return {
     customers,

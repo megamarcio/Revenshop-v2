@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface DashboardStats {
@@ -30,28 +30,28 @@ export const useDashboardStats = () => {
     loading: true,
   });
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       console.log('Fetching dashboard stats for:', dateFilter);
       setStats(prev => ({ ...prev, loading: true }));
       
-      // Fetch vehicles data
+      // Fetch vehicles data - Selecionando apenas campos necessários
       const { data: vehicles, error: vehiclesError } = await supabase
         .from('vehicles')
-        .select('category, purchase_price, sale_price');
+        .select('id, category, purchase_price, sale_price');
 
       if (vehiclesError) {
         console.error('Error fetching vehicles:', vehiclesError);
         throw vehiclesError;
       }
 
-      // Fetch sales data with date filter
+      // Fetch sales data - Selecionando apenas campos necessários
       const startDate = new Date(dateFilter.year, dateFilter.month - 1, 1);
       const endDate = new Date(dateFilter.year, dateFilter.month, 0);
       
       const { data: sales, error: salesError } = await supabase
         .from('sales')
-        .select('final_sale_price, sale_date')
+        .select('id, final_sale_price')
         .gte('sale_date', startDate.toISOString().split('T')[0])
         .lte('sale_date', endDate.toISOString().split('T')[0]);
 
@@ -60,10 +60,10 @@ export const useDashboardStats = () => {
         throw salesError;
       }
 
-      // Fetch customer deals for budget calculations
+      // Fetch customer deals for budget calculations - Selecionando apenas campos necessários
       const { data: deals, error: dealsError } = await supabase
         .from('customer_deals')
-        .select('total_amount, created_at, status')
+        .select('id, total_amount, status')
         .gte('created_at', startDate.toISOString())
         .lt('created_at', new Date(dateFilter.year, dateFilter.month, 1).toISOString());
 
@@ -95,11 +95,11 @@ export const useDashboardStats = () => {
       console.error('Error fetching dashboard stats:', error);
       setStats(prev => ({ ...prev, loading: false }));
     }
-  };
+  }, [dateFilter]);
 
   useEffect(() => {
     fetchStats();
-  }, [dateFilter]);
+  }, [fetchStats]);
 
   return { 
     stats, 
