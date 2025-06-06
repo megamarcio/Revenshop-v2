@@ -50,7 +50,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
       
       let query = supabase
         .from('vehicles')
-        .select('id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at')
+        .select('id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at, updated_at')
         .order('created_at', { ascending: false });
 
       // Filtrar por categoria se especificado
@@ -73,11 +73,13 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
         throw error;
       }
       
-      // Adicionar image_url baseado na primeira foto
+      // Adicionar image_url baseado na primeira foto e garantir que todos os campos necessários existam
       const vehiclesWithImages = (data || []).map(vehicle => ({
         ...vehicle,
-        image_url: vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null
-      }));
+        image_url: vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null,
+        // Garantir que updated_at exista (se por algum motivo não existir)
+        updated_at: vehicle.updated_at || vehicle.created_at || new Date().toISOString()
+      })) as Vehicle[];
 
       console.log('Vehicles fetched successfully:', vehiclesWithImages.length, 'vehicles');
       
