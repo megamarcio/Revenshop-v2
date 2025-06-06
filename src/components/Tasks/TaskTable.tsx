@@ -27,13 +27,10 @@ const TaskTable = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Tarefa</TableHead>
-            <TableHead>Veículo</TableHead>
-            <TableHead>Responsável</TableHead>
-            <TableHead>Prioridade</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Vencimento</TableHead>
-            <TableHead>Ações</TableHead>
+            <TableHead className="text-xs font-medium">Tarefa</TableHead>
+            <TableHead className="text-xs font-medium">Responsável</TableHead>
+            <TableHead className="text-xs font-medium">Prioridade</TableHead>
+            <TableHead className="text-xs font-medium">Vencimento</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -54,7 +51,7 @@ const TaskTable = ({
       
       {tasks.length === 0 && (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">Nenhuma tarefa encontrada</p>
+          <p className="text-muted-foreground text-xs">Nenhuma tarefa encontrada</p>
         </div>
       )}
     </div>

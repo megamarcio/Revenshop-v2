@@ -1,9 +1,7 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { Edit, Trash2, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -36,93 +34,59 @@ const TaskTableRow = ({
     }
   };
 
+  const getPriorityText = (priority: string) => {
+    switch (priority) {
+      case 'urgent': return 'Urgente';
+      case 'high': return 'Alta';
+      case 'medium': return 'Média';
+      case 'low': return 'Baixa';
+      default: return priority;
+    }
+  };
+
   const isOverdue = (dueDate: string | null) => {
     if (!dueDate) return false;
     return new Date(dueDate) < new Date();
   };
 
   return (
-    <TableRow>
-      <TableCell>
-        <div>
-          <div className="font-medium flex items-center gap-2">
-            {task.title}
-            {task.due_date && isOverdue(task.due_date) && task.status !== 'completed' && (
-              <AlertTriangle className="h-4 w-4 text-red-500" />
-            )}
-          </div>
-          {task.description && (
-            <div className="text-sm text-gray-500 mt-1">{task.description}</div>
-          )}
-        </div>
-      </TableCell>
-      <TableCell>
-        {task.vehicle ? (
-          <div>
-            <div className="font-medium text-sm">{task.vehicle.name}</div>
-            <div className="text-xs text-gray-500">{task.vehicle.internal_code}</div>
-          </div>
-        ) : (
-          '-'
-        )}
-      </TableCell>
-      <TableCell>
-        {task.assigned_user ? (
-          `${task.assigned_user.first_name} ${task.assigned_user.last_name}`
-        ) : (
-          <span className="text-gray-400">Não atribuída</span>
-        )}
-      </TableCell>
-      <TableCell>
+    <TableRow 
+      className="hover:bg-gray-50 cursor-pointer" 
+      onClick={() => onEdit(task)}
+    >
+      <TableCell className="py-2">
         <div className="flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${getPriorityColor(task.priority)}`} />
-          <span className="capitalize">{task.priority}</span>
-        </div>
-      </TableCell>
-      <TableCell>
-        <select
-          value={task.status}
-          onChange={(e) => onStatusChange(task.id, e.target.value)}
-          className="text-sm border rounded px-2 py-1"
-          disabled={!canEditVehicles && task.assigned_to !== userId}
-        >
-          <option value="pending">Pendente</option>
-          <option value="in_progress">Em Andamento</option>
-          <option value="completed">Concluída</option>
-          <option value="cancelled">Cancelada</option>
-        </select>
-      </TableCell>
-      <TableCell>
-        {task.due_date ? (
-          <span className={isOverdue(task.due_date) && task.status !== 'completed' ? 'text-red-600 font-medium' : ''}>
-            {format(new Date(task.due_date), 'dd/MM/yyyy', { locale: ptBR })}
+          <span className="text-xs font-medium text-gray-900">
+            {task.title}
           </span>
-        ) : (
-          '-'
-        )}
-      </TableCell>
-      <TableCell>
-        <div className="flex gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-6 w-6 p-0"
-            onClick={() => onEdit(task)}
-          >
-            <Edit className="h-3 w-3" />
-          </Button>
-          {canEditVehicles && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => onDelete(task.id)}
-              disabled={isDeleting}
-            >
-              <Trash2 className="h-3 w-3" />
-            </Button>
+          {task.due_date && isOverdue(task.due_date) && task.status !== 'completed' && (
+            <AlertTriangle className="h-3 w-3 text-red-500 flex-shrink-0" />
           )}
         </div>
+      </TableCell>
+      <TableCell className="py-2">
+        <span className="text-xs text-gray-700">
+          {task.assigned_user ? (
+            `${task.assigned_user.first_name} ${task.assigned_user.last_name}`
+          ) : (
+            <span className="text-gray-400">Não atribuída</span>
+          )}
+        </span>
+      </TableCell>
+      <TableCell className="py-2">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${getPriorityColor(task.priority)} flex-shrink-0`} />
+          <span className="text-xs text-gray-700">{getPriorityText(task.priority)}</span>
+        </div>
+      </TableCell>
+      <TableCell className="py-2">
+        <span className={`text-xs ${isOverdue(task.due_date) && task.status !== 'completed' ? 'text-red-600 font-medium' : 'text-gray-700'}`}>
+          {task.due_date ? (
+            format(new Date(task.due_date), 'dd/MM/yyyy', { locale: ptBR })
+          ) : (
+            '-'
+          )}
+        </span>
       </TableCell>
     </TableRow>
   );
