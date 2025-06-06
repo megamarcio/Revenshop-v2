@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +19,7 @@ interface TaskFormProps {
 
 const TaskForm = ({ task, onSave, onCancel }: TaskFormProps) => {
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
-  const { userProfile } = useAuth();
+  const { user } = useAuth();
   const isEditing = !!task;
 
   const [formData, setFormData] = useState({
@@ -75,7 +74,7 @@ const TaskForm = ({ task, onSave, onCancel }: TaskFormProps) => {
 
     const taskData = {
       ...formData,
-      created_by: userProfile?.id || '',
+      created_by: user?.id || '',
       vehicle_id: formData.vehicle_id || null,
       assigned_to: formData.assigned_to || null,
       due_date: formData.due_date || null,

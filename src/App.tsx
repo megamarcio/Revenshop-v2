@@ -1,6 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
-import { LanguageContext } from './contexts/LanguageContext';
 import Sidebar from './components/Layout/Sidebar';
 import Navbar from './components/Layout/Navbar';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -43,7 +43,7 @@ const App: React.FC = () => {
           {activeTab === 'tasks' && <TaskManagement />}
           {activeTab === 'bhph' && <BuyHerePayHere />}
           {activeTab === 'users' && canManageUsers && <UserManagement />}
-          {activeTab === 'admin' && canAccessAdmin && <AdminPanel />}
+          {activeTab === 'admin' && canAccessAdmin && <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />}
           {activeTab === 'profile' && <ProfilePage />}
         </main>
       </div>

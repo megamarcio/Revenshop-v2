@@ -59,10 +59,10 @@ export const useTasks = () => {
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: async (newTask: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'vehicle' | 'assigned_user' | 'created_user'>) => {
+    mutationFn: async (newTask: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'vehicle' | 'assigned_user' | 'created_user' | 'completed_at'>) => {
       const { data, error } = await supabase
         .from('tasks')
-        .insert([newTask])
+        .insert([{ ...newTask, completed_at: null }])
         .select()
         .single();
 
@@ -143,7 +143,7 @@ export const useTasks = () => {
 
   return {
     tasks: tasks || [],
-    isLoading,
+    loading: isLoading,
     error,
     createTask: createTaskMutation.mutate,
     updateTask: updateTaskMutation.mutate,

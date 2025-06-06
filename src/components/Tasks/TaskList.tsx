@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ interface TaskListProps {
 
 const TaskList = ({ onEditTask, compact = false, limit }: TaskListProps) => {
   const { tasks, updateTask, deleteTask, isDeleting } = useTasks();
-  const { canEditVehicles, userProfile } = useAuth();
+  const { canEditVehicles, user } = useAuth();
   const [filter, setFilter] = useState<'all' | 'pending' | 'in_progress' | 'completed'>('all');
 
   const filteredTasks = tasks
@@ -230,7 +229,7 @@ const TaskList = ({ onEditTask, compact = false, limit }: TaskListProps) => {
                     value={task.status}
                     onChange={(e) => handleStatusChange(task.id, e.target.value)}
                     className="text-sm border rounded px-2 py-1"
-                    disabled={!canEditVehicles && task.assigned_to !== userProfile?.id}
+                    disabled={!canEditVehicles && task.assigned_to !== user?.id}
                   >
                     <option value="pending">Pendente</option>
                     <option value="in_progress">Em Andamento</option>
