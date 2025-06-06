@@ -1,7 +1,7 @@
+
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { 
   LayoutDashboard, 
   Car, 
@@ -14,15 +14,28 @@ import {
   CheckSquare,
   Calculator
 } from 'lucide-react';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar
+} from '@/components/ui/sidebar';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
 
-const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
+const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { t } = useLanguage();
   const { canAccessAdmin, canManageUsers } = useAuth();
+  const { state } = useSidebar();
 
   const menuItems = [
     ...(canAccessAdmin ? [{ id: 'dashboard', label: t('dashboard'), icon: LayoutDashboard }] : []),
@@ -38,29 +51,48 @@ const Sidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   ];
 
   return (
-    <aside className="bg-card w-64 min-h-screen border-r border-border shadow-sm">
-      <nav className="p-4 space-y-2">
-        {menuItems.map((item) => {
-          const Icon = item.icon;
-          return (
-            <Button
-              key={item.id}
-              variant={activeTab === item.id ? "default" : "ghost"}
-              className={`w-full justify-start space-x-3 h-11 ${
-                activeTab === item.id 
-                  ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' 
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              }`}
-              onClick={() => setActiveTab(item.id)}
-            >
-              <Icon className="h-5 w-5" />
-              <span>{item.label}</span>
-            </Button>
-          );
-        })}
-      </nav>
-    </aside>
+    <Sidebar collapsible="icon" className="border-r">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center space-x-2">
+          <div className="w-8 h-8 bg-revenshop-primary rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">R</span>
+          </div>
+          {state === "expanded" && (
+            <span className="font-semibold text-lg">RevenShop</span>
+          )}
+        </div>
+      </SidebarHeader>
+      
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {menuItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton
+                      isActive={activeTab === item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      tooltip={state === "collapsed" ? item.label : undefined}
+                      className={`w-full ${
+                        activeTab === item.id 
+                          ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' 
+                          : 'hover:bg-muted'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </Sidebar>
   );
 };
 
-export default Sidebar;
+export default AppSidebar;

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
@@ -12,6 +13,7 @@ import BuyHerePayHere from './components/BHPH/BuyHerePayHere';
 import AuctionManagement from './components/Auctions/AuctionManagement';
 import TaskManagement from './components/Tasks/TaskManagement';
 import FinancingSimulation from './components/FinancingSimulation/FinancingSimulation';
+import { SidebarProvider } from '@/components/ui/sidebar';
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -29,26 +31,28 @@ const App: React.FC = () => {
   }, [activeTab]);
 
   return (
-    <div className="flex h-screen bg-background">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+    <SidebarProvider>
+      <div className="flex h-screen bg-background w-full">
+        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="flex flex-col flex-1">
-        <Navbar />
+        <div className="flex flex-col flex-1 min-w-0">
+          <Navbar />
 
-        <main className="flex-1 overflow-auto bg-background">
-          {activeTab === 'dashboard' && canAccessAdmin && <Dashboard />}
-          {activeTab === 'vehicles' && <VehicleList />}
-          {activeTab === 'customers' && <CustomerManagement />}
-          {activeTab === 'auctions' && <AuctionManagement />}
-          {activeTab === 'tasks' && <TaskManagement />}
-          {activeTab === 'bhph' && <BuyHerePayHere />}
-          {activeTab === 'financing' && <FinancingSimulation />}
-          {activeTab === 'users' && canManageUsers && <UserManagement />}
-          {activeTab === 'admin' && canAccessAdmin && <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />}
-          {activeTab === 'profile' && <ProfilePage />}
-        </main>
+          <main className="flex-1 overflow-auto bg-background">
+            {activeTab === 'dashboard' && canAccessAdmin && <Dashboard />}
+            {activeTab === 'vehicles' && <VehicleList />}
+            {activeTab === 'customers' && <CustomerManagement />}
+            {activeTab === 'auctions' && <AuctionManagement />}
+            {activeTab === 'tasks' && <TaskManagement />}
+            {activeTab === 'bhph' && <BuyHerePayHere />}
+            {activeTab === 'financing' && <FinancingSimulation />}
+            {activeTab === 'users' && canManageUsers && <UserManagement />}
+            {activeTab === 'admin' && canAccessAdmin && <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />}
+            {activeTab === 'profile' && <ProfilePage />}
+          </main>
+        </div>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

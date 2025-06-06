@@ -2,6 +2,7 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { LogOut, User } from 'lucide-react';
 
 const Navbar = () => {
@@ -10,7 +11,8 @@ const Navbar = () => {
   return (
     <header className="bg-card border-b border-border px-6 py-4">
       <div className="flex justify-between items-center">
-        <div>
+        <div className="flex items-center gap-4">
+          <SidebarTrigger className="h-8 w-8" />
           <h1 className="text-lg font-semibold text-foreground">RevenShop</h1>
         </div>
         
