@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles';
 import VehicleForm from './VehicleForm';
@@ -10,6 +11,9 @@ import VehicleListView from './VehicleListView';
 import EmptyVehicleState from './EmptyVehicleState';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
+import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
+import { useVehicleActions } from './VehicleActions';
+import { useVehicleFilters } from './VehicleFilters';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
@@ -22,162 +26,37 @@ const VehicleList = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
 
-  const handleSaveVehicle = async (vehicleData: any) => {
-    try {
-      console.log('VehicleList - handleSaveVehicle called with:', vehicleData);
-      console.log('VehicleList - editingVehicle:', editingVehicle);
-      
-      if (editingVehicle && editingVehicle.id) {
-        // Se tem ID válido, é uma edição
-        await updateVehicle(editingVehicle.id, vehicleData);
-      } else {
-        // Se não tem ID ou é duplicação, é criação
-        await createVehicle(vehicleData);
-      }
-      setShowAddForm(false);
-      setEditingVehicle(null);
-    } catch (error) {
-      console.error('Error saving vehicle:', error);
-    }
-  };
+  const {
+    handleSaveVehicle,
+    handleEditVehicle,
+    handleDuplicateVehicle,
+    handleDeleteVehicle
+  } = useVehicleActions({
+    vehicles,
+    canEditVehicles,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle,
+    onEditingChange: setEditingVehicle,
+    onFormToggle: setShowAddForm
+  });
 
-  const handleEditVehicle = (vehicle: Vehicle) => {
-    if (!canEditVehicles) return;
-    console.log('VehicleList - handleEditVehicle called with:', vehicle);
-    
-    // Passar o objeto vehicle diretamente do banco de dados
-    setEditingVehicle(vehicle);
-    setShowAddForm(true);
-  };
-
-  const handleDuplicateVehicle = (vehicle: Vehicle) => {
-    if (!canEditVehicles) return;
-    console.log('VehicleList - handleDuplicateVehicle called with:', vehicle);
-    
-    // Criar uma cópia sem ID para forçar criação de novo veículo
-    const duplicatedVehicle = {
-      name: `${vehicle.name} (Cópia)`,
-      vin: '',
-      year: vehicle.year,
-      model: vehicle.model,
-      miles: vehicle.miles,
-      internal_code: '',
-      color: vehicle.color,
-      ca_note: vehicle.ca_note,
-      purchase_price: vehicle.purchase_price,
-      sale_price: vehicle.sale_price,
-      min_negotiable: vehicle.min_negotiable,
-      carfax_price: vehicle.carfax_price,
-      mmr_value: vehicle.mmr_value,
-      description: vehicle.description,
-      category: vehicle.category,
-      title_type: vehicle.title_type,
-      title_status: vehicle.title_status,
-      photos: vehicle.photos,
-      video: vehicle.video
-    };
-    
-    // Não incluir ID para garantir que será tratado como criação
-    setEditingVehicle(duplicatedVehicle as Vehicle);
-    setShowAddForm(true);
-  };
-
-  const handleDeleteVehicle = async (vehicle: Vehicle) => {
-    if (!canEditVehicles) return;
-    if (confirm('Tem certeza que deseja excluir este veículo?')) {
-      await deleteVehicle(vehicle.id);
-    }
-  };
+  const { filteredAndSortedVehicles } = useVehicleFilters({
+    vehicles,
+    searchTerm,
+    filterBy,
+    sortBy,
+    sortOrder
+  });
 
   const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
     setSortOrder(newSortOrder);
   };
 
-  const handleExport = (format: 'csv' | 'xls') => {
-    const headers = ['Nome', 'Ano', 'Cor', 'Código Interno', 'VIN', 'Preço de Compra', 'Preço de Venda', 'Status'];
-    const data = filteredAndSortedVehicles.map(vehicle => [
-      vehicle.name,
-      vehicle.year,
-      vehicle.color,
-      vehicle.internal_code,
-      vehicle.vin,
-      vehicle.purchase_price,
-      vehicle.sale_price,
-      vehicle.category === 'forSale' ? 'À Venda' : 'Vendido'
-    ]);
-
-    if (format === 'csv') {
-      const csvContent = [headers, ...data].map(row => row.join(',')).join('\n');
-      const blob = new Blob([csvContent], { type: 'text/csv' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'veiculos.csv';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } else {
-      const csvContent = [headers, ...data].map(row => row.join('\t')).join('\n');
-      const blob = new Blob([csvContent], { type: 'application/vnd.ms-excel' });
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'veiculos.xls';
-      a.click();
-      window.URL.revokeObjectURL(url);
-    }
+  const handleExportData = (format: 'csv' | 'xls') => {
+    handleExport(filteredAndSortedVehicles, format);
   };
-
-  // Função para converter dados do banco para o formato do formulário
-  const convertVehicleForCard = (vehicle: Vehicle) => ({
-    id: vehicle.id,
-    name: vehicle.name,
-    vin: vehicle.vin,
-    year: vehicle.year,
-    model: vehicle.model,
-    plate: vehicle.miles?.toString() || '',
-    internalCode: vehicle.internal_code,
-    color: vehicle.color,
-    caNote: vehicle.ca_note,
-    purchasePrice: vehicle.purchase_price,
-    salePrice: vehicle.sale_price,
-    profitMargin: vehicle.profit_margin || 0,
-    minNegotiable: vehicle.min_negotiable || 0,
-    carfaxPrice: vehicle.carfax_price || 0,
-    mmrValue: vehicle.mmr_value || 0,
-    description: vehicle.description || '',
-    category: vehicle.category,
-    photos: vehicle.photos,
-    video: vehicle.video
-  });
-
-  const filteredAndSortedVehicles = useMemo(() => {
-    let filtered = vehicles.filter(vehicle => {
-      const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      const matchesFilter = filterBy === 'all' || vehicle.category === filterBy;
-      
-      return matchesSearch && matchesFilter;
-    });
-
-    // Força a ordenação por internal_code sempre
-    filtered.sort((a, b) => {
-      // Ordenação numérica do código interno
-      const aCode = parseInt(a.internal_code) || 0;
-      const bCode = parseInt(b.internal_code) || 0;
-      
-      if (aCode !== bCode) {
-        return aCode - bCode; // Sempre do menor para o maior
-      }
-      
-      // Se os códigos numéricos forem iguais, ordenar alfabeticamente
-      return a.internal_code.localeCompare(b.internal_code, undefined, { numeric: true });
-    });
-
-    return filtered;
-  }, [vehicles, searchTerm, filterBy]);
 
   if (loading) {
     return (
@@ -209,7 +88,7 @@ const VehicleList = () => {
         onSortChange={handleSortChange}
         filterBy={filterBy}
         onFilterChange={setFilterBy}
-        onExport={handleExport}
+        onExport={handleExportData}
       />
 
       {viewMode === 'grid' ? (
@@ -250,7 +129,7 @@ const VehicleList = () => {
             setShowAddForm(false);
             setEditingVehicle(null);
           }}
-          onSave={handleSaveVehicle}
+          onSave={(vehicleData) => handleSaveVehicle(vehicleData, editingVehicle)}
           editingVehicle={editingVehicle}
         />
       )}
