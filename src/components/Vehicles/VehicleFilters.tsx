@@ -1,6 +1,6 @@
 
 import { useMemo } from 'react';
-import { Vehicle } from '../../hooks/useVehicles';
+import { Vehicle } from '../../hooks/useVehicles/types';
 
 interface VehicleFiltersProps {
   vehicles: Vehicle[];
