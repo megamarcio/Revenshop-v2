@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Plus, Trash2, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
-import { useVehicles } from '../../hooks/useVehicles';
+import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
 import { useMaintenance } from '../../hooks/useMaintenance';
 import { MaintenanceFormData, MaintenancePart, MaintenanceLabor, MAINTENANCE_ITEMS } from '../../types/maintenance';
 import VehicleMaintenanceSelector from './VehicleMaintenanceSelector';
@@ -23,7 +22,7 @@ interface MaintenanceFormProps {
 }
 
 const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) => {
-  const { vehicles, loading: vehiclesLoading } = useVehicles();
+  const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ category: 'forSale', limit: 50 });
   const { addMaintenance, updateMaintenance } = useMaintenance();
   const [loading, setLoading] = useState(false);
   
@@ -211,9 +210,8 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
 
   const currentItems = MAINTENANCE_ITEMS[formData.maintenance_type];
 
-  console.log('MaintenanceForm - vehicles:', vehicles);
+  console.log('MaintenanceForm - vehicles loaded:', vehicles.length);
   console.log('MaintenanceForm - vehiclesLoading:', vehiclesLoading);
-  console.log('MaintenanceForm - selectedVehicle:', selectedVehicle);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>

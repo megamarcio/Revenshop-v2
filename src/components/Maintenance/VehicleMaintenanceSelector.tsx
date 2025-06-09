@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useVehicles } from '../../hooks/useVehicles';
+import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
 import { Car } from 'lucide-react';
 
 interface VehicleMaintenanceSelectorProps {
@@ -11,14 +11,13 @@ interface VehicleMaintenanceSelectorProps {
 }
 
 const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: VehicleMaintenanceSelectorProps) => {
-  const { vehicles, loading } = useVehicles();
+  const { vehicles, loading } = useVehiclesOptimized({ category: 'forSale', limit: 50 });
 
   const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
 
-  console.log('VehicleMaintenanceSelector - vehicles:', vehicles);
+  console.log('VehicleMaintenanceSelector - vehicles loaded:', vehicles.length);
   console.log('VehicleMaintenanceSelector - loading:', loading);
   console.log('VehicleMaintenanceSelector - selectedVehicleId:', selectedVehicleId);
-  console.log('VehicleMaintenanceSelector - selectedVehicle:', selectedVehicle);
 
   return (
     <div className="space-y-2">
