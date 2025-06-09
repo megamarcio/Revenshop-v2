@@ -16,7 +16,8 @@ export interface Vehicle {
   carfaxPrice: number;
   mmrValue: number;
   description: string;
-  category: 'forSale' | 'sold';
+  category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
+  consignmentStore?: string;
   seller?: string;
   finalSalePrice?: number;
   photos: string[];

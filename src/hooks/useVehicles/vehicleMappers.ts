@@ -17,7 +17,8 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
     mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
     description: vehicleData.description || null,
-    category: vehicleData.category as 'forSale' | 'sold',
+    category: vehicleData.category as 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned',
+    consignment_store: vehicleData.consignmentStore || null,
     title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
                vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
     title_status: vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' as const :
@@ -46,6 +47,7 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
   if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
   if (vehicleData.category) dbUpdateData.category = vehicleData.category;
+  if (vehicleData.consignmentStore !== undefined) dbUpdateData.consignment_store = vehicleData.consignmentStore || null;
   
   // Processar informações do título
   if (vehicleData.titleInfo !== undefined) {

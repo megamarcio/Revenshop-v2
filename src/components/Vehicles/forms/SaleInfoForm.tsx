@@ -10,7 +10,8 @@ import { UserCheck, DollarSign, UserPlus } from 'lucide-react';
 
 interface SaleInfoFormProps {
   formData: {
-    category: 'forSale' | 'sold';
+    category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
+    consignmentStore?: string;
     saleDate?: string;
     finalSalePrice?: string;
     customerName?: string;
@@ -77,24 +78,37 @@ const SaleInfoForm = ({ formData, errors, onInputChange, onNavigateToCustomers }
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Status de Venda</h3>
+      <h3 className="text-lg font-semibold">Tipo</h3>
       <div className="space-y-4">
-        <div className="flex space-x-4">
-          <Button
-            type="button"
-            variant={formData.category === 'forSale' ? 'default' : 'outline'}
-            onClick={() => onInputChange('category', 'forSale')}
-          >
-            À Venda
-          </Button>
-          <Button
-            type="button"
-            variant={formData.category === 'sold' ? 'default' : 'outline'}
-            onClick={() => onInputChange('category', 'sold')}
-          >
-            Vendido
-          </Button>
+        <div className="space-y-2">
+          <Label htmlFor="category">Tipo do Veículo</Label>
+          <Select value={formData.category} onValueChange={(value) => onInputChange('category', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="forSale">À Venda</SelectItem>
+              <SelectItem value="sold">Vendido</SelectItem>
+              <SelectItem value="rental">Aluguel</SelectItem>
+              <SelectItem value="maintenance">Manutenção</SelectItem>
+              <SelectItem value="consigned">Consignado</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+
+        {formData.category === 'consigned' && (
+          <div className="space-y-2">
+            <Label htmlFor="consignmentStore">Nome da Loja *</Label>
+            <Input
+              id="consignmentStore"
+              value={formData.consignmentStore || ''}
+              onChange={(e) => onInputChange('consignmentStore', e.target.value)}
+              placeholder="Ex: Auto Center Silva"
+              className={errors.consignmentStore ? 'border-red-500' : ''}
+            />
+            {errors.consignmentStore && <p className="text-sm text-red-500">{errors.consignmentStore}</p>}
+          </div>
+        )}
 
         {formData.category === 'sold' && (
           <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">

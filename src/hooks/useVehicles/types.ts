@@ -16,7 +16,8 @@ export interface Vehicle {
   carfax_price?: number;
   mmr_value?: number;
   description?: string;
-  category: 'forSale' | 'sold';
+  category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
+  consignment_store?: string;
   title_type?: 'clean-title' | 'rebuilt';
   title_status?: 'em-maos' | 'em-transito';
   photos: string[];

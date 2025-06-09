@@ -12,7 +12,8 @@ import {
   UserCheck,
   Gavel,
   CheckSquare,
-  Calculator
+  Calculator,
+  Wrench
 } from 'lucide-react';
 import {
   Sidebar,
@@ -39,7 +40,8 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     canManageUsers, 
     canAccessDashboard,
     canAccessAuctions,
-    isInternalSeller
+    isInternalSeller,
+    isAdmin
   } = useAuth();
   const { state } = useSidebar();
 
@@ -51,6 +53,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     { id: 'tasks', label: 'Tarefas', icon: CheckSquare },
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
     { id: 'financing', label: 'Simulação de Financiamento', icon: Calculator },
+    ...((isAdmin || isInternalSeller) ? [{ id: 'maintenance', label: 'Manutenção', icon: Wrench }] : []),
     ...(canManageUsers ? [{ id: 'users', label: t('users'), icon: Users }] : []),
     ...(canAccessAdmin ? [{ id: 'admin', label: t('admin'), icon: Settings }] : []),
     { id: 'profile', label: t('profile'), icon: User }

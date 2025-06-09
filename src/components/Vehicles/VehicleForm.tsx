@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,8 @@ interface VehicleFormData {
   carfaxPrice: string;
   mmrValue: string;
   description: string;
-  category: 'forSale' | 'sold';
+  category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
+  consignmentStore?: string;
   seller?: string;
   finalSalePrice?: string;
   saleDate?: string;
@@ -92,6 +94,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
     mmrValue: editingVehicle?.mmr_value?.toString() || editingVehicle?.mmrValue?.toString() || '',
     description: editingVehicle?.description || '',
     category: editingVehicle?.category || 'forSale',
+    consignmentStore: editingVehicle?.consignment_store || editingVehicle?.consignmentStore || '',
     seller: editingVehicle?.seller || '',
     finalSalePrice: editingVehicle?.finalSalePrice?.toString() || '',
     saleDate: editingVehicle?.saleDate || '',
@@ -162,6 +165,11 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
     if (!formData.purchasePrice.trim()) newErrors.purchasePrice = t('purchasePriceRequired') || 'Valor de compra é obrigatório';
     if (!formData.salePrice.trim()) newErrors.salePrice = t('salePriceRequired') || 'Valor de venda é obrigatório';
 
+    // Validação para consignação
+    if (formData.category === 'consigned' && !formData.consignmentStore?.trim()) {
+      newErrors.consignmentStore = 'Nome da loja é obrigatório para veículos consignados';
+    }
+
     const miles = parseInt(formData.plate);
     if (isNaN(miles) || miles < 0 || miles > 500000) {
       newErrors.plate = t('milesValidation') || 'Milhas devem estar entre 0 e 500,000';
@@ -171,9 +179,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
     if (isNaN(caNote) || caNote < 0 || caNote > 50 || caNote % 5 !== 0) {
       newErrors.caNote = t('caNoteValidation') || 'Nota CA deve ser múltiplo de 5 entre 0 e 50';
     }
-
-    // Para veículos vendidos, não validamos mais os dados do cliente aqui
-    // O usuário precisa cadastrar o cliente separadamente
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
