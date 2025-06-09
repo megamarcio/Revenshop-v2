@@ -2,33 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-
-export interface Vehicle {
-  id: string;
-  name: string;
-  vin: string;
-  year: number;
-  model: string;
-  miles: number;
-  internal_code: string;
-  color: string;
-  ca_note: number;
-  purchase_price: number;
-  sale_price: number;
-  profit_margin: number;
-  min_negotiable?: number;
-  carfax_price?: number;
-  mmr_value?: number;
-  description?: string;
-  category: 'forSale' | 'sold';
-  title_type?: 'clean-title' | 'rebuilt';
-  title_status?: 'em-maos' | 'em-transito';
-  photos: string[];
-  video?: string;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
-}
+import { Vehicle } from './useVehicles/types';
 
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -93,7 +67,7 @@ export const useVehicles = () => {
         carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
         mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
         description: vehicleData.description || null,
-        category: vehicleData.category as 'forSale' | 'sold',
+        category: vehicleData.category as Vehicle['category'],
         title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
                    vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
         title_status: vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' as const :
