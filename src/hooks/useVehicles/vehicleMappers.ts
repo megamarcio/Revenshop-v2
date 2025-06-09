@@ -19,6 +19,28 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     extendedCategory = vehicleData.category;
   }
 
+  // Process title information - save combined format
+  let titleType = null;
+  let titleStatus = null;
+  
+  if (vehicleData.titleInfo) {
+    console.log('Processing titleInfo:', vehicleData.titleInfo);
+    const titleParts = vehicleData.titleInfo.split('-');
+    
+    // Extract title type
+    if (titleParts[0] === 'clean-title' || titleParts[0] === 'rebuilt') {
+      titleType = titleParts[0];
+    }
+    
+    // Extract title status if present
+    if (titleParts.length > 1) {
+      const statusPart = titleParts.slice(1).join('-');
+      if (statusPart === 'em-maos' || statusPart === 'em-transito') {
+        titleStatus = statusPart;
+      }
+    }
+  }
+
   // Preparar dados básicos
   const baseData = {
     name: vehicleData.name,
@@ -36,10 +58,8 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
     description: vehicleData.description || null,
     category: dbCategory,
-    title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
-               vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
-    title_status: vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' as const :
-                 vehicleData.titleInfo?.includes('em-transito') ? 'em-transito' as const : null,
+    title_type: titleType,
+    title_status: titleStatus,
     photos: vehicleData.photos || [],
     video: vehicleData.video || null,
     created_by: (await supabase.auth.getUser()).data.user?.id || null
@@ -115,20 +135,22 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
     dbUpdateData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
   }
   
-  // Processar informações do título
+  // Processar informações do título - CORRIGIDO para salvar corretamente
   if (vehicleData.titleInfo !== undefined) {
-    console.log('Processing titleInfo:', vehicleData.titleInfo);
+    console.log('Processing titleInfo for update:', vehicleData.titleInfo);
     
     if (vehicleData.titleInfo) {
       const titleParts = vehicleData.titleInfo.split('-');
       console.log('Title parts:', titleParts);
       
+      // Extract title type
       if (titleParts[0] === 'clean-title' || titleParts[0] === 'rebuilt') {
         dbUpdateData.title_type = titleParts[0];
       } else {
         dbUpdateData.title_type = null;
       }
       
+      // Extract title status
       if (titleParts.length > 1) {
         const statusPart = titleParts.slice(1).join('-');
         if (statusPart === 'em-maos' || statusPart === 'em-transito') {
@@ -143,6 +165,11 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
       dbUpdateData.title_type = null;
       dbUpdateData.title_status = null;
     }
+    
+    console.log('Title data being saved:', { 
+      title_type: dbUpdateData.title_type, 
+      title_status: dbUpdateData.title_status 
+    });
   }
   
   if (vehicleData.photos !== undefined) {
