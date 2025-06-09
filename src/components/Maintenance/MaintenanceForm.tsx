@@ -13,6 +13,7 @@ import { CalendarIcon, Plus, Trash2, Upload } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { useVehicles } from '../../hooks/useVehicles';
+import { useMaintenance } from '../../hooks/useMaintenance';
 import { MaintenanceFormData, MaintenancePart, MaintenanceLabor, MAINTENANCE_ITEMS } from '../../types/maintenance';
 import VehicleMaintenanceSelector from './VehicleMaintenanceSelector';
 
@@ -22,7 +23,8 @@ interface MaintenanceFormProps {
 }
 
 const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) => {
-  const { vehicles } = useVehicles();
+  const { vehicles, loading: vehiclesLoading } = useVehicles();
+  const { addMaintenance, updateMaintenance } = useMaintenance();
   const [loading, setLoading] = useState(false);
   
   const [formData, setFormData] = useState<MaintenanceFormData>({
@@ -184,12 +186,15 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
         vehicle_internal_code: selectedVehicle?.internal_code || ''
       };
 
-      // Here would be the API call to save the maintenance record
-      console.log('Saving maintenance:', maintenanceData);
+      if (editingMaintenance) {
+        updateMaintenance(editingMaintenance.id, maintenanceData);
+      } else {
+        addMaintenance(maintenanceData);
+      }
       
       toast({
         title: 'Sucesso',
-        description: 'Manutenção salva com sucesso!'
+        description: `Manutenção ${editingMaintenance ? 'atualizada' : 'salva'} com sucesso!`
       });
       
       onClose();
@@ -205,6 +210,10 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
   };
 
   const currentItems = MAINTENANCE_ITEMS[formData.maintenance_type];
+
+  console.log('MaintenanceForm - vehicles:', vehicles);
+  console.log('MaintenanceForm - vehiclesLoading:', vehiclesLoading);
+  console.log('MaintenanceForm - selectedVehicle:', selectedVehicle);
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
@@ -437,7 +446,7 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
             <Button type="button" variant="outline" onClick={onClose}>
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || vehiclesLoading}>
               {loading ? 'Salvando...' : 'Salvar Manutenção'}
             </Button>
           </div>

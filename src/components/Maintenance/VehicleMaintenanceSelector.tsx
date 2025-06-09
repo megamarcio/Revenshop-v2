@@ -15,6 +15,11 @@ const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: Vehi
 
   const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
 
+  console.log('VehicleMaintenanceSelector - vehicles:', vehicles);
+  console.log('VehicleMaintenanceSelector - loading:', loading);
+  console.log('VehicleMaintenanceSelector - selectedVehicleId:', selectedVehicleId);
+  console.log('VehicleMaintenanceSelector - selectedVehicle:', selectedVehicle);
+
   return (
     <div className="space-y-2">
       <Label>Veículo</Label>
