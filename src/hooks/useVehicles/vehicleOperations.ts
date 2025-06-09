@@ -7,7 +7,7 @@ import { mapFormDataToDbData, mapUpdateDataToDbData, mapDbDataToAppData } from '
 export const fetchVehicles = async (): Promise<Vehicle[]> => {
   console.log('Fetching vehicles from database...');
   
-  // Otimizar consulta selecionando apenas campos necessários e limitando resultados
+  // Remover consignment_store da consulta pois não existe no banco
   const { data, error } = await supabase
     .from('vehicles')
     .select(`
@@ -15,10 +15,10 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       ca_note, purchase_price, sale_price, profit_margin, 
       min_negotiable, carfax_price, mmr_value, description, 
       category, title_type, title_status, photos, video, 
-      created_at, updated_at, created_by, consignment_store
+      created_at, updated_at, created_by
     `)
     .order('created_at', { ascending: false })
-    .limit(100); // Limitar para evitar consultas muito pesadas
+    .limit(100);
 
   if (error) {
     console.error('Supabase error fetching vehicles:', error);

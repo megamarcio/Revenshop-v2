@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Vehicle } from './types';
 
 export const mapFormDataToDbData = async (vehicleData: any) => {
+  console.log('mapFormDataToDbData - input:', vehicleData);
+  
   // Map our extended categories to database enum values
   let dbCategory: 'forSale' | 'sold' = 'forSale';
   let extendedCategory: string | null = null;
@@ -17,7 +19,8 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     extendedCategory = vehicleData.category;
   }
 
-  return {
+  // Preparar dados básicos
+  const baseData = {
     name: vehicleData.name,
     vin: vehicleData.vin,
     year: parseInt(vehicleData.year),
@@ -32,23 +35,36 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
     mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
     description: vehicleData.description || null,
-    category: dbCategory, // Use only database-compatible values
-    consignment_store: vehicleData.consignmentStore || null,
+    category: dbCategory,
     title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
                vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
     title_status: vehicleData.titleInfo?.includes('em-maos') ? 'em-maos' as const :
                  vehicleData.titleInfo?.includes('em-transito') ? 'em-transito' as const : null,
     photos: vehicleData.photos || [],
     video: vehicleData.video || null,
-    created_by: (await supabase.auth.getUser()).data.user?.id || null,
-    // Store extended category in description or use a JSON field approach
-    ...(extendedCategory && {
-      description: `[CATEGORY:${extendedCategory}]${vehicleData.description ? ' ' + vehicleData.description : ''}`
-    })
+    created_by: (await supabase.auth.getUser()).data.user?.id || null
   };
+
+  // Adicionar categoria estendida na descrição se necessário
+  if (extendedCategory) {
+    const currentDesc = baseData.description || '';
+    baseData.description = `[CATEGORY:${extendedCategory}]${currentDesc ? ' ' + currentDesc : ''}`;
+  }
+
+  // Adicionar informações de consignação na descrição se necessário
+  if (vehicleData.consignmentStore && vehicleData.category === 'consigned') {
+    const currentDesc = baseData.description || '';
+    const cleanDesc = currentDesc.replace(/\[STORE:[^\]]+\]\s*/, '');
+    baseData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
+  }
+
+  console.log('mapFormDataToDbData - output:', baseData);
+  return baseData;
 };
 
 export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
+  console.log('mapUpdateDataToDbData - input:', vehicleData);
+  
   const dbUpdateData: any = {};
   
   if (vehicleData.name) dbUpdateData.name = vehicleData.name;
@@ -64,14 +80,23 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.minNegotiable !== undefined) dbUpdateData.min_negotiable = vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null;
   if (vehicleData.carfaxPrice !== undefined) dbUpdateData.carfax_price = vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null;
   if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
-  if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
   
   // Handle category mapping
   if (vehicleData.category) {
     if (vehicleData.category === 'sold') {
       dbUpdateData.category = 'sold';
+      // Limpar informações de categoria estendida se estava vendido
+      if (vehicleData.description !== undefined) {
+        const cleanDesc = vehicleData.description.replace(/\[CATEGORY:[^\]]+\]\s*/, '');
+        dbUpdateData.description = cleanDesc;
+      }
     } else if (vehicleData.category === 'forSale') {
       dbUpdateData.category = 'forSale';
+      // Limpar informações de categoria estendida se estava à venda
+      if (vehicleData.description !== undefined) {
+        const cleanDesc = vehicleData.description.replace(/\[CATEGORY:[^\]]+\]\s*/, '');
+        dbUpdateData.description = cleanDesc;
+      }
     } else {
       // For rental, maintenance, consigned - store as forSale in DB
       dbUpdateData.category = 'forSale';
@@ -83,7 +108,12 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
     }
   }
   
-  if (vehicleData.consignmentStore !== undefined) dbUpdateData.consignment_store = vehicleData.consignmentStore || null;
+  // Handle consignment store info
+  if (vehicleData.consignmentStore !== undefined && vehicleData.category === 'consigned') {
+    const currentDesc = dbUpdateData.description || vehicleData.description || '';
+    const cleanDesc = currentDesc.replace(/\[STORE:[^\]]+\]\s*/, '');
+    dbUpdateData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
+  }
   
   // Processar informações do título
   if (vehicleData.titleInfo !== undefined) {
@@ -123,6 +153,7 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
     dbUpdateData.video = vehicleData.video || null;
   }
 
+  console.log('mapUpdateDataToDbData - output:', dbUpdateData);
   return dbUpdateData;
 };
 
@@ -132,15 +163,32 @@ export const extractExtendedCategory = (description: string): string => {
   return match ? match[1] : '';
 };
 
+// Helper function to extract consignment store from description
+export const extractConsignmentStore = (description: string): string => {
+  const match = description?.match(/\[STORE:([^\]]+)\]/);
+  return match ? match[1] : '';
+};
+
+// Helper function to clean description from metadata
+export const cleanDescription = (description: string): string => {
+  if (!description) return '';
+  return description
+    .replace(/\[CATEGORY:[^\]]+\]\s*/, '')
+    .replace(/\[STORE:[^\]]+\]\s*/, '')
+    .trim();
+};
+
 // Helper function to map database data back to our application format
 export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
   const extendedCategory = extractExtendedCategory(dbVehicle.description || '');
-  const cleanDescription = dbVehicle.description?.replace(/\[CATEGORY:[^\]]+\]\s*/, '') || '';
+  const consignmentStore = extractConsignmentStore(dbVehicle.description || '');
+  const cleanDesc = cleanDescription(dbVehicle.description || '');
   
   return {
     ...dbVehicle,
     category: extendedCategory || dbVehicle.category,
-    description: cleanDescription,
-    extended_category: extendedCategory || null
+    description: cleanDesc,
+    extended_category: extendedCategory || null,
+    consignment_store: consignmentStore || null
   };
 };
