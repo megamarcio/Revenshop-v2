@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
-import { Car, X, Save, ExternalLink } from 'lucide-react';
+import { Car, X, Save, ExternalLink, Wrench } from 'lucide-react';
 import BasicInfoForm from './forms/BasicInfoForm';
 import FinancialInfoForm from './forms/FinancialInfoForm';
 import SaleInfoForm from './forms/SaleInfoForm';
@@ -12,9 +11,11 @@ import MediaUploadForm from './forms/MediaUploadForm';
 import DescriptionForm from './forms/DescriptionForm';
 import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
+import { useAuth } from '../../contexts/AuthContext';
 
 const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }: VehicleFormProps) => {
   const { t } = useLanguage();
+  const { isAdmin, isInternalSeller } = useAuth();
   
   const {
     formData,
@@ -32,6 +33,14 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
     generateDescription,
     calculateProfitMargin
   } = useVehicleForm(editingVehicle);
+
+  const handleViewMaintenance = () => {
+    // TODO: Implementar modal ou navegação para ver manutenções
+    toast({
+      title: 'Manutenções',
+      description: 'Visualização de manutenções será implementada em breve.',
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -111,6 +120,19 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
             <CardTitle>{isEditing ? t('editVehicle') : t('addVehicle')}</CardTitle>
           </div>
           <div className="flex items-center space-x-2">
+            {(isAdmin || isInternalSeller) && isEditing && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleViewMaintenance}
+                className="flex items-center gap-2"
+                title="Ver Manutenções"
+              >
+                <Wrench className="h-4 w-4" />
+                Manutenções
+              </Button>
+            )}
             {formData.vin && (
               <Button
                 type="button"
@@ -147,6 +169,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
               errors={errors}
               onInputChange={handleInputChange}
               calculateProfitMargin={calculateProfitMargin}
+              vehicleId={isEditing ? editingVehicle?.id : undefined}
             />
 
             <SaleInfoForm
