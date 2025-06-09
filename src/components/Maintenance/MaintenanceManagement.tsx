@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Plus, Wrench } from 'lucide-react';
 import MaintenanceForm from './MaintenanceForm';
 import MaintenanceList from './MaintenanceList';
+import { useMaintenance } from '../../hooks/useMaintenance';
 
 const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();
+  const { maintenances } = useMaintenance();
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
 
@@ -46,12 +48,26 @@ const MaintenanceManagement = () => {
     setEditingMaintenance(null);
   };
 
+  // Calcular estatísticas dos dados reais
+  const openMaintenances = maintenances.filter(m => {
+    const today = new Date();
+    const repairDate = new Date(m.repair_date);
+    return repairDate >= today;
+  }).length;
+
+  const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Sistema de Manutenção</h1>
           <p className="text-gray-600">Gerenciar manutenções e reparos dos veículos</p>
+          <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
+            <span>{maintenances.length} manutenções cadastradas</span>
+            <span>{openMaintenances} em aberto/pendentes</span>
+            <span>R$ {totalCost.toFixed(2).replace('.', ',')} em custos</span>
+          </div>
         </div>
         <Button onClick={handleNewMaintenance} className="bg-revenshop-primary hover:bg-revenshop-primary/90">
           <Plus className="h-4 w-4 mr-2" />

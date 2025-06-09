@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import FinancialInfoForm from './forms/FinancialInfoForm';
 import SaleInfoForm from './forms/SaleInfoForm';
 import MediaUploadForm from './forms/MediaUploadForm';
 import DescriptionForm from './forms/DescriptionForm';
+import MaintenanceViewModal from '../Maintenance/MaintenanceViewModal';
 import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
 import { useAuth } from '../../contexts/AuthContext';
@@ -16,6 +17,7 @@ import { useAuth } from '../../contexts/AuthContext';
 const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }: VehicleFormProps) => {
   const { t } = useLanguage();
   const { isAdmin, isInternalSeller } = useAuth();
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   
   const {
     formData,
@@ -35,11 +37,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
   } = useVehicleForm(editingVehicle);
 
   const handleViewMaintenance = () => {
-    // TODO: Implementar modal ou navegação para ver manutenções
-    toast({
-      title: 'Manutenções',
-      description: 'Visualização de manutenções será implementada em breve.',
-    });
+    setShowMaintenanceModal(true);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -112,109 +110,121 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <Car className="h-6 w-6 text-revenshop-primary" />
-            <CardTitle>{isEditing ? t('editVehicle') : t('addVehicle')}</CardTitle>
-          </div>
-          <div className="flex items-center space-x-2">
-            {(isAdmin || isInternalSeller) && isEditing && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleViewMaintenance}
-                className="flex items-center gap-2"
-                title="Ver Manutenções"
-              >
-                <Wrench className="h-4 w-4" />
-                Manutenções
-              </Button>
-            )}
-            {formData.vin && (
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={handleCarfaxClick}
-                className="flex items-center gap-2"
-                title="Ver Carfax"
-              >
-                <img 
-                  src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
-                  alt="Carfax" 
-                  className="h-4 w-4"
-                />
-                Carfax
-              </Button>
-            )}
-            <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-        
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <BasicInfoForm
-              formData={formData}
-              errors={errors}
-              onInputChange={handleInputChange}
-            />
-
-            <FinancialInfoForm
-              formData={formData}
-              errors={errors}
-              onInputChange={handleInputChange}
-              calculateProfitMargin={calculateProfitMargin}
-              vehicleId={isEditing ? editingVehicle?.id : undefined}
-            />
-
-            <SaleInfoForm
-              formData={formData}
-              errors={errors}
-              onInputChange={handleInputChange}
-              onNavigateToCustomers={onNavigateToCustomers}
-            />
-
-            <MediaUploadForm
-              photos={photos}
-              videos={videos}
-              setPhotos={setPhotos}
-              setVideos={setVideos}
-            />
-
-            <DescriptionForm
-              description={formData.description}
-              onDescriptionChange={(value) => handleInputChange('description', value)}
-              generateDescription={generateDescription}
-            />
-
-            <div className="flex justify-end space-x-4 pt-6 border-t">
-              <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                {t('cancel')}
-              </Button>
-              <Button type="submit" disabled={isLoading}>
-                <Save className="h-4 w-4 mr-2" />
-                {isLoading ? 
-                  `${isEditing ? t('updating') : t('saving')}...` : 
-                  isEditing ? t('update') : t('save')
-                }
+    <>
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Car className="h-6 w-6 text-revenshop-primary" />
+              <CardTitle>{isEditing ? t('editVehicle') : t('addVehicle')}</CardTitle>
+            </div>
+            <div className="flex items-center space-x-2">
+              {(isAdmin || isInternalSeller) && isEditing && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleViewMaintenance}
+                  className="flex items-center gap-2"
+                  title="Ver Manutenções"
+                >
+                  <Wrench className="h-4 w-4" />
+                  Manutenções
+                </Button>
+              )}
+              {formData.vin && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCarfaxClick}
+                  className="flex items-center gap-2"
+                  title="Ver Carfax"
+                >
+                  <img 
+                    src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
+                    alt="Carfax" 
+                    className="h-4 w-4"
+                  />
+                  Carfax
+                </Button>
+              )}
+              <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
+                <X className="h-4 w-4" />
               </Button>
             </div>
-            
-            {isLoading && photos.length > 5 && (
-              <div className="text-center text-sm text-gray-600">
-                <p>{t('processingPhotos') || `Processando ${photos.length} fotos... Isso pode levar alguns minutos.`}</p>
-                <p>{t('dontCloseWindow') || 'Por favor, não feche esta janela.'}</p>
+          </CardHeader>
+          
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <BasicInfoForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+              />
+
+              <FinancialInfoForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                calculateProfitMargin={calculateProfitMargin}
+                vehicleId={isEditing ? editingVehicle?.id : undefined}
+                onViewMaintenance={handleViewMaintenance}
+              />
+
+              <SaleInfoForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                onNavigateToCustomers={onNavigateToCustomers}
+              />
+
+              <MediaUploadForm
+                photos={photos}
+                videos={videos}
+                setPhotos={setPhotos}
+                setVideos={setVideos}
+              />
+
+              <DescriptionForm
+                description={formData.description}
+                onDescriptionChange={(value) => handleInputChange('description', value)}
+                generateDescription={generateDescription}
+              />
+
+              <div className="flex justify-end space-x-4 pt-6 border-t">
+                <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                  {t('cancel')}
+                </Button>
+                <Button type="submit" disabled={isLoading}>
+                  <Save className="h-4 w-4 mr-2" />
+                  {isLoading ? 
+                    `${isEditing ? t('updating') : t('saving')}...` : 
+                    isEditing ? t('update') : t('save')
+                  }
+                </Button>
               </div>
-            )}
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+              
+              {isLoading && photos.length > 5 && (
+                <div className="text-center text-sm text-gray-600">
+                  <p>{t('processingPhotos') || `Processando ${photos.length} fotos... Isso pode levar alguns minutos.`}</p>
+                  <p>{t('dontCloseWindow') || 'Por favor, não feche esta janela.'}</p>
+                </div>
+              )}
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+
+      {showMaintenanceModal && (
+        <MaintenanceViewModal
+          isOpen={showMaintenanceModal}
+          onClose={() => setShowMaintenanceModal(false)}
+          vehicleId={editingVehicle?.id}
+          vehicleName={formData.name}
+        />
+      )}
+    </>
   );
 };
 

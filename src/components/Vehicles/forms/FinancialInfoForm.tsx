@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Calculator, Wrench, Eye } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
+import { useMaintenance } from '../../../hooks/useMaintenance';
 
 interface FinancialInfoFormProps {
   formData: {
@@ -18,24 +19,27 @@ interface FinancialInfoFormProps {
   onInputChange: (field: string, value: string) => void;
   calculateProfitMargin: () => string;
   vehicleId?: string;
+  onViewMaintenance?: () => void;
 }
 
-const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMargin, vehicleId }: FinancialInfoFormProps) => {
+const FinancialInfoForm = ({ 
+  formData, 
+  errors, 
+  onInputChange, 
+  calculateProfitMargin, 
+  vehicleId,
+  onViewMaintenance
+}: FinancialInfoFormProps) => {
   const { isAdmin, isInternalSeller } = useAuth();
+  const { getTotalMaintenanceCost } = useMaintenance();
   
-  // Mock data para demonstração - em produção viria de uma consulta real
-  const maintenanceCost = vehicleId ? 1250.00 : 0;
+  const maintenanceCost = vehicleId ? getTotalMaintenanceCost(vehicleId) : 0;
   
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
     }).format(value);
-  };
-
-  const handleViewMaintenance = () => {
-    // TODO: Implementar modal ou navegação para ver manutenções
-    console.log('Ver manutenções do veículo:', vehicleId);
   };
 
   return (
@@ -136,7 +140,7 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={handleViewMaintenance}
+                onClick={onViewMaintenance}
                 className="flex items-center gap-1"
                 title="Ver Manutenções"
               >
