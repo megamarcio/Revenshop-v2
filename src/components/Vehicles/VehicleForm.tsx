@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -58,23 +57,34 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
   // Determinar se é edição (tem ID válido) ou criação/duplicação (sem ID)
   const isEditing = editingVehicle && editingVehicle.id;
   
-  // Construir titleInfo a partir dos campos do banco - CORRIGIDO
-  const buildTitleInfo = (vehicle: any) => {
-    if (!vehicle) return '';
+  // Use titleInfo directly from the mapped vehicle data
+  const getTitleInfo = (vehicle: any) => {
+    console.log('VehicleForm - getTitleInfo called with:', vehicle);
     
+    // First try to use the titleInfo field directly (from mapDbDataToAppData)
+    if (vehicle?.titleInfo) {
+      console.log('VehicleForm - using titleInfo directly:', vehicle.titleInfo);
+      return vehicle.titleInfo;
+    }
+    
+    // Fallback: build from separate fields if titleInfo is not available
     const parts = [];
     
-    // Adicionar tipo do título
-    if (vehicle.title_type) {
+    if (vehicle?.title_type) {
       parts.push(vehicle.title_type);
     }
     
-    // Adicionar status do título
-    if (vehicle.title_status) {
+    if (vehicle?.title_status) {
       parts.push(vehicle.title_status);
     }
     
-    return parts.join('-');
+    const result = parts.join('-');
+    console.log('VehicleForm - built titleInfo from parts:', result, 'from fields:', {
+      title_type: vehicle?.title_type,
+      title_status: vehicle?.title_status
+    });
+    
+    return result;
   };
   
   const [formData, setFormData] = useState<VehicleFormData>({
@@ -86,7 +96,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
-    titleInfo: buildTitleInfo(editingVehicle) || editingVehicle?.titleInfo || '',
+    titleInfo: getTitleInfo(editingVehicle),
     purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '',
     salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '',
     minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
@@ -118,7 +128,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
 
   console.log('VehicleForm - isEditing:', isEditing);
   console.log('VehicleForm - formData initialized:', formData);
-  console.log('VehicleForm - titleInfo from buildTitleInfo:', buildTitleInfo(editingVehicle));
+  console.log('VehicleForm - titleInfo final value:', formData.titleInfo);
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     console.log('VehicleForm - handleInputChange:', field, value);
