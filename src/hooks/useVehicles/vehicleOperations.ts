@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Vehicle } from './types';
-import { mapFormDataToDbData, mapUpdateDataToDbData } from './vehicleMappers';
+import { mapFormDataToDbData, mapUpdateDataToDbData, mapDbDataToAppData } from './vehicleMappers';
 
 export const fetchVehicles = async (): Promise<Vehicle[]> => {
   console.log('Fetching vehicles from database...');
@@ -15,7 +15,7 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       ca_note, purchase_price, sale_price, profit_margin, 
       min_negotiable, carfax_price, mmr_value, description, 
       category, title_type, title_status, photos, video, 
-      created_at, updated_at, created_by
+      created_at, updated_at, created_by, consignment_store
     `)
     .order('created_at', { ascending: false })
     .limit(100); // Limitar para evitar consultas muito pesadas
@@ -26,7 +26,10 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
   }
   
   console.log('Vehicles fetched successfully:', data?.length || 0, 'vehicles');
-  return data || [];
+  
+  // Map database data to application format
+  const mappedVehicles = data?.map(mapDbDataToAppData) || [];
+  return mappedVehicles;
 };
 
 export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
@@ -47,7 +50,7 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
   }
   
   console.log('Vehicle created successfully:', data);
-  return data;
+  return mapDbDataToAppData(data);
 };
 
 export const updateVehicle = async (id: string, vehicleData: Partial<any>): Promise<Vehicle> => {
@@ -69,7 +72,7 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
   }
   
   console.log('Vehicle updated successfully:', data);
-  return data;
+  return mapDbDataToAppData(data);
 };
 
 export const deleteVehicle = async (id: string): Promise<void> => {

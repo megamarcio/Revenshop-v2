@@ -25,4 +25,6 @@ export interface Vehicle {
   created_at: string;
   updated_at: string;
   created_by?: string;
+  // Additional field to store extended category info
+  extended_category?: 'rental' | 'maintenance' | 'consigned';
 }

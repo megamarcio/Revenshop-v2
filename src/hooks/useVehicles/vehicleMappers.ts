@@ -2,6 +2,20 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export const mapFormDataToDbData = async (vehicleData: any) => {
+  // Map our extended categories to database enum values
+  let dbCategory: 'forSale' | 'sold' = 'forSale';
+  let extendedCategory: string | null = null;
+  
+  if (vehicleData.category === 'sold') {
+    dbCategory = 'sold';
+  } else if (vehicleData.category === 'forSale') {
+    dbCategory = 'forSale';
+  } else {
+    // For rental, maintenance, consigned - store as forSale in DB but track extended category
+    dbCategory = 'forSale';
+    extendedCategory = vehicleData.category;
+  }
+
   return {
     name: vehicleData.name,
     vin: vehicleData.vin,
@@ -17,7 +31,7 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
     mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
     description: vehicleData.description || null,
-    category: vehicleData.category as 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned',
+    category: dbCategory,
     consignment_store: vehicleData.consignmentStore || null,
     title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
                vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
@@ -25,7 +39,11 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
                  vehicleData.titleInfo?.includes('em-transito') ? 'em-transito' as const : null,
     photos: vehicleData.photos || [],
     video: vehicleData.video || null,
-    created_by: (await supabase.auth.getUser()).data.user?.id || null
+    created_by: (await supabase.auth.getUser()).data.user?.id || null,
+    // Store extended category in description or use a JSON field approach
+    ...(extendedCategory && {
+      description: `[CATEGORY:${extendedCategory}]${vehicleData.description ? ' ' + vehicleData.description : ''}`
+    })
   };
 };
 
@@ -46,7 +64,24 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.carfaxPrice !== undefined) dbUpdateData.carfax_price = vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null;
   if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
   if (vehicleData.description !== undefined) dbUpdateData.description = vehicleData.description;
-  if (vehicleData.category) dbUpdateData.category = vehicleData.category;
+  
+  // Handle category mapping
+  if (vehicleData.category) {
+    if (vehicleData.category === 'sold') {
+      dbUpdateData.category = 'sold';
+    } else if (vehicleData.category === 'forSale') {
+      dbUpdateData.category = 'forSale';
+    } else {
+      // For rental, maintenance, consigned - store as forSale in DB
+      dbUpdateData.category = 'forSale';
+      // Store extended category in description
+      const extendedCategory = vehicleData.category;
+      const currentDesc = vehicleData.description || '';
+      const cleanDesc = currentDesc.replace(/\[CATEGORY:[^\]]+\]\s*/, '');
+      dbUpdateData.description = `[CATEGORY:${extendedCategory}]${cleanDesc ? ' ' + cleanDesc : ''}`;
+    }
+  }
+  
   if (vehicleData.consignmentStore !== undefined) dbUpdateData.consignment_store = vehicleData.consignmentStore || null;
   
   // Processar informações do título
@@ -88,4 +123,23 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   }
 
   return dbUpdateData;
+};
+
+// Helper function to extract extended category from description
+export const extractExtendedCategory = (description: string): string => {
+  const match = description?.match(/\[CATEGORY:([^\]]+)\]/);
+  return match ? match[1] : '';
+};
+
+// Helper function to map database data back to our application format
+export const mapDbDataToAppData = (dbVehicle: any): any => {
+  const extendedCategory = extractExtendedCategory(dbVehicle.description || '');
+  const cleanDescription = dbVehicle.description?.replace(/\[CATEGORY:[^\]]+\]\s*/, '') || '';
+  
+  return {
+    ...dbVehicle,
+    category: extendedCategory || dbVehicle.category,
+    description: cleanDescription,
+    extended_category: extendedCategory || null
+  };
 };
