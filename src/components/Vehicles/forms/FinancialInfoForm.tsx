@@ -2,7 +2,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Calculator, Wrench } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calculator, Wrench, Eye } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 
 interface FinancialInfoFormProps {
@@ -30,6 +31,11 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
       style: 'currency',
       currency: 'BRL'
     }).format(value);
+  };
+
+  const handleViewMaintenance = () => {
+    // TODO: Implementar modal ou navegação para ver manutenções
+    console.log('Ver manutenções do veículo:', vehicleId);
   };
 
   return (
@@ -120,47 +126,27 @@ const FinancialInfoForm = ({ formData, errors, onInputChange, calculateProfitMar
               <Wrench className="h-4 w-4" />
               Custo Total Manutenções
             </Label>
-            <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
-              <span className="text-lg font-bold text-orange-600">
-                {formatCurrency(maintenanceCost)}
-              </span>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <span className="text-lg font-bold text-orange-600">
+                  {formatCurrency(maintenanceCost)}
+                </span>
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={handleViewMaintenance}
+                className="flex items-center gap-1"
+                title="Ver Manutenções"
+              >
+                <Eye className="h-4 w-4" />
+                Ver
+              </Button>
             </div>
           </div>
         )}
       </div>
-
-      {/* Resumo Financeiro - apenas para admins e vendedores internos */}
-      {(isAdmin || isInternalSeller) && vehicleId && maintenanceCost > 0 && (
-        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-          <h4 className="text-md font-semibold text-blue-800 mb-3">Resumo de Custos</h4>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-            <div>
-              <span className="text-gray-600">Compra:</span>
-              <span className="ml-2 font-medium">
-                ${parseFloat(formData.purchasePrice || '0').toFixed(2)}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-600">Manutenções:</span>
-              <span className="ml-2 font-medium text-orange-600">
-                {formatCurrency(maintenanceCost)}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-600">Custo Total:</span>
-              <span className="ml-2 font-bold text-red-600">
-                ${(parseFloat(formData.purchasePrice || '0') + (maintenanceCost * 5.5)).toFixed(2)}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-600">Lucro Real:</span>
-              <span className="ml-2 font-bold text-green-600">
-                ${(parseFloat(formData.salePrice || '0') - parseFloat(formData.purchasePrice || '0') - (maintenanceCost * 5.5)).toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
