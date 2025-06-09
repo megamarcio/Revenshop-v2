@@ -1,5 +1,5 @@
 
-import { Vehicle } from '../../hooks/useVehicles';
+import { Vehicle } from '../../hooks/useVehicles/types';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface VehicleActionsProps {

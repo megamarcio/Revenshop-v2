@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Vehicle } from './types';
 
 export const mapFormDataToDbData = async (vehicleData: any) => {
   // Map our extended categories to database enum values
@@ -31,7 +32,7 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
     mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
     description: vehicleData.description || null,
-    category: dbCategory,
+    category: dbCategory, // Use only database-compatible values
     consignment_store: vehicleData.consignmentStore || null,
     title_type: vehicleData.titleInfo?.split('-')[0] === 'clean-title' ? 'clean-title' as const : 
                vehicleData.titleInfo?.split('-')[0] === 'rebuilt' ? 'rebuilt' as const : null,
@@ -132,7 +133,7 @@ export const extractExtendedCategory = (description: string): string => {
 };
 
 // Helper function to map database data back to our application format
-export const mapDbDataToAppData = (dbVehicle: any): any => {
+export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
   const extendedCategory = extractExtendedCategory(dbVehicle.description || '');
   const cleanDescription = dbVehicle.description?.replace(/\[CATEGORY:[^\]]+\]\s*/, '') || '';
   

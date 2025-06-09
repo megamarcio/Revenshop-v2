@@ -1,5 +1,4 @@
-
-import { Vehicle } from '../../hooks/useVehicles';
+import { Vehicle } from '../../hooks/useVehicles/types';
 
 // Função para converter dados do banco para o formato do formulário
 export const convertVehicleForCard = (vehicle: Vehicle) => ({
