@@ -41,7 +41,10 @@ const VehicleControls = ({
   const filterOptions = [
     { value: 'all', label: 'Todos' },
     { value: 'forSale', label: 'À Venda' },
-    { value: 'sold', label: 'Vendidos' }
+    { value: 'sold', label: 'Vendidos' },
+    { value: 'rental', label: 'Aluguel' },
+    { value: 'maintenance', label: 'Manutenção' },
+    { value: 'consigned', label: 'Consignado' }
   ];
 
   return (

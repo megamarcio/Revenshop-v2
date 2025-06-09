@@ -24,7 +24,17 @@ export const useVehicleFilters = ({
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesFilter = filterBy === 'all' || vehicle.category === filterBy;
+      let matchesFilter = true;
+      if (filterBy !== 'all') {
+        // Check if it's a direct category match or extended category match
+        if (vehicle.category === filterBy) {
+          matchesFilter = true;
+        } else if (vehicle.extended_category === filterBy) {
+          matchesFilter = true;
+        } else {
+          matchesFilter = false;
+        }
+      }
       
       return matchesSearch && matchesFilter;
     });
