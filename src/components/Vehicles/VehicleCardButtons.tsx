@@ -1,12 +1,22 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Copy, Trash2, Eye, DollarSign, Archive, EyeOff } from 'lucide-react';
-import { Vehicle } from './VehicleCardTypes';
+import { 
+  Edit, 
+  Copy, 
+  ExternalLink, 
+  Download, 
+  Eye, 
+  EyeOff, 
+  Trash2,
+  Wrench
+} from 'lucide-react';
+import { VehicleCardProps } from './VehicleCardTypes';
 
 interface VehicleCardButtonsProps {
-  vehicle: Vehicle;
+  vehicle: VehicleCardProps['vehicle'];
   canEditVehicles: boolean;
   canViewCostPrices: boolean;
   isInternalSeller: boolean;
@@ -17,9 +27,10 @@ interface VehicleCardButtonsProps {
   onEdit: () => void;
   onCopyDescription: () => void;
   onCarfaxLookup: () => void;
-  onDownloadAll: () => Promise<void>;
+  onDownloadAll: () => void;
   onToggleMinNegotiable: () => void;
   onDelete?: () => void;
+  onViewMaintenance?: () => void;
 }
 
 const VehicleCardButtons = ({
@@ -36,94 +47,110 @@ const VehicleCardButtons = ({
   onCarfaxLookup,
   onDownloadAll,
   onToggleMinNegotiable,
-  onDelete
+  onDelete,
+  onViewMaintenance
 }: VehicleCardButtonsProps) => {
   return (
-    <div className="flex gap-1 pt-2 border-t border-gray-100 justify-center">
-      {canEditVehicles && (
-        <Button 
-          size="sm" 
-          variant="outline" 
-          className="h-7 w-7 p-0"
-          onClick={onEdit}
-          title="Editar"
-        >
-          <Edit className="h-3 w-3" />
-        </Button>
-      )}
-      <Button 
-        size="sm" 
-        variant="outline" 
-        className="h-7 w-7 p-0"
-        onClick={onCopyDescription}
-        title="Copiar Descrição"
-        disabled={!vehicle.description}
-      >
-        <Copy className="h-3 w-3" />
-      </Button>
-      <Button 
-        size="sm" 
-        variant="outline" 
-        className="h-7 w-7 p-0"
-        onClick={onCarfaxLookup}
-        title="Consultar Carfax"
-      >
-        <img 
-          src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
-          alt="Carfax" 
-          className="h-3 w-3 object-contain"
-        />
-      </Button>
-      {isSeller && vehicle.photos && vehicle.photos.length > 0 && (
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 w-7 p-0"
-          onClick={onDownloadAll}
-          disabled={downloading}
-          title="Baixar Fotos (ZIP)"
-        >
-          <Archive className="h-3 w-3" />
-        </Button>
-      )}
-      {isInternalSeller && (
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 w-7 p-0"
-          onClick={onToggleMinNegotiable}
-          title="Ver Mín. Negociável"
-        >
-          {showMinNegotiable ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-        </Button>
-      )}
-      {canViewCostPrices && (
+    <div className="space-y-2">
+      {/* Primeira linha de botões */}
+      <div className="flex gap-1">
+        {canEditVehicles && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">
+                <Edit className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Editar</TooltipContent>
+          </Tooltip>
+        )}
+
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="h-7 w-7 p-0"
-              title="Ver Preço de Compra"
-            >
-              <DollarSign className="h-3 w-3" />
+            <Button onClick={onCopyDescription} size="sm" variant="outline" className="flex-1">
+              <Copy className="h-3 w-3" />
             </Button>
           </TooltipTrigger>
-          <TooltipContent>
-            <p className="font-semibold">{formatCurrency(vehicle.purchasePrice)}</p>
-          </TooltipContent>
+          <TooltipContent>Copiar Descrição</TooltipContent>
         </Tooltip>
-      )}
-      {canEditVehicles && onDelete && (
-        <Button 
-          size="sm" 
-          variant="outline" 
-          className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
-          onClick={onDelete}
-          title="Excluir"
-        >
-          <Trash2 className="h-3 w-3" />
-        </Button>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={onCarfaxLookup} size="sm" variant="outline" className="flex-1">
+              <ExternalLink className="h-3 w-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Carfax</TooltipContent>
+        </Tooltip>
+
+        {vehicle.photos && vehicle.photos.length > 0 && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={onDownloadAll} 
+                size="sm" 
+                variant="outline" 
+                className="flex-1"
+                disabled={downloading}
+              >
+                <Download className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Baixar Fotos</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* Segunda linha de botões */}
+      <div className="flex gap-1">
+        {(canViewCostPrices || isInternalSeller) && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={onToggleMinNegotiable} 
+                size="sm" 
+                variant="outline" 
+                className="flex-1"
+              >
+                {showMinNegotiable ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              {showMinNegotiable ? 'Ocultar' : 'Mostrar'} Mín. Negociável
+            </TooltipContent>
+          </Tooltip>
+        )}
+
+        {(isInternalSeller || canEditVehicles) && onViewMaintenance && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={onViewMaintenance} size="sm" variant="outline" className="flex-1">
+                <Wrench className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Ver Manutenções</TooltipContent>
+          </Tooltip>
+        )}
+
+        {canEditVehicles && onDelete && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button onClick={onDelete} size="sm" variant="destructive" className="flex-1">
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Excluir</TooltipContent>
+          </Tooltip>
+        )}
+      </div>
+
+      {/* Badge de valor mínimo negociável */}
+      {showMinNegotiable && vehicle.minNegotiable && (
+        <div className="pt-2">
+          <Badge variant="secondary" className="w-full justify-center text-xs">
+            Mín: {formatCurrency(parseFloat(vehicle.minNegotiable.toString()))}
+          </Badge>
+        </div>
       )}
     </div>
   );

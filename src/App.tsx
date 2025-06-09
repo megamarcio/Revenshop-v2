@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import Sidebar from './components/Layout/Sidebar';
@@ -16,6 +17,7 @@ const BuyHerePayHere = lazy(() => import('./components/BHPH/BuyHerePayHere'));
 const AuctionManagement = lazy(() => import('./components/Auctions/AuctionManagement'));
 const TaskManagement = lazy(() => import('./components/Tasks/TaskManagement'));
 const FinancingSimulation = lazy(() => import('./components/FinancingSimulation/FinancingSimulation'));
+const MaintenanceManagement = lazy(() => import('./components/Maintenance/MaintenanceManagement'));
 
 // Componente de loading
 const LoadingFallback = () => (
@@ -26,7 +28,7 @@ const LoadingFallback = () => (
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const { canAccessAdmin, canManageUsers, canAccessDashboard } = useAuth();
+  const { canAccessAdmin, canManageUsers, canAccessDashboard, isAdmin, isInternalSeller } = useAuth();
 
   useEffect(() => {
     const storedTab = localStorage.getItem('activeTab');
@@ -55,6 +57,8 @@ const App: React.FC = () => {
         return <BuyHerePayHere />;
       case 'financing':
         return <FinancingSimulation />;
+      case 'maintenance':
+        return (isAdmin || isInternalSeller) ? <MaintenanceManagement /> : null;
       case 'users':
         return canManageUsers ? <UserManagement /> : null;
       case 'admin':
