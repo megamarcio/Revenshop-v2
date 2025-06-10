@@ -17,7 +17,7 @@ interface PartsAndLaborFormProps {
   onUpdateLabor: (id: string, field: keyof MaintenanceLabor, value: string | number) => void;
   onRemoveLabor: (id: string) => void;
   onAddQuote: (partId: string) => void;
-  onUpdateQuote: (partId: string, quoteId: string, field: string, value: string | number) => void;
+  onUpdateQuote: (partId: string, quoteId: string, field: string, value: string | number | boolean) => void;
   onRemoveQuote: (partId: string, quoteId: string) => void;
 }
 
@@ -45,12 +45,25 @@ const PartsAndLaborForm = ({
     }, 0);
   };
 
+  const calculatePurchasedQuotesTotal = () => {
+    return parts.reduce((sum, part) => {
+      const purchasedQuotesTotal = part.priceQuotes?.reduce((partSum, quote) => {
+        return partSum + (quote.purchased ? (quote.estimatedPrice || 0) : 0);
+      }, 0) || 0;
+      return sum + purchasedQuotesTotal;
+    }, 0);
+  };
+
   const calculateLaborTotal = () => {
     return labor.reduce((sum, labor) => sum + (labor.value || 0), 0);
   };
 
   const calculateGrandTotal = () => {
     return calculatePartsTotal() + calculateLaborTotal();
+  };
+
+  const calculateEstimatedTotal = () => {
+    return calculatePurchasedQuotesTotal() + calculateLaborTotal();
   };
 
   return (
@@ -77,12 +90,13 @@ const PartsAndLaborForm = ({
                 />
               </div>
               <div className="w-32">
-                <Label>Valor Real (R$)</Label>
+                <Label>Valor Real ($)</Label>
                 <Input 
                   type="number" 
-                  value={part.value} 
+                  value={part.value || ''} 
                   onChange={e => onUpdatePart(part.id, 'value', parseFloat(e.target.value) || 0)} 
-                  placeholder="0,00" 
+                  placeholder="0.00"
+                  className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <Button 
@@ -127,12 +141,13 @@ const PartsAndLaborForm = ({
               />
             </div>
             <div className="w-32">
-              <Label>Valor (R$)</Label>
+              <Label>Valor ($)</Label>
               <Input 
                 type="number" 
-                value={laborItem.value} 
+                value={laborItem.value || ''} 
                 onChange={e => onUpdateLabor(laborItem.id, 'value', parseFloat(e.target.value) || 0)} 
-                placeholder="0,00" 
+                placeholder="0.00"
+                className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
             <Button 
@@ -153,36 +168,50 @@ const PartsAndLaborForm = ({
           <div className="flex justify-between">
             <span>Peças Utilizadas:</span>
             <span className="font-medium">
-              R$ {calculatePartsTotal().toFixed(2).replace('.', ',')}
+              $ {calculatePartsTotal().toFixed(2)}
             </span>
           </div>
           
           <div className="flex justify-between">
             <span>Mão de Obra:</span>
             <span className="font-medium">
-              R$ {calculateLaborTotal().toFixed(2).replace('.', ',')}
+              $ {calculateLaborTotal().toFixed(2)}
             </span>
           </div>
 
           <div className="flex justify-between text-blue-700">
             <span>Orçamento de Peças:</span>
             <span className="font-medium">
-              R$ {calculateQuotesTotal().toFixed(2).replace('.', ',')}
+              $ {calculateQuotesTotal().toFixed(2)}
             </span>
           </div>
           
           <div className="flex justify-between text-revenshop-primary font-semibold">
             <span>Valor Total Real:</span>
-            <span>R$ {calculateGrandTotal().toFixed(2).replace('.', ',')}</span>
+            <span>$ {calculateGrandTotal().toFixed(2)}</span>
           </div>
         </div>
 
-        {calculateQuotesTotal() > 0 && (
+        {calculatePurchasedQuotesTotal() > 0 && (
+          <div className="border-t pt-3 mt-3">
+            <div className="flex justify-between items-center text-green-800 bg-green-100 p-2 rounded">
+              <span className="font-semibold">Valor Estimado (Comprados):</span>
+              <span className="text-lg font-bold">
+                $ {calculateEstimatedTotal().toFixed(2)}
+              </span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              * Baseado nas cotações marcadas como compradas
+            </p>
+          </div>
+        )}
+
+        {calculateQuotesTotal() > 0 && calculatePurchasedQuotesTotal() === 0 && (
           <div className="border-t pt-3 mt-3">
             <div className="flex justify-between items-center text-blue-800 bg-blue-100 p-2 rounded">
               <span className="font-semibold">Valor Estimado Total:</span>
               <span className="text-lg font-bold">
-                R$ {(calculateQuotesTotal() + calculateLaborTotal()).toFixed(2).replace('.', ',')}
+                $ {(calculateQuotesTotal() + calculateLaborTotal()).toFixed(2)}
               </span>
             </div>
             <p className="text-xs text-gray-600 mt-1">

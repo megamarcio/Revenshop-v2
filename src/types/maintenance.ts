@@ -12,6 +12,7 @@ export interface PartPriceQuote {
   websiteUrl: string;
   partUrl: string;
   estimatedPrice: number;
+  purchased?: boolean;
 }
 
 export interface MaintenanceLabor {
@@ -59,20 +60,20 @@ export interface MaintenanceFormData {
 }
 
 export const PARTS_WEBSITES = [
-  { name: 'RockAuto', url: 'https://www.rockauto.com' },
-  { name: 'AutoZone', url: 'https://www.autozone.com' },
-  { name: 'Advance Auto Parts', url: 'https://www.advanceautoparts.com' },
-  { name: "O'Reilly Auto Parts", url: 'https://www.oreillyauto.com' },
-  { name: 'CarParts.com', url: 'https://www.carparts.com' },
   { name: '1A Auto', url: 'https://www.1aauto.com' },
+  { name: 'Advance Auto Parts', url: 'https://www.advanceautoparts.com' },
   { name: 'Amazon Automotive', url: 'https://www.amazon.com/automotive' },
+  { name: 'AutoZone', url: 'https://www.autozone.com' },
+  { name: 'Car-Part.com', url: 'https://www.car-part.com' },
+  { name: 'CarParts.com', url: 'https://www.carparts.com' },
   { name: 'eBay Motors', url: 'https://www.ebay.com/motors' },
   { name: 'LKQ Online', url: 'https://www.lkqonline.com' },
-  { name: 'Car-Part.com', url: 'https://www.car-part.com' },
+  { name: "O'Reilly Auto Parts", url: 'https://www.oreillyauto.com' },
   { name: 'PartsGeek', url: 'https://www.partsgeek.com' },
+  { name: 'RepairLink', url: 'https://www.repairlink.com' },
+  { name: 'RockAuto', url: 'https://www.rockauto.com' },
   { name: 'Summit Racing', url: 'https://www.summitracing.com' },
   { name: 'Tire Rack', url: 'https://www.tirerack.com' },
-  { name: 'RepairLink', url: 'https://www.repairlink.com' },
   { name: 'Outros', url: '' }
 ];
 

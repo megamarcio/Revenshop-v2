@@ -4,7 +4,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Plus, Trash2, ExternalLink, Globe } from 'lucide-react';
 import { PartPriceQuote, PARTS_WEBSITES } from '../../../types/maintenance';
 
 interface PriceQuoteSectionProps {
@@ -12,7 +13,7 @@ interface PriceQuoteSectionProps {
   partName: string;
   quotes: PartPriceQuote[];
   onAddQuote: (partId: string) => void;
-  onUpdateQuote: (partId: string, quoteId: string, field: keyof PartPriceQuote, value: string | number) => void;
+  onUpdateQuote: (partId: string, quoteId: string, field: keyof PartPriceQuote, value: string | number | boolean) => void;
   onRemoveQuote: (partId: string, quoteId: string) => void;
 }
 
@@ -31,6 +32,13 @@ const PriceQuoteSection = ({
   const openUrl = (url: string) => {
     if (url) {
       window.open(url, '_blank');
+    }
+  };
+
+  const openMainWebsite = (websiteName: string) => {
+    const website = PARTS_WEBSITES.find(w => w.name === websiteName);
+    if (website && website.url) {
+      window.open(website.url, '_blank');
     }
   };
 
@@ -55,11 +63,9 @@ const PriceQuoteSection = ({
       {quotes.length > 0 && (
         <div className="space-y-2">
           {quotes.map((quote) => {
-            const selectedWebsite = PARTS_WEBSITES.find(w => w.name === quote.website);
-            
             return (
               <div key={quote.id} className="grid grid-cols-12 gap-2 items-end bg-white p-2 rounded border">
-                <div className="col-span-3">
+                <div className="col-span-2">
                   <Label className="text-xs">Site</Label>
                   <Select 
                     value={quote.website} 
@@ -82,7 +88,7 @@ const PriceQuoteSection = ({
                   </Select>
                 </div>
 
-                <div className="col-span-4">
+                <div className="col-span-3">
                   <Label className="text-xs">Link da Peça</Label>
                   <Input
                     value={quote.partUrl}
@@ -93,17 +99,39 @@ const PriceQuoteSection = ({
                 </div>
 
                 <div className="col-span-2">
-                  <Label className="text-xs">Valor (R$)</Label>
+                  <Label className="text-xs">Valor ($)</Label>
                   <Input
                     type="number"
-                    value={quote.estimatedPrice}
+                    value={quote.estimatedPrice || ''}
                     onChange={(e) => onUpdateQuote(partId, quote.id, 'estimatedPrice', parseFloat(e.target.value) || 0)}
-                    placeholder="0,00"
-                    className="h-8 text-xs"
+                    placeholder="0.00"
+                    className="h-8 text-xs [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
 
-                <div className="col-span-3 flex gap-1">
+                <div className="col-span-1">
+                  <Label className="text-xs">Comprado</Label>
+                  <div className="flex justify-center mt-1">
+                    <Checkbox
+                      checked={quote.purchased || false}
+                      onCheckedChange={(checked) => onUpdateQuote(partId, quote.id, 'purchased', checked)}
+                    />
+                  </div>
+                </div>
+
+                <div className="col-span-4 flex gap-1">
+                  {quote.website && (
+                    <Button
+                      type="button"
+                      onClick={() => openMainWebsite(quote.website)}
+                      size="sm"
+                      variant="outline"
+                      className="h-8 w-8 p-0"
+                      title={`Pesquisar no ${quote.website}`}
+                    >
+                      <Globe className="h-3 w-3" />
+                    </Button>
+                  )}
                   {quote.partUrl && (
                     <Button
                       type="button"
@@ -111,7 +139,7 @@ const PriceQuoteSection = ({
                       size="sm"
                       variant="outline"
                       className="h-8 w-8 p-0"
-                      title="Abrir link"
+                      title="Abrir link da peça"
                     >
                       <ExternalLink className="h-3 w-3" />
                     </Button>
@@ -134,7 +162,7 @@ const PriceQuoteSection = ({
           {quotes.length > 0 && (
             <div className="bg-blue-100 p-2 rounded border text-right">
               <span className="text-xs font-medium text-blue-800">
-                Total Estimado: R$ {calculateQuoteTotal().toFixed(2).replace('.', ',')}
+                Total Estimado: $ {calculateQuoteTotal().toFixed(2)}
               </span>
             </div>
           )}

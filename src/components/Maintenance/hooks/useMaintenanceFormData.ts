@@ -38,7 +38,10 @@ export const useMaintenanceFormData = (editingMaintenance?: any) => {
         mechanic_phone: editingMaintenance.mechanic_phone || '',
         parts: (editingMaintenance.parts || []).map((part: any) => ({
           ...part,
-          priceQuotes: part.priceQuotes || []
+          priceQuotes: (part.priceQuotes || []).map((quote: any) => ({
+            ...quote,
+            purchased: quote.purchased || false
+          }))
         })),
         labor: editingMaintenance.labor || [],
         receipt_urls: editingMaintenance.receipt_urls || []
