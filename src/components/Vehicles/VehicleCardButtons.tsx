@@ -52,12 +52,12 @@ const VehicleCardButtons = ({
 }: VehicleCardButtonsProps) => {
   return (
     <div className="space-y-2">
-      {/* Primeira linha - todos os botões principais em uma linha */}
+      {/* Primeira linha de botões */}
       <div className="flex gap-1">
         {canEditVehicles && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onEdit} size="sm" variant="outline" className="h-7 w-7 p-0">
+              <Button onClick={onEdit} size="sm" variant="outline" className="flex-1">
                 <Edit className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
@@ -67,11 +67,20 @@ const VehicleCardButtons = ({
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={onCopyDescription} size="sm" variant="outline" className="h-7 w-7 p-0">
+            <Button onClick={onCopyDescription} size="sm" variant="outline" className="flex-1">
               <Copy className="h-3 w-3" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Copiar Descrição</TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button onClick={onCarfaxLookup} size="sm" variant="outline" className="flex-1">
+              <ExternalLink className="h-3 w-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>Carfax</TooltipContent>
         </Tooltip>
 
         {vehicle.photos && vehicle.photos.length > 0 && (
@@ -81,7 +90,7 @@ const VehicleCardButtons = ({
                 onClick={onDownloadAll} 
                 size="sm" 
                 variant="outline" 
-                className="h-7 w-7 p-0"
+                className="flex-1"
                 disabled={downloading}
               >
                 <Download className="h-3 w-3" />
@@ -90,7 +99,10 @@ const VehicleCardButtons = ({
             <TooltipContent>Baixar Fotos</TooltipContent>
           </Tooltip>
         )}
+      </div>
 
+      {/* Segunda linha de botões */}
+      <div className="flex gap-1">
         {(canViewCostPrices || isInternalSeller) && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -98,7 +110,7 @@ const VehicleCardButtons = ({
                 onClick={onToggleMinNegotiable} 
                 size="sm" 
                 variant="outline" 
-                className="h-7 w-7 p-0"
+                className="flex-1"
               >
                 {showMinNegotiable ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               </Button>
@@ -112,7 +124,7 @@ const VehicleCardButtons = ({
         {(isInternalSeller || canEditVehicles) && onViewMaintenance && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onViewMaintenance} size="sm" variant="outline" className="h-7 w-7 p-0">
+              <Button onClick={onViewMaintenance} size="sm" variant="outline" className="flex-1">
                 <Wrench className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
@@ -123,7 +135,7 @@ const VehicleCardButtons = ({
         {canEditVehicles && onDelete && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onDelete} size="sm" variant="destructive" className="h-7 w-7 p-0">
+              <Button onClick={onDelete} size="sm" variant="destructive" className="flex-1">
                 <Trash2 className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
@@ -132,26 +144,9 @@ const VehicleCardButtons = ({
         )}
       </div>
 
-      {/* Segunda linha - botão do Carfax */}
-      <div className="flex">
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button onClick={onCarfaxLookup} size="sm" variant="outline" className="w-full h-7 flex items-center gap-1 text-xs">
-              <img 
-                src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
-                alt="Carfax" 
-                className="h-3 w-auto"
-              />
-              Carfax
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>Ver Carfax</TooltipContent>
-        </Tooltip>
-      </div>
-
       {/* Badge de valor mínimo negociável */}
       {showMinNegotiable && vehicle.minNegotiable && (
-        <div className="pt-1">
+        <div className="pt-2">
           <Badge variant="secondary" className="w-full justify-center text-xs">
             Mín: {formatCurrency(parseFloat(vehicle.minNegotiable.toString()))}
           </Badge>

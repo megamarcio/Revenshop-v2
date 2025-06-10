@@ -45,7 +45,7 @@ export const generateDescription = (formData: VehicleFormData): string => {
   const color = formData.color;
   const price = formatCurrency(formData.salePrice);
   const vin = formData.vin;
-  const miles = formData.miles; // CORRECTED: Use miles instead of plate
+  const miles = formData.plate; // Miles are stored in the plate field
   
   // Format title information
   let titleInfo = 'Clean Title';
@@ -103,7 +103,7 @@ export const validateForm = (formData: VehicleFormData): Record<string, string> 
   if (!formData.vin.trim()) newErrors.vin = 'VIN é obrigatório';
   if (!formData.year.trim()) newErrors.year = 'Ano é obrigatório';
   if (!formData.model.trim()) newErrors.model = 'Modelo é obrigatório';
-  if (!formData.miles.trim()) newErrors.miles = 'Milhas são obrigatórias'; // CORRECTED: Use miles instead of plate
+  if (!formData.plate.trim()) newErrors.plate = 'Milhas são obrigatórias';
   if (!formData.internalCode.trim()) newErrors.internalCode = 'Código interno é obrigatório';
   if (!formData.color.trim()) newErrors.color = 'Cor é obrigatória';
   if (!formData.purchasePrice.trim()) newErrors.purchasePrice = 'Valor de compra é obrigatório';
@@ -114,10 +114,10 @@ export const validateForm = (formData: VehicleFormData): Record<string, string> 
     newErrors.consignmentStore = 'Nome da loja é obrigatório para veículos consignados';
   }
 
-  // Miles validation - CORRECTED: Use miles instead of plate
-  const miles = parseInt(formData.miles);
+  // Miles validation
+  const miles = parseInt(formData.plate);
   if (isNaN(miles) || miles < 0 || miles > 500000) {
-    newErrors.miles = 'Milhas devem estar entre 0 e 500,000';
+    newErrors.plate = 'Milhas devem estar entre 0 e 500,000';
   }
 
   // CA Note validation

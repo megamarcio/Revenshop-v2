@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Vehicle } from './types';
@@ -8,7 +7,7 @@ import { mapDbDataToAppData } from './utils/dbToAppMapper';
 export const fetchVehicles = async (): Promise<Vehicle[]> => {
   console.log('Fetching vehicles from database...');
   
-  // Buscar todos os campos necessários do banco
+  // Remover consignment_store da consulta pois não existe no banco
   const { data, error } = await supabase
     .from('vehicles')
     .select(`
@@ -26,12 +25,10 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
     throw error;
   }
   
-  console.log('Raw vehicles data from database:', data);
   console.log('Vehicles fetched successfully:', data?.length || 0, 'vehicles');
   
   // Map database data to application format
   const mappedVehicles = data?.map(mapDbDataToAppData) || [];
-  console.log('Mapped vehicles:', mappedVehicles);
   return mappedVehicles;
 };
 
