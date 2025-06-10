@@ -62,7 +62,7 @@ const MaintenanceCard = ({
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-600">Detecção:</span>
+              <span className="text-gray-600">Criado em:</span>
               <span>{formatDate(maintenance.detection_date)}</span>
             </div>
             {maintenance.promised_date && <div className="flex items-center gap-2">
