@@ -31,7 +31,7 @@ const DateSelectionForm = ({
           Datas da Manutenção
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-gray-100">
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-gray-100 px-[6px]">
                 <Info className="h-3 w-3 text-gray-500" />
               </Button>
             </TooltipTrigger>
@@ -55,7 +55,7 @@ const DateSelectionForm = ({
           </Tooltip>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4 rounded-sm bg-slate-50">
+      <CardContent className="space-y-4 rounded-sm bg-slate-50 px-0 mx-0 py-0 my-[8px]">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Data de Detecção */}
           <div className="space-y-2">

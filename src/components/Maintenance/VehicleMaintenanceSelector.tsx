@@ -49,7 +49,7 @@ const VehicleMaintenanceSelector = ({
         </SelectContent>
       </Select>
       
-      {selectedVehicle && <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+      {selectedVehicle && <div className="bg-blue-50 p-3 rounded-lg border border-blue-200 mx-0 my-0 py-0 px-[16px]">
           <div className="flex items-center gap-2 mb-2">
             <Car className="h-4 w-4 text-blue-600" />
             <span className="font-semibold text-blue-800">Veículo</span>

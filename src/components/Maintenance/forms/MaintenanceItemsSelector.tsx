@@ -23,7 +23,7 @@ const MaintenanceItemsSelector = ({
   const currentItems = MAINTENANCE_ITEMS[maintenanceType];
   return <>
       {/* Tipo de Manutenção */}
-      <div className="space-y-2">
+      <div className="space-y-2 rounded-xl">
         <Label>Tipo de Manutenção</Label>
         <Select value={maintenanceType} onValueChange={onMaintenanceTypeChange}>
           <SelectTrigger>
