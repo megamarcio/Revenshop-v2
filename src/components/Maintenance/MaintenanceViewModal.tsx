@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../types/maintenance';
 import { useMaintenance } from '../../hooks/useMaintenance';
-import TechnicalPanelModal from './TechnicalPanelModal';
+import TechnicalPanelTable from './TechnicalPanel/TechnicalPanelTable';
 
 interface MaintenanceViewModalProps {
   isOpen: boolean;
@@ -215,7 +214,7 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
         </DialogContent>
       </Dialog>
 
-      <TechnicalPanelModal
+      <TechnicalPanelTable
         isOpen={showTechnicalPanel}
         onClose={() => setShowTechnicalPanel(false)}
         vehicleId={vehicleId}
