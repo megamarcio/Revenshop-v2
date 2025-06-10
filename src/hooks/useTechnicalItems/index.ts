@@ -1,85 +1,115 @@
 
-import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { 
+  fetchTechnicalItems, 
+  createDefaultTechnicalItems, 
+  updateTechnicalItem,
+  createTechnicalItem,
+  deleteTechnicalItem
+} from './operations';
 import { TechnicalItem } from './types';
-import { fetchTechnicalItems, createDefaultTechnicalItems, updateTechnicalItem } from './operations';
-
-export type { TechnicalItem } from './types';
+import { toast } from '@/hooks/use-toast';
 
 export const useTechnicalItems = (vehicleId?: string) => {
-  const [items, setItems] = useState<TechnicalItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchItems = async () => {
-    if (!vehicleId) {
-      setItems([]);
-      setLoading(false);
-      return;
-    }
+  const {
+    data: items = [],
+    isLoading,
+    error
+  } = useQuery({
+    queryKey: ['technical-items', vehicleId],
+    queryFn: () => fetchTechnicalItems(vehicleId!),
+    enabled: !!vehicleId,
+  });
 
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const data = await fetchTechnicalItems(vehicleId);
-      setItems(data);
-    } catch (err) {
-      console.error('Error loading technical items:', err);
-      setError(err instanceof Error ? err.message : 'Erro inesperado ao carregar itens técnicos');
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const createDefaultItemsMutation = useMutation({
+    mutationFn: createDefaultTechnicalItems,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['technical-items', vehicleId] });
+      toast({
+        title: 'Sucesso',
+        description: 'Itens técnicos padrão criados com sucesso',
+      });
+    },
+    onError: (error) => {
+      console.error('Error creating default items:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao criar itens técnicos padrão',
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const createDefaultItems = async () => {
-    if (!vehicleId) {
-      console.warn('Cannot create items without vehicleId');
-      return;
-    }
+  const updateItemMutation = useMutation({
+    mutationFn: ({ itemId, updates }: { itemId: string; updates: Partial<TechnicalItem> }) =>
+      updateTechnicalItem(itemId, updates),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['technical-items', vehicleId] });
+    },
+    onError: (error) => {
+      console.error('Error updating item:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao atualizar item técnico',
+        variant: 'destructive',
+      });
+    },
+  });
 
-    try {
-      setLoading(true);
-      await createDefaultTechnicalItems(vehicleId);
-      await fetchItems();
-    } catch (err) {
-      console.error('Error creating default items:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao criar itens padrão');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const createItemMutation = useMutation({
+    mutationFn: ({ vehicleId, name, type }: { vehicleId: string; name: string; type: string }) =>
+      createTechnicalItem(vehicleId, name, type),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['technical-items', vehicleId] });
+      toast({
+        title: 'Sucesso',
+        description: 'Item técnico criado com sucesso',
+      });
+    },
+    onError: (error) => {
+      console.error('Error creating item:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao criar item técnico',
+        variant: 'destructive',
+      });
+    },
+  });
 
-  const updateItem = async (itemId: string, updates: Partial<TechnicalItem>) => {
-    try {
-      await updateTechnicalItem(itemId, updates);
-      
-      // Update local state
-      setItems(current => 
-        current.map(item => 
-          item.id === itemId ? { ...item, ...updates } : item
-        )
-      );
-    } catch (err) {
-      console.error('Error updating item:', err);
-      setError(err instanceof Error ? err.message : 'Erro ao atualizar item');
-    }
-  };
-
-  const refresh = async () => {
-    await fetchItems();
-  };
-
-  useEffect(() => {
-    fetchItems();
-  }, [vehicleId]);
+  const deleteItemMutation = useMutation({
+    mutationFn: deleteTechnicalItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['technical-items', vehicleId] });
+      toast({
+        title: 'Sucesso',
+        description: 'Item técnico excluído com sucesso',
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting item:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir item técnico',
+        variant: 'destructive',
+      });
+    },
+  });
 
   return {
     items,
-    loading,
+    isLoading,
     error,
-    createDefaultItems,
-    updateItem,
-    refresh
+    createDefaultItems: createDefaultItemsMutation.mutate,
+    updateItem: updateItemMutation.mutate,
+    createItem: createItemMutation.mutate,
+    deleteItem: deleteItemMutation.mutate,
+    isCreatingDefaultItems: createDefaultItemsMutation.isPending,
+    isUpdatingItem: updateItemMutation.isPending,
+    isCreatingItem: createItemMutation.isPending,
+    isDeletingItem: deleteItemMutation.isPending,
   };
 };
+
+export * from './types';

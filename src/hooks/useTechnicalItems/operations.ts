@@ -54,6 +54,42 @@ export const createDefaultTechnicalItems = async (vehicleId: string): Promise<vo
   }
 };
 
+export const createTechnicalItem = async (vehicleId: string, name: string, type: string): Promise<void> => {
+  console.log('Creating technical item:', { vehicleId, name, type });
+  
+  const { error } = await supabase
+    .from('technical_items')
+    .insert({
+      vehicle_id: vehicleId,
+      name: name,
+      type: type,
+      status: 'em-dia'
+    });
+
+  if (error) {
+    console.error('Error creating technical item:', error);
+    throw new Error(error.message);
+  }
+  
+  console.log('Successfully created technical item');
+};
+
+export const deleteTechnicalItem = async (itemId: string): Promise<void> => {
+  console.log('Deleting technical item:', itemId);
+  
+  const { error } = await supabase
+    .from('technical_items')
+    .delete()
+    .eq('id', itemId);
+
+  if (error) {
+    console.error('Error deleting technical item:', error);
+    throw new Error(error.message);
+  }
+  
+  console.log('Successfully deleted technical item');
+};
+
 export const updateTechnicalItem = async (itemId: string, updates: Partial<TechnicalItem>): Promise<void> => {
   console.log('Updating technical item:', itemId, 'with updates:', updates);
   

@@ -36,9 +36,9 @@ const FinancialInfoForm = ({
   const maintenanceCost = vehicleId ? getTotalMaintenanceCost(vehicleId) : 0;
   
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'BRL'
+      currency: 'USD'
     }).format(value);
   };
 
@@ -123,7 +123,7 @@ const FinancialInfoForm = ({
           />
         </div>
 
-        {/* Custo Total de Manutenções - apenas para admins e vendedores internos */}
+        {/* Custo Total de Manutenções - agora em USD */}
         {(isAdmin || isInternalSeller) && vehicleId && (
           <div className="space-y-2">
             <Label className="flex items-center gap-2">

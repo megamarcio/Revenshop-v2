@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit2, Save, X, LucideIcon } from 'lucide-react';
+import { Edit2, Save, X, LucideIcon, AlertCircle } from 'lucide-react';
 import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 
 interface MainItemCardProps {
@@ -69,16 +68,6 @@ const MainItemCard = ({
     const value = e.target.value;
     setMiles(value);
     onUpdate(item.id, { miles: value });
-    
-    // Auto-calculate next change for oil - calculate miles for next change
-    if (item.type === 'oil' && value) {
-      const currentMiles = parseInt(value);
-      if (!isNaN(currentMiles)) {
-        const nextMiles = currentMiles + 5000;
-        // Don't automatically set next change date, let user set it manually
-        console.log('Next oil change at:', nextMiles, 'miles');
-      }
-    }
   };
 
   const handleNextChangeDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,7 +105,6 @@ const MainItemCard = ({
   };
 
   const handleSave = () => {
-    // Ensure all current state is saved
     onUpdate(item.id, {
       status,
       miles,
@@ -128,7 +116,6 @@ const MainItemCard = ({
   };
 
   const handleCancel = () => {
-    // Reset to original values
     setStatus(item.status);
     setMiles(item.miles || '');
     setNextChange(item.next_change || '');
@@ -152,6 +139,9 @@ const MainItemCard = ({
 
   const renderSpecificFields = () => {
     if (item.type === 'oil') {
+      const currentMiles = parseInt(miles);
+      const nextOilChangeMiles = !isNaN(currentMiles) ? currentMiles + 5000 : null;
+
       return (
         <>
           <div>
@@ -170,6 +160,20 @@ const MainItemCard = ({
               <span className="text-sm">{miles || 'N/A'} miles</span>
             )}
           </div>
+          
+          {/* Oil Change Warning */}
+          {nextOilChangeMiles && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-2">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <div>
+                  <p className="text-xs font-medium text-blue-800">Próxima Troca de Óleo</p>
+                  <p className="text-xs text-blue-700">{nextOilChangeMiles.toLocaleString()} miles</p>
+                </div>
+              </div>
+            </div>
+          )}
+          
           <div>
             <label className="text-xs text-gray-700 block mb-1">
               Data da Próxima Troca
@@ -189,7 +193,7 @@ const MainItemCard = ({
       );
     }
 
-    if (item.type === 'battery') {
+    if (item.type === 'electrical') {
       return (
         <>
           <div>
@@ -209,7 +213,7 @@ const MainItemCard = ({
           </div>
           <div>
             <label className="text-xs text-gray-700 block mb-1">
-              Próxima Troca
+              Próxima Troca (3 anos)
             </label>
             <span className="text-sm">{nextChange || 'N/A'}</span>
           </div>

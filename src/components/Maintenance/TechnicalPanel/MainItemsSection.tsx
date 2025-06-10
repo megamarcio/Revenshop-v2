@@ -30,10 +30,10 @@ const MainItemsSection = ({
       searchTerms: ['oil', 'óleo', 'motor', 'troca', 'oleo']
     },
     { 
-      type: 'battery', 
+      type: 'electrical', 
       title: 'Bateria', 
       icon: Battery,
-      searchTerms: ['battery', 'bateria', 'bat']
+      searchTerms: ['battery', 'bateria', 'bat', 'electrical']
     },
     { 
       type: 'tires', 
