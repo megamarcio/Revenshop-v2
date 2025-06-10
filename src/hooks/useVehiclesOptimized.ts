@@ -93,9 +93,12 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
           return null;
         }
 
+        // Cast para garantir que temos um objeto válido
+        const validVehicle = vehicle as Record<string, any>;
+
         const baseVehicle = {
-          ...vehicle,
-          image_url: vehicle.photos && Array.isArray(vehicle.photos) && vehicle.photos.length > 0 ? vehicle.photos[0] : null,
+          ...validVehicle,
+          image_url: validVehicle.photos && Array.isArray(validVehicle.photos) && validVehicle.photos.length > 0 ? validVehicle.photos[0] : null,
         };
 
         // Para consultas mínimas, adicionar campos padrão
@@ -116,7 +119,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
         } else {
           return {
             ...baseVehicle,
-            updated_at: vehicle.updated_at || vehicle.created_at || new Date().toISOString()
+            updated_at: validVehicle.updated_at || validVehicle.created_at || new Date().toISOString()
           };
         }
       }).filter(vehicle => vehicle !== null) as Vehicle[];
