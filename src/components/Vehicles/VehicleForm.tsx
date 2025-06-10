@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +51,23 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
     generateDescription,
     calculateProfitMargin
   } = useVehicleForm(editingVehicle);
+
+  // Fechar ao clicar fora da janela
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      const modal = document.querySelector('[data-vehicle-form-modal]');
+      
+      if (modal && !modal.contains(target) && !isLoading) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onClose, isLoading]);
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
@@ -147,7 +165,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   return (
     <>
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-        <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto" data-vehicle-form-modal>
           <CardHeader className="flex flex-row items-center justify-between">
             <div className="flex items-center space-x-2">
               <Car className="h-6 w-6 text-revenshop-primary" />
@@ -183,29 +201,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
                   />
                   Carfax
                 </Button>
-              )}
-              {canEditVehicles && isEditing && onDelete && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive" size="sm" disabled={isLoading}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
-                        Excluir
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
               )}
               <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
                 <X className="h-4 w-4" />
@@ -250,10 +245,36 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
                 generateDescription={generateDescription}
               />
 
-              <div className="flex justify-end space-x-4 pt-6 border-t">
-                <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                  {t('cancel')}
-                </Button>
+              <div className="flex justify-between items-center space-x-4 pt-6 border-t">
+                <div className="flex space-x-2">
+                  <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                    {t('cancel')}
+                  </Button>
+                  {canEditVehicles && isEditing && onDelete && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" disabled={isLoading}>
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Excluir
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                            Excluir
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
                 <Button type="submit" disabled={isLoading}>
                   <Save className="h-4 w-4 mr-2" />
                   {isLoading ? 
