@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { Wrench } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { TechnicalItem } from '../components/Maintenance/TechnicalPanel/types';
@@ -37,7 +38,7 @@ export const useTechnicalItems = (vehicleId?: string) => {
       const formattedItems: TechnicalItem[] = data.map(item => ({
         id: item.id,
         name: item.name,
-        icon: 'Wrench', // Simplified - icon will be handled in the component
+        icon: Wrench, // Using the actual Lucide icon component
         month: item.month || '',
         year: item.year || '',
         miles: item.miles || '',
