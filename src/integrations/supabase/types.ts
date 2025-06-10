@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      ai_settings: {
+        Row: {
+          created_at: string
+          description_instructions: string | null
+          id: string
+          image_instructions: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description_instructions?: string | null
+          id?: string
+          image_instructions?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description_instructions?: string | null
+          id?: string
+          image_instructions?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       auctions: {
         Row: {
           actual_auction_fees: number | null
@@ -616,11 +640,45 @@ export type Database = {
           },
         ]
       }
+      whatsapp_groups: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          phone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      get_ai_settings: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          image_instructions: string
+          description_instructions: string
+        }[]
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -629,12 +687,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      save_ai_settings: {
+        Args: {
+          p_image_instructions: string
+          p_description_instructions: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       payment_method: "cash" | "financing" | "bhph" | "check" | "other"
       title_status: "em-maos" | "em-transito"
       title_type: "clean-title" | "rebuilt"
-      user_role: "admin" | "manager" | "seller"
+      user_role: "admin" | "manager" | "seller" | "internal_seller"
       vehicle_category: "forSale" | "sold"
     }
     CompositeTypes: {
@@ -754,7 +819,7 @@ export const Constants = {
       payment_method: ["cash", "financing", "bhph", "check", "other"],
       title_status: ["em-maos", "em-transito"],
       title_type: ["clean-title", "rebuilt"],
-      user_role: ["admin", "manager", "seller"],
+      user_role: ["admin", "manager", "seller", "internal_seller"],
       vehicle_category: ["forSale", "sold"],
     },
   },
