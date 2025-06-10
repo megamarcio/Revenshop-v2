@@ -45,8 +45,8 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
     setEditingItem(null);
   };
 
-  const urgentItems = items.filter(item => item.status === 'urgente');
-  const needsAttentionItems = items.filter(item => item.status === 'precisa-troca');
+  const trocarItems = items.filter(item => item.status === 'trocar');
+  const proximoTrocaItems = items.filter(item => item.status === 'proximo-troca');
   const groupedItems = groupItemsByType(items);
 
   return (
@@ -65,8 +65,8 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
 
         <div className="space-y-4">
           <AlertSection 
-            urgentItems={urgentItems}
-            needsAttentionItems={needsAttentionItems}
+            trocarItems={trocarItems}
+            proximoTrocaItems={proximoTrocaItems}
           />
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

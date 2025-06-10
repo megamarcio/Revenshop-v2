@@ -8,9 +8,11 @@ export interface TechnicalItem {
   month: string;
   year: string;
   miles?: string;
-  status: 'em-dia' | 'precisa-troca' | 'urgente';
+  nextChange?: string; // Data da próxima troca
+  status: 'em-dia' | 'proximo-troca' | 'trocar';
   type: 'oil' | 'electrical' | 'filter' | 'suspension' | 'brakes' | 'fluids' | 'tires' | 'tuneup';
   extraInfo?: string;
+  tireBrand?: string; // Para pneus
 }
 
 export interface TechnicalPanelModalProps {
@@ -30,8 +32,8 @@ export interface EditableItemRowProps {
 }
 
 export interface AlertSectionProps {
-  urgentItems: TechnicalItem[];
-  needsAttentionItems: TechnicalItem[];
+  trocarItems: TechnicalItem[];
+  proximoTrocaItems: TechnicalItem[];
 }
 
 export interface TechnicalSectionProps {
@@ -46,3 +48,15 @@ export interface TechnicalSectionProps {
   isHighlight?: boolean;
   className?: string;
 }
+
+export const TIRE_BRANDS = [
+  'Michelin',
+  'Bridgestone',
+  'Pirelli',
+  'Continental',
+  'Goodyear',
+  'Yokohama',
+  'Dunlop',
+  'Hankook',
+  'Outros'
+];

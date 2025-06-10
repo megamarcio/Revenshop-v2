@@ -9,8 +9,8 @@ interface StatusIconProps {
 const StatusIcon = ({ status }: StatusIconProps) => {
   switch (status) {
     case 'em-dia': return <CheckCircle className="h-3 w-3" />;
-    case 'precisa-troca': return <Clock className="h-3 w-3" />;
-    case 'urgente': return <AlertTriangle className="h-3 w-3" />;
+    case 'proximo-troca': return <Clock className="h-3 w-3" />;
+    case 'trocar': return <AlertTriangle className="h-3 w-3" />;
     default: return <XCircle className="h-3 w-3" />;
   }
 };
