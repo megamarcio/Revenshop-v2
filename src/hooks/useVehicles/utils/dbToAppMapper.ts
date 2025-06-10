@@ -54,8 +54,7 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
     extended_category: extendedCategory,
     consignment_store: consignmentStore || undefined,
     
-    // Form-compatible aliases that the form expects
-    plate: dbVehicle.miles?.toString() || '0',
+    // Form-compatible aliases with CORRECT mapping
     internalCode: dbVehicle.internal_code || '',
     caNote: dbVehicle.ca_note?.toString() || '0',
     purchasePrice: dbVehicle.purchase_price?.toString() || '0',
@@ -72,7 +71,6 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
     model: mappedVehicle.model,
     miles: mappedVehicle.miles,
     color: mappedVehicle.color,
-    plate: mappedVehicle.plate,
     internalCode: mappedVehicle.internalCode
   });
   

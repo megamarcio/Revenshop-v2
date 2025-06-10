@@ -22,7 +22,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     vin: editingVehicle?.vin || '',
     year: getFieldValue(editingVehicle?.year, null, '0'),
     model: editingVehicle?.model || '',
-    plate: getFieldValue(editingVehicle?.miles, editingVehicle?.plate, '0'),
+    miles: getFieldValue(editingVehicle?.miles, null, '0'), // CORRIGIDO: usar miles diretamente
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: getFieldValue(editingVehicle?.ca_note, editingVehicle?.caNote, '0'),
@@ -61,7 +61,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
   console.log('useVehicleForm - specific field values:', {
     year: formData.year,
     model: formData.model,
-    plate: formData.plate,
+    miles: formData.miles, // CORRIGIDO: agora mostra miles em vez de plate
     color: formData.color,
     internalCode: formData.internalCode
   });

@@ -4,7 +4,7 @@ export interface VehicleFormData {
   vin: string;
   year: string;
   model: string;
-  plate: string;
+  miles: string; // Corrigido: era 'plate', agora é 'miles'
   internalCode: string;
   color: string;
   caNote: string;

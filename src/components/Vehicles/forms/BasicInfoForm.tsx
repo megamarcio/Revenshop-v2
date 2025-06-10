@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -12,7 +11,7 @@ interface BasicInfoFormProps {
     vin: string;
     year: string;
     model: string;
-    plate: string;
+    miles: string;
     internalCode: string;
     color: string;
     caNote: string;
@@ -43,18 +42,14 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     setIsExpanded(!!value);
     
     if (!value) {
-      // Se nenhum tipo foi selecionado, limpar titleInfo
       onInputChange('titleInfo', '');
     } else {
-      // Verificar se já há um status selecionado
       const currentStatus = getCurrentStatus();
       if (currentStatus) {
-        // Se já há status, manter com o novo tipo
         const newTitleInfo = `${value}-${currentStatus}`;
         console.log('BasicInfoForm - updating titleInfo with existing status:', newTitleInfo);
         onInputChange('titleInfo', newTitleInfo);
       } else {
-        // Se não há status, apenas definir o tipo
         console.log('BasicInfoForm - setting only title type:', value);
         onInputChange('titleInfo', value);
       }
@@ -70,7 +65,6 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
       console.log('BasicInfoForm - setting combined titleInfo:', newTitleInfo);
       onInputChange('titleInfo', newTitleInfo);
     } else if (titleType && !status) {
-      // Se status foi desmarcado, manter apenas o tipo
       console.log('BasicInfoForm - clearing status, keeping only type:', titleType);
       onInputChange('titleInfo', titleType);
     }
@@ -81,13 +75,12 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     // Allow only numbers and limit to 500000
     const numericValue = value.replace(/\D/g, '');
     if (parseInt(numericValue) <= 500000 || numericValue === '') {
-      onInputChange('plate', numericValue);
+      onInputChange('miles', numericValue);
     }
   };
 
   const handleCaNoteChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
-    // Only allow multiples of 5 between 0 and 50
     if (!isNaN(value) && value >= 0 && value <= 50 && value % 5 === 0) {
       onInputChange('caNote', value.toString());
     } else if (e.target.value === '') {
@@ -95,13 +88,11 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     }
   };
 
-  // Extrair o status atual do titleInfo - CORRIGIDO para usar startsWith
   const getCurrentStatus = () => {
     if (!formData.titleInfo) return '';
     
     console.log('getCurrentStatus - formData.titleInfo:', formData.titleInfo);
     
-    // Verificar se começa com clean-title ou rebuilt e extrair o status
     if (formData.titleInfo.startsWith('clean-title-')) {
       const status = formData.titleInfo.substring('clean-title-'.length);
       console.log('getCurrentStatus - extracted status from clean-title:', status);
@@ -176,13 +167,13 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           <Input
             id="miles"
             type="text"
-            value={formData.plate}
+            value={formData.miles}
             onChange={handleMilesChange}
             placeholder="Ex: 45000"
             max="500000"
-            className={errors.plate ? 'border-red-500' : ''}
+            className={errors.miles ? 'border-red-500' : ''}
           />
-          {errors.plate && <p className="text-sm text-red-500">{errors.plate}</p>}
+          {errors.miles && <p className="text-sm text-red-500">{errors.miles}</p>}
           <p className="text-xs text-gray-500">Máximo: 500,000 milhas</p>
         </div>
 

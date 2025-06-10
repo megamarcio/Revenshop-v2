@@ -46,7 +46,7 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     vin: vehicleData.vin,
     year: parseInt(vehicleData.year),
     model: vehicleData.model,
-    miles: parseInt(vehicleData.plate), // O formulário usa 'plate' para milhas
+    miles: parseInt(vehicleData.miles), // CORRIGIDO: usar miles em vez de plate
     internal_code: vehicleData.internalCode,
     color: vehicleData.color,
     ca_note: parseInt(vehicleData.caNote),
@@ -90,7 +90,7 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.vin) dbUpdateData.vin = vehicleData.vin;
   if (vehicleData.year) dbUpdateData.year = parseInt(vehicleData.year);
   if (vehicleData.model) dbUpdateData.model = vehicleData.model;
-  if (vehicleData.plate) dbUpdateData.miles = parseInt(vehicleData.plate);
+  if (vehicleData.miles) dbUpdateData.miles = parseInt(vehicleData.miles); // CORRIGIDO: usar miles em vez de plate
   if (vehicleData.internalCode) dbUpdateData.internal_code = vehicleData.internalCode;
   if (vehicleData.color) dbUpdateData.color = vehicleData.color;
   if (vehicleData.caNote) dbUpdateData.ca_note = parseInt(vehicleData.caNote);
@@ -134,7 +134,7 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
     dbUpdateData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
   }
   
-  // Processar informações do título - CORRIGIDO para salvar corretamente
+  // Processar informações do título
   if (vehicleData.titleInfo !== undefined) {
     console.log('Processing titleInfo for update:', vehicleData.titleInfo);
     
