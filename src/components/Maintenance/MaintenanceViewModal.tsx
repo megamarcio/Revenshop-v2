@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -78,6 +79,13 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
 
   const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
 
+  const handleTechnicalPanelClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('Opening Technical Panel');
+    setShowTechnicalPanel(true);
+  };
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -107,8 +115,9 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => setShowTechnicalPanel(true)}
+                  onClick={handleTechnicalPanelClick}
                   className="flex items-center gap-2"
+                  type="button"
                 >
                   <Settings2 className="h-4 w-4" />
                   Painel Técnico
@@ -206,14 +215,12 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
         </DialogContent>
       </Dialog>
 
-      {showTechnicalPanel && (
-        <TechnicalPanelModal
-          isOpen={showTechnicalPanel}
-          onClose={() => setShowTechnicalPanel(false)}
-          vehicleId={vehicleId}
-          vehicleName={vehicleName}
-        />
-      )}
+      <TechnicalPanelModal
+        isOpen={showTechnicalPanel}
+        onClose={() => setShowTechnicalPanel(false)}
+        vehicleId={vehicleId}
+        vehicleName={vehicleName}
+      />
     </>
   );
 };
