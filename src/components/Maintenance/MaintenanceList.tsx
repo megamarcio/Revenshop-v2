@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -100,179 +99,179 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Status da Manutenção no canto superior esquerdo */}
-      <div className="absolute top-4 left-4 z-50">
-        <TooltipProvider>
+    <TooltipProvider>
+      <div className="space-y-6 relative">
+        {/* Legenda dos Status no canto superior esquerdo */}
+        <div className="fixed top-20 left-6 z-50">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
-                <Info className="h-3 w-3 text-gray-500" />
+              <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-white shadow-md border border-gray-300 hover:bg-gray-50">
+                <Info className="h-4 w-4 text-gray-600" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="max-w-xs p-3">
-              <div className="space-y-2 text-sm">
-                <h4 className="font-semibold mb-2">Legenda dos Status:</h4>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+            <TooltipContent side="right" className="max-w-xs p-4 bg-white border shadow-lg">
+              <div className="space-y-3 text-sm">
+                <h4 className="font-semibold text-gray-900 mb-3">Legenda dos Status:</h4>
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
                   <span><strong>Em Aberto:</strong> Sem data prometida</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
                   <span><strong>Pendente:</strong> Com data prometida</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                <div className="flex items-center gap-3">
+                  <div className="w-4 h-4 bg-green-500 rounded-full"></div>
                   <span><strong>Concluída:</strong> Com data de reparo</span>
                 </div>
               </div>
             </TooltipContent>
           </Tooltip>
-        </TooltipProvider>
-      </div>
-
-      {/* Filtros */}
-      <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2">
-          <Filter className="h-4 w-4" />
-          <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
-            <SelectTrigger className="w-64">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="open">Em Aberto e Pendentes</SelectItem>
-              <SelectItem value="completed">Concluídas</SelectItem>
-              <SelectItem value="all">Todas</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
-        <div className="text-sm text-gray-600">
-          Ordenadas por código do veículo e data de detecção
-        </div>
-      </div>
 
-      {/* Lista de Manutenções */}
-      <div className="space-y-4">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Carregando manutenções...</p>
+        {/* Filtros */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Filter className="h-4 w-4" />
+            <Select value={statusFilter} onValueChange={(value: any) => setStatusFilter(value)}>
+              <SelectTrigger className="w-64">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="open">Em Aberto e Pendentes</SelectItem>
+                <SelectItem value="completed">Concluídas</SelectItem>
+                <SelectItem value="all">Todas</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-        ) : filteredMaintenances.length === 0 ? (
-          <Card>
-            <CardContent className="p-12 text-center">
-              <Wrench className="h-16 w-16 mx-auto mb-4 text-gray-400" />
-              <h3 className="text-lg font-semibold text-gray-600 mb-2">
-                Nenhuma manutenção encontrada
-              </h3>
-              <p className="text-gray-500">
-                {statusFilter !== 'all' 
-                  ? 'Tente ajustar os filtros de busca' 
-                  : 'Cadastre a primeira manutenção para começar'
-                }
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          filteredMaintenances.map((maintenance) => {
-            const status = getMaintenanceStatus(maintenance);
-            return (
-              <Card key={maintenance.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary relative">
-                <CardContent className="p-4">
-                  {/* Status no canto superior esquerdo do card */}
-                  <div className="absolute top-3 left-3">
-                    <Badge className={getStatusBadgeStyles(status)}>
-                      {getStatusLabel(status)}
-                    </Badge>
-                  </div>
+          <div className="text-sm text-gray-600">
+            Ordenadas por código do veículo e data de detecção
+          </div>
+        </div>
 
-                  <div className="ml-24 flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <span className="font-bold text-revenshop-primary">
-                        {maintenance.vehicle_internal_code}
-                      </span>
-                      <span className="text-gray-700">- {maintenance.vehicle_name}</span>
-                      <span className="text-sm">
-                        {getMaintenanceTypeLabel(maintenance.maintenance_type)}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-revenshop-primary text-lg">
-                        {formatCurrency(maintenance.total_amount)}
-                      </span>
-                      {canEditVehicles && (
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(maintenance)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDelete(maintenance)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="ml-24 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-600">Detecção:</span>
-                        <span>{format(new Date(maintenance.detection_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
-                      </div>
-                      {maintenance.promised_date && (
-                        <div className="flex items-center gap-2">
-                          <Clock className="h-4 w-4 text-orange-500" />
-                          <span className="text-gray-600">Prometida:</span>
-                          <span>{format(new Date(maintenance.promised_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
-                        </div>
-                      )}
-                      {maintenance.repair_date && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4 text-green-500" />
-                          <span className="text-gray-600">Reparo:</span>
-                          <span>{format(new Date(maintenance.repair_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
-                        </div>
-                      )}
+        {/* Lista de Manutenções */}
+        <div className="space-y-4">
+          {loading ? (
+            <div className="text-center py-12">
+              <p className="text-gray-600">Carregando manutenções...</p>
+            </div>
+          ) : filteredMaintenances.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Wrench className="h-16 w-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                  Nenhuma manutenção encontrada
+                </h3>
+                <p className="text-gray-500">
+                  {statusFilter !== 'all' 
+                    ? 'Tente ajustar os filtros de busca' 
+                    : 'Cadastre a primeira manutenção para começar'
+                  }
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            filteredMaintenances.map((maintenance) => {
+              const status = getMaintenanceStatus(maintenance);
+              return (
+                <Card key={maintenance.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary relative">
+                  <CardContent className="p-4">
+                    {/* Status no canto superior esquerdo do card */}
+                    <div className="absolute top-3 left-3">
+                      <Badge className={getStatusBadgeStyles(status)}>
+                        {getStatusLabel(status)}
+                      </Badge>
                     </div>
 
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <Wrench className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-600">Mecânico:</span>
-                        <span>{maintenance.mechanic_name}</span>
+                    <div className="ml-24 flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="font-bold text-revenshop-primary">
+                          {maintenance.vehicle_internal_code}
+                        </span>
+                        <span className="text-gray-700">- {maintenance.vehicle_name}</span>
+                        <span className="text-sm">
+                          {getMaintenanceTypeLabel(maintenance.maintenance_type)}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Phone className="h-4 w-4 text-gray-500" />
-                        <span>{maintenance.mechanic_phone}</span>
-                      </div>
-                    </div>
-
-                    <div className="space-y-1">
-                      <div className="text-sm">
-                        <span className="text-gray-600">Itens:</span>
-                        <span className="ml-2">{maintenance.maintenance_items.slice(0, 2).join(', ')}</span>
-                        {maintenance.maintenance_items.length > 2 && (
-                          <span className="text-gray-500">... +{maintenance.maintenance_items.length - 2}</span>
+                        <span className="font-bold text-revenshop-primary text-lg">
+                          {formatCurrency(maintenance.total_amount)}
+                        </span>
+                        {canEditVehicles && (
+                          <div className="flex gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onEdit(maintenance)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(maintenance)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
                         )}
                       </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })
-        )}
+
+                    <div className="ml-24 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">Detecção:</span>
+                          <span>{format(new Date(maintenance.detection_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                        </div>
+                        {maintenance.promised_date && (
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-orange-500" />
+                            <span className="text-gray-600">Prometida:</span>
+                            <span>{format(new Date(maintenance.promised_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                          </div>
+                        )}
+                        {maintenance.repair_date && (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-green-500" />
+                            <span className="text-gray-600">Reparo:</span>
+                            <span>{format(new Date(maintenance.repair_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Wrench className="h-4 w-4 text-gray-500" />
+                          <span className="text-gray-600">Mecânico:</span>
+                          <span>{maintenance.mechanic_name}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-gray-500" />
+                          <span>{maintenance.mechanic_phone}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="text-sm">
+                          <span className="text-gray-600">Itens:</span>
+                          <span className="ml-2">{maintenance.maintenance_items.slice(0, 2).join(', ')}</span>
+                          {maintenance.maintenance_items.length > 2 && (
+                            <span className="text-gray-500">... +{maintenance.maintenance_items.length - 2}</span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })
+          )}
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 };
 
