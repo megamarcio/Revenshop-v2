@@ -1,12 +1,15 @@
+
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { LayoutDashboard, Car, Users, Settings, User, CreditCard, UserCheck, Gavel, CheckSquare, Calculator, Wrench } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
+
 const AppSidebar = ({
   activeTab,
   setActiveTab
@@ -25,52 +28,67 @@ const AppSidebar = ({
   const {
     state
   } = useSidebar();
-  const menuItems = [...(canAccessDashboard ? [{
-    id: 'dashboard',
-    label: t('dashboard'),
-    icon: LayoutDashboard
-  }] : []), {
-    id: 'vehicles',
-    label: t('vehicles'),
-    icon: Car
-  }, {
-    id: 'customers',
-    label: t('customers'),
-    icon: UserCheck
-  }, ...(canAccessAuctions ? [{
-    id: 'auctions',
-    label: 'Leilões',
-    icon: Gavel
-  }] : []), {
-    id: 'tasks',
-    label: 'Tarefas',
-    icon: CheckSquare
-  }, {
-    id: 'bhph',
-    label: 'Buy Here Pay Here',
-    icon: CreditCard
-  }, {
-    id: 'financing',
-    label: 'Simulação de Financiamento',
-    icon: Calculator
-  }, ...(isAdmin || isInternalSeller ? [{
-    id: 'maintenance',
-    label: 'Manutenção',
-    icon: Wrench
-  }] : []), ...(canManageUsers ? [{
-    id: 'users',
-    label: t('users'),
-    icon: Users
-  }] : []), ...(canAccessAdmin ? [{
-    id: 'admin',
-    label: t('admin'),
-    icon: Settings
-  }] : []), {
-    id: 'profile',
-    label: t('profile'),
-    icon: User
-  }];
-  return <Sidebar collapsible="icon" className="border-r">
+  
+  const menuItems = [
+    ...(canAccessDashboard ? [{
+      id: 'dashboard',
+      label: t('dashboard'),
+      icon: LayoutDashboard
+    }] : []), 
+    {
+      id: 'vehicles',
+      label: t('vehicles'),
+      icon: Car
+    }, 
+    {
+      id: 'customers',
+      label: t('customers'),
+      icon: UserCheck
+    }, 
+    ...(canAccessAuctions ? [{
+      id: 'auctions',
+      label: 'Leilões',
+      icon: Gavel
+    }] : []), 
+    {
+      id: 'tasks',
+      label: 'Tarefas',
+      icon: CheckSquare
+    }, 
+    {
+      id: 'bhph',
+      label: 'Buy Here Pay Here',
+      icon: CreditCard
+    }, 
+    {
+      id: 'financing',
+      label: 'Simulação de Financiamento',
+      icon: Calculator
+    }, 
+    ...(isAdmin || isInternalSeller ? [{
+      id: 'maintenance',
+      label: 'Manutenção',
+      icon: Wrench
+    }] : []), 
+    ...(canManageUsers ? [{
+      id: 'users',
+      label: t('users'),
+      icon: Users
+    }] : []), 
+    ...(canAccessAdmin ? [{
+      id: 'admin',
+      label: 'Configurações',
+      icon: Settings
+    }] : []), 
+    {
+      id: 'profile',
+      label: t('profile'),
+      icon: User
+    }
+  ];
+
+  return (
+    <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="p-4">
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-revenshop-primary rounded-lg flex items-center justify-center">
@@ -85,18 +103,27 @@ const AppSidebar = ({
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map(item => {
-              const Icon = item.icon;
-              return <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton isActive={activeTab === item.id} onClick={() => setActiveTab(item.id)} tooltip={state === "collapsed" ? item.label : undefined} className={`w-full ${activeTab === item.id ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' : 'hover:bg-muted'}`}>
+                const Icon = item.icon;
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton 
+                      isActive={activeTab === item.id} 
+                      onClick={() => setActiveTab(item.id)} 
+                      tooltip={state === "collapsed" ? item.label : undefined} 
+                      className={`w-full ${activeTab === item.id ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' : 'hover:bg-muted'}`}
+                    >
                       <Icon className="h-4 w-4" />
                       <span className="text-sm px-0 mx-0">{item.label}</span>
                     </SidebarMenuButton>
-                  </SidebarMenuItem>;
-            })}
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-    </Sidebar>;
+    </Sidebar>
+  );
 };
+
 export default AppSidebar;
