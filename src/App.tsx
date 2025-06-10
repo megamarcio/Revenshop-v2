@@ -5,10 +5,10 @@ import Sidebar from './components/Layout/Sidebar';
 import Navbar from './components/Layout/Navbar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Loader2 } from 'lucide-react';
+import VehicleList from './components/Vehicles/VehicleList';
 
 // Lazy loading dos componentes para melhor performance
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
-const VehicleList = lazy(() => import('./components/Vehicles/VehicleList'));
 const CustomerManagement = lazy(() => import('./components/Customers/CustomerManagement'));
 const UserManagement = lazy(() => import('./components/Users/UserManagement'));
 const AdminPanel = lazy(() => import('./components/Admin/AdminPanel'));
