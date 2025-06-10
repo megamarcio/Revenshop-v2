@@ -6,32 +6,30 @@ import { Info } from 'lucide-react';
 
 const MaintenanceStatusLegend = () => {
   return (
-    <div className="fixed top-20 left-6 z-50">
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button variant="outline" size="sm" className="h-8 w-8 p-0 bg-white shadow-md border border-gray-300 hover:bg-gray-50">
-            <Info className="h-4 w-4 text-gray-600" />
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent side="right" className="max-w-xs p-4 bg-white border shadow-lg">
-          <div className="space-y-3 text-sm">
-            <h4 className="font-semibold text-gray-900 mb-3">Legenda dos Status:</h4>
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
-              <span><strong>Em Aberto:</strong> Sem data prometida</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 bg-orange-500 rounded-full"></div>
-              <span><strong>Pendente:</strong> Com data prometida</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-              <span><strong>Concluída:</strong> Com data de reparo</span>
-            </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="ghost" size="sm" className="h-6 w-6 p-0 hover:bg-gray-100">
+          <Info className="h-3 w-3 text-gray-500" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent side="bottom" className="max-w-xs p-3 bg-white border shadow-lg">
+        <div className="space-y-2 text-xs">
+          <h4 className="font-semibold text-gray-900 mb-2">Legenda dos Status:</h4>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+            <span><strong>Em Aberto:</strong> Sem data prometida</span>
           </div>
-        </TooltipContent>
-      </Tooltip>
-    </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+            <span><strong>Pendente:</strong> Com data prometida</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+            <span><strong>Concluída:</strong> Com data de reparo</span>
+          </div>
+        </div>
+      </TooltipContent>
+    </Tooltip>
   );
 };
 

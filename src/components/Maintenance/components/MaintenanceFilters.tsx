@@ -2,6 +2,7 @@
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Filter } from 'lucide-react';
+import MaintenanceStatusLegend from './MaintenanceStatusLegend';
 
 interface MaintenanceFiltersProps {
   statusFilter: 'open' | 'pending' | 'completed' | 'all';
@@ -23,6 +24,7 @@ const MaintenanceFilters = ({ statusFilter, onStatusFilterChange }: MaintenanceF
             <SelectItem value="all">Todas</SelectItem>
           </SelectContent>
         </Select>
+        <MaintenanceStatusLegend />
       </div>
       <div className="text-sm text-gray-600">
         Ordenadas por código do veículo e data de detecção

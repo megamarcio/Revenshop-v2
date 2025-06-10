@@ -6,7 +6,6 @@ import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useAuth } from '../../contexts/AuthContext';
 import { useMaintenanceStatus } from './hooks/useMaintenanceStatus';
 import { sortMaintenances } from './utils/maintenanceFormatters';
-import MaintenanceStatusLegend from './components/MaintenanceStatusLegend';
 import MaintenanceFilters from './components/MaintenanceFilters';
 import MaintenanceCard from './components/MaintenanceCard';
 import EmptyMaintenanceState from './components/EmptyMaintenanceState';
@@ -40,9 +39,7 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
 
   return (
     <TooltipProvider>
-      <div className="space-y-6 relative">
-        <MaintenanceStatusLegend />
-
+      <div className="space-y-6">
         <MaintenanceFilters 
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
