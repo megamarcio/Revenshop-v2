@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Wrench, Phone, DollarSign, Filter, Trash2, Edit, Clock } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Calendar, Wrench, Phone, DollarSign, Filter, Trash2, Edit, Clock, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../types/maintenance';
@@ -100,6 +101,36 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
 
   return (
     <div className="space-y-6">
+      {/* Status da Manutenção no canto superior esquerdo */}
+      <div className="absolute top-4 left-4 z-50">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="p-1 h-6 w-6">
+                <Info className="h-3 w-3 text-gray-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-xs p-3">
+              <div className="space-y-2 text-sm">
+                <h4 className="font-semibold mb-2">Legenda dos Status:</h4>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                  <span><strong>Em Aberto:</strong> Sem data prometida</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-500 rounded"></div>
+                  <span><strong>Pendente:</strong> Com data prometida</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span><strong>Concluída:</strong> Com data de reparo</span>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
+
       {/* Filtros */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
@@ -147,7 +178,7 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
             return (
               <Card key={maintenance.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary relative">
                 <CardContent className="p-4">
-                  {/* Status no canto superior esquerdo */}
+                  {/* Status no canto superior esquerdo do card */}
                   <div className="absolute top-3 left-3">
                     <Badge className={getStatusBadgeStyles(status)}>
                       {getStatusLabel(status)}
