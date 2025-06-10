@@ -16,7 +16,24 @@ export const fetchTechnicalItems = async (vehicleId: string): Promise<TechnicalI
     throw new Error(error.message);
   }
 
-  return (data || []).map(transformDatabaseItem);
+  const items = (data || []).map(transformDatabaseItem);
+  
+  // Check and auto-update status based on next_change dates
+  const updatedItems = items.map(item => {
+    if (item.next_change) {
+      const today = new Date();
+      const changeDate = new Date(item.next_change);
+      
+      if (changeDate < today && item.status !== 'trocar') {
+        // Auto-update status to 'trocar' if overdue
+        updateTechnicalItem(item.id, { status: 'trocar' });
+        return { ...item, status: 'trocar' as const };
+      }
+    }
+    return item;
+  });
+
+  return updatedItems;
 };
 
 export const createDefaultTechnicalItems = async (vehicleId: string): Promise<void> => {
@@ -38,7 +55,11 @@ export const createDefaultTechnicalItems = async (vehicleId: string): Promise<vo
 };
 
 export const updateTechnicalItem = async (itemId: string, updates: Partial<TechnicalItem>): Promise<void> => {
+  console.log('Updating technical item:', itemId, 'with updates:', updates);
+  
   const dbUpdates = transformUpdatesForDatabase(updates);
+  
+  console.log('Database updates:', dbUpdates);
 
   const { error } = await supabase
     .from('technical_items')
@@ -49,4 +70,6 @@ export const updateTechnicalItem = async (itemId: string, updates: Partial<Techn
     console.error('Error updating item:', error);
     throw new Error(error.message);
   }
+  
+  console.log('Successfully updated technical item');
 };

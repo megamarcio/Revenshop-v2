@@ -27,19 +27,19 @@ const MainItemsSection = ({
       type: 'oil', 
       title: 'Troca de Óleo', 
       icon: Droplet,
-      searchTerms: ['oil', 'óleo', 'motor', 'troca']
+      searchTerms: ['oil', 'óleo', 'motor', 'troca', 'oleo']
     },
     { 
       type: 'battery', 
       title: 'Bateria', 
       icon: Battery,
-      searchTerms: ['battery', 'bateria']
+      searchTerms: ['battery', 'bateria', 'bat']
     },
     { 
       type: 'tires', 
       title: 'Tamanho do Pneu', 
       icon: Gauge,
-      searchTerms: ['tire', 'pneu', 'tamanho', 'wheel', 'roda']
+      searchTerms: ['tire', 'pneu', 'tamanho', 'wheel', 'roda', 'pneus']
     }
   ];
 

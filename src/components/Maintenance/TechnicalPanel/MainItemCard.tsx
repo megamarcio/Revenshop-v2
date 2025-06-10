@@ -45,6 +45,20 @@ const MainItemCard = ({
     }
   }, [item, isEditing]);
 
+  // Check if item needs status update based on next_change date
+  useEffect(() => {
+    if (nextChange) {
+      const today = new Date();
+      const changeDate = new Date(nextChange);
+      
+      if (changeDate < today && status !== 'trocar') {
+        const newStatus = 'trocar';
+        setStatus(newStatus);
+        onUpdate(item.id, { status: newStatus });
+      }
+    }
+  }, [nextChange, status, item.id, onUpdate]);
+
   const handleStatusChange = (value: string) => {
     const validStatus = value as 'em-dia' | 'proximo-troca' | 'trocar';
     setStatus(validStatus);
@@ -56,15 +70,21 @@ const MainItemCard = ({
     setMiles(value);
     onUpdate(item.id, { miles: value });
     
-    // Auto-calculate next change for oil
+    // Auto-calculate next change for oil - calculate miles for next change
     if (item.type === 'oil' && value) {
       const currentMiles = parseInt(value);
       if (!isNaN(currentMiles)) {
         const nextMiles = currentMiles + 5000;
-        setNextChange(nextMiles.toString() + ' miles');
-        onUpdate(item.id, { next_change: nextMiles.toString() + ' miles' });
+        // Don't automatically set next change date, let user set it manually
+        console.log('Next oil change at:', nextMiles, 'miles');
       }
     }
+  };
+
+  const handleNextChangeDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNextChange(value);
+    onUpdate(item.id, { next_change: value });
   };
 
   const handleExtraInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -84,11 +104,11 @@ const MainItemCard = ({
     setExtraInfo(value);
     onUpdate(item.id, { extraInfo: value });
     
-    // Auto-calculate next change for battery (2 years later)
+    // Auto-calculate next change for battery (3 years later)
     if (value) {
       const currentDate = new Date(value);
       const nextDate = new Date(currentDate);
-      nextDate.setFullYear(currentDate.getFullYear() + 2);
+      nextDate.setFullYear(currentDate.getFullYear() + 3);
       const formattedNextDate = nextDate.toISOString().split('T')[0];
       setNextChange(formattedNextDate);
       onUpdate(item.id, { next_change: formattedNextDate });
@@ -96,6 +116,14 @@ const MainItemCard = ({
   };
 
   const handleSave = () => {
+    // Ensure all current state is saved
+    onUpdate(item.id, {
+      status,
+      miles,
+      next_change: nextChange,
+      extraInfo,
+      tireBrand
+    });
     onSave();
   };
 
@@ -144,9 +172,18 @@ const MainItemCard = ({
           </div>
           <div>
             <label className="text-xs text-gray-700 block mb-1">
-              Próxima Troca
+              Data da Próxima Troca
             </label>
-            <span className="text-sm">{nextChange || 'N/A'}</span>
+            {isEditing ? (
+              <Input
+                type="date"
+                value={nextChange}
+                onChange={handleNextChangeDateChange}
+                className="text-sm"
+              />
+            ) : (
+              <span className="text-sm">{nextChange || 'N/A'}</span>
+            )}
           </div>
         </>
       );
