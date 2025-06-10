@@ -26,8 +26,8 @@ const DateSelectionForm = ({
   onPromisedDateChange
 }: DateSelectionFormProps) => {
   return <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+      <CardHeader className="mx-0 my-0 py-0">
+        <CardTitle className="flex items-center gap-2 text-sm font-semibold">
           Datas da Manutenção
           <Tooltip>
             <TooltipTrigger asChild>
