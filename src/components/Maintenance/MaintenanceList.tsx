@@ -44,12 +44,16 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadgeStyles = (status: string) => {
     switch (status) {
-      case 'open': return 'bg-yellow-100 text-yellow-800';
-      case 'pending': return 'bg-orange-100 text-orange-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'open': 
+        return 'bg-yellow-500 hover:bg-yellow-600 text-white border-0';
+      case 'pending': 
+        return 'bg-orange-500 hover:bg-orange-600 text-white border-0';
+      case 'completed': 
+        return 'bg-green-500 hover:bg-green-600 text-white border-0';
+      default: 
+        return 'bg-gray-500 hover:bg-gray-600 text-white border-0';
     }
   };
 
@@ -141,13 +145,17 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
           filteredMaintenances.map((maintenance) => {
             const status = getMaintenanceStatus(maintenance);
             return (
-              <Card key={maintenance.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary">
+              <Card key={maintenance.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary relative">
                 <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-3">
+                  {/* Status no canto superior esquerdo */}
+                  <div className="absolute top-3 left-3">
+                    <Badge className={getStatusBadgeStyles(status)}>
+                      {getStatusLabel(status)}
+                    </Badge>
+                  </div>
+
+                  <div className="ml-24 flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <Badge className={getStatusBadge(status)}>
-                        {getStatusLabel(status)}
-                      </Badge>
                       <span className="font-bold text-revenshop-primary">
                         {maintenance.vehicle_internal_code}
                       </span>
@@ -182,7 +190,7 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                  <div className="ml-24 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="space-y-1">
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-500" />
