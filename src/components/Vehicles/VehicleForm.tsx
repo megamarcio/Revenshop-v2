@@ -62,7 +62,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.removeEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
