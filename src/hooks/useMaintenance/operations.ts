@@ -2,7 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { MaintenanceRecord } from '../../types/maintenance';
 import { toast } from '@/hooks/use-toast';
-import { formatMaintenanceRecord, prepareMaintenanceForDatabase, prepareMaintenanceUpdates } from './utils';
+import { formatMaintenanceRecord } from './utils';
 import { DatabaseMaintenanceRecord } from './types';
 
 export const loadMaintenances = async (vehicleId?: string): Promise<MaintenanceRecord[]> => {
@@ -60,8 +60,8 @@ export const addMaintenanceRecord = async (
       details: maintenance.details || null,
       mechanic_name: maintenance.mechanic_name,
       mechanic_phone: maintenance.mechanic_phone,
-      parts: maintenance.parts,
-      labor: maintenance.labor,
+      parts: maintenance.parts as any, // Cast to Json type for Supabase
+      labor: maintenance.labor as any, // Cast to Json type for Supabase
       total_amount: maintenance.total_amount,
       receipt_urls: maintenance.receipt_urls,
       created_by: userId
@@ -117,6 +117,9 @@ export const updateMaintenanceRecord = async (
       if (key === 'repair_date' || key === 'promised_date') {
         // Converter strings vazias para null para campos de data
         updateData[key] = updates[key as keyof MaintenanceRecord] || null;
+      } else if (key === 'parts' || key === 'labor') {
+        // Cast arrays to Json type for Supabase
+        updateData[key] = updates[key as keyof MaintenanceRecord] as any;
       } else if (updates[key as keyof MaintenanceRecord] !== undefined) {
         updateData[key] = updates[key as keyof MaintenanceRecord];
       }
