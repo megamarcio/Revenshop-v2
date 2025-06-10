@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,8 +34,9 @@ const MainItemCard = ({
   const [nextChange, setNextChange] = useState(item.next_change || '');
 
   const handleStatusChange = (value: string) => {
-    setStatus(value);
-    onUpdate(item.id, { status: value as 'em-dia' | 'proximo-troca' | 'trocar' });
+    const validStatus = value as 'em-dia' | 'proximo-troca' | 'trocar';
+    setStatus(validStatus);
+    onUpdate(item.id, { status: validStatus });
   };
 
   const handleMilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {

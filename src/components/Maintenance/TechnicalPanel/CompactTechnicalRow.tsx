@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,8 +28,9 @@ const CompactTechnicalRow = ({
   const [nextChange, setNextChange] = useState(item.next_change || '');
 
   const handleStatusChange = (value: string) => {
-    setStatus(value);
-    onUpdate(item.id, { status: value as 'em-dia' | 'proximo-troca' | 'trocar' });
+    const validStatus = value as 'em-dia' | 'proximo-troca' | 'trocar';
+    setStatus(validStatus);
+    onUpdate(item.id, { status: validStatus });
   };
 
   const handleNextChangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {

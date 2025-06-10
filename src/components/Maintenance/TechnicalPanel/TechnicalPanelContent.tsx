@@ -1,4 +1,8 @@
+
 import React from 'react';
+import { Droplet, Zap, Filter, Car, Disc3, Settings, Gauge, Wrench } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 import LoadingTechnicalState from './LoadingTechnicalState';
 import EmptyTechnicalState from './EmptyTechnicalState';
@@ -6,6 +10,7 @@ import MainItemsSection from './MainItemsSection';
 import OtherItemsSection from './OtherItemsSection';
 import TechnicalStatistics from './TechnicalStatistics';
 import AlertSection from './AlertSection';
+import TechnicalSection from './TechnicalSection';
 import { getItemsByStatus } from './utils';
 
 interface TechnicalPanelContentProps {

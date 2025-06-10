@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,11 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
     onCancel();
   };
 
+  const handleStatusChange = (value: string) => {
+    const validStatus = value as 'em-dia' | 'proximo-troca' | 'trocar';
+    setStatus(validStatus);
+  };
+
   return (
     <div className="grid grid-cols-5 gap-4 items-center">
       <div>
@@ -48,7 +54,7 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
       </div>
       <div>
         {isEditing ? (
-          <Select value={status} onValueChange={setStatus}>
+          <Select value={status} onValueChange={handleStatusChange}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
