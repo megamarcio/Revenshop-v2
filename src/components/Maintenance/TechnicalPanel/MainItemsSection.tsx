@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Droplet, Zap, Filter, Disc3 } from 'lucide-react';
+import { Droplet, Battery, Gauge } from 'lucide-react';
 import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 import MainItemCard from './MainItemCard';
 
@@ -21,31 +21,25 @@ const MainItemsSection = ({
   onCancel,
   onUpdate
 }: MainItemsSectionProps) => {
-  // Define main items mapping - looking for items that contain these types
+  // Define main items mapping - specifically for Oil Change, Battery, and Tire Size
   const mainItemsConfig = [
     { 
       type: 'oil', 
-      title: 'Óleo do Motor', 
+      title: 'Troca de Óleo', 
       icon: Droplet,
-      searchTerms: ['oil', 'óleo', 'motor']
+      searchTerms: ['oil', 'óleo', 'motor', 'troca']
     },
     { 
-      type: 'electrical', 
-      title: 'Sistema Elétrico', 
-      icon: Zap,
-      searchTerms: ['electrical', 'elétrico', 'bateria', 'battery']
+      type: 'battery', 
+      title: 'Bateria', 
+      icon: Battery,
+      searchTerms: ['battery', 'bateria']
     },
     { 
-      type: 'filter', 
-      title: 'Filtros', 
-      icon: Filter,
-      searchTerms: ['filter', 'filtro']
-    },
-    { 
-      type: 'brakes', 
-      title: 'Sistema de Freios', 
-      icon: Disc3,
-      searchTerms: ['brakes', 'freio', 'brake']
+      type: 'tires', 
+      title: 'Tamanho do Pneu', 
+      icon: Gauge,
+      searchTerms: ['tire', 'pneu', 'tamanho', 'wheel', 'roda']
     }
   ];
 
@@ -82,7 +76,7 @@ const MainItemsSection = ({
         <div className="text-center py-8">
           <p className="text-gray-500">Nenhum item principal encontrado</p>
           <p className="text-sm text-gray-400 mt-2">
-            Tipos procurados: óleo, elétrico, filtros, freios
+            Itens procurados: Troca de Óleo, Bateria, Tamanho do Pneu
           </p>
         </div>
       </div>

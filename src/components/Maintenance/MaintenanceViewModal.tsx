@@ -9,7 +9,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../types/maintenance';
 import { useMaintenance } from '../../hooks/useMaintenance';
-import TechnicalPanelTable from './TechnicalPanel/TechnicalPanelTable';
+import TechnicalPanelRedesigned from './TechnicalPanel/TechnicalPanelRedesigned';
 
 interface MaintenanceViewModalProps {
   isOpen: boolean;
@@ -214,7 +214,7 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
         </DialogContent>
       </Dialog>
 
-      <TechnicalPanelTable
+      <TechnicalPanelRedesigned
         isOpen={showTechnicalPanel}
         onClose={() => setShowTechnicalPanel(false)}
         vehicleId={vehicleId}

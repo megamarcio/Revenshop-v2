@@ -1,8 +1,7 @@
 
 import React from 'react';
-import { Filter, Wrench, Settings, Droplets } from 'lucide-react';
 import { TechnicalItem } from '../../../hooks/useTechnicalItems';
-import CategorySection from './CategorySection';
+import EditableItemRow from './EditableItemRow';
 
 interface OtherItemsSectionProps {
   items: TechnicalItem[];
@@ -21,35 +20,58 @@ const OtherItemsSection = ({
   onCancel,
   onUpdate
 }: OtherItemsSectionProps) => {
-  const categories = [
-    { key: 'filter', title: 'Filtros', icon: Filter },
-    { key: 'suspension', title: 'Suspensão', icon: Wrench },
-    { key: 'tuneup', title: 'Tune-up', icon: Settings },
-    { key: 'fluids', title: 'Fluidos', icon: Droplets }
-  ];
+  // Filter out the main items (oil, battery, tires) to show only "other" items
+  const mainItemTypes = ['oil', 'battery', 'tires'];
+  const mainItemSearchTerms = ['oil', 'óleo', 'motor', 'troca', 'battery', 'bateria', 'tire', 'pneu', 'tamanho', 'wheel', 'roda'];
+  
+  const otherItems = items.filter(item => {
+    // Exclude if it's a main item type
+    if (mainItemTypes.includes(item.type)) return false;
+    
+    // Exclude if the name contains main item search terms
+    const containsMainTerms = mainItemSearchTerms.some(term => 
+      item.name.toLowerCase().includes(term.toLowerCase())
+    );
+    
+    return !containsMainTerms;
+  });
+
+  if (otherItems.length === 0) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-xl font-semibold text-gray-900">Outros Itens</h2>
+        <div className="text-center py-8">
+          <p className="text-gray-500">Nenhum outro item encontrado</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-semibold text-gray-900">Outros Itens</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {categories.map(({ key, title, icon }) => {
-          const categoryItems = items.filter(item => item.type === key);
-          if (categoryItems.length === 0) return null;
-
-          return (
-            <CategorySection
-              key={key}
-              title={title}
-              icon={icon}
-              items={categoryItems}
-              editingItem={editingItem}
-              onEdit={onEdit}
-              onSave={onSave}
-              onCancel={onCancel}
-              onUpdate={onUpdate}
-            />
-          );
-        })}
+      <div className="bg-white border rounded-lg overflow-hidden">
+        <div className="grid grid-cols-5 gap-4 items-center p-4 bg-gray-50 border-b font-medium text-sm text-gray-700">
+          <div>Nome do Item</div>
+          <div>Status</div>
+          <div>Próxima Troca</div>
+          <div>Milhas</div>
+          <div className="text-right">Ações</div>
+        </div>
+        <div className="divide-y">
+          {otherItems.map((item) => (
+            <div key={item.id} className="p-4">
+              <EditableItemRow
+                item={item}
+                isEditing={editingItem === item.id}
+                onEdit={onEdit}
+                onSave={onSave}
+                onCancel={onCancel}
+                onUpdate={onUpdate}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
