@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
@@ -15,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
 import { useVehicleActions } from './VehicleActions';
 import { useVehicleFilters } from './VehicleFilters';
+import { useVehicles } from '../../hooks/useVehicles';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
@@ -41,11 +41,12 @@ const VehicleList = () => {
     minimal: true
   });
 
-  const vehicleOperations = {
-    createVehicle: async () => {},
-    updateVehicle: async () => {},
-    deleteVehicle: async () => {}
-  };
+  // Get vehicle operations from useVehicles hook
+  const {
+    createVehicle,
+    updateVehicle,
+    deleteVehicle
+  } = useVehicles();
 
   const {
     handleSaveVehicle,
@@ -55,9 +56,9 @@ const VehicleList = () => {
   } = useVehicleActions({
     vehicles,
     canEditVehicles,
-    createVehicle: vehicleOperations.createVehicle,
-    updateVehicle: vehicleOperations.updateVehicle,
-    deleteVehicle: vehicleOperations.deleteVehicle,
+    createVehicle,
+    updateVehicle,
+    deleteVehicle,
     onEditingChange: setEditingVehicle,
     onFormToggle: setShowAddForm
   });
