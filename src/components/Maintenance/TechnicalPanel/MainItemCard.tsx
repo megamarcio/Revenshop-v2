@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,15 @@ const MainItemCard = ({
   const [miles, setMiles] = useState(item.miles || '');
   const [nextChange, setNextChange] = useState(item.next_change || '');
 
+  // Reset local state when item changes or editing stops
+  useEffect(() => {
+    if (!isEditing) {
+      setStatus(item.status);
+      setMiles(item.miles || '');
+      setNextChange(item.next_change || '');
+    }
+  }, [item, isEditing]);
+
   const handleStatusChange = (value: string) => {
     const validStatus = value as 'em-dia' | 'proximo-troca' | 'trocar';
     setStatus(validStatus);
@@ -40,16 +49,36 @@ const MainItemCard = ({
   };
 
   const handleMilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setMiles(e.target.value);
+    const value = e.target.value;
+    setMiles(value);
+    onUpdate(item.id, { miles: value });
   };
 
   const handleNextChangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setNextChange(e.target.value);
+    const value = e.target.value;
+    setNextChange(value);
+    onUpdate(item.id, { next_change: value });
   };
 
   const handleSave = () => {
-    onUpdate(item.id, { miles: miles, next_change: nextChange });
     onSave();
+  };
+
+  const handleCancel = () => {
+    // Reset to original values
+    setStatus(item.status);
+    setMiles(item.miles || '');
+    setNextChange(item.next_change || '');
+    onCancel();
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'em-dia': return 'Em Dia';
+      case 'proximo-troca': return 'Próximo da Troca';
+      case 'trocar': return 'Trocar';
+      default: return status;
+    }
   };
 
   return (
@@ -83,13 +112,13 @@ const MainItemCard = ({
             </div>
             <div>
               <label className="text-sm text-gray-700 block mb-1">
-                Próxima troca (KM)
+                Quilometragem (KM)
               </label>
               <Input
-                type="number"
+                type="text"
                 value={miles}
                 onChange={handleMilesChange}
-                placeholder="KM atual"
+                placeholder="Ex: 50000"
               />
             </div>
             <div>
@@ -103,8 +132,8 @@ const MainItemCard = ({
                 placeholder="Data da próxima troca"
               />
             </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={onCancel}>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="ghost" size="sm" onClick={handleCancel}>
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
@@ -117,15 +146,15 @@ const MainItemCard = ({
         ) : (
           <div className="grid gap-3">
             <div className="text-sm text-gray-600">
-              Status: <span className="font-medium">{item.status}</span>
+              Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
             </div>
             <div className="text-sm text-gray-600">
-              KM da última troca: <span className="font-medium">{item.miles || 'N/A'}</span>
+              Quilometragem: <span className="font-medium">{item.miles || 'N/A'}</span>
             </div>
             <div className="text-sm text-gray-600">
-              Data da próxima troca: <span className="font-medium">{item.next_change || 'N/A'}</span>
+              Próxima troca: <span className="font-medium">{item.next_change || 'N/A'}</span>
             </div>
-            <Button variant="outline" size="sm" onClick={() => onEdit(item.id)}>
+            <Button variant="outline" size="sm" onClick={() => onEdit(item.id)} className="mt-2">
               <Edit2 className="h-4 w-4 mr-2" />
               Editar
             </Button>

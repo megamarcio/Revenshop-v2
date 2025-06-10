@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,6 +26,15 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
   const [status, setStatus] = useState(item.status);
   const [nextChange, setNextChange] = useState(item.next_change || '');
 
+  // Reset local state when item changes or editing stops
+  useEffect(() => {
+    if (!isEditing) {
+      setName(item.name);
+      setStatus(item.status);
+      setNextChange(item.next_change || '');
+    }
+  }, [item, isEditing]);
+
   const handleSave = () => {
     onUpdate(item.id, { name, status, next_change: nextChange });
     onSave();
@@ -41,13 +50,31 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
   const handleStatusChange = (value: string) => {
     const validStatus = value as 'em-dia' | 'proximo-troca' | 'trocar';
     setStatus(validStatus);
+    onUpdate(item.id, { status: validStatus });
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setName(value);
+    onUpdate(item.id, { name: value });
+  };
+
+  const handleNextChangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setNextChange(value);
+    onUpdate(item.id, { next_change: value });
   };
 
   return (
     <div className="grid grid-cols-5 gap-4 items-center">
       <div>
         {isEditing ? (
-          <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input 
+            type="text" 
+            value={name} 
+            onChange={handleNameChange} 
+            placeholder="Nome do item"
+          />
         ) : (
           <span>{item.name}</span>
         )}
@@ -71,17 +98,17 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
         )}
       </div>
       <div>
-          {isEditing ? (
-            <Input
-              type="text"
-              placeholder="Próxima troca"
-              value={nextChange}
-              onChange={(e) => setNextChange(e.target.value)}
-            />
-          ) : (
-            <span>{item.next_change || 'N/A'}</span>
-          )}
-        </div>
+        {isEditing ? (
+          <Input
+            type="date"
+            placeholder="Próxima troca"
+            value={nextChange}
+            onChange={handleNextChangeChange}
+          />
+        ) : (
+          <span>{item.next_change || 'N/A'}</span>
+        )}
+      </div>
       <div className="col-span-2 flex justify-end gap-2">
         {isEditing ? (
           <>
