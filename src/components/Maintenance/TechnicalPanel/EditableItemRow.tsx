@@ -3,9 +3,54 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit2, Save, X, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
-import { EditableItemRowProps, TIRE_BRANDS } from './types';
-import { getStatusColor, formatDate } from './utils';
+import { Edit2, Save, X, CheckCircle, Clock, AlertTriangle, Wrench } from 'lucide-react';
+import { TechnicalItem } from '../../hooks/useTechnicalItems';
+
+const TIRE_BRANDS = [
+  'Michelin',
+  'Goodyear', 
+  'Bridgestone',
+  'Continental',
+  'Pirelli',
+  'Dunlop',
+  'Yokohama',
+  'Hankook',
+  'Cooper',
+  'Toyo'
+];
+
+interface EditableItemRowProps {
+  item: TechnicalItem;
+  isEditing: boolean;
+  onEdit: (itemId: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onUpdate: (itemId: string, updates: Partial<TechnicalItem>) => void;
+}
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'em-dia':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'proximo-troca':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'trocar':
+      return 'bg-red-100 text-red-800 border-red-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const formatDate = (month?: string, year?: string, miles?: string) => {
+  const parts = [];
+  if (month && year) {
+    parts.push(`${month}/${year}`);
+  }
+  if (miles) {
+    parts.push(`${miles} mi`);
+  }
+  return parts.length > 0 ? parts.join(' - ') : 'Não informado';
+};
 
 const EditableItemRow = ({ 
   item, 
@@ -15,7 +60,6 @@ const EditableItemRow = ({
   onCancel, 
   onUpdate 
 }: EditableItemRowProps) => {
-  const Icon = item.icon;
   const isTire = item.type === 'tires';
   const isTireSize = item.id === 'tire-type';
 
@@ -25,7 +69,7 @@ const EditableItemRow = ({
     }`}>
       {/* Ícone e Nome */}
       <div className="col-span-3 flex items-center gap-2 min-w-0">
-        <Icon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+        <Wrench className="h-4 w-4 text-gray-600 flex-shrink-0" />
         <span className={`text-sm font-medium truncate ${isTireSize ? 'text-blue-800' : ''}`}>
           {item.name}
         </span>
@@ -62,7 +106,7 @@ const EditableItemRow = ({
               <>
                 <Input
                   type="text"
-                  value={item.month}
+                  value={item.month || ''}
                   onChange={(e) => onUpdate(item.id, { month: e.target.value })}
                   placeholder="MM"
                   className="w-12 h-8 text-xs"
@@ -71,7 +115,7 @@ const EditableItemRow = ({
                 <span className="text-xs">/</span>
                 <Input
                   type="text"
-                  value={item.year}
+                  value={item.year || ''}
                   onChange={(e) => onUpdate(item.id, { year: e.target.value })}
                   placeholder="YYYY"
                   className="w-16 h-8 text-xs"
@@ -81,7 +125,7 @@ const EditableItemRow = ({
                   <>
                     <Input
                       type="text"
-                      value={item.miles}
+                      value={item.miles || ''}
                       onChange={(e) => onUpdate(item.id, { miles: e.target.value })}
                       placeholder="mi"
                       className="w-16 h-8 text-xs"
@@ -90,8 +134,8 @@ const EditableItemRow = ({
                 )}
                 <Input
                   type="date"
-                  value={item.nextChange || ''}
-                  onChange={(e) => onUpdate(item.id, { nextChange: e.target.value })}
+                  value={item.next_change || ''}
+                  onChange={(e) => onUpdate(item.id, { next_change: e.target.value })}
                   className="w-32 h-8 text-xs"
                   placeholder="Próxima"
                 />
@@ -114,9 +158,9 @@ const EditableItemRow = ({
             ) : (
               <div className="space-y-1">
                 <div>{formatDate(item.month, item.year, item.miles)}</div>
-                {item.nextChange && (
+                {item.next_change && (
                   <div className="text-gray-500">
-                    Próxima: {new Date(item.nextChange).toLocaleDateString('pt-BR')}
+                    Próxima: {new Date(item.next_change).toLocaleDateString('pt-BR')}
                   </div>
                 )}
               </div>
