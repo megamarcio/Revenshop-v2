@@ -90,7 +90,7 @@ const MaintenanceManagement = () => {
           <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
             <span>{maintenances.length} manutenções cadastradas</span>
             <span>{openMaintenances} em aberto/pendentes</span>
-            <span>R$ {totalCost.toFixed(2).replace('.', ',')} em custos</span>
+            <span>$ {totalCost.toFixed(2)} em custos</span>
           </div>
         </div>
         <div className="flex gap-3">

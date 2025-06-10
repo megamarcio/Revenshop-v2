@@ -1,12 +1,11 @@
-
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../../types/maintenance';
 
 export const formatCurrency = (value: number) => {
-  return new Intl.NumberFormat('pt-BR', {
+  return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: 'BRL'
+    currency: 'USD'
   }).format(value);
 };
 
