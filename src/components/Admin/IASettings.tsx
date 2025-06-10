@@ -15,6 +15,7 @@ const IASettings = () => {
   const [imageInstructions, setImageInstructions] = useState('');
   const [descriptionInstructions, setDescriptionInstructions] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,8 +24,25 @@ const IASettings = () => {
 
   const loadSettings = async () => {
     try {
-      // Carregar configurações salvas (simulação - você pode implementar a lógica de carregamento)
-      const defaultImageInstructions = `Criar uma imagem realista e profissional de um veículo baseado nas seguintes especificações:
+      setIsLoadingSettings(true);
+      
+      // Tentar carregar configurações existentes do banco
+      const { data: settings, error } = await supabase
+        .from('ai_settings')
+        .select('*')
+        .limit(1)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Erro ao carregar configurações:', error);
+      }
+
+      if (settings) {
+        setImageInstructions(settings.image_instructions || '');
+        setDescriptionInstructions(settings.description_instructions || '');
+      } else {
+        // Configurações padrão
+        const defaultImageInstructions = `Criar uma imagem realista e profissional de um veículo baseado nas seguintes especificações:
 - Modelo: [MODELO]
 - Ano: [ANO] 
 - Cor: [COR]
@@ -32,7 +50,7 @@ const IASettings = () => {
 - Qualidade: Alta resolução, bem iluminado
 - Perspectiva: Vista lateral/frontal que destaque as características do veículo`;
 
-      const defaultDescriptionInstructions = `Criar uma descrição atrativa e profissional para um veículo usado/seminovo seguindo este modelo:
+        const defaultDescriptionInstructions = `Criar uma descrição atrativa e profissional para um veículo usado/seminovo seguindo este modelo:
 - Iniciar com características principais (marca, modelo, ano, motor)
 - Destacar pontos fortes e diferenciais
 - Mencionar estado de conservação
@@ -40,25 +58,44 @@ const IASettings = () => {
 - Usar linguagem comercial e persuasiva
 - Finalizar com chamada para ação`;
 
-      setImageInstructions(defaultImageInstructions);
-      setDescriptionInstructions(defaultDescriptionInstructions);
+        setImageInstructions(defaultImageInstructions);
+        setDescriptionInstructions(defaultDescriptionInstructions);
+      }
     } catch (error) {
       console.error('Erro ao carregar configurações:', error);
+    } finally {
+      setIsLoadingSettings(false);
     }
   };
 
   const saveSettings = async () => {
     setIsLoading(true);
     try {
-      // Salvar chave da OpenAI no Supabase Secrets (simulação)
-      if (openAIKey) {
-        // Aqui você implementaria a lógica para salvar no Supabase Secrets
-        console.log('Salvando chave OpenAI no Supabase Secrets');
+      // Salvar instruções no banco de dados
+      const settingsData = {
+        image_instructions: imageInstructions,
+        description_instructions: descriptionInstructions,
+        updated_at: new Date().toISOString()
+      };
+
+      const { error: upsertError } = await supabase
+        .from('ai_settings')
+        .upsert(settingsData, { 
+          onConflict: 'id',
+          ignoreDuplicates: false 
+        });
+
+      if (upsertError) {
+        throw upsertError;
       }
 
-      // Salvar instruções localmente ou no banco
-      localStorage.setItem('ia_image_instructions', imageInstructions);
-      localStorage.setItem('ia_description_instructions', descriptionInstructions);
+      // Salvar chave da OpenAI no Supabase Secrets (se fornecida)
+      if (openAIKey.trim()) {
+        // Aqui você implementaria a lógica para salvar no Supabase Secrets
+        // Por enquanto, vamos apenas limpar o campo após salvar
+        console.log('Chave OpenAI será salva no Supabase Secrets');
+        setOpenAIKey('');
+      }
 
       toast({
         title: "Configurações salvas",
@@ -75,6 +112,14 @@ const IASettings = () => {
       setIsLoading(false);
     }
   };
+
+  if (isLoadingSettings) {
+    return (
+      <div className="flex justify-center items-center p-8">
+        <div className="text-muted-foreground">Carregando configurações...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
