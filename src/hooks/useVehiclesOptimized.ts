@@ -42,22 +42,26 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const { category, limit = 20, searchTerm, minimal = false } = options;
+  const { category, limit = 10, searchTerm, minimal = false } = options;
 
-  const fetchVehicles = useCallback(async (offset = 0) => {
+  const fetchVehicles = useCallback(async (page = 1, reset = false) => {
     try {
-      console.log('Fetching vehicles with options:', { category, limit, offset, searchTerm, minimal });
+      console.log('Fetching vehicles with options:', { category, limit, page, searchTerm, minimal });
       
-      // Selecionar colunas baseado no tipo de consulta
+      const offset = (page - 1) * limit;
+      
+      // Selecionar apenas as colunas necessárias para otimização
       const selectColumns = minimal 
         ? 'id, name, vin, sale_price, internal_code, photos'
-        : 'id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at, updated_at';
+        : 'id, name, vin, sale_price, internal_code, photos, year, model, miles, color, ca_note, purchase_price, profit_margin, category, created_at, updated_at';
 
       let query = supabase
         .from('vehicles')
-        .select(selectColumns)
-        .order('created_at', { ascending: false });
+        .select(selectColumns, { count: 'exact' })
+        .order('internal_code', { ascending: true }); // Ordenar por código interno
 
       // Filtrar por categoria se especificado
       if (category) {
@@ -72,7 +76,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
       // Adicionar paginação
       query = query.range(offset, offset + limit - 1);
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) {
         console.error('Supabase error fetching vehicles:', error);
@@ -85,7 +89,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
         throw new Error('Invalid data format received from database');
       }
 
-      // Adicionar image_url baseado na primeira foto e garantir que todos os campos necessários existam
+      // Processar veículos com apenas a primeira imagem
       const vehiclesWithImages = data.map(vehicle => {
         // Verificar se vehicle é um objeto válido
         if (!vehicle || typeof vehicle !== 'object') {
@@ -93,12 +97,16 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
           return null;
         }
 
-        // Cast para garantir que temos um objeto válido
         const validVehicle = vehicle as Record<string, any>;
+
+        // Usar apenas a primeira foto para otimização
+        const firstPhoto = validVehicle.photos && Array.isArray(validVehicle.photos) && validVehicle.photos.length > 0 
+          ? validVehicle.photos[0] 
+          : null;
 
         const baseVehicle = {
           ...validVehicle,
-          image_url: validVehicle.photos && Array.isArray(validVehicle.photos) && validVehicle.photos.length > 0 ? validVehicle.photos[0] : null,
+          image_url: firstPhoto,
         };
 
         // Para consultas mínimas, adicionar campos padrão
@@ -124,15 +132,17 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
         }
       }).filter(vehicle => vehicle !== null) as Vehicle[];
 
-      console.log('Vehicles fetched successfully:', vehiclesWithImages.length, 'vehicles');
+      console.log('Vehicles fetched successfully:', vehiclesWithImages.length, 'vehicles, page:', page);
       
-      if (offset === 0) {
+      if (reset || page === 1) {
         setVehicles(vehiclesWithImages);
       } else {
         setVehicles(prev => [...prev, ...vehiclesWithImages]);
       }
 
-      setHasMore(vehiclesWithImages.length === limit);
+      setTotalCount(count || 0);
+      setCurrentPage(page);
+      setHasMore(vehiclesWithImages.length === limit && (offset + vehiclesWithImages.length) < (count || 0));
     } catch (error) {
       console.error('Error fetching vehicles:', error);
       toast({
@@ -151,23 +161,36 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
   }, [vehicles]);
 
   const loadMore = useCallback(() => {
-    fetchVehicles(vehicles.length);
-  }, [fetchVehicles, vehicles.length]);
+    if (hasMore && !loading) {
+      fetchVehicles(currentPage + 1, false);
+    }
+  }, [fetchVehicles, currentPage, hasMore, loading]);
+
+  const goToPage = useCallback((page: number) => {
+    setLoading(true);
+    fetchVehicles(page, true);
+  }, [fetchVehicles]);
 
   const refetch = useCallback(() => {
     setLoading(true);
-    fetchVehicles();
+    fetchVehicles(1, true);
   }, [fetchVehicles]);
 
   useEffect(() => {
-    fetchVehicles();
+    fetchVehicles(1, true);
   }, [fetchVehicles]);
+
+  const totalPages = Math.ceil(totalCount / limit);
 
   return {
     vehicles: category === 'forSale' ? forSaleVehicles : vehicles,
     loading,
     hasMore,
+    currentPage,
+    totalPages,
+    totalCount,
     loadMore,
+    goToPage,
     refetch,
   };
 };

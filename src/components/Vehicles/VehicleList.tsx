@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useVehicles, Vehicle } from '../../hooks/useVehicles';
+import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
 import VehicleListHeader from './VehicleListHeader';
@@ -10,6 +10,7 @@ import VehicleControls from './VehicleControls';
 import VehicleListView from './VehicleListView';
 import EmptyVehicleState from './EmptyVehicleState';
 import { Card, CardContent } from '@/components/ui/card';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Loader2 } from 'lucide-react';
 import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
 import { useVehicleActions } from './VehicleActions';
@@ -17,14 +18,34 @@ import { useVehicleFilters } from './VehicleFilters';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
-  const { vehicles, loading, createVehicle, updateVehicle, deleteVehicle } = useVehicles();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('internal_code');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
+
+  const { 
+    vehicles, 
+    loading, 
+    currentPage, 
+    totalPages, 
+    totalCount,
+    goToPage,
+    refetch
+  } = useVehiclesOptimized({
+    category: filterBy === 'all' ? undefined : filterBy as 'forSale' | 'sold',
+    limit: 10,
+    searchTerm,
+    minimal: true
+  });
+
+  const vehicleOperations = {
+    createVehicle: async () => {},
+    updateVehicle: async () => {},
+    deleteVehicle: async () => {}
+  };
 
   const {
     handleSaveVehicle,
@@ -34,19 +55,19 @@ const VehicleList = () => {
   } = useVehicleActions({
     vehicles,
     canEditVehicles,
-    createVehicle,
-    updateVehicle,
-    deleteVehicle,
+    createVehicle: vehicleOperations.createVehicle,
+    updateVehicle: vehicleOperations.updateVehicle,
+    deleteVehicle: vehicleOperations.deleteVehicle,
     onEditingChange: setEditingVehicle,
     onFormToggle: setShowAddForm
   });
 
   const { filteredAndSortedVehicles } = useVehicleFilters({
     vehicles,
-    searchTerm,
-    filterBy,
-    sortBy,
-    sortOrder
+    searchTerm: '', // A busca agora é feita no backend
+    filterBy: 'all', // O filtro agora é feito no backend
+    sortBy: 'internal_code', // A ordenação agora é feita no backend
+    sortOrder: 'asc'
   });
 
   const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
@@ -55,10 +76,20 @@ const VehicleList = () => {
   };
 
   const handleExportData = (format: 'csv' | 'xls') => {
-    handleExport(filteredAndSortedVehicles, format);
+    handleExport(vehicles, format);
   };
 
-  if (loading) {
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    goToPage(1); // Reset para primeira página ao buscar
+  };
+
+  const handleFilterChange = (value: string) => {
+    setFilterBy(value);
+    goToPage(1); // Reset para primeira página ao filtrar
+  };
+
+  if (loading && currentPage === 1) {
     return (
       <div className="p-6">
         <Card>
@@ -77,7 +108,7 @@ const VehicleList = () => {
       
       <VehicleSearchBar 
         searchTerm={searchTerm} 
-        onSearchChange={setSearchTerm} 
+        onSearchChange={handleSearchChange} 
       />
 
       <VehicleControls
@@ -87,13 +118,23 @@ const VehicleList = () => {
         sortOrder={sortOrder}
         onSortChange={handleSortChange}
         filterBy={filterBy}
-        onFilterChange={setFilterBy}
+        onFilterChange={handleFilterChange}
         onExport={handleExportData}
       />
 
+      {/* Contador de resultados */}
+      <div className="flex items-center justify-between text-sm text-gray-600">
+        <span>
+          Mostrando {vehicles.length} de {totalCount} veículos
+        </span>
+        <span>
+          Página {currentPage} de {totalPages}
+        </span>
+      </div>
+
       {viewMode === 'grid' ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-          {filteredAndSortedVehicles.map((vehicle) => (
+          {vehicles.map((vehicle) => (
             <VehicleCard
               key={vehicle.id}
               vehicle={convertVehicleForCard(vehicle)}
@@ -105,7 +146,7 @@ const VehicleList = () => {
         </div>
       ) : (
         <VehicleListView
-          vehicles={filteredAndSortedVehicles.map(convertVehicleForCard)}
+          vehicles={vehicles.map(convertVehicleForCard)}
           onEdit={(vehicle) => {
             const originalVehicle = vehicles.find(v => v.id === vehicle.id);
             if (originalVehicle) handleEditVehicle(originalVehicle);
@@ -121,7 +162,47 @@ const VehicleList = () => {
         />
       )}
 
-      {filteredAndSortedVehicles.length === 0 && !loading && <EmptyVehicleState />}
+      {/* Paginação */}
+      {totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious 
+                  onClick={() => currentPage > 1 && goToPage(currentPage - 1)}
+                  className={currentPage <= 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+              
+              {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                const pageNumber = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + i;
+                if (pageNumber > totalPages) return null;
+                
+                return (
+                  <PaginationItem key={pageNumber}>
+                    <PaginationLink 
+                      onClick={() => goToPage(pageNumber)}
+                      isActive={currentPage === pageNumber}
+                      className="cursor-pointer"
+                    >
+                      {pageNumber}
+                    </PaginationLink>
+                  </PaginationItem>
+                );
+              })}
+              
+              <PaginationItem>
+                <PaginationNext 
+                  onClick={() => currentPage < totalPages && goToPage(currentPage + 1)}
+                  className={currentPage >= totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+
+      {vehicles.length === 0 && !loading && <EmptyVehicleState />}
 
       {showAddForm && canEditVehicles && (
         <VehicleForm
