@@ -25,7 +25,18 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
   });
   
   // Mapear corretamente os campos do banco para o formato da aplicação
-  const mappedVehicle: Vehicle = {
+  const mappedVehicle: Vehicle & {
+    // Add form-compatible aliases
+    plate: string;
+    internalCode: string;
+    caNote: string;
+    purchasePrice: string;
+    salePrice: string;
+    minNegotiable: string;
+    carfaxPrice: string;
+    mmrValue: string;
+    titleInfo: string;
+  } = {
     id: dbVehicle.id,
     name: dbVehicle.name || '',
     vin: dbVehicle.vin || '',
@@ -51,9 +62,19 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
     updated_at: dbVehicle.updated_at,
     created_by: dbVehicle.created_by,
     extended_category: extendedCategory,
-    consignment_store: consignmentStore || undefined
+    consignment_store: consignmentStore || undefined,
+    // Form-compatible aliases
+    plate: dbVehicle.miles?.toString() || '0',
+    internalCode: dbVehicle.internal_code || '',
+    caNote: dbVehicle.ca_note?.toString() || '0',
+    purchasePrice: dbVehicle.purchase_price?.toString() || '0',
+    salePrice: dbVehicle.sale_price?.toString() || '0',
+    minNegotiable: dbVehicle.min_negotiable?.toString() || '',
+    carfaxPrice: dbVehicle.carfax_price?.toString() || '',
+    mmrValue: dbVehicle.mmr_value?.toString() || '',
+    titleInfo: titleInfo
   };
   
   console.log('mapDbDataToAppData - output:', mappedVehicle);
-  return mappedVehicle;
+  return mappedVehicle as any;
 };
