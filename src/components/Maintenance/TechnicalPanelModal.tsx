@@ -2,12 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Settings2, Droplets, Zap, Filter, Target, Disc } from 'lucide-react';
+import { Settings2, Droplets, Zap, Filter, Target, Disc, Wrench } from 'lucide-react';
 import { TechnicalItem, TechnicalPanelModalProps } from './TechnicalPanel/types';
 import { groupItemsByType } from './TechnicalPanel/utils';
 import { defaultTechnicalItems } from './TechnicalPanel/data';
 import AlertSection from './TechnicalPanel/AlertSection';
-import TechnicalSection from './TechnicalPanel/TechnicalSection';
+import CompactTechnicalRow from './TechnicalPanel/CompactTechnicalRow';
 
 const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: TechnicalPanelModalProps) => {
   const [editingItem, setEditingItem] = useState<string | null>(null);
@@ -52,7 +52,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="max-w-5xl max-h-[85vh] overflow-y-auto"
+        className="max-w-4xl max-h-[85vh] overflow-y-auto"
         onPointerDownOutside={(e) => e.preventDefault()}
         onInteractOutside={(e) => e.preventDefault()}
       >
@@ -63,14 +63,14 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           <AlertSection 
             trocarItems={trocarItems}
             proximoTrocaItems={proximoTrocaItems}
           />
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <TechnicalSection
+          <div className="space-y-2">
+            <CompactTechnicalRow
               title="Óleo do Motor"
               icon={Droplets}
               items={groupedItems.oil}
@@ -82,7 +82,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               isHighlight={true}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Sistema Elétrico"
               icon={Zap}
               items={groupedItems.electrical}
@@ -93,7 +93,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onUpdate={updateItem}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Filtros e Limpeza"
               icon={Filter}
               items={groupedItems.filter}
@@ -104,7 +104,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onUpdate={updateItem}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Suspensão e Direção"
               icon={Target}
               items={groupedItems.suspension}
@@ -115,7 +115,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onUpdate={updateItem}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Sistema de Freios"
               icon={Disc}
               items={groupedItems.brakes}
@@ -126,7 +126,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onUpdate={updateItem}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Fluidos"
               icon={Droplets}
               items={groupedItems.fluids}
@@ -137,7 +137,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onUpdate={updateItem}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Tune Up"
               icon={Zap}
               items={groupedItems.tuneup}
@@ -148,7 +148,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onUpdate={updateItem}
             />
 
-            <TechnicalSection
+            <CompactTechnicalRow
               title="Pneus"
               icon={Target}
               items={groupedItems.tires}
@@ -157,7 +157,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
               onSave={handleSave}
               onCancel={handleCancel}
               onUpdate={updateItem}
-              className="lg:col-span-2"
+              isHighlight={true}
             />
           </div>
 
