@@ -66,7 +66,7 @@ const MaintenanceForm = ({ open, onClose, editingMaintenance }: MaintenanceFormP
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="relative max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
         <MaintenanceFormHeader 
           isEditing={isEditing}
           status={status}
