@@ -1,49 +1,43 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useVehiclesMinimal } from '../../hooks/useVehiclesMinimal';
 import { Car } from 'lucide-react';
-
 interface VehicleMaintenanceSelectorProps {
   selectedVehicleId: string;
   onVehicleChange: (vehicleId: string) => void;
 }
-
-const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: VehicleMaintenanceSelectorProps) => {
-  const { vehicles, loading } = useVehiclesMinimal({ category: 'forSale', limit: 50 });
-
+const VehicleMaintenanceSelector = ({
+  selectedVehicleId,
+  onVehicleChange
+}: VehicleMaintenanceSelectorProps) => {
+  const {
+    vehicles,
+    loading
+  } = useVehiclesMinimal({
+    category: 'forSale',
+    limit: 50
+  });
   const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
-
   console.log('VehicleMaintenanceSelector - vehicles loaded:', vehicles.length);
   console.log('VehicleMaintenanceSelector - loading:', loading);
   console.log('VehicleMaintenanceSelector - selectedVehicleId:', selectedVehicleId);
-
-  return (
-    <div className="space-y-2">
+  return <div className="space-y-2">
       <Label>Veículo</Label>
       <Select value={selectedVehicleId} onValueChange={onVehicleChange}>
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Selecione um veículo para manutenção">
-            {selectedVehicle && (
-              <div className="flex items-center gap-2">
+            {selectedVehicle && <div className="flex items-center gap-2">
                 <Car className="h-4 w-4" />
                 <span className="font-semibold text-revenshop-primary">
                   {selectedVehicle.internal_code}
                 </span>
                 <span>- {selectedVehicle.name}</span>
-              </div>
-            )}
+              </div>}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {loading ? (
-            <SelectItem value="loading-placeholder" disabled>Carregando veículos...</SelectItem>
-          ) : vehicles.length === 0 ? (
-            <SelectItem value="empty-placeholder" disabled>Nenhum veículo cadastrado</SelectItem>
-          ) : (
-            vehicles.map((vehicle) => (
-              <SelectItem key={vehicle.id} value={vehicle.id}>
+          {loading ? <SelectItem value="loading-placeholder" disabled>Carregando veículos...</SelectItem> : vehicles.length === 0 ? <SelectItem value="empty-placeholder" disabled>Nenhum veículo cadastrado</SelectItem> : vehicles.map(vehicle => <SelectItem key={vehicle.id} value={vehicle.id}>
                 <div className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   <span className="font-semibold text-revenshop-primary">
@@ -51,17 +45,14 @@ const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: Vehi
                   </span>
                   <span>- {vehicle.name}</span>
                 </div>
-              </SelectItem>
-            ))
-          )}
+              </SelectItem>)}
         </SelectContent>
       </Select>
       
-      {selectedVehicle && (
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+      {selectedVehicle && <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
           <div className="flex items-center gap-2 mb-2">
             <Car className="h-4 w-4 text-blue-600" />
-            <span className="font-semibold text-blue-800">Veículo Selecionado</span>
+            <span className="font-semibold text-blue-800">Veículo</span>
           </div>
           <div className="grid grid-cols-2 gap-2 text-sm">
             <div>
@@ -79,14 +70,11 @@ const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: Vehi
               <span className="ml-2 font-medium">{selectedVehicle.vin}</span>
             </div>
             <div>
-              <span className="text-gray-600">Preço:</span>
-              <span className="ml-2 font-medium">R$ {selectedVehicle.sale_price?.toFixed(2).replace('.', ',')}</span>
+              
+              
             </div>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
-
 export default VehicleMaintenanceSelector;
