@@ -2,7 +2,7 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, Car, Users, Settings, User, CreditCard, UserCheck, Gavel, CheckSquare, Calculator, Wrench } from 'lucide-react';
+import { LayoutDashboard, Car, Users, Settings, User, CreditCard, UserCheck, Gavel, CheckSquare, Calculator, Wrench, Bot } from 'lucide-react';
 import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
 
 interface SidebarProps {
@@ -70,6 +70,11 @@ const AppSidebar = ({
       label: 'Manutenção',
       icon: Wrench
     }] : []), 
+    {
+      id: 'ai-beta',
+      label: 'IA (beta)',
+      icon: Bot
+    },
     ...(canManageUsers ? [{
       id: 'users',
       label: t('users'),

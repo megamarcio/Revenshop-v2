@@ -18,6 +18,7 @@ const AuctionManagement = lazy(() => import('./components/Auctions/AuctionManage
 const TaskManagement = lazy(() => import('./components/Tasks/TaskManagement'));
 const FinancingSimulation = lazy(() => import('./components/FinancingSimulation/FinancingSimulation'));
 const MaintenanceManagement = lazy(() => import('./components/Maintenance/MaintenanceManagement'));
+const AIBeta = lazy(() => import('./components/AI/AIBeta'));
 
 // Componente de loading
 const LoadingFallback = () => (
@@ -59,6 +60,8 @@ const App: React.FC = () => {
         return <FinancingSimulation />;
       case 'maintenance':
         return (isAdmin || isInternalSeller) ? <MaintenanceManagement /> : null;
+      case 'ai-beta':
+        return <AIBeta />;
       case 'users':
         return canManageUsers ? <UserManagement /> : null;
       case 'admin':
