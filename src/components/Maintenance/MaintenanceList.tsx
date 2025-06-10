@@ -1,9 +1,10 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Wrench, Phone, DollarSign, Filter, Trash2, Edit } from 'lucide-react';
+import { Calendar, Wrench, Phone, DollarSign, Filter, Trash2, Edit, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../types/maintenance';
@@ -21,11 +22,16 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
 
   const getMaintenanceStatus = (maintenance: MaintenanceRecord) => {
     const today = new Date();
-    const repairDate = new Date(maintenance.repair_date);
-    const detectionDate = new Date(maintenance.detection_date);
+    const repairDate = maintenance.repair_date ? new Date(maintenance.repair_date) : null;
+    const promisedDate = maintenance.promised_date ? new Date(maintenance.promised_date) : null;
     
-    if (repairDate < today) return 'completed';
-    if (detectionDate <= today && repairDate >= today) return 'pending';
+    // Concluída: com data de reparo
+    if (repairDate) return 'completed';
+    
+    // Pendente: com data prometida mas sem data de reparo
+    if (promisedDate && !repairDate) return 'pending';
+    
+    // Em aberto: sem data prometida e sem data de reparo
     return 'open';
   };
 
@@ -56,7 +62,17 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
     }
   };
 
-  const filteredMaintenances = maintenances.filter(maintenance => {
+  // Ordenar por código interno do veículo e depois por data de detecção
+  const sortedMaintenances = [...maintenances].sort((a, b) => {
+    // Primeiro por código interno do veículo
+    const codeComparison = a.vehicle_internal_code.localeCompare(b.vehicle_internal_code);
+    if (codeComparison !== 0) return codeComparison;
+    
+    // Depois por data de detecção (mais antiga primeiro)
+    return new Date(a.detection_date).getTime() - new Date(b.detection_date).getTime();
+  });
+
+  const filteredMaintenances = sortedMaintenances.filter(maintenance => {
     const status = getMaintenanceStatus(maintenance);
     if (statusFilter === 'all') return true;
     if (statusFilter === 'open') {
@@ -94,6 +110,9 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
               <SelectItem value="all">Todas</SelectItem>
             </SelectContent>
           </Select>
+        </div>
+        <div className="text-sm text-gray-600">
+          Ordenadas por código do veículo e data de detecção
         </div>
       </div>
 
@@ -170,11 +189,20 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
                         <span className="text-gray-600">Detecção:</span>
                         <span>{format(new Date(maintenance.detection_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Calendar className="h-4 w-4 text-gray-500" />
-                        <span className="text-gray-600">Reparo:</span>
-                        <span>{format(new Date(maintenance.repair_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
-                      </div>
+                      {maintenance.promised_date && (
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-orange-500" />
+                          <span className="text-gray-600">Prometida:</span>
+                          <span>{format(new Date(maintenance.promised_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                        </div>
+                      )}
+                      {maintenance.repair_date && (
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-green-500" />
+                          <span className="text-gray-600">Reparo:</span>
+                          <span>{format(new Date(maintenance.repair_date), 'dd/MM/yyyy', { locale: ptBR })}</span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="space-y-1">

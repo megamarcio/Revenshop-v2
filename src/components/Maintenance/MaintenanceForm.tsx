@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -32,6 +31,7 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
     vehicle_id: '',
     detection_date: '',
     repair_date: '',
+    promised_date: '',
     maintenance_type: 'preventive',
     maintenance_items: [],
     custom_maintenance: '',
@@ -43,8 +43,9 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
     receipt_urls: []
   });
 
-  const [detectionDate, setDetectionDate] = useState<Date>();
+  const [detectionDate, setDetectionDate] = useState<Date>(new Date()); // Hoje por padrão
   const [repairDate, setRepairDate] = useState<Date>();
+  const [promisedDate, setPromisedDate] = useState<Date>();
 
   useEffect(() => {
     if (editingMaintenance) {
@@ -52,6 +53,7 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
         vehicle_id: editingMaintenance.vehicle_id || '',
         detection_date: editingMaintenance.detection_date || '',
         repair_date: editingMaintenance.repair_date || '',
+        promised_date: editingMaintenance.promised_date || '',
         maintenance_type: editingMaintenance.maintenance_type || 'preventive',
         maintenance_items: editingMaintenance.maintenance_items || [],
         custom_maintenance: editingMaintenance.custom_maintenance || '',
@@ -68,6 +70,9 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
       }
       if (editingMaintenance.repair_date) {
         setRepairDate(new Date(editingMaintenance.repair_date));
+      }
+      if (editingMaintenance.promised_date) {
+        setPromisedDate(new Date(editingMaintenance.promised_date));
       }
     }
   }, [editingMaintenance]);
@@ -145,6 +150,19 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
     return partsTotal + laborTotal;
   };
 
+  const getMaintenanceStatus = () => {
+    // Em aberto: sem data prometida e sem data de reparo
+    if (!promisedDate && !repairDate) return 'open';
+    
+    // Concluída: com data de reparo
+    if (repairDate) return 'completed';
+    
+    // Pendente: com data prometida mas sem data de reparo
+    if (promisedDate && !repairDate) return 'pending';
+    
+    return 'open';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -157,10 +175,22 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
       return;
     }
 
-    if (!detectionDate || !repairDate) {
+    if (!detectionDate) {
       toast({
         title: 'Erro',
-        description: 'Informe as datas de detecção e reparo',
+        description: 'Informe a data de detecção',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const status = getMaintenanceStatus();
+    
+    // Validar se data de reparo é obrigatória para status "completed"
+    if (status === 'completed' && !repairDate) {
+      toast({
+        title: 'Erro',
+        description: 'Data de reparo é obrigatória para manutenções concluídas',
         variant: 'destructive'
       });
       return;
@@ -181,7 +211,8 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
       const maintenanceData = {
         ...formData,
         detection_date: format(detectionDate, 'yyyy-MM-dd'),
-        repair_date: format(repairDate, 'yyyy-MM-dd'),
+        repair_date: repairDate ? format(repairDate, 'yyyy-MM-dd') : '',
+        promised_date: promisedDate ? format(promisedDate, 'yyyy-MM-dd') : '',
         total_amount: calculateTotal(),
         vehicle_name: selectedVehicle?.name || '',
         vehicle_internal_code: selectedVehicle?.internal_code || ''
@@ -231,8 +262,10 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
           <DateSelectionForm
             detectionDate={detectionDate}
             repairDate={repairDate}
+            promisedDate={promisedDate}
             onDetectionDateChange={setDetectionDate}
             onRepairDateChange={setRepairDate}
+            onPromisedDateChange={setPromisedDate}
           />
 
           <MaintenanceItemsSelector
@@ -275,6 +308,18 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
           />
 
           <ReceiptUploadForm />
+
+          {/* Status Preview */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h4 className="font-medium mb-2">Status da Manutenção:</h4>
+            <p className="text-sm text-gray-600">
+              <strong>{getMaintenanceStatus() === 'open' ? 'Em Aberto' : 
+                      getMaintenanceStatus() === 'pending' ? 'Pendente' : 'Concluída'}</strong>
+              {getMaintenanceStatus() === 'open' && ' - Sem data prometida definida'}
+              {getMaintenanceStatus() === 'pending' && ' - Aguardando conclusão do reparo'}
+              {getMaintenanceStatus() === 'completed' && ' - Reparo concluído'}
+            </p>
+          </div>
 
           {/* Botões */}
           <div className="flex justify-end gap-2 pt-4">
