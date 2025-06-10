@@ -58,5 +58,6 @@ export const TIRE_BRANDS = [
   'Yokohama',
   'Dunlop',
   'Hankook',
+  'Douglas',
   'Outros'
 ];

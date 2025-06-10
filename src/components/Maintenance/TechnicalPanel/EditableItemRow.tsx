@@ -6,7 +6,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit2, Save, X, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
 import { EditableItemRowProps, TIRE_BRANDS } from './types';
 import { getStatusColor, formatDate } from './utils';
-import StatusIcon from './StatusIcon';
 
 const EditableItemRow = ({ 
   item, 
@@ -21,15 +20,21 @@ const EditableItemRow = ({
   const isTireSize = item.id === 'tire-type';
 
   return (
-    <div className={`flex items-center justify-between p-2 border rounded hover:bg-gray-50 ${isTireSize ? 'bg-blue-50 border-blue-200' : ''}`}>
-      <div className="flex items-center gap-2 flex-1 min-w-0">
-        <Icon className="h-3 w-3 text-gray-600 flex-shrink-0" />
-        <span className={`text-xs font-medium min-w-[80px] ${isTireSize ? 'text-blue-800' : ''}`}>
-          {item.name}:
+    <div className={`grid grid-cols-12 gap-2 p-3 border rounded-lg hover:bg-gray-50 items-center ${
+      isTireSize ? 'bg-blue-50 border-blue-300 border-2' : ''
+    }`}>
+      {/* Ícone e Nome */}
+      <div className="col-span-3 flex items-center gap-2 min-w-0">
+        <Icon className="h-4 w-4 text-gray-600 flex-shrink-0" />
+        <span className={`text-sm font-medium truncate ${isTireSize ? 'text-blue-800' : ''}`}>
+          {item.name}
         </span>
-        
+      </div>
+      
+      {/* Dados */}
+      <div className="col-span-5">
         {isEditing ? (
-          <div className="flex items-center gap-1 flex-1 min-w-0">
+          <div className="flex items-center gap-1">
             {isTireSize ? (
               <>
                 <Input
@@ -37,13 +42,13 @@ const EditableItemRow = ({
                   value={item.extraInfo || ''}
                   onChange={(e) => onUpdate(item.id, { extraInfo: e.target.value })}
                   placeholder="Ex: 205/55 R16"
-                  className="w-24 h-6 text-xs"
+                  className="h-8 text-xs flex-1"
                 />
                 <Select
                   value={item.tireBrand || ''}
                   onValueChange={(value) => onUpdate(item.id, { tireBrand: value })}
                 >
-                  <SelectTrigger className="w-20 h-6 text-xs">
+                  <SelectTrigger className="w-32 h-8 text-xs">
                     <SelectValue placeholder="Marca" />
                   </SelectTrigger>
                   <SelectContent>
@@ -60,7 +65,7 @@ const EditableItemRow = ({
                   value={item.month}
                   onChange={(e) => onUpdate(item.id, { month: e.target.value })}
                   placeholder="MM"
-                  className="w-8 h-6 text-xs"
+                  className="w-12 h-8 text-xs"
                   maxLength={2}
                 />
                 <span className="text-xs">/</span>
@@ -69,7 +74,7 @@ const EditableItemRow = ({
                   value={item.year}
                   onChange={(e) => onUpdate(item.id, { year: e.target.value })}
                   placeholder="YYYY"
-                  className="w-12 h-6 text-xs"
+                  className="w-16 h-8 text-xs"
                   maxLength={4}
                 />
                 {item.miles !== undefined && (
@@ -79,7 +84,7 @@ const EditableItemRow = ({
                       value={item.miles}
                       onChange={(e) => onUpdate(item.id, { miles: e.target.value })}
                       placeholder="mi"
-                      className="w-12 h-6 text-xs"
+                      className="w-16 h-8 text-xs"
                     />
                   </>
                 )}
@@ -87,34 +92,32 @@ const EditableItemRow = ({
                   type="date"
                   value={item.nextChange || ''}
                   onChange={(e) => onUpdate(item.id, { nextChange: e.target.value })}
-                  className="w-24 h-6 text-xs"
+                  className="w-32 h-8 text-xs"
                   placeholder="Próxima"
                 />
               </>
             )}
           </div>
         ) : (
-          <div className="flex-1 min-w-0">
+          <div className="text-xs text-gray-700">
             {isTireSize ? (
-              <div className="flex items-center gap-1">
-                <span className="text-xs font-medium text-blue-700 truncate">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-blue-800 text-sm">
                   {item.extraInfo || 'Não informado'}
                 </span>
                 {item.tireBrand && (
-                  <span className="text-xs bg-blue-100 px-1 rounded">
+                  <span className="bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-medium">
                     {item.tireBrand}
                   </span>
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-1">
-                <span className="text-xs text-gray-700 truncate">
-                  {formatDate(item.month, item.year, item.miles)}
-                </span>
+              <div className="space-y-1">
+                <div>{formatDate(item.month, item.year, item.miles)}</div>
                 {item.nextChange && (
-                  <span className="text-xs bg-gray-100 px-1 rounded whitespace-nowrap">
-                    {new Date(item.nextChange).toLocaleDateString('pt-BR')}
-                  </span>
+                  <div className="text-gray-500">
+                    Próxima: {new Date(item.nextChange).toLocaleDateString('pt-BR')}
+                  </div>
                 )}
               </div>
             )}
@@ -122,34 +125,41 @@ const EditableItemRow = ({
         )}
       </div>
 
-      <div className="flex items-center gap-1 flex-shrink-0">
+      {/* Status */}
+      <div className="col-span-3 flex items-center gap-2">
         <Select
           value={item.status}
           onValueChange={(value: 'em-dia' | 'proximo-troca' | 'trocar') => 
             onUpdate(item.id, { status: value })
           }
         >
-          <SelectTrigger className={`w-20 h-6 text-xs border ${getStatusColor(item.status)}`}>
+          <SelectTrigger className={`h-8 text-xs flex-1 ${getStatusColor(item.status)}`}>
             <div className="flex items-center gap-1">
-              <StatusIcon status={item.status} />
-              <SelectValue />
+              {item.status === 'em-dia' && <CheckCircle className="h-3 w-3" />}
+              {item.status === 'proximo-troca' && <Clock className="h-3 w-3" />}
+              {item.status === 'trocar' && <AlertTriangle className="h-3 w-3" />}
+              <span className="truncate">
+                {item.status === 'em-dia' && 'Em Dia'}
+                {item.status === 'proximo-troca' && 'Próximo'}
+                {item.status === 'trocar' && 'Trocar'}
+              </span>
             </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="em-dia">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <CheckCircle className="h-3 w-3 text-green-600" />
                 Em Dia
               </div>
             </SelectItem>
             <SelectItem value="proximo-troca">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <Clock className="h-3 w-3 text-yellow-600" />
                 Próximo
               </div>
             </SelectItem>
             <SelectItem value="trocar">
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-2">
                 <AlertTriangle className="h-3 w-3 text-red-600" />
                 Trocar
               </div>
@@ -157,12 +167,13 @@ const EditableItemRow = ({
           </SelectContent>
         </Select>
 
+        {/* Botão de Edição */}
         {isEditing ? (
           <div className="flex gap-1">
-            <Button size="sm" variant="ghost" onClick={onSave} className="h-6 w-6 p-0">
+            <Button size="sm" variant="ghost" onClick={onSave} className="h-8 w-8 p-0">
               <Save className="h-3 w-3 text-green-600" />
             </Button>
-            <Button size="sm" variant="ghost" onClick={onCancel} className="h-6 w-6 p-0">
+            <Button size="sm" variant="ghost" onClick={onCancel} className="h-8 w-8 p-0">
               <X className="h-3 w-3 text-red-600" />
             </Button>
           </div>
@@ -171,7 +182,7 @@ const EditableItemRow = ({
             size="sm" 
             variant="ghost" 
             onClick={() => onEdit(item.id)}
-            className="h-6 w-6 p-0"
+            className="h-8 w-8 p-0"
           >
             <Edit2 className="h-3 w-3 text-gray-600" />
           </Button>
