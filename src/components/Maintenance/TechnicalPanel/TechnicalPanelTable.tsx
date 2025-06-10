@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ interface TechnicalPanelTableProps {
 }
 
 const TechnicalPanelTable = ({ isOpen, onClose, vehicleId, vehicleName }: TechnicalPanelTableProps) => {
-  const { items, loading, updateItem, createDefaultItems, refresh } = useTechnicalItems(vehicleId);
+  const { items, isLoading, updateItem, createDefaultItems } = useTechnicalItems(vehicleId);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   const getItemIcon = (item: any) => {
@@ -88,15 +87,17 @@ const TechnicalPanelTable = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
   };
 
   const handleUpdate = (itemId: string, updates: any) => {
-    updateItem(itemId, updates);
+    updateItem({ itemId, updates });
   };
 
   const handleCreateDefaults = () => {
-    createDefaultItems();
+    if (vehicleId) {
+      createDefaultItems(vehicleId);
+    }
   };
 
   const handleRefresh = () => {
-    refresh();
+    window.location.reload();
   };
 
   const renderEditableCell = (item: any, field: string, placeholder: string) => {
@@ -192,13 +193,13 @@ const TechnicalPanelTable = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
                 variant="outline"
                 size="sm"
                 onClick={handleRefresh}
-                disabled={loading}
+                disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                 Atualizar
               </Button>
-              {items.length === 0 && !loading && (
+              {items.length === 0 && !isLoading && (
                 <Button
                   onClick={handleCreateDefaults}
                   size="sm"
@@ -213,7 +214,7 @@ const TechnicalPanelTable = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
         </DialogHeader>
 
         <div className="space-y-4 p-1">
-          {loading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="flex items-center gap-3 text-gray-500">
                 <RefreshCw className="h-5 w-5 animate-spin" />

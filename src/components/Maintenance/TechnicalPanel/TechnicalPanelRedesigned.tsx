@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useTechnicalItems } from '../../../hooks/useTechnicalItems';
 import TechnicalPanelHeader from './TechnicalPanelHeader';
 import MainItemsSection from './MainItemsSection';
@@ -9,15 +10,17 @@ import EmptyTechnicalState from './EmptyTechnicalState';
 import NoVehicleSelected from './NoVehicleSelected';
 
 interface TechnicalPanelRedesignedProps {
-  selectedVehicleId: string | null;
-  onVehicleChange: (vehicleId: string | null) => void;
+  isOpen: boolean;
   onClose: () => void;
+  vehicleId?: string;
+  vehicleName?: string;
 }
 
 const TechnicalPanelRedesigned = ({
-  selectedVehicleId,
-  onVehicleChange,
-  onClose
+  isOpen,
+  onClose,
+  vehicleId,
+  vehicleName
 }: TechnicalPanelRedesignedProps) => {
   const [editingItem, setEditingItem] = useState<string | null>(null);
   
@@ -29,7 +32,7 @@ const TechnicalPanelRedesigned = ({
     createItem,
     deleteItem,
     isCreatingDefaultItems
-  } = useTechnicalItems(selectedVehicleId || undefined);
+  } = useTechnicalItems(vehicleId || undefined);
 
   const handleEdit = (itemId: string) => {
     setEditingItem(itemId);
@@ -48,8 +51,8 @@ const TechnicalPanelRedesigned = ({
   };
 
   const handleAddItem = (name: string, type: string) => {
-    if (selectedVehicleId) {
-      createItem({ vehicleId: selectedVehicleId, name, type });
+    if (vehicleId) {
+      createItem({ vehicleId, name, type });
     }
   };
 
@@ -57,51 +60,65 @@ const TechnicalPanelRedesigned = ({
     deleteItem(itemId);
   };
 
-  if (!selectedVehicleId) {
-    return <NoVehicleSelected />;
-  }
+  const handleCreateDefaults = () => {
+    if (vehicleId) {
+      createDefaultItems(vehicleId);
+    }
+  };
 
-  if (isLoading) {
-    return <LoadingTechnicalState />;
-  }
-
-  if (items.length === 0) {
+  if (!vehicleId) {
     return (
-      <EmptyTechnicalState 
-        onCreateDefaults={() => createDefaultItems(selectedVehicleId)}
-        isCreating={isCreatingDefaultItems}
+      <NoVehicleSelected 
+        isOpen={isOpen}
+        onClose={onClose}
       />
     );
   }
 
   return (
-    <div className="space-y-6">
-      <TechnicalPanelHeader 
-        selectedVehicleId={selectedVehicleId}
-        onVehicleChange={onVehicleChange}
-        onClose={onClose}
-      />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+        <TechnicalPanelHeader
+          vehicleName={vehicleName}
+          loading={isLoading}
+          itemsCount={items.length}
+          onRefresh={() => window.location.reload()}
+          onCreateDefaults={handleCreateDefaults}
+        />
 
-      <MainItemsSection
-        items={items}
-        editingItem={editingItem}
-        onEdit={handleEdit}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onUpdate={handleUpdate}
-      />
+        <div className="space-y-6 p-1">
+          {isLoading ? (
+            <LoadingTechnicalState />
+          ) : items.length === 0 ? (
+            <EmptyTechnicalState 
+              onCreateDefaults={handleCreateDefaults}
+            />
+          ) : (
+            <>
+              <MainItemsSection
+                items={items}
+                editingItem={editingItem}
+                onEdit={handleEdit}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                onUpdate={handleUpdate}
+              />
 
-      <OtherItemsSection
-        items={items}
-        editingItem={editingItem}
-        onEdit={handleEdit}
-        onSave={handleSave}
-        onCancel={handleCancel}
-        onUpdate={handleUpdate}
-        onAddItem={handleAddItem}
-        onDeleteItem={handleDeleteItem}
-      />
-    </div>
+              <OtherItemsSection
+                items={items}
+                editingItem={editingItem}
+                onEdit={handleEdit}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                onUpdate={handleUpdate}
+                onAddItem={handleAddItem}
+                onDeleteItem={handleDeleteItem}
+              />
+            </>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

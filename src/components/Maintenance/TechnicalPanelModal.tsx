@@ -13,7 +13,7 @@ interface TechnicalPanelModalProps {
 }
 
 const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: TechnicalPanelModalProps) => {
-  const { items, loading, updateItem, createDefaultItems, refresh } = useTechnicalItems(vehicleId);
+  const { items, isLoading, updateItem, createDefaultItems } = useTechnicalItems(vehicleId);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   const handleEdit = (itemId: string) => {
@@ -29,15 +29,17 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
   };
 
   const handleUpdate = (itemId: string, updates: Partial<TechnicalItem>) => {
-    updateItem(itemId, updates);
+    updateItem({ itemId, updates });
   };
 
   const handleCreateDefaults = () => {
-    createDefaultItems();
+    if (vehicleId) {
+      createDefaultItems(vehicleId);
+    }
   };
 
   const handleRefresh = () => {
-    refresh();
+    window.location.reload();
   };
 
   return (
@@ -45,7 +47,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
         <TechnicalPanelHeader
           vehicleName={vehicleName}
-          loading={loading}
+          loading={isLoading}
           itemsCount={items.length}
           onRefresh={handleRefresh}
           onCreateDefaults={handleCreateDefaults}
@@ -54,7 +56,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
         <div className="space-y-6 p-1">
           <TechnicalPanelContent
             items={items}
-            loading={loading}
+            loading={isLoading}
             editingItem={editingItem}
             onEdit={handleEdit}
             onSave={handleSave}
