@@ -2,8 +2,19 @@ import React, { useState } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { toast } from '@/hooks/use-toast';
-import { Car, X, Save, ExternalLink, Wrench } from 'lucide-react';
+import { Car, X, Save, ExternalLink, Wrench, Trash2 } from 'lucide-react';
 import BasicInfoForm from './forms/BasicInfoForm';
 import FinancialInfoForm from './forms/FinancialInfoForm';
 import SaleInfoForm from './forms/SaleInfoForm';
@@ -14,9 +25,13 @@ import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
 import { useAuth } from '../../contexts/AuthContext';
 
-const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }: VehicleFormProps) => {
+interface ExtendedVehicleFormProps extends VehicleFormProps {
+  onDelete?: (id: string) => Promise<void>;
+}
+
+const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, onDelete }: ExtendedVehicleFormProps) => {
   const { t } = useLanguage();
-  const { isAdmin, isInternalSeller } = useAuth();
+  const { isAdmin, isInternalSeller, canEditVehicles } = useAuth();
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   
   const {
@@ -38,6 +53,26 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
+  };
+
+  const handleDelete = async () => {
+    if (onDelete && editingVehicle?.id) {
+      try {
+        await onDelete(editingVehicle.id);
+        toast({
+          title: t('success'),
+          description: 'Veículo excluído com sucesso!',
+        });
+        onClose();
+      } catch (error) {
+        console.error('Error deleting vehicle:', error);
+        toast({
+          title: t('error'),
+          description: 'Erro ao excluir veículo.',
+          variant: 'destructive',
+        });
+      }
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,12 +177,35 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers }:
                   title="Ver Carfax"
                 >
                   <img 
-                    src="/lovable-uploads/c0940bfc-455c-4f29-b281-d3e148371e8d.png" 
+                    src="/lovable-uploads/f4315c70-bf51-4461-916d-f4f2c3305516.png" 
                     alt="Carfax" 
                     className="h-4 w-4"
                   />
                   Carfax
                 </Button>
+              )}
+              {canEditVehicles && isEditing && onDelete && (
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" size="sm" disabled={isLoading}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja excluir este veículo? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                        Excluir
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               )}
               <Button variant="ghost" size="icon" onClick={onClose} disabled={isLoading}>
                 <X className="h-4 w-4" />

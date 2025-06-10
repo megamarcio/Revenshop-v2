@@ -4,7 +4,7 @@ export interface VehicleFormData {
   vin: string;
   year: string;
   model: string;
-  plate: string;
+  miles: string;
   internalCode: string;
   color: string;
   caNote: string;
@@ -36,4 +36,5 @@ export interface VehicleFormProps {
   onSave: (vehicle: any) => void;
   editingVehicle?: any;
   onNavigateToCustomers?: () => void;
+  onDelete?: (id: string) => Promise<void>;
 }
