@@ -2,12 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { MessageCircle, Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { MessageCircle, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import WhatsAppGroupCard from './WhatsAppGroupCard';
+import WhatsAppGroupForm from './WhatsAppGroupForm';
 
 interface WhatsAppGroup {
   id?: string;
@@ -89,14 +88,20 @@ const WhatsAppIntegration = () => {
           description: "Grupo atualizado com sucesso!",
         });
       } else {
-        // Criar novo grupo
+        // Criar novo grupo - obter user_id primeiro
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) {
+          throw new Error('Usuário não autenticado');
+        }
+
         const { error } = await supabase
           .from('whatsapp_groups')
-          .insert([{
+          .insert({
             name: group.name,
             description: group.description,
-            phone: group.phone
-          }]);
+            phone: group.phone,
+            user_id: user.user.id
+          });
 
         if (error) throw error;
 
@@ -198,59 +203,13 @@ const WhatsAppIntegration = () => {
         <CardContent className="space-y-4">
           {/* Formulário para novo grupo */}
           {isAddingGroup && (
-            <Card className="border-dashed">
-              <CardContent className="p-4 space-y-4">
-                <h4 className="font-medium">Novo Grupo</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-name">Nome do Grupo *</Label>
-                    <Input
-                      id="new-name"
-                      value={newGroup.name}
-                      onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                      placeholder="Ex: Vendas Orlando"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="new-phone">Telefone do Grupo *</Label>
-                    <Input
-                      id="new-phone"
-                      value={newGroup.phone}
-                      onChange={(e) => setNewGroup({ ...newGroup, phone: e.target.value })}
-                      placeholder="Ex: +1234567890"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="new-description">Descrição</Label>
-                  <Textarea
-                    id="new-description"
-                    value={newGroup.description}
-                    onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
-                    placeholder="Descrição do grupo..."
-                    rows={2}
-                  />
-                </div>
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => saveGroup(newGroup)}
-                    disabled={isLoading}
-                    className="flex items-center gap-2"
-                  >
-                    <Save className="h-4 w-4" />
-                    Salvar
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    onClick={handleCancelEdit}
-                    disabled={isLoading}
-                  >
-                    <X className="h-4 w-4" />
-                    Cancelar
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+            <WhatsAppGroupForm
+              newGroup={newGroup}
+              isLoading={isLoading}
+              onSave={saveGroup}
+              onCancel={handleCancelEdit}
+              onChange={setNewGroup}
+            />
           )}
 
           {/* Lista de grupos */}
@@ -261,90 +220,18 @@ const WhatsAppIntegration = () => {
               </div>
             ) : (
               groups.map((group) => (
-                <Card key={group.id}>
-                  <CardContent className="p-4">
-                    {editingGroup?.id === group.id ? (
-                      // Modo de edição
-                      <div className="space-y-4">
-                        <h4 className="font-medium">Editando Grupo</h4>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <Label>Nome do Grupo *</Label>
-                            <Input
-                              value={editingGroup.name}
-                              onChange={(e) => setEditingGroup({ ...editingGroup, name: e.target.value })}
-                              placeholder="Ex: Vendas Orlando"
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <Label>Telefone do Grupo *</Label>
-                            <Input
-                              value={editingGroup.phone}
-                              onChange={(e) => setEditingGroup({ ...editingGroup, phone: e.target.value })}
-                              placeholder="Ex: +1234567890"
-                            />
-                          </div>
-                        </div>
-                        <div className="space-y-2">
-                          <Label>Descrição</Label>
-                          <Textarea
-                            value={editingGroup.description}
-                            onChange={(e) => setEditingGroup({ ...editingGroup, description: e.target.value })}
-                            placeholder="Descrição do grupo..."
-                            rows={2}
-                          />
-                        </div>
-                        <div className="flex gap-2">
-                          <Button 
-                            onClick={() => saveGroup(editingGroup)}
-                            disabled={isLoading}
-                            className="flex items-center gap-2"
-                          >
-                            <Save className="h-4 w-4" />
-                            Salvar
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            onClick={handleCancelEdit}
-                            disabled={isLoading}
-                          >
-                            <X className="h-4 w-4" />
-                            Cancelar
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      // Modo de visualização
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <h4 className="font-medium">{group.name}</h4>
-                          <p className="text-sm text-muted-foreground">{group.phone}</p>
-                          {group.description && (
-                            <p className="text-sm text-muted-foreground mt-1">{group.description}</p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEdit(group)}
-                            disabled={isLoading || editingGroup !== null || isAddingGroup}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => deleteGroup(group.id!)}
-                            disabled={isLoading || editingGroup !== null || isAddingGroup}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
+                <WhatsAppGroupCard
+                  key={group.id}
+                  group={group}
+                  isEditing={editingGroup?.id === group.id}
+                  editingGroup={editingGroup}
+                  isLoading={isLoading}
+                  onEdit={handleEdit}
+                  onSave={saveGroup}
+                  onDelete={deleteGroup}
+                  onCancel={handleCancelEdit}
+                  onEditingChange={setEditingGroup}
+                />
               ))
             )}
           </div>
