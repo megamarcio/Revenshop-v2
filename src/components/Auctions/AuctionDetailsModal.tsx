@@ -1,8 +1,13 @@
-
 import React from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ExternalLink, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface AuctionDetailsModalProps {
   auction: any;
@@ -10,9 +15,44 @@ interface AuctionDetailsModalProps {
 }
 
 const AuctionDetailsModal = ({ auction, onClose }: AuctionDetailsModalProps) => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { canEditVehicles } = useAuth();
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from('auctions')
+        .delete()
+        .eq('id', auction.id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auctions'] });
+      toast({
+        title: 'Sucesso',
+        description: 'Leilão excluído com sucesso!',
+      });
+      onClose();
+    },
+    onError: (error) => {
+      console.error('Error deleting auction:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir leilão.',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const calculateProfitMargin = () => {
     if (!auction.carfax_value || !auction.mmr_value || auction.mmr_value === 0) return null;
     return ((auction.carfax_value - auction.mmr_value) / auction.mmr_value * 100).toFixed(1);
+  };
+
+  const handleDelete = () => {
+    deleteMutation.mutate();
   };
 
   const profitMargin = calculateProfitMargin();
@@ -21,9 +61,34 @@ const AuctionDetailsModal = ({ auction, onClose }: AuctionDetailsModalProps) => 
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl font-bold">
-            Detalhes do Leilão - {auction.car_name} ({auction.car_year})
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl font-bold">
+              Detalhes do Leilão - {auction.car_name} ({auction.car_year})
+            </DialogTitle>
+            {canEditVehicles && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="destructive" size="sm">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Tem certeza de que deseja excluir este leilão? Esta ação não pode ser desfeita.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction onClick={handleDelete} disabled={deleteMutation.isPending}>
+                      {deleteMutation.isPending ? 'Excluindo...' : 'Excluir'}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
