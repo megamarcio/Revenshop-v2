@@ -25,6 +25,7 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
   const [name, setName] = useState(item.name);
   const [status, setStatus] = useState(item.status);
   const [nextChange, setNextChange] = useState(item.next_change || '');
+  const [miles, setMiles] = useState(item.miles || '');
 
   // Reset local state when item changes or editing stops
   useEffect(() => {
@@ -32,11 +33,12 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
       setName(item.name);
       setStatus(item.status);
       setNextChange(item.next_change || '');
+      setMiles(item.miles || '');
     }
   }, [item, isEditing]);
 
   const handleSave = () => {
-    onUpdate(item.id, { name, status, next_change: nextChange });
+    onUpdate(item.id, { name, status, next_change: nextChange, miles });
     onSave();
   };
 
@@ -44,6 +46,7 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
     setName(item.name);
     setStatus(item.status);
     setNextChange(item.next_change || '');
+    setMiles(item.miles || '');
     onCancel();
   };
 
@@ -65,8 +68,27 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
     onUpdate(item.id, { next_change: value });
   };
 
+  const handleMilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setMiles(value);
+    onUpdate(item.id, { miles: value });
+  };
+
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case 'em-dia': 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Em Dia</span>;
+      case 'proximo-troca': 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Próximo da Troca</span>;
+      case 'trocar': 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Trocar</span>;
+      default: 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>;
+    }
+  };
+
   return (
-    <div className="grid grid-cols-5 gap-4 items-center">
+    <div className="grid grid-cols-5 gap-3 items-center py-2">
       <div>
         {isEditing ? (
           <Input 
@@ -74,15 +96,16 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
             value={name} 
             onChange={handleNameChange} 
             placeholder="Nome do item"
+            className="text-sm"
           />
         ) : (
-          <span>{item.name}</span>
+          <span className="text-sm">{item.name}</span>
         )}
       </div>
       <div>
         {isEditing ? (
           <Select value={status} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-full text-sm">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -94,7 +117,7 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
             </SelectContent>
           </Select>
         ) : (
-          <span>{statusOptions.find(option => option.value === item.status)?.label}</span>
+          getStatusDisplay(item.status)
         )}
       </div>
       <div>
@@ -104,27 +127,38 @@ const EditableItemRow = ({ item, isEditing, onEdit, onSave, onCancel, onUpdate }
             placeholder="Próxima troca"
             value={nextChange}
             onChange={handleNextChangeChange}
+            className="text-sm"
           />
         ) : (
-          <span>{item.next_change || 'N/A'}</span>
+          <span className="text-sm">{item.next_change || 'N/A'}</span>
         )}
       </div>
-      <div className="col-span-2 flex justify-end gap-2">
+      <div>
+        {isEditing ? (
+          <Input
+            type="text"
+            placeholder="Milhas"
+            value={miles}
+            onChange={handleMilesChange}
+            className="text-sm"
+          />
+        ) : (
+          <span className="text-sm">{item.miles ? `${item.miles} miles` : 'N/A'}</span>
+        )}
+      </div>
+      <div className="flex justify-end gap-1">
         {isEditing ? (
           <>
-            <Button size="sm" variant="outline" onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Salvar
+            <Button size="sm" variant="outline" onClick={handleSave} className="h-6 px-2 text-xs">
+              <Save className="h-3 w-3" />
             </Button>
-            <Button size="sm" variant="ghost" onClick={handleCancel}>
-              <X className="h-4 w-4 mr-2" />
-              Cancelar
+            <Button size="sm" variant="ghost" onClick={handleCancel} className="h-6 px-2 text-xs">
+              <X className="h-3 w-3" />
             </Button>
           </>
         ) : (
-          <Button size="sm" onClick={() => onEdit(item.id)}>
-            <Edit2 className="h-4 w-4 mr-2" />
-            Editar
+          <Button size="sm" onClick={() => onEdit(item.id)} className="h-6 px-2 text-xs">
+            <Edit2 className="h-3 w-3" />
           </Button>
         )}
       </div>

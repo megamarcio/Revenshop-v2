@@ -6,7 +6,6 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit2, Save, X, LucideIcon } from 'lucide-react';
 import { TechnicalItem } from '../../../hooks/useTechnicalItems';
-import StatusIcon from './StatusIcon';
 
 interface MainItemCardProps {
   title: string;
@@ -32,6 +31,8 @@ const MainItemCard = ({
   const [status, setStatus] = useState(item.status);
   const [miles, setMiles] = useState(item.miles || '');
   const [nextChange, setNextChange] = useState(item.next_change || '');
+  const [extraInfo, setExtraInfo] = useState(item.extraInfo || '');
+  const [tireBrand, setTireBrand] = useState(item.tireBrand || '');
 
   // Reset local state when item changes or editing stops
   useEffect(() => {
@@ -39,6 +40,8 @@ const MainItemCard = ({
       setStatus(item.status);
       setMiles(item.miles || '');
       setNextChange(item.next_change || '');
+      setExtraInfo(item.extraInfo || '');
+      setTireBrand(item.tireBrand || '');
     }
   }, [item, isEditing]);
 
@@ -52,12 +55,44 @@ const MainItemCard = ({
     const value = e.target.value;
     setMiles(value);
     onUpdate(item.id, { miles: value });
+    
+    // Auto-calculate next change for oil
+    if (item.type === 'oil' && value) {
+      const currentMiles = parseInt(value);
+      if (!isNaN(currentMiles)) {
+        const nextMiles = currentMiles + 5000;
+        setNextChange(nextMiles.toString() + ' miles');
+        onUpdate(item.id, { next_change: nextMiles.toString() + ' miles' });
+      }
+    }
   };
 
-  const handleNextChangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleExtraInfoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    setNextChange(value);
-    onUpdate(item.id, { next_change: value });
+    setExtraInfo(value);
+    onUpdate(item.id, { extraInfo: value });
+  };
+
+  const handleTireBrandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setTireBrand(value);
+    onUpdate(item.id, { tireBrand: value });
+  };
+
+  const handleBatteryDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setExtraInfo(value);
+    onUpdate(item.id, { extraInfo: value });
+    
+    // Auto-calculate next change for battery (2 years later)
+    if (value) {
+      const currentDate = new Date(value);
+      const nextDate = new Date(currentDate);
+      nextDate.setFullYear(currentDate.getFullYear() + 2);
+      const formattedNextDate = nextDate.toISOString().split('T')[0];
+      setNextChange(formattedNextDate);
+      onUpdate(item.id, { next_change: formattedNextDate });
+    }
   };
 
   const handleSave = () => {
@@ -69,94 +104,171 @@ const MainItemCard = ({
     setStatus(item.status);
     setMiles(item.miles || '');
     setNextChange(item.next_change || '');
+    setExtraInfo(item.extraInfo || '');
+    setTireBrand(item.tireBrand || '');
     onCancel();
   };
 
-  const getStatusLabel = (status: string) => {
+  const getStatusDisplay = (status: string) => {
     switch (status) {
-      case 'em-dia': return 'Em Dia';
-      case 'proximo-troca': return 'Próximo da Troca';
-      case 'trocar': return 'Trocar';
-      default: return status;
+      case 'em-dia': 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Em Dia</span>;
+      case 'proximo-troca': 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Próximo da Troca</span>;
+      case 'trocar': 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">Trocar</span>;
+      default: 
+        return <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>;
     }
   };
 
-  return (
-    <Card className="transition-all duration-200 hover:shadow-md">
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between text-base">
-          <div className="flex items-center gap-2">
-            <div className="p-1.5 rounded-md bg-gray-100">
-              <Icon className="h-4 w-4 text-gray-600" />
-            </div>
-            <span>{title}</span>
+  const renderSpecificFields = () => {
+    if (item.type === 'oil') {
+      return (
+        <>
+          <div>
+            <label className="text-xs text-gray-700 block mb-1">
+              Milhas Atual
+            </label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={miles}
+                onChange={handleMilesChange}
+                placeholder="Ex: 50000"
+                className="text-sm"
+              />
+            ) : (
+              <span className="text-sm">{miles || 'N/A'} miles</span>
+            )}
           </div>
-          <StatusIcon status={item.status} />
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isEditing ? (
-          <div className="grid gap-4">
-            <div>
-              <label className="text-sm text-gray-700 block mb-1">Status</label>
-              <Select value={status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Selecione o status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="em-dia">Em Dia</SelectItem>
-                  <SelectItem value="proximo-troca">Próximo da Troca</SelectItem>
-                  <SelectItem value="trocar">Trocar</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <label className="text-sm text-gray-700 block mb-1">
-                Quilometragem (KM)
-              </label>
+          <div>
+            <label className="text-xs text-gray-700 block mb-1">
+              Próxima Troca
+            </label>
+            <span className="text-sm">{nextChange || 'N/A'}</span>
+          </div>
+        </>
+      );
+    }
+
+    if (item.type === 'battery') {
+      return (
+        <>
+          <div>
+            <label className="text-xs text-gray-700 block mb-1">
+              Data Atual da Bateria
+            </label>
+            {isEditing ? (
+              <Input
+                type="date"
+                value={extraInfo}
+                onChange={handleBatteryDateChange}
+                className="text-sm"
+              />
+            ) : (
+              <span className="text-sm">{extraInfo || 'N/A'}</span>
+            )}
+          </div>
+          <div>
+            <label className="text-xs text-gray-700 block mb-1">
+              Próxima Troca
+            </label>
+            <span className="text-sm">{nextChange || 'N/A'}</span>
+          </div>
+        </>
+      );
+    }
+
+    if (item.type === 'tires') {
+      return (
+        <>
+          <div>
+            <label className="text-xs text-gray-700 block mb-1">
+              Tamanho do Pneu
+            </label>
+            {isEditing ? (
+              <Input
+                type="text"
+                value={tireBrand}
+                onChange={handleTireBrandChange}
+                placeholder="Ex: 235/75 R17"
+                className="text-sm"
+              />
+            ) : (
+              <span className="text-sm">{tireBrand || 'N/A'}</span>
+            )}
+          </div>
+          <div>
+            <label className="text-xs text-gray-700 block mb-1">
+              Milhas
+            </label>
+            {isEditing ? (
               <Input
                 type="text"
                 value={miles}
                 onChange={handleMilesChange}
                 placeholder="Ex: 50000"
+                className="text-sm"
               />
-            </div>
-            <div>
-              <label className="text-sm text-gray-700 block mb-1">
-                Próxima troca (Data)
-              </label>
-              <Input
-                type="date"
-                value={nextChange}
-                onChange={handleNextChangeChange}
-                placeholder="Data da próxima troca"
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <Button variant="ghost" size="sm" onClick={handleCancel}>
-                <X className="h-4 w-4 mr-2" />
-                Cancelar
-              </Button>
-              <Button size="sm" onClick={handleSave}>
-                <Save className="h-4 w-4 mr-2" />
-                Salvar
-              </Button>
-            </div>
+            ) : (
+              <span className="text-sm">{miles || 'N/A'} miles</span>
+            )}
           </div>
-        ) : (
-          <div className="grid gap-3">
-            <div className="text-sm text-gray-600">
-              Status: <span className="font-medium">{getStatusLabel(item.status)}</span>
+        </>
+      );
+    }
+
+    return null;
+  };
+
+  return (
+    <Card className="transition-all duration-200 hover:shadow-md">
+      <CardHeader className="pb-2">
+        <CardTitle className="flex items-center justify-between text-sm">
+          <div className="flex items-center gap-2">
+            <div className="p-1 rounded-md bg-gray-100">
+              <Icon className="h-3 w-3 text-gray-600" />
             </div>
-            <div className="text-sm text-gray-600">
-              Quilometragem: <span className="font-medium">{item.miles || 'N/A'}</span>
-            </div>
-            <div className="text-sm text-gray-600">
-              Próxima troca: <span className="font-medium">{item.next_change || 'N/A'}</span>
-            </div>
-            <Button variant="outline" size="sm" onClick={() => onEdit(item.id)} className="mt-2">
-              <Edit2 className="h-4 w-4 mr-2" />
-              Editar
+            <span className="text-sm">{title}</span>
+          </div>
+          {!isEditing && (
+            <Button variant="outline" size="sm" onClick={() => onEdit(item.id)} className="h-6 px-2 text-xs">
+              <Edit2 className="h-3 w-3" />
+            </Button>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0 space-y-2">
+        <div>
+          <label className="text-xs text-gray-700 block mb-1">Status</label>
+          {isEditing ? (
+            <Select value={status} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-full text-sm">
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="em-dia">Em Dia</SelectItem>
+                <SelectItem value="proximo-troca">Próximo da Troca</SelectItem>
+                <SelectItem value="trocar">Trocar</SelectItem>
+              </SelectContent>
+            </Select>
+          ) : (
+            getStatusDisplay(item.status)
+          )}
+        </div>
+
+        {renderSpecificFields()}
+
+        {isEditing && (
+          <div className="flex justify-end gap-1 pt-2">
+            <Button variant="ghost" size="sm" onClick={handleCancel} className="h-6 px-2 text-xs">
+              <X className="h-3 w-3 mr-1" />
+              Cancelar
+            </Button>
+            <Button size="sm" onClick={handleSave} className="h-6 px-2 text-xs">
+              <Save className="h-3 w-3 mr-1" />
+              Salvar
             </Button>
           </div>
         )}

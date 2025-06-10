@@ -38,20 +38,20 @@ const OtherItemsSection = ({
 
   if (otherItems.length === 0) {
     return (
-      <div className="space-y-4">
-        <h2 className="text-xl font-semibold text-gray-900">Outros Itens</h2>
-        <div className="text-center py-8">
-          <p className="text-gray-500">Nenhum outro item encontrado</p>
+      <div className="space-y-3">
+        <h2 className="text-lg font-semibold text-gray-900">Outros Itens</h2>
+        <div className="text-center py-6">
+          <p className="text-sm text-gray-500">Nenhum outro item encontrado</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-gray-900">Outros Itens</h2>
+    <div className="space-y-4">
+      <h2 className="text-lg font-semibold text-gray-900">Outros Itens</h2>
       <div className="bg-white border rounded-lg overflow-hidden">
-        <div className="grid grid-cols-5 gap-4 items-center p-4 bg-gray-50 border-b font-medium text-sm text-gray-700">
+        <div className="grid grid-cols-5 gap-3 items-center p-3 bg-gray-50 border-b font-medium text-xs text-gray-700">
           <div>Nome do Item</div>
           <div>Status</div>
           <div>Próxima Troca</div>
@@ -60,7 +60,7 @@ const OtherItemsSection = ({
         </div>
         <div className="divide-y">
           {otherItems.map((item) => (
-            <div key={item.id} className="p-4">
+            <div key={item.id} className="px-3">
               <EditableItemRow
                 item={item}
                 isEditing={editingItem === item.id}
