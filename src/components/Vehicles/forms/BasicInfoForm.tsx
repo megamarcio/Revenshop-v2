@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ChevronDown } from 'lucide-react';
@@ -36,6 +37,35 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
 
   console.log('BasicInfoForm - titleType state:', titleType);
   console.log('BasicInfoForm - isExpanded state:', isExpanded);
+
+  const colorOptions = [
+    { value: 'White', color: '#FFFFFF', border: true },
+    { value: 'Black', color: '#000000' },
+    { value: 'Gray', color: '#808080' },
+    { value: 'Silver', color: '#C0C0C0' },
+    { value: 'Blue', color: '#0000FF' },
+    { value: 'Red', color: '#FF0000' },
+    { value: 'Green', color: '#008000' },
+    { value: 'Yellow', color: '#FFFF00' },
+    { value: 'Orange', color: '#FFA500' },
+    { value: 'Brown', color: '#A52A2A' },
+    { value: 'Beige', color: '#F5F5DC' },
+    { value: 'Gold', color: '#FFD700' },
+    { value: 'Purple', color: '#800080' },
+    { value: 'Pink', color: '#FFC0CB' },
+    { value: 'Maroon', color: '#800000' },
+    { value: 'Burgundy', color: '#722F37' },
+    { value: 'Navy Blue', color: '#000080' },
+    { value: 'Dark Green', color: '#006400' },
+    { value: 'Light Blue', color: '#ADD8E6' },
+    { value: 'Light Gray', color: '#D3D3D3' },
+    { value: 'Dark Gray', color: '#696969' },
+    { value: 'Matte Black', color: '#28282B' },
+    { value: 'Pearl White', color: '#F8F6F0' },
+    { value: 'Champagne', color: '#F7E7CE' },
+    { value: 'Teal', color: '#008080' },
+    { value: 'Bronze', color: '#CD7F32' }
+  ];
 
   const handleTitleTypeChange = (value: string) => {
     console.log('BasicInfoForm - handleTitleTypeChange:', value);
@@ -200,13 +230,24 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
 
         <div className="space-y-2">
           <Label htmlFor="color">Cor *</Label>
-          <Input
-            id="color"
-            value={formData.color}
-            onChange={(e) => onInputChange('color', e.target.value)}
-            placeholder="Ex: Preto"
-            className={errors.color ? 'border-red-500' : ''}
-          />
+          <Select value={formData.color} onValueChange={(value) => onInputChange('color', value)}>
+            <SelectTrigger className={errors.color ? 'border-red-500' : ''}>
+              <SelectValue placeholder="Selecione uma cor" />
+            </SelectTrigger>
+            <SelectContent>
+              {colorOptions.map((colorOption) => (
+                <SelectItem key={colorOption.value} value={colorOption.value}>
+                  <div className="flex items-center gap-2">
+                    <div 
+                      className={`w-4 h-4 rounded-full ${colorOption.border ? 'border border-gray-400' : ''}`}
+                      style={{ backgroundColor: colorOption.color }}
+                    />
+                    <span>{colorOption.value}</span>
+                  </div>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {errors.color && <p className="text-sm text-red-500">{errors.color}</p>}
         </div>
 
