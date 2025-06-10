@@ -40,7 +40,7 @@ const MaintenanceItemsSelector = ({
       {/* Itens de Manutenção */}
       <div className="space-y-2 rounded-xl">
         <Label>Itens de Manutenção</Label>
-        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border rounded-lg p-4">
+        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border p-4 mx-0 px-[16px] rounded-lg">
           {currentItems.map(item => <div key={item} className="flex items-center space-x-2">
               <Checkbox id={item} checked={maintenanceItems.includes(item)} onCheckedChange={checked => onMaintenanceItemChange(item, checked as boolean)} />
               <Label htmlFor={item} className="text-sm">{item}</Label>
