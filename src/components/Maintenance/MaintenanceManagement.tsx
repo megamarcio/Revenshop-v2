@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, Wrench } from 'lucide-react';
 import MaintenanceForm from './MaintenanceForm';
 import MaintenanceList from './MaintenanceList';
-import { useMaintenance } from '../../hooks/useMaintenance';
+import { useMaintenance } from '../../hooks/useMaintenance/index';
 
 const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();

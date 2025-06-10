@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,7 +7,7 @@ import { Calendar, Wrench, Phone, DollarSign, Filter, Trash2, Edit } from 'lucid
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../types/maintenance';
-import { useMaintenance } from '../../hooks/useMaintenance';
+import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface MaintenanceListProps {
