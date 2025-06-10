@@ -1,9 +1,12 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2 } from 'lucide-react';
 import { MaintenancePart, MaintenanceLabor } from '../../../types/maintenance';
+import PriceQuoteSection from './PriceQuoteSection';
+
 interface PartsAndLaborFormProps {
   parts: MaintenancePart[];
   labor: MaintenanceLabor[];
@@ -13,7 +16,11 @@ interface PartsAndLaborFormProps {
   onAddLabor: () => void;
   onUpdateLabor: (id: string, field: keyof MaintenanceLabor, value: string | number) => void;
   onRemoveLabor: (id: string) => void;
+  onAddQuote: (partId: string) => void;
+  onUpdateQuote: (partId: string, quoteId: string, field: string, value: string | number) => void;
+  onRemoveQuote: (partId: string, quoteId: string) => void;
 }
+
 const PartsAndLaborForm = ({
   parts,
   labor,
@@ -22,14 +29,32 @@ const PartsAndLaborForm = ({
   onRemovePart,
   onAddLabor,
   onUpdateLabor,
-  onRemoveLabor
+  onRemoveLabor,
+  onAddQuote,
+  onUpdateQuote,
+  onRemoveQuote
 }: PartsAndLaborFormProps) => {
-  const calculateTotal = () => {
-    const partsTotal = parts.reduce((sum, part) => sum + (part.value || 0), 0);
-    const laborTotal = labor.reduce((sum, labor) => sum + (labor.value || 0), 0);
-    return partsTotal + laborTotal;
+  const calculatePartsTotal = () => {
+    return parts.reduce((sum, part) => sum + (part.value || 0), 0);
   };
-  return <>
+
+  const calculateQuotesTotal = () => {
+    return parts.reduce((sum, part) => {
+      const partQuotesTotal = part.priceQuotes?.reduce((partSum, quote) => partSum + (quote.estimatedPrice || 0), 0) || 0;
+      return sum + partQuotesTotal;
+    }, 0);
+  };
+
+  const calculateLaborTotal = () => {
+    return labor.reduce((sum, labor) => sum + (labor.value || 0), 0);
+  };
+
+  const calculateGrandTotal = () => {
+    return calculatePartsTotal() + calculateLaborTotal();
+  };
+
+  return (
+    <>
       {/* Peças */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -39,19 +64,47 @@ const PartsAndLaborForm = ({
             Adicionar Peça
           </Button>
         </div>
-        {parts.map(part => <div key={part.id} className="flex gap-2 items-end">
-            <div className="flex-1">
-              <Label>Nome da Peça</Label>
-              <Input value={part.name} onChange={e => onUpdatePart(part.id, 'name', e.target.value)} placeholder="Ex: Filtro de óleo" />
+        
+        {parts.map(part => (
+          <div key={part.id} className="space-y-2">
+            <div className="flex gap-2 items-end">
+              <div className="flex-1">
+                <Label>Nome da Peça</Label>
+                <Input 
+                  value={part.name} 
+                  onChange={e => onUpdatePart(part.id, 'name', e.target.value)} 
+                  placeholder="Ex: Filtro de óleo" 
+                />
+              </div>
+              <div className="w-32">
+                <Label>Valor Real (R$)</Label>
+                <Input 
+                  type="number" 
+                  value={part.value} 
+                  onChange={e => onUpdatePart(part.id, 'value', parseFloat(e.target.value) || 0)} 
+                  placeholder="0,00" 
+                />
+              </div>
+              <Button 
+                type="button" 
+                onClick={() => onRemovePart(part.id)} 
+                size="sm" 
+                variant="destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
             </div>
-            <div className="w-32">
-              <Label>Valor (R$)</Label>
-              <Input type="number" value={part.value} onChange={e => onUpdatePart(part.id, 'value', parseFloat(e.target.value) || 0)} placeholder="0,00" />
-            </div>
-            <Button type="button" onClick={() => onRemovePart(part.id)} size="sm" variant="destructive">
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>)}
+
+            <PriceQuoteSection
+              partId={part.id}
+              partName={part.name || 'Peça sem nome'}
+              quotes={part.priceQuotes || []}
+              onAddQuote={onAddQuote}
+              onUpdateQuote={onUpdateQuote}
+              onRemoveQuote={onRemoveQuote}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Mão de Obra */}
@@ -63,30 +116,83 @@ const PartsAndLaborForm = ({
             Adicionar Serviço
           </Button>
         </div>
-        {labor.map(laborItem => <div key={laborItem.id} className="flex gap-2 items-end">
+        {labor.map(laborItem => (
+          <div key={laborItem.id} className="flex gap-2 items-end">
             <div className="flex-1">
               <Label>Descrição do Serviço</Label>
-              <Input value={laborItem.description} onChange={e => onUpdateLabor(laborItem.id, 'description', e.target.value)} placeholder="Ex: Instalação do filtro" />
+              <Input 
+                value={laborItem.description} 
+                onChange={e => onUpdateLabor(laborItem.id, 'description', e.target.value)} 
+                placeholder="Ex: Instalação do filtro" 
+              />
             </div>
             <div className="w-32">
               <Label>Valor (R$)</Label>
-              <Input type="number" value={laborItem.value} onChange={e => onUpdateLabor(laborItem.id, 'value', parseFloat(e.target.value) || 0)} placeholder="0,00" />
+              <Input 
+                type="number" 
+                value={laborItem.value} 
+                onChange={e => onUpdateLabor(laborItem.id, 'value', parseFloat(e.target.value) || 0)} 
+                placeholder="0,00" 
+              />
             </div>
-            <Button type="button" onClick={() => onRemoveLabor(laborItem.id)} size="sm" variant="destructive">
+            <Button 
+              type="button" 
+              onClick={() => onRemoveLabor(laborItem.id)} 
+              size="sm" 
+              variant="destructive"
+            >
               <Trash2 className="h-4 w-4" />
             </Button>
-          </div>)}
+          </div>
+        ))}
       </div>
 
-      {/* Valor Total */}
-      <div className="bg-gray-50 p-4 rounded-lg">
-        <div className="flex justify-between items-center">
-          <span className="text-lg font-semibold">Valor Total:</span>
-          <span className="text-revenshop-primary text-xl font-bold text-left">
-            R$ {calculateTotal().toFixed(2).replace('.', ',')}
-          </span>
+      {/* Resumo Financeiro */}
+      <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+        <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="flex justify-between">
+            <span>Peças Utilizadas:</span>
+            <span className="font-medium">
+              R$ {calculatePartsTotal().toFixed(2).replace('.', ',')}
+            </span>
+          </div>
+          
+          <div className="flex justify-between">
+            <span>Mão de Obra:</span>
+            <span className="font-medium">
+              R$ {calculateLaborTotal().toFixed(2).replace('.', ',')}
+            </span>
+          </div>
+
+          <div className="flex justify-between text-blue-700">
+            <span>Orçamento de Peças:</span>
+            <span className="font-medium">
+              R$ {calculateQuotesTotal().toFixed(2).replace('.', ',')}
+            </span>
+          </div>
+          
+          <div className="flex justify-between text-revenshop-primary font-semibold">
+            <span>Valor Total Real:</span>
+            <span>R$ {calculateGrandTotal().toFixed(2).replace('.', ',')}</span>
+          </div>
         </div>
+
+        {calculateQuotesTotal() > 0 && (
+          <div className="border-t pt-3 mt-3">
+            <div className="flex justify-between items-center text-blue-800 bg-blue-100 p-2 rounded">
+              <span className="font-semibold">Valor Estimado Total:</span>
+              <span className="text-lg font-bold">
+                R$ {(calculateQuotesTotal() + calculateLaborTotal()).toFixed(2).replace('.', ',')}
+              </span>
+            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              * Baseado nas cotações de preços coletadas
+            </p>
+          </div>
+        )}
       </div>
-    </>;
+    </>
+  );
 };
+
 export default PartsAndLaborForm;

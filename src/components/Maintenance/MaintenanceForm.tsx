@@ -66,12 +66,65 @@ const MaintenanceForm = ({
     calculateTotal,
     getMaintenanceStatus
   });
+
+  // Funções para gerenciar cotações de preços
+  const handleAddQuote = (partId: string) => {
+    const newQuote = {
+      id: crypto.randomUUID(),
+      website: '',
+      websiteUrl: '',
+      partUrl: '',
+      estimatedPrice: 0
+    };
+    
+    setFormData(prev => ({
+      ...prev,
+      parts: prev.parts.map(part => 
+        part.id === partId 
+          ? { ...part, priceQuotes: [...(part.priceQuotes || []), newQuote] }
+          : part
+      )
+    }));
+  };
+
+  const handleUpdateQuote = (partId: string, quoteId: string, field: string, value: string | number) => {
+    setFormData(prev => ({
+      ...prev,
+      parts: prev.parts.map(part => 
+        part.id === partId 
+          ? {
+              ...part,
+              priceQuotes: (part.priceQuotes || []).map(quote =>
+                quote.id === quoteId 
+                  ? { ...quote, [field]: value }
+                  : quote
+              )
+            }
+          : part
+      )
+    }));
+  };
+
+  const handleRemoveQuote = (partId: string, quoteId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      parts: prev.parts.map(part => 
+        part.id === partId 
+          ? {
+              ...part,
+              priceQuotes: (part.priceQuotes || []).filter(quote => quote.id !== quoteId)
+            }
+          : part
+      )
+    }));
+  };
+
   const isEditing = !!editingMaintenance;
   const status = getMaintenanceStatus();
   const statusColor = getStatusColor();
   const statusText = getStatusText();
   return <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto mx-[16px] my-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-[16px] my-0">
         <MaintenanceFormHeader isEditing={isEditing} status={status} statusColor={statusColor} statusText={statusText} />
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -113,53 +166,66 @@ const MaintenanceForm = ({
           details: details
         }))} />
 
-          <PartsAndLaborForm parts={formData.parts} labor={formData.labor} onAddPart={() => {
-          const newPart = {
-            id: crypto.randomUUID(),
-            name: '',
-            value: 0
-          };
-          setFormData(prev => ({
-            ...prev,
-            parts: [...prev.parts, newPart]
-          }));
-        }} onUpdatePart={(id, field, value) => {
-          setFormData(prev => ({
-            ...prev,
-            parts: prev.parts.map(part => part.id === id ? {
-              ...part,
-              [field]: value
-            } : part)
-          }));
-        }} onRemovePart={id => {
-          setFormData(prev => ({
-            ...prev,
-            parts: prev.parts.filter(part => part.id !== id)
-          }));
-        }} onAddLabor={() => {
-          const newLabor = {
-            id: crypto.randomUUID(),
-            description: '',
-            value: 0
-          };
-          setFormData(prev => ({
-            ...prev,
-            labor: [...prev.labor, newLabor]
-          }));
-        }} onUpdateLabor={(id, field, value) => {
-          setFormData(prev => ({
-            ...prev,
-            labor: prev.labor.map(labor => labor.id === id ? {
-              ...labor,
-              [field]: value
-            } : labor)
-          }));
-        }} onRemoveLabor={id => {
-          setFormData(prev => ({
-            ...prev,
-            labor: prev.labor.filter(labor => labor.id !== id)
-          }));
-        }} />
+          <PartsAndLaborForm 
+            parts={formData.parts} 
+            labor={formData.labor} 
+            onAddPart={() => {
+              const newPart = {
+                id: crypto.randomUUID(),
+                name: '',
+                value: 0,
+                priceQuotes: []
+              };
+              setFormData(prev => ({
+                ...prev,
+                parts: [...prev.parts, newPart]
+              }));
+            }} 
+            onUpdatePart={(id, field, value) => {
+              setFormData(prev => ({
+                ...prev,
+                parts: prev.parts.map(part => part.id === id ? {
+                  ...part,
+                  [field]: value
+                } : part)
+              }));
+            }} 
+            onRemovePart={id => {
+              setFormData(prev => ({
+                ...prev,
+                parts: prev.parts.filter(part => part.id !== id)
+              }));
+            }} 
+            onAddLabor={() => {
+              const newLabor = {
+                id: crypto.randomUUID(),
+                description: '',
+                value: 0
+              };
+              setFormData(prev => ({
+                ...prev,
+                labor: [...prev.labor, newLabor]
+              }));
+            }} 
+            onUpdateLabor={(id, field, value) => {
+              setFormData(prev => ({
+                ...prev,
+                labor: prev.labor.map(labor => labor.id === id ? {
+                  ...labor,
+                  [field]: value
+                } : labor)
+              }));
+            }} 
+            onRemoveLabor={id => {
+              setFormData(prev => ({
+                ...prev,
+                labor: prev.labor.filter(labor => labor.id !== id)
+              }));
+            }}
+            onAddQuote={handleAddQuote}
+            onUpdateQuote={handleUpdateQuote}
+            onRemoveQuote={handleRemoveQuote}
+          />
 
           <ReceiptUploadForm receiptUrls={formData.receipt_urls} onReceiptUrlsChange={urls => setFormData(prev => ({
           ...prev,

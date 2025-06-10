@@ -3,6 +3,15 @@ export interface MaintenancePart {
   id: string;
   name: string;
   value: number;
+  priceQuotes: PartPriceQuote[];
+}
+
+export interface PartPriceQuote {
+  id: string;
+  website: string;
+  websiteUrl: string;
+  partUrl: string;
+  estimatedPrice: number;
 }
 
 export interface MaintenanceLabor {
@@ -48,6 +57,24 @@ export interface MaintenanceFormData {
   labor: MaintenanceLabor[];
   receipt_urls: string[];
 }
+
+export const PARTS_WEBSITES = [
+  { name: 'RockAuto', url: 'https://www.rockauto.com' },
+  { name: 'AutoZone', url: 'https://www.autozone.com' },
+  { name: 'Advance Auto Parts', url: 'https://www.advanceautoparts.com' },
+  { name: "O'Reilly Auto Parts", url: 'https://www.oreillyauto.com' },
+  { name: 'CarParts.com', url: 'https://www.carparts.com' },
+  { name: '1A Auto', url: 'https://www.1aauto.com' },
+  { name: 'Amazon Automotive', url: 'https://www.amazon.com/automotive' },
+  { name: 'eBay Motors', url: 'https://www.ebay.com/motors' },
+  { name: 'LKQ Online', url: 'https://www.lkqonline.com' },
+  { name: 'Car-Part.com', url: 'https://www.car-part.com' },
+  { name: 'PartsGeek', url: 'https://www.partsgeek.com' },
+  { name: 'Summit Racing', url: 'https://www.summitracing.com' },
+  { name: 'Tire Rack', url: 'https://www.tirerack.com' },
+  { name: 'RepairLink', url: 'https://www.repairlink.com' },
+  { name: 'Outros', url: '' }
+];
 
 export const MAINTENANCE_ITEMS = {
   preventive: [
