@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
@@ -13,21 +12,26 @@ export const useVehicleForm = (editingVehicle?: any) => {
   // Determine if editing (has valid ID) or creating/duplicating (no ID)
   const isEditing = editingVehicle && editingVehicle.id;
   
+  // Better field mapping with fallbacks
+  const getFieldValue = (primary: any, fallback: any, defaultValue: string = '') => {
+    return primary?.toString() || fallback?.toString() || defaultValue;
+  };
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
-    year: editingVehicle?.year?.toString() || '0',
+    year: getFieldValue(editingVehicle?.year, null, '0'),
     model: editingVehicle?.model || '',
-    plate: editingVehicle?.miles?.toString() || editingVehicle?.plate?.toString() || '0',
+    plate: getFieldValue(editingVehicle?.miles, editingVehicle?.plate, '0'),
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
-    caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '0',
-    titleInfo: getTitleInfo(editingVehicle),
-    purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '0',
-    salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '0',
-    minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
-    carfaxPrice: editingVehicle?.carfax_price?.toString() || editingVehicle?.carfaxPrice?.toString() || '',
-    mmrValue: editingVehicle?.mmr_value?.toString() || editingVehicle?.mmrValue?.toString() || '',
+    caNote: getFieldValue(editingVehicle?.ca_note, editingVehicle?.caNote, '0'),
+    titleInfo: editingVehicle?.titleInfo || getTitleInfo(editingVehicle) || '',
+    purchasePrice: getFieldValue(editingVehicle?.purchase_price, editingVehicle?.purchasePrice, '0'),
+    salePrice: getFieldValue(editingVehicle?.sale_price, editingVehicle?.salePrice, '0'),
+    minNegotiable: getFieldValue(editingVehicle?.min_negotiable, editingVehicle?.minNegotiable, ''),
+    carfaxPrice: getFieldValue(editingVehicle?.carfax_price, editingVehicle?.carfaxPrice, ''),
+    mmrValue: getFieldValue(editingVehicle?.mmr_value, editingVehicle?.mmrValue, ''),
     description: editingVehicle?.description || '',
     category: editingVehicle?.category || 'forSale',
     consignmentStore: editingVehicle?.consignment_store || editingVehicle?.consignmentStore || '',
@@ -54,7 +58,13 @@ export const useVehicleForm = (editingVehicle?: any) => {
 
   console.log('useVehicleForm - isEditing:', isEditing);
   console.log('useVehicleForm - formData initialized:', formData);
-  console.log('useVehicleForm - titleInfo final value:', formData.titleInfo);
+  console.log('useVehicleForm - specific field values:', {
+    year: formData.year,
+    model: formData.model,
+    plate: formData.plate,
+    color: formData.color,
+    internalCode: formData.internalCode
+  });
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     console.log('useVehicleForm - handleInputChange:', field, value);

@@ -2,7 +2,7 @@
 import { Vehicle } from '../types';
 import { extractExtendedCategory, extractConsignmentStore, cleanDescription } from './descriptionUtils';
 
-// Helper function to map database data back to our application format - CORRIGIDO
+// Helper function to map database data back to our application format
 export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
   console.log('mapDbDataToAppData - input:', dbVehicle);
   
@@ -24,34 +24,24 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
     title_status: dbVehicle.title_status
   });
   
-  // Mapear corretamente os campos do banco para o formato da aplicação
-  const mappedVehicle: Vehicle & {
-    // Add form-compatible aliases
-    plate: string;
-    internalCode: string;
-    caNote: string;
-    purchasePrice: string;
-    salePrice: string;
-    minNegotiable: string;
-    carfaxPrice: string;
-    mmrValue: string;
-    titleInfo: string;
-  } = {
+  // Map database fields correctly to application format
+  const mappedVehicle = {
+    // Core Vehicle fields
     id: dbVehicle.id,
     name: dbVehicle.name || '',
     vin: dbVehicle.vin || '',
     year: dbVehicle.year || 0,
     model: dbVehicle.model || '',
-    miles: dbVehicle.miles || 0, // Este é o campo correto no banco
+    miles: dbVehicle.miles || 0,
     internal_code: dbVehicle.internal_code || '',
     color: dbVehicle.color || '',
     ca_note: dbVehicle.ca_note || 0,
     purchase_price: dbVehicle.purchase_price || 0,
     sale_price: dbVehicle.sale_price || 0,
     profit_margin: dbVehicle.profit_margin || 0,
-    min_negotiable: dbVehicle.min_negotiable,
-    carfax_price: dbVehicle.carfax_price,
-    mmr_value: dbVehicle.mmr_value,
+    min_negotiable: dbVehicle.min_negotiable || null,
+    carfax_price: dbVehicle.carfax_price || null,
+    mmr_value: dbVehicle.mmr_value || null,
     description: cleanDesc,
     category: extendedCategory || dbVehicle.category || 'forSale',
     title_type: dbVehicle.title_type,
@@ -63,7 +53,8 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
     created_by: dbVehicle.created_by,
     extended_category: extendedCategory,
     consignment_store: consignmentStore || undefined,
-    // Form-compatible aliases
+    
+    // Form-compatible aliases that the form expects
     plate: dbVehicle.miles?.toString() || '0',
     internalCode: dbVehicle.internal_code || '',
     caNote: dbVehicle.ca_note?.toString() || '0',
@@ -76,5 +67,14 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
   };
   
   console.log('mapDbDataToAppData - output:', mappedVehicle);
+  console.log('mapDbDataToAppData - specific fields check:', {
+    year: mappedVehicle.year,
+    model: mappedVehicle.model,
+    miles: mappedVehicle.miles,
+    color: mappedVehicle.color,
+    plate: mappedVehicle.plate,
+    internalCode: mappedVehicle.internalCode
+  });
+  
   return mappedVehicle as any;
 };
