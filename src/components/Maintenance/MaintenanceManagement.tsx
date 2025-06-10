@@ -19,7 +19,7 @@ const MaintenanceManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [showTechnicalPanel, setShowTechnicalPanel] = useState(false);
-  const [selectedVehicleForPanel, setSelectedVehicleForPanel] = useState<string>('');
+  const [selectedVehicleForPanel, setSelectedVehicleForPanel] = useState<string>('all');
   const [vehicleCodeFilter, setVehicleCodeFilter] = useState('');
 
   if (!isAdmin && !isInternalSeller) {
@@ -79,7 +79,7 @@ const MaintenanceManagement = () => {
 
   const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
 
-  const selectedVehicle = vehicles.find(v => v.id === selectedVehicleForPanel);
+  const selectedVehicle = vehicles.find(v => v.id === (selectedVehicleForPanel === 'all' ? '' : selectedVehicleForPanel));
 
   return (
     <div className="p-6 space-y-6">
@@ -124,7 +124,7 @@ const MaintenanceManagement = () => {
                   <SelectValue placeholder="Selecionar veículo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos os veículos</SelectItem>
+                  <SelectItem value="all">Todos os veículos</SelectItem>
                   {filteredVehicles.map((vehicle) => (
                     <SelectItem key={vehicle.id} value={vehicle.id}>
                       {vehicle.internal_code} - {vehicle.name}
@@ -161,7 +161,7 @@ const MaintenanceManagement = () => {
         <TechnicalPanelRedesigned
           isOpen={showTechnicalPanel}
           onClose={() => setShowTechnicalPanel(false)}
-          vehicleId={selectedVehicleForPanel || undefined}
+          vehicleId={selectedVehicleForPanel === 'all' ? undefined : selectedVehicleForPanel}
           vehicleName={selectedVehicle?.name || "Painel Geral"}
         />
       )}
