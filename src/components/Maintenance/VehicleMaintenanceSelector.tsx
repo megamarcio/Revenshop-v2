@@ -38,9 +38,9 @@ const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: Vehi
         </SelectTrigger>
         <SelectContent>
           {loading ? (
-            <SelectItem value="loading" disabled>Carregando veículos...</SelectItem>
+            <SelectItem value="loading-placeholder" disabled>Carregando veículos...</SelectItem>
           ) : vehicles.length === 0 ? (
-            <SelectItem value="empty" disabled>Nenhum veículo cadastrado</SelectItem>
+            <SelectItem value="empty-placeholder" disabled>Nenhum veículo cadastrado</SelectItem>
           ) : (
             vehicles.map((vehicle) => (
               <SelectItem key={vehicle.id} value={vehicle.id}>
