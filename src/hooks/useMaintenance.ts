@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { MaintenanceRecord } from '../types/maintenance';
+import { MaintenanceRecord, MaintenancePart, MaintenanceLabor } from '../types/maintenance';
 import { toast } from '@/hooks/use-toast';
 
 export const useMaintenance = (vehicleId?: string) => {
@@ -56,8 +56,8 @@ export const useMaintenance = (vehicleId?: string) => {
         details: record.details || '',
         mechanic_name: record.mechanic_name,
         mechanic_phone: record.mechanic_phone,
-        parts: record.parts || [],
-        labor: record.labor || [],
+        parts: Array.isArray(record.parts) ? record.parts as MaintenancePart[] : [],
+        labor: Array.isArray(record.labor) ? record.labor as MaintenanceLabor[] : [],
         total_amount: record.total_amount,
         receipt_urls: record.receipt_urls || [],
         created_at: record.created_at,
@@ -94,12 +94,27 @@ export const useMaintenance = (vehicleId?: string) => {
         return;
       }
 
+      // Preparar dados para inserção no banco
+      const insertData = {
+        vehicle_id: maintenance.vehicle_id,
+        detection_date: maintenance.detection_date,
+        repair_date: maintenance.repair_date,
+        maintenance_type: maintenance.maintenance_type,
+        maintenance_items: maintenance.maintenance_items,
+        custom_maintenance: maintenance.custom_maintenance,
+        details: maintenance.details,
+        mechanic_name: maintenance.mechanic_name,
+        mechanic_phone: maintenance.mechanic_phone,
+        parts: maintenance.parts as any, // Cast para Json
+        labor: maintenance.labor as any, // Cast para Json
+        total_amount: maintenance.total_amount,
+        receipt_urls: maintenance.receipt_urls,
+        created_by: user.id
+      };
+
       const { data, error } = await supabase
         .from('maintenance_records')
-        .insert({
-          ...maintenance,
-          created_by: user.id
-        })
+        .insert(insertData)
         .select(`
           *,
           vehicles!inner(name, internal_code)
@@ -129,8 +144,8 @@ export const useMaintenance = (vehicleId?: string) => {
         details: data.details || '',
         mechanic_name: data.mechanic_name,
         mechanic_phone: data.mechanic_phone,
-        parts: data.parts || [],
-        labor: data.labor || [],
+        parts: Array.isArray(data.parts) ? data.parts as MaintenancePart[] : [],
+        labor: Array.isArray(data.labor) ? data.labor as MaintenanceLabor[] : [],
         total_amount: data.total_amount,
         receipt_urls: data.receipt_urls || [],
         created_at: data.created_at,
@@ -158,9 +173,18 @@ export const useMaintenance = (vehicleId?: string) => {
 
   const updateMaintenance = async (id: string, updates: Partial<MaintenanceRecord>) => {
     try {
+      // Preparar dados para atualização, convertendo arrays para JSON se necessário
+      const updateData: any = { ...updates };
+      if (updates.parts) {
+        updateData.parts = updates.parts as any;
+      }
+      if (updates.labor) {
+        updateData.labor = updates.labor as any;
+      }
+
       const { error } = await supabase
         .from('maintenance_records')
-        .update(updates)
+        .update(updateData)
         .eq('id', id);
 
       if (error) {
