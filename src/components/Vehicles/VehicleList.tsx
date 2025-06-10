@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles/index';
 import VehicleForm from './VehicleForm';
@@ -12,8 +12,6 @@ import EmptyVehicleState from './EmptyVehicleState';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
-import { useVehicleActions } from './VehicleActions';
-import { useVehicleFilters } from './VehicleFilters';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
@@ -26,28 +24,112 @@ const VehicleList = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
 
-  const {
-    handleSaveVehicle,
-    handleEditVehicle,
-    handleDuplicateVehicle,
-    handleDeleteVehicle
-  } = useVehicleActions({
-    vehicles,
-    canEditVehicles,
-    createVehicle,
-    updateVehicle,
-    deleteVehicle,
-    onEditingChange: setEditingVehicle,
-    onFormToggle: setShowAddForm
-  });
+  // Vehicle Actions Logic (moved from VehicleActions.tsx)
+  const handleSaveVehicle = async (vehicleData: any, editingVehicle: Vehicle | null) => {
+    try {
+      console.log('VehicleList - handleSaveVehicle called with:', vehicleData);
+      console.log('VehicleList - editingVehicle:', editingVehicle);
+      
+      if (editingVehicle && editingVehicle.id) {
+        // Se tem ID válido, é uma edição
+        await updateVehicle(editingVehicle.id, vehicleData);
+      } else {
+        // Se não tem ID ou é duplicação, é criação
+        await createVehicle(vehicleData);
+      }
+      setShowAddForm(false);
+      setEditingVehicle(null);
+    } catch (error) {
+      console.error('Error saving vehicle:', error);
+    }
+  };
 
-  const { filteredAndSortedVehicles } = useVehicleFilters({
-    vehicles,
-    searchTerm,
-    filterBy,
-    sortBy,
-    sortOrder
-  });
+  const handleEditVehicle = (vehicle: Vehicle) => {
+    if (!canEditVehicles) return;
+    console.log('VehicleList - handleEditVehicle called with:', vehicle);
+    
+    // Passar o objeto vehicle diretamente do banco de dados
+    setEditingVehicle(vehicle);
+    setShowAddForm(true);
+  };
+
+  const handleDuplicateVehicle = (vehicle: Vehicle) => {
+    if (!canEditVehicles) return;
+    console.log('VehicleList - handleDuplicateVehicle called with:', vehicle);
+    
+    // Criar uma cópia sem ID para forçar criação de novo veículo
+    const duplicatedVehicle = {
+      name: `${vehicle.name} (Cópia)`,
+      vin: '',
+      year: vehicle.year,
+      model: vehicle.model,
+      miles: vehicle.miles,
+      internal_code: '',
+      color: vehicle.color,
+      ca_note: vehicle.ca_note,
+      purchase_price: vehicle.purchase_price,
+      sale_price: vehicle.sale_price,
+      min_negotiable: vehicle.min_negotiable,
+      carfax_price: vehicle.carfax_price,
+      mmr_value: vehicle.mmr_value,
+      description: vehicle.description,
+      category: vehicle.category,
+      title_type: vehicle.title_type,
+      title_status: vehicle.title_status,
+      photos: vehicle.photos,
+      video: vehicle.video
+    };
+    
+    // Não incluir ID para garantir que será tratado como criação
+    setEditingVehicle(duplicatedVehicle as Vehicle);
+    setShowAddForm(true);
+  };
+
+  const handleDeleteVehicle = async (vehicle: Vehicle) => {
+    if (!canEditVehicles) return;
+    if (confirm('Tem certeza que deseja excluir este veículo?')) {
+      await deleteVehicle(vehicle.id);
+    }
+  };
+
+  // Vehicle Filters Logic (moved from VehicleFilters.tsx)
+  const filteredAndSortedVehicles = useMemo(() => {
+    let filtered = vehicles.filter(vehicle => {
+      const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      let matchesFilter = true;
+      if (filterBy !== 'all') {
+        // Check if it's a direct category match or extended category match
+        if (vehicle.category === filterBy) {
+          matchesFilter = true;
+        } else if (vehicle.extended_category === filterBy) {
+          matchesFilter = true;
+        } else {
+          matchesFilter = false;
+        }
+      }
+      
+      return matchesSearch && matchesFilter;
+    });
+
+    // Força a ordenação por internal_code sempre
+    filtered.sort((a, b) => {
+      // Ordenação numérica do código interno
+      const aCode = parseInt(a.internal_code) || 0;
+      const bCode = parseInt(b.internal_code) || 0;
+      
+      if (aCode !== bCode) {
+        return aCode - bCode; // Sempre do menor para o maior
+      }
+      
+      // Se os códigos numéricos forem iguais, ordenar alfabeticamente
+      return a.internal_code.localeCompare(b.internal_code, undefined, { numeric: true });
+    });
+
+    return filtered;
+  }, [vehicles, searchTerm, filterBy]);
 
   const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
