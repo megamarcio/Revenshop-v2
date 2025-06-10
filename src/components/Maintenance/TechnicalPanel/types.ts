@@ -3,16 +3,18 @@ import { LucideIcon } from 'lucide-react';
 
 export interface TechnicalItem {
   id: string;
+  vehicle_id: string;
   name: string;
-  icon: LucideIcon;
-  month: string;
-  year: string;
-  miles?: string;
-  nextChange?: string; // Data da próxima troca
+  type: string;
   status: 'em-dia' | 'proximo-troca' | 'trocar';
-  type: 'oil' | 'electrical' | 'filter' | 'suspension' | 'brakes' | 'fluids' | 'tires' | 'tuneup';
+  month?: string;
+  year?: string;
+  miles?: string;
   extraInfo?: string;
-  tireBrand?: string; // Para pneus
+  tireBrand?: string;
+  next_change?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface TechnicalPanelModalProps {
