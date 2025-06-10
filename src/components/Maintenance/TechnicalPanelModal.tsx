@@ -16,15 +16,30 @@ import {
   Plus,
   RefreshCw
 } from 'lucide-react';
-import { TechnicalPanelModalProps, TechnicalItem } from './TechnicalPanel/types';
-import { groupItemsByType } from './TechnicalPanel/utils';
 import TechnicalSection from './TechnicalPanel/TechnicalSection';
 import AlertSection from './TechnicalPanel/AlertSection';
-import { useTechnicalItems } from '../../hooks/useTechnicalItems';
+import { useTechnicalItems, TechnicalItem } from '../../hooks/useTechnicalItems';
+
+interface TechnicalPanelModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  vehicleId?: string;
+  vehicleName?: string;
+}
 
 const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: TechnicalPanelModalProps) => {
   const { items, loading, updateItem, createDefaultItems, refresh } = useTechnicalItems(vehicleId);
   const [editingItem, setEditingItem] = useState<string | null>(null);
+
+  const groupItemsByType = (items: TechnicalItem[]) => {
+    return items.reduce((acc, item) => {
+      if (!acc[item.type]) {
+        acc[item.type] = [];
+      }
+      acc[item.type].push(item);
+      return acc;
+    }, {} as Record<string, TechnicalItem[]>);
+  };
 
   const groupedItems = groupItemsByType(items);
   
