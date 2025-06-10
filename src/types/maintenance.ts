@@ -1,3 +1,4 @@
+
 export interface MaintenancePart {
   id: string;
   name: string;
@@ -16,7 +17,7 @@ export interface MaintenanceRecord {
   vehicle_name: string;
   vehicle_internal_code: string;
   detection_date: string;
-  repair_date: string;
+  repair_date?: string;
   promised_date?: string;
   maintenance_type: 'preventive' | 'corrective' | 'bodyshop';
   maintenance_items: string[];

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -211,12 +212,14 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
       const maintenanceData = {
         ...formData,
         detection_date: format(detectionDate, 'yyyy-MM-dd'),
-        repair_date: repairDate ? format(repairDate, 'yyyy-MM-dd') : '',
-        promised_date: promisedDate ? format(promisedDate, 'yyyy-MM-dd') : '',
+        repair_date: repairDate ? format(repairDate, 'yyyy-MM-dd') : '', // Corrigido: enviar string vazia se não houver data
+        promised_date: promisedDate ? format(promisedDate, 'yyyy-MM-dd') : '', // Corrigido: enviar string vazia se não houver data
         total_amount: calculateTotal(),
         vehicle_name: selectedVehicle?.name || '',
         vehicle_internal_code: selectedVehicle?.internal_code || ''
       };
+
+      console.log('Dados da manutenção antes de enviar:', maintenanceData);
 
       if (editingMaintenance) {
         updateMaintenance(editingMaintenance.id, maintenanceData);
@@ -231,6 +234,7 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
       
       onClose();
     } catch (error) {
+      console.error('Erro ao salvar manutenção:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao salvar manutenção',
