@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -164,6 +163,34 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
     return 'open';
   };
 
+  const getStatusColor = () => {
+    const status = getMaintenanceStatus();
+    switch (status) {
+      case 'open':
+        return 'bg-yellow-500';
+      case 'pending':
+        return 'bg-orange-500';
+      case 'completed':
+        return 'bg-green-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const getStatusText = () => {
+    const status = getMaintenanceStatus();
+    switch (status) {
+      case 'open':
+        return 'Em Aberto';
+      case 'pending':
+        return 'Pendente';
+      case 'completed':
+        return 'Concluída';
+      default:
+        return 'Indefinido';
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -250,8 +277,14 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto relative">
+        {/* Status no canto superior esquerdo */}
+        <div className="absolute top-4 left-4 flex items-center gap-2 z-10">
+          <div className={`w-3 h-3 ${getStatusColor()} rounded-full`}></div>
+          <span className="text-xs font-medium text-gray-700">{getStatusText()}</span>
+        </div>
+
+        <DialogHeader className="pt-8">
           <DialogTitle>
             {editingMaintenance ? 'Editar Manutenção' : 'Nova Manutenção'}
           </DialogTitle>
@@ -312,18 +345,6 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
           />
 
           <ReceiptUploadForm />
-
-          {/* Status Preview */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h4 className="font-medium mb-2">Status da Manutenção:</h4>
-            <p className="text-sm text-gray-600">
-              <strong>{getMaintenanceStatus() === 'open' ? 'Em Aberto' : 
-                      getMaintenanceStatus() === 'pending' ? 'Pendente' : 'Concluída'}</strong>
-              {getMaintenanceStatus() === 'open' && ' - Sem data prometida definida'}
-              {getMaintenanceStatus() === 'pending' && ' - Aguardando conclusão do reparo'}
-              {getMaintenanceStatus() === 'completed' && ' - Reparo concluído'}
-            </p>
-          </div>
 
           {/* Botões */}
           <div className="flex justify-end gap-2 pt-4">

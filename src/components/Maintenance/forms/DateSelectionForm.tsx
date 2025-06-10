@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, X } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { CalendarIcon, X, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
@@ -30,7 +31,33 @@ const DateSelectionForm = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Datas da Manutenção</CardTitle>
+        <CardTitle className="flex items-center gap-2">
+          Datas da Manutenção
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-gray-100">
+                <Info className="h-3 w-3 text-gray-500" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="max-w-xs p-3 bg-white border shadow-lg">
+              <div className="space-y-2 text-xs">
+                <h4 className="font-semibold text-gray-900 mb-2">Legenda dos Status:</h4>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <span><strong>Em Aberto:</strong> Sem data prometida</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <span><strong>Pendente:</strong> Com data prometida</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span><strong>Concluída:</strong> Com data de reparo</span>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
