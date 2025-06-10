@@ -79,26 +79,47 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
         throw error;
       }
       
+      // Verificar se data é um array válido antes de processar
+      if (!Array.isArray(data)) {
+        console.error('Data is not an array:', data);
+        throw new Error('Invalid data format received from database');
+      }
+
       // Adicionar image_url baseado na primeira foto e garantir que todos os campos necessários existam
-      const vehiclesWithImages = (data || []).map(vehicle => ({
-        ...vehicle,
-        image_url: vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null,
+      const vehiclesWithImages = data.map(vehicle => {
+        // Verificar se vehicle é um objeto válido
+        if (!vehicle || typeof vehicle !== 'object') {
+          console.error('Invalid vehicle object:', vehicle);
+          return null;
+        }
+
+        const baseVehicle = {
+          ...vehicle,
+          image_url: vehicle.photos && Array.isArray(vehicle.photos) && vehicle.photos.length > 0 ? vehicle.photos[0] : null,
+        };
+
         // Para consultas mínimas, adicionar campos padrão
-        ...(minimal ? {
-          year: 0,
-          model: '',
-          miles: 0,
-          color: '',
-          ca_note: 0,
-          purchase_price: 0,
-          profit_margin: 0,
-          category: category || 'forSale',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        } : {
-          updated_at: vehicle.updated_at || vehicle.created_at || new Date().toISOString()
-        })
-      })) as Vehicle[];
+        if (minimal) {
+          return {
+            ...baseVehicle,
+            year: 0,
+            model: '',
+            miles: 0,
+            color: '',
+            ca_note: 0,
+            purchase_price: 0,
+            profit_margin: 0,
+            category: category || 'forSale' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        } else {
+          return {
+            ...baseVehicle,
+            updated_at: vehicle.updated_at || vehicle.created_at || new Date().toISOString()
+          };
+        }
+      }).filter(vehicle => vehicle !== null) as Vehicle[];
 
       console.log('Vehicles fetched successfully:', vehiclesWithImages.length, 'vehicles');
       
