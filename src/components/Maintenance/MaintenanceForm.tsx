@@ -48,9 +48,15 @@ const MaintenanceForm = ({
   } = useMaintenanceFormStatus(promisedDate, repairDate);
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
   const calculateTotal = () => {
-    const partsTotal = formData.parts.reduce((sum, part) => sum + part.value, 0);
+    // Calcular total baseado apenas nas peças compradas (cotações marcadas) + mão de obra
+    const purchasedPartsTotal = formData.parts.reduce((sum, part) => {
+      const purchasedQuotesTotal = part.priceQuotes?.reduce((partSum, quote) => {
+        return partSum + (quote.purchased ? (quote.estimatedPrice || 0) : 0);
+      }, 0) || 0;
+      return sum + purchasedQuotesTotal;
+    }, 0);
     const laborTotal = formData.labor.reduce((sum, labor) => sum + labor.value, 0);
-    return partsTotal + laborTotal;
+    return purchasedPartsTotal + laborTotal;
   };
   const {
     handleSubmit,
@@ -173,7 +179,6 @@ const MaintenanceForm = ({
               const newPart = {
                 id: crypto.randomUUID(),
                 name: '',
-                value: 0,
                 priceQuotes: []
               };
               setFormData(prev => ({

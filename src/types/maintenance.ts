@@ -1,8 +1,6 @@
-
 export interface MaintenancePart {
   id: string;
   name: string;
-  value: number;
   priceQuotes: PartPriceQuote[];
 }
 

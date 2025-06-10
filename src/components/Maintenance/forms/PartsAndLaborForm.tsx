@@ -34,11 +34,6 @@ const PartsAndLaborForm = ({
   onUpdateQuote,
   onRemoveQuote
 }: PartsAndLaborFormProps) => {
-  // Valor das peças utilizadas (valor real inserido manualmente)
-  const calculatePartsTotal = () => {
-    return parts.reduce((sum, part) => sum + (part.value || 0), 0);
-  };
-
   // Orçamento total de todas as cotações (compradas + não compradas)
   const calculateQuotesTotal = () => {
     return parts.reduce((sum, part) => {
@@ -61,9 +56,9 @@ const PartsAndLaborForm = ({
     return labor.reduce((sum, labor) => sum + (labor.value || 0), 0);
   };
 
-  // Valor Total Real = Peças Utilizadas (valor real) + Peças Compradas (cotações marcadas) + Mão de Obra
+  // Valor Total Real = Peças Compradas (cotações marcadas) + Mão de Obra
   const calculateGrandTotal = () => {
-    return calculatePartsTotal() + calculatePurchasedQuotesTotal() + calculateLaborTotal();
+    return calculatePurchasedQuotesTotal() + calculateLaborTotal();
   };
 
   return (
@@ -71,7 +66,7 @@ const PartsAndLaborForm = ({
       {/* Peças */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <Label>Peças Utilizadas</Label>
+          <Label>Peças</Label>
           <Button type="button" onClick={onAddPart} size="sm">
             <Plus className="h-4 w-4 mr-2" />
             Adicionar Peça
@@ -87,16 +82,6 @@ const PartsAndLaborForm = ({
                   value={part.name} 
                   onChange={e => onUpdatePart(part.id, 'name', e.target.value)} 
                   placeholder="Ex: Filtro de óleo" 
-                />
-              </div>
-              <div className="w-32">
-                <Label>Valor Real ($)</Label>
-                <Input 
-                  type="number" 
-                  value={part.value || ''} 
-                  onChange={e => onUpdatePart(part.id, 'value', parseFloat(e.target.value) || 0)} 
-                  placeholder=""
-                  className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
               <Button 
@@ -166,13 +151,6 @@ const PartsAndLaborForm = ({
       <div className="bg-gray-50 p-4 rounded-lg space-y-3">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex justify-between">
-            <span>Peças Utilizadas (valor real):</span>
-            <span className="font-medium">
-              $ {calculatePartsTotal().toFixed(2)}
-            </span>
-          </div>
-          
-          <div className="flex justify-between">
             <span>Mão de Obra:</span>
             <span className="font-medium">
               $ {calculateLaborTotal().toFixed(2)}
@@ -188,7 +166,7 @@ const PartsAndLaborForm = ({
 
           {calculatePurchasedQuotesTotal() > 0 && (
             <div className="flex justify-between text-green-700">
-              <span>Peças Compradas (cotações):</span>
+              <span>Peças Compradas:</span>
               <span className="font-medium">
                 $ {calculatePurchasedQuotesTotal().toFixed(2)}
               </span>
@@ -203,7 +181,7 @@ const PartsAndLaborForm = ({
 
         <div className="text-xs text-gray-600 mt-2 space-y-1">
           <p>* Orçamento de Peças: soma de todas as cotações coletadas</p>
-          <p>* Valor Total Real: Peças Utilizadas + Peças Compradas + Mão de Obra</p>
+          <p>* Valor Total Real: Peças Compradas + Mão de Obra</p>
         </div>
       </div>
     </>
