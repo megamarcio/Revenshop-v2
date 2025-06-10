@@ -13,22 +13,28 @@ export type Database = {
         Row: {
           created_at: string
           description_instructions: string | null
+          gemini_key: string | null
           id: string
           image_instructions: string | null
+          openai_key: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description_instructions?: string | null
+          gemini_key?: string | null
           id?: string
           image_instructions?: string | null
+          openai_key?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description_instructions?: string | null
+          gemini_key?: string | null
           id?: string
           image_instructions?: string | null
+          openai_key?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -370,6 +376,74 @@ export type Database = {
           },
         ]
       }
+      maintenance_records: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          custom_maintenance: string | null
+          details: string | null
+          detection_date: string
+          id: string
+          labor: Json
+          maintenance_items: string[]
+          maintenance_type: string
+          mechanic_name: string
+          mechanic_phone: string
+          parts: Json
+          receipt_urls: string[]
+          repair_date: string
+          total_amount: number
+          updated_at: string
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          custom_maintenance?: string | null
+          details?: string | null
+          detection_date: string
+          id?: string
+          labor?: Json
+          maintenance_items?: string[]
+          maintenance_type: string
+          mechanic_name: string
+          mechanic_phone: string
+          parts?: Json
+          receipt_urls?: string[]
+          repair_date: string
+          total_amount?: number
+          updated_at?: string
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          custom_maintenance?: string | null
+          details?: string | null
+          detection_date?: string
+          id?: string
+          labor?: Json
+          maintenance_items?: string[]
+          maintenance_type?: string
+          mechanic_name?: string
+          mechanic_phone?: string
+          parts?: Json
+          receipt_urls?: string[]
+          repair_date?: string
+          total_amount?: number
+          updated_at?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "maintenance_records_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           commission_client_brought: number | null
@@ -677,6 +751,8 @@ export type Database = {
         Returns: {
           image_instructions: string
           description_instructions: string
+          openai_key: string
+          gemini_key: string
         }[]
       }
       get_current_user_role: {
@@ -691,6 +767,8 @@ export type Database = {
         Args: {
           p_image_instructions: string
           p_description_instructions: string
+          p_openai_key?: string
+          p_gemini_key?: string
         }
         Returns: undefined
       }

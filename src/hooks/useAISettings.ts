@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 interface AISettings {
   image_instructions: string;
   description_instructions: string;
+  openai_key?: string;
+  gemini_key?: string;
 }
 
 export const useAISettings = () => {
@@ -23,18 +25,16 @@ export const useAISettings = () => {
     try {
       setIsLoadingSettings(true);
       
-      // For now, we'll use a workaround since the types aren't updated yet
       const { data: settings, error } = await supabase
-        .rpc('get_ai_settings')
-        .single();
+        .rpc('get_ai_settings');
 
       if (error && error.code !== 'PGRST116') {
         console.error('Erro ao carregar configurações:', error);
       }
 
-      if (settings) {
-        setImageInstructions(settings.image_instructions || '');
-        setDescriptionInstructions(settings.description_instructions || '');
+      if (settings && settings.length > 0) {
+        setImageInstructions(settings[0].image_instructions || '');
+        setDescriptionInstructions(settings[0].description_instructions || '');
       } else {
         // Set default instructions
         const defaultImageInstructions = `Criar uma imagem realista e profissional de um veículo baseado nas seguintes especificações:
@@ -66,7 +66,6 @@ export const useAISettings = () => {
   const saveSettings = async () => {
     setIsLoading(true);
     try {
-      // Use RPC function to save settings
       const { error } = await supabase
         .rpc('save_ai_settings', {
           p_image_instructions: imageInstructions,

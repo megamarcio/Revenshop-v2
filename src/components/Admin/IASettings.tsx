@@ -43,7 +43,7 @@ const IASettings = () => {
       <div className="flex justify-end">
         <Button onClick={saveSettings} disabled={isLoading} className="flex items-center gap-2">
           <Save className="h-4 w-4" />
-          {isLoading ? 'Salvando...' : 'Salvar Configurações'}
+          {isLoading ? 'Salvando...' : 'Salvar Instruções'}
         </Button>
       </div>
     </div>

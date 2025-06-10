@@ -3,18 +3,21 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Wrench, Phone, DollarSign, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Calendar, Wrench, Phone, DollarSign, Filter, Trash2, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { MaintenanceRecord } from '../../types/maintenance';
 import { useMaintenance } from '../../hooks/useMaintenance';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface MaintenanceListProps {
   onEdit: (maintenance: any) => void;
 }
 
 const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
-  const { maintenances, loading } = useMaintenance();
+  const { maintenances, loading, deleteMaintenance } = useMaintenance();
+  const { canEditVehicles } = useAuth();
   const [statusFilter, setStatusFilter] = useState<'open' | 'pending' | 'completed' | 'all'>('open');
 
   const getMaintenanceStatus = (maintenance: MaintenanceRecord) => {
@@ -70,6 +73,12 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
     }).format(value);
   };
 
+  const handleDelete = async (maintenance: MaintenanceRecord) => {
+    if (window.confirm(`Tem certeza que deseja excluir a manutenção do veículo ${maintenance.vehicle_internal_code} - ${maintenance.vehicle_name}?`)) {
+      await deleteMaintenance(maintenance.id!);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Filtros */}
@@ -114,7 +123,7 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
           filteredMaintenances.map((maintenance) => {
             const status = getMaintenanceStatus(maintenance);
             return (
-              <Card key={maintenance.id} className="hover:shadow-lg transition-shadow cursor-pointer border-l-4 border-l-revenshop-primary" onClick={() => onEdit(maintenance)}>
+              <Card key={maintenance.id} className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary">
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -129,9 +138,30 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
                         {getMaintenanceTypeLabel(maintenance.maintenance_type)}
                       </span>
                     </div>
-                    <span className="font-bold text-revenshop-primary text-lg">
-                      {formatCurrency(maintenance.total_amount)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-revenshop-primary text-lg">
+                        {formatCurrency(maintenance.total_amount)}
+                      </span>
+                      {canEditVehicles && (
+                        <div className="flex gap-1">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(maintenance)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDelete(maintenance)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
