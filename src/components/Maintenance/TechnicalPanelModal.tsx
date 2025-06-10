@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,12 +37,30 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
     tireType: '205/55 R16'
   };
 
+  // Prevenir fechamento automático do modal pai
+  useEffect(() => {
+    if (isOpen) {
+      const handleClickOutside = (event: MouseEvent) => {
+        event.stopPropagation();
+      };
+
+      document.addEventListener('mousedown', handleClickOutside, true);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside, true);
+      };
+    }
+  }, [isOpen]);
+
   const formatDate = (month: string, year: string) => `${month}/${year}`;
   const formatDateWithMiles = (month: string, year: string, miles: string) => `${month}/${year} - ${miles} mi`;
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogContent 
+        className="max-w-4xl max-h-[80vh] overflow-y-auto"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        onInteractOutside={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Settings2 className="h-5 w-5 text-revenshop-primary" />
