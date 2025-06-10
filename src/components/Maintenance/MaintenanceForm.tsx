@@ -1,8 +1,9 @@
 
 import React from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
-import { MaintenancePart, MaintenanceLabor } from '../../types/maintenance';
+import { useAuth } from '../../contexts/AuthContext';
+import { useVehicles } from '../../hooks/useVehicles';
+import { useMaintenance } from '../../hooks/useMaintenance';
 import VehicleMaintenanceSelector from './VehicleMaintenanceSelector';
 import DateSelectionForm from './forms/DateSelectionForm';
 import MaintenanceItemsSelector from './forms/MaintenanceItemsSelector';
@@ -16,17 +17,15 @@ import { useMaintenanceFormStatus } from './hooks/useMaintenanceFormStatus';
 import { useMaintenanceFormSubmit } from './hooks/useMaintenanceFormSubmit';
 
 interface MaintenanceFormProps {
+  open: boolean;
   onClose: () => void;
   editingMaintenance?: any;
 }
 
-const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) => {
-  const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ 
-    category: 'forSale', 
-    limit: 50, 
-    minimal: true 
-  });
-
+const MaintenanceForm = ({ open, onClose, editingMaintenance }: MaintenanceFormProps) => {
+  const { canEditVehicles } = useAuth();
+  const { vehicles, loading: vehiclesLoading } = useVehicles();
+  
   const {
     formData,
     setFormData,
@@ -38,78 +37,13 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
     setPromisedDate
   } = useMaintenanceFormData(editingMaintenance);
 
-  const { getMaintenanceStatus, getStatusColor, getStatusText } = useMaintenanceFormStatus(repairDate, promisedDate);
+  const { getMaintenanceStatus, getStatusColor, getStatusText } = useMaintenanceFormStatus(promisedDate, repairDate);
 
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
 
-  const handleMaintenanceItemChange = (item: string, checked: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      maintenance_items: checked 
-        ? [...prev.maintenance_items, item]
-        : prev.maintenance_items.filter(i => i !== item)
-    }));
-  };
-
-  const addPart = () => {
-    const newPart: MaintenancePart = {
-      id: Date.now().toString(),
-      name: '',
-      value: 0
-    };
-    setFormData(prev => ({
-      ...prev,
-      parts: [...prev.parts, newPart]
-    }));
-  };
-
-  const updatePart = (id: string, field: keyof MaintenancePart, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      parts: prev.parts.map(part => 
-        part.id === id ? { ...part, [field]: value } : part
-      )
-    }));
-  };
-
-  const removePart = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      parts: prev.parts.filter(part => part.id !== id)
-    }));
-  };
-
-  const addLabor = () => {
-    const newLabor: MaintenanceLabor = {
-      id: Date.now().toString(),
-      description: '',
-      value: 0
-    };
-    setFormData(prev => ({
-      ...prev,
-      labor: [...prev.labor, newLabor]
-    }));
-  };
-
-  const updateLabor = (id: string, field: keyof MaintenanceLabor, value: string | number) => {
-    setFormData(prev => ({
-      ...prev,
-      labor: prev.labor.map(labor => 
-        labor.id === id ? { ...labor, [field]: value } : labor
-      )
-    }));
-  };
-
-  const removeLabor = (id: string) => {
-    setFormData(prev => ({
-      ...prev,
-      labor: prev.labor.filter(labor => labor.id !== id)
-    }));
-  };
-
   const calculateTotal = () => {
-    const partsTotal = formData.parts.reduce((sum, part) => sum + (part.value || 0), 0);
-    const laborTotal = formData.labor.reduce((sum, labor) => sum + (labor.value || 0), 0);
+    const partsTotal = formData.parts.reduce((sum, part) => sum + part.cost, 0);
+    const laborTotal = formData.labor.reduce((sum, labor) => sum + labor.cost, 0);
     return partsTotal + laborTotal;
   };
 
@@ -125,80 +59,74 @@ const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) 
     getMaintenanceStatus
   });
 
-  console.log('MaintenanceForm - vehicles loaded:', vehicles.length);
-  console.log('MaintenanceForm - vehiclesLoading:', vehiclesLoading);
+  const isEditing = !!editingMaintenance;
+  const status = getMaintenanceStatus();
+  const statusColor = getStatusColor();
+  const statusText = getStatusText();
 
   return (
-    <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto relative">
-        <MaintenanceFormHeader
-          isEditing={!!editingMaintenance}
-          status={getMaintenanceStatus()}
-          statusColor={getStatusColor()}
-          statusText={getStatusText()}
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="relative max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <MaintenanceFormHeader 
+          isEditing={isEditing}
+          status={status}
+          statusColor={statusColor}
+          statusText={statusText}
         />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <VehicleMaintenanceSelector
+            vehicles={vehicles}
             selectedVehicleId={formData.vehicle_id}
             onVehicleChange={(vehicleId) => setFormData(prev => ({ ...prev, vehicle_id: vehicleId }))}
+            disabled={!canEditVehicles}
+            loading={vehiclesLoading}
           />
 
           <DateSelectionForm
             detectionDate={detectionDate}
+            setDetectionDate={setDetectionDate}
             repairDate={repairDate}
+            setRepairDate={setRepairDate}
             promisedDate={promisedDate}
-            onDetectionDateChange={setDetectionDate}
-            onRepairDateChange={setRepairDate}
-            onPromisedDateChange={setPromisedDate}
+            setPromisedDate={setPromisedDate}
           />
 
           <MaintenanceItemsSelector
             maintenanceType={formData.maintenance_type}
+            setMaintenanceType={(type) => setFormData(prev => ({ ...prev, maintenance_type: type }))}
             maintenanceItems={formData.maintenance_items}
+            setMaintenanceItems={(items) => setFormData(prev => ({ ...prev, maintenance_items: items }))}
             customMaintenance={formData.custom_maintenance}
-            onMaintenanceTypeChange={(value) => 
-              setFormData(prev => ({ ...prev, maintenance_type: value, maintenance_items: [] }))
-            }
-            onMaintenanceItemChange={handleMaintenanceItemChange}
-            onCustomMaintenanceChange={(value) => 
-              setFormData(prev => ({ ...prev, custom_maintenance: value }))
-            }
+            setCustomMaintenance={(custom) => setFormData(prev => ({ ...prev, custom_maintenance: custom }))}
+            details={formData.details}
+            setDetails={(details) => setFormData(prev => ({ ...prev, details: details }))}
           />
 
           <MechanicInfoForm
             mechanicName={formData.mechanic_name}
+            setMechanicName={(name) => setFormData(prev => ({ ...prev, mechanic_name: name }))}
             mechanicPhone={formData.mechanic_phone}
-            details={formData.details}
-            onMechanicNameChange={(value) => 
-              setFormData(prev => ({ ...prev, mechanic_name: value }))
-            }
-            onMechanicPhoneChange={(value) => 
-              setFormData(prev => ({ ...prev, mechanic_phone: value }))
-            }
-            onDetailsChange={(value) => 
-              setFormData(prev => ({ ...prev, details: value }))
-            }
+            setMechanicPhone={(phone) => setFormData(prev => ({ ...prev, mechanic_phone: phone }))}
           />
 
           <PartsAndLaborForm
             parts={formData.parts}
+            setParts={(parts) => setFormData(prev => ({ ...prev, parts }))}
             labor={formData.labor}
-            onAddPart={addPart}
-            onUpdatePart={updatePart}
-            onRemovePart={removePart}
-            onAddLabor={addLabor}
-            onUpdateLabor={updateLabor}
-            onRemoveLabor={removeLabor}
+            setLabor={(labor) => setFormData(prev => ({ ...prev, labor }))}
           />
 
-          <ReceiptUploadForm />
+          <ReceiptUploadForm
+            receiptUrls={formData.receipt_urls}
+            setReceiptUrls={(urls) => setFormData(prev => ({ ...prev, receipt_urls: urls }))}
+          />
 
           <MaintenanceFormActions
             onCancel={onClose}
             loading={loading}
             vehiclesLoading={vehiclesLoading}
-            isEditing={!!editingMaintenance}
+            isEditing={isEditing}
           />
         </form>
       </DialogContent>
