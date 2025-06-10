@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { AlertTriangle, Clock, Wrench } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 
 interface AlertSectionProps {
   trocarItems: TechnicalItem[];

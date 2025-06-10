@@ -1,5 +1,4 @@
-
-import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 
 export const categorizeItems = (items: TechnicalItem[]) => {
   const mainItems = items.filter(item => 

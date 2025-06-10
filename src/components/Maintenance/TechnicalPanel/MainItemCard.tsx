@@ -1,11 +1,10 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit2, Save, X, CheckCircle, Clock, AlertTriangle, LucideIcon } from 'lucide-react';
-import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import { LucideIcon, Edit2, Save, X, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 
 interface MainItemCardProps {
   title: string;

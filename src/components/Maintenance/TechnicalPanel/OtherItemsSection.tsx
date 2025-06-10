@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Filter, Wrench, Settings, Droplets } from 'lucide-react';
-import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 import CategorySection from './CategorySection';
 
 interface OtherItemsSectionProps {

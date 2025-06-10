@@ -1,10 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit2, Save, X, CheckCircle, Clock, AlertTriangle, Wrench } from 'lucide-react';
-import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 
 const TIRE_BRANDS = [
   'Michelin',

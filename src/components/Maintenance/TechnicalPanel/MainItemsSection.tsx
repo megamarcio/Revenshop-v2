@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Wrench, Droplets, Zap } from 'lucide-react';
-import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import { TechnicalItem } from '../../../hooks/useTechnicalItems';
 import MainItemCard from './MainItemCard';
 
 interface MainItemsSectionProps {
