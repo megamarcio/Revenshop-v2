@@ -625,6 +625,62 @@ export type Database = {
           },
         ]
       }
+      technical_items: {
+        Row: {
+          created_at: string
+          extra_info: string | null
+          id: string
+          miles: string | null
+          month: string | null
+          name: string
+          next_change: string | null
+          status: string
+          tire_brand: string | null
+          type: string
+          updated_at: string
+          vehicle_id: string
+          year: string | null
+        }
+        Insert: {
+          created_at?: string
+          extra_info?: string | null
+          id?: string
+          miles?: string | null
+          month?: string | null
+          name: string
+          next_change?: string | null
+          status?: string
+          tire_brand?: string | null
+          type: string
+          updated_at?: string
+          vehicle_id: string
+          year?: string | null
+        }
+        Update: {
+          created_at?: string
+          extra_info?: string | null
+          id?: string
+          miles?: string | null
+          month?: string | null
+          name?: string
+          next_change?: string | null
+          status?: string
+          tire_brand?: string | null
+          type?: string
+          updated_at?: string
+          vehicle_id?: string
+          year?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technical_items_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           ca_note: number

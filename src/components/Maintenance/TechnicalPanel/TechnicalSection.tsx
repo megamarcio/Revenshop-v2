@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { TechnicalSectionProps } from './types';
 import EditableItemRow from './EditableItemRow';
 
@@ -16,19 +17,28 @@ const TechnicalSection = ({
   isHighlight = false,
   className = ""
 }: TechnicalSectionProps) => {
-  const cardClassName = isHighlight 
-    ? "border-revenshop-primary border-2 lg:col-span-2" 
-    : "";
+  const alertCount = items.filter(item => 
+    item.status === 'trocar' || item.status === 'proximo-troca'
+  ).length;
 
   return (
-    <Card className={`${cardClassName} ${className}`}>
+    <Card className={`transition-all duration-200 hover:shadow-md ${className}`}>
       <CardHeader className="pb-3">
-        <CardTitle className={`flex items-center gap-2 ${isHighlight ? 'text-lg text-revenshop-primary' : 'text-base'}`}>
-          <Icon className="h-4 w-4" />
-          {title}
+        <CardTitle className={`flex items-center justify-between ${isHighlight ? 'text-lg text-orange-700' : 'text-base'}`}>
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-md ${isHighlight ? 'bg-orange-100' : 'bg-gray-100'}`}>
+              <Icon className={`h-4 w-4 ${isHighlight ? 'text-orange-600' : 'text-gray-600'}`} />
+            </div>
+            <span>{title}</span>
+          </div>
+          {alertCount > 0 && (
+            <Badge variant="destructive" className="text-xs px-2 py-0.5">
+              {alertCount}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-3">
         {items.map(item => (
           <EditableItemRow
             key={item.id}
@@ -40,6 +50,11 @@ const TechnicalSection = ({
             onUpdate={onUpdate}
           />
         ))}
+        {items.length === 0 && (
+          <div className="text-center py-4 text-gray-500 text-sm">
+            Nenhum item cadastrado
+          </div>
+        )}
       </CardContent>
     </Card>
   );
