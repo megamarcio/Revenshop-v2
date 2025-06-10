@@ -89,7 +89,14 @@ const TechnicalPanelRedesigned = ({ isOpen, onClose, vehicleId, vehicleName }: T
                 onUpdate={handleUpdate}
                 onCancel={handleCancel}
               />
-              <OtherItemsSection items={items} />
+              <OtherItemsSection 
+                items={items}
+                editingItem={editingItem}
+                onEdit={handleEdit}
+                onSave={handleSave}
+                onUpdate={handleUpdate}
+                onCancel={handleCancel}
+              />
             </>
           )}
         </div>

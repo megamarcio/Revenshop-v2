@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LucideIcon, Edit2, Save, X, CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { Edit2, Save, X, LucideIcon } from 'lucide-react';
 import { TechnicalItem } from '../../../hooks/useTechnicalItems';
+import StatusIcon from './StatusIcon';
 
 interface MainItemCardProps {
   title: string;
@@ -17,19 +18,6 @@ interface MainItemCardProps {
   onUpdate: (itemId: string, updates: Partial<TechnicalItem>) => void;
 }
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'em-dia':
-      return 'bg-green-100 text-green-800 border-green-200';
-    case 'proximo-troca':
-      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-    case 'trocar':
-      return 'bg-red-100 text-red-800 border-red-200';
-    default:
-      return 'bg-gray-100 text-gray-800 border-gray-200';
-  }
-};
-
 const MainItemCard = ({
   title,
   icon: Icon,
@@ -40,131 +28,107 @@ const MainItemCard = ({
   onCancel,
   onUpdate
 }: MainItemCardProps) => {
+  const [status, setStatus] = useState(item.status);
+  const [miles, setMiles] = useState(item.miles || '');
+  const [nextChange, setNextChange] = useState(item.next_change || '');
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value);
+    onUpdate(item.id, { status: value as 'em-dia' | 'proximo-troca' | 'trocar' });
+  };
+
+  const handleMilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMiles(e.target.value);
+  };
+
+  const handleNextChangeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setNextChange(e.target.value);
+  };
+
+  const handleSave = () => {
+    onUpdate(item.id, { miles: miles, next_change: nextChange });
+    onSave();
+  };
+
   return (
     <Card className="transition-all duration-200 hover:shadow-md">
       <CardHeader className="pb-3">
-        <CardTitle className="flex items-center justify-between text-lg">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <Icon className="h-5 w-5 text-blue-600" />
+        <CardTitle className="flex items-center justify-between text-base">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-gray-100">
+              <Icon className="h-4 w-4 text-gray-600" />
             </div>
             <span>{title}</span>
           </div>
-          <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(item.status)}`}>
-            <div className="flex items-center gap-2">
-              {item.status === 'em-dia' && <CheckCircle className="h-4 w-4" />}
-              {item.status === 'proximo-troca' && <Clock className="h-4 w-4" />}
-              {item.status === 'trocar' && <AlertTriangle className="h-4 w-4" />}
-              <span>
-                {item.status === 'em-dia' && 'Em Dia'}
-                {item.status === 'proximo-troca' && 'Próximo da Troca'}
-                {item.status === 'trocar' && 'Precisa Trocar'}
-              </span>
-            </div>
-          </div>
+          <StatusIcon status={item.status} />
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         {isEditing ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Mês</label>
-              <Input
-                type="text"
-                value={item.month || ''}
-                onChange={(e) => onUpdate(item.id, { month: e.target.value })}
-                placeholder="MM"
-                maxLength={2}
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">Ano</label>
-              <Input
-                type="text"
-                value={item.year || ''}
-                onChange={(e) => onUpdate(item.id, { year: e.target.value })}
-                placeholder="YYYY"
-                maxLength={4}
-              />
-            </div>
-            {item.miles !== undefined && (
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Milhas</label>
-                <Input
-                  type="text"
-                  value={item.miles || ''}
-                  onChange={(e) => onUpdate(item.id, { miles: e.target.value })}
-                  placeholder="Milhas"
-                />
-              </div>
-            )}
-            <div className="space-y-2 md:col-span-3">
-              <label className="text-sm font-medium text-gray-700">Status</label>
-              <Select
-                value={item.status}
-                onValueChange={(value: 'em-dia' | 'proximo-troca' | 'trocar') => 
-                  onUpdate(item.id, { status: value })
-                }
-              >
-                <SelectTrigger>
-                  <SelectValue />
+          <div className="grid gap-4">
+            <div>
+              <label className="text-sm text-gray-700 block mb-1">Status</label>
+              <Select value={status} onValueChange={handleStatusChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecione o status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="em-dia">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                      Em Dia
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="proximo-troca">
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 text-yellow-600" />
-                      Próximo da Troca
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="trocar">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
-                      Precisa Trocar
-                    </div>
-                  </SelectItem>
+                  <SelectItem value="em-dia">Em Dia</SelectItem>
+                  <SelectItem value="proximo-troca">Próximo da Troca</SelectItem>
+                  <SelectItem value="trocar">Trocar</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="text-lg font-semibold text-gray-900">
-              {item.month && item.year ? `${item.month}/${item.year}` : 'Não informado'}
-              {item.miles && ` - ${item.miles} milhas`}
+            <div>
+              <label className="text-sm text-gray-700 block mb-1">
+                Próxima troca (KM)
+              </label>
+              <Input
+                type="number"
+                value={miles}
+                onChange={handleMilesChange}
+                placeholder="KM atual"
+              />
             </div>
-            {item.next_change && (
-              <div className="text-sm text-gray-600">
-                Próxima troca: {new Date(item.next_change).toLocaleDateString('pt-BR')}
-              </div>
-            )}
-          </div>
-        )}
-        
-        <div className="flex justify-end gap-2">
-          {isEditing ? (
-            <>
-              <Button variant="outline" onClick={onCancel}>
+            <div>
+              <label className="text-sm text-gray-700 block mb-1">
+                Próxima troca (Data)
+              </label>
+              <Input
+                type="date"
+                value={nextChange}
+                onChange={handleNextChangeChange}
+                placeholder="Data da próxima troca"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" size="sm" onClick={onCancel}>
                 <X className="h-4 w-4 mr-2" />
                 Cancelar
               </Button>
-              <Button onClick={onSave}>
+              <Button size="sm" onClick={handleSave}>
                 <Save className="h-4 w-4 mr-2" />
                 Salvar
               </Button>
-            </>
-          ) : (
-            <Button variant="outline" onClick={() => onEdit(item.id)}>
+            </div>
+          </div>
+        ) : (
+          <div className="grid gap-3">
+            <div className="text-sm text-gray-600">
+              Status: <span className="font-medium">{item.status}</span>
+            </div>
+            <div className="text-sm text-gray-600">
+              KM da última troca: <span className="font-medium">{item.miles || 'N/A'}</span>
+            </div>
+            <div className="text-sm text-gray-600">
+              Data da próxima troca: <span className="font-medium">{item.next_change || 'N/A'}</span>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => onEdit(item.id)}>
               <Edit2 className="h-4 w-4 mr-2" />
               Editar
             </Button>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
