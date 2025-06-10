@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
+import { useVehiclesMinimal } from '../../hooks/useVehiclesMinimal';
 import { Car } from 'lucide-react';
 
 interface VehicleMaintenanceSelectorProps {
@@ -11,7 +11,7 @@ interface VehicleMaintenanceSelectorProps {
 }
 
 const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: VehicleMaintenanceSelectorProps) => {
-  const { vehicles, loading } = useVehiclesOptimized({ category: 'forSale', limit: 50 });
+  const { vehicles, loading } = useVehiclesMinimal({ category: 'forSale', limit: 50 });
 
   const selectedVehicle = vehicles.find(v => v.id === selectedVehicleId);
 
@@ -49,7 +49,7 @@ const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: Vehi
                   <span className="font-semibold text-revenshop-primary">
                     {vehicle.internal_code}
                   </span>
-                  <span>- {vehicle.name} ({vehicle.year})</span>
+                  <span>- {vehicle.name}</span>
                 </div>
               </SelectItem>
             ))
@@ -75,12 +75,12 @@ const VehicleMaintenanceSelector = ({ selectedVehicleId, onVehicleChange }: Vehi
               <span className="ml-2 font-medium">{selectedVehicle.name}</span>
             </div>
             <div>
-              <span className="text-gray-600">Ano:</span>
-              <span className="ml-2 font-medium">{selectedVehicle.year}</span>
-            </div>
-            <div>
               <span className="text-gray-600">VIN:</span>
               <span className="ml-2 font-medium">{selectedVehicle.vin}</span>
+            </div>
+            <div>
+              <span className="text-gray-600">Preço:</span>
+              <span className="ml-2 font-medium">R$ {selectedVehicle.sale_price?.toFixed(2).replace('.', ',')}</span>
             </div>
           </div>
         </div>

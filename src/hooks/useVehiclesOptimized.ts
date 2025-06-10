@@ -35,6 +35,7 @@ interface UseVehiclesOptions {
   category?: 'forSale' | 'sold';
   limit?: number;
   searchTerm?: string;
+  minimal?: boolean;
 }
 
 export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
@@ -42,15 +43,20 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
   const [loading, setLoading] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
-  const { category, limit = 20, searchTerm } = options;
+  const { category, limit = 20, searchTerm, minimal = false } = options;
 
   const fetchVehicles = useCallback(async (offset = 0) => {
     try {
-      console.log('Fetching vehicles with options:', { category, limit, offset, searchTerm });
+      console.log('Fetching vehicles with options:', { category, limit, offset, searchTerm, minimal });
       
+      // Selecionar colunas baseado no tipo de consulta
+      const selectColumns = minimal 
+        ? 'id, name, vin, sale_price, internal_code, photos'
+        : 'id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at, updated_at';
+
       let query = supabase
         .from('vehicles')
-        .select('id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at, updated_at')
+        .select(selectColumns)
         .order('created_at', { ascending: false });
 
       // Filtrar por categoria se especificado
@@ -77,8 +83,21 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
       const vehiclesWithImages = (data || []).map(vehicle => ({
         ...vehicle,
         image_url: vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null,
-        // Garantir que updated_at exista (se por algum motivo não existir)
-        updated_at: vehicle.updated_at || vehicle.created_at || new Date().toISOString()
+        // Para consultas mínimas, adicionar campos padrão
+        ...(minimal ? {
+          year: 0,
+          model: '',
+          miles: 0,
+          color: '',
+          ca_note: 0,
+          purchase_price: 0,
+          profit_margin: 0,
+          category: category || 'forSale',
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        } : {
+          updated_at: vehicle.updated_at || vehicle.created_at || new Date().toISOString()
+        })
       })) as Vehicle[];
 
       console.log('Vehicles fetched successfully:', vehiclesWithImages.length, 'vehicles');
@@ -100,7 +119,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
     } finally {
       setLoading(false);
     }
-  }, [category, limit, searchTerm]);
+  }, [category, limit, searchTerm, minimal]);
 
   // Memoizar veículos para venda especificamente para a calculadora
   const forSaleVehicles = useMemo(() => {

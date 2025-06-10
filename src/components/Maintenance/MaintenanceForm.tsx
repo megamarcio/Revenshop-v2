@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -22,7 +23,11 @@ interface MaintenanceFormProps {
 }
 
 const MaintenanceForm = ({ onClose, editingMaintenance }: MaintenanceFormProps) => {
-  const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ category: 'forSale', limit: 50 });
+  const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ 
+    category: 'forSale', 
+    limit: 50, 
+    minimal: true 
+  });
   const { addMaintenance, updateMaintenance } = useMaintenance();
   const [loading, setLoading] = useState(false);
   
