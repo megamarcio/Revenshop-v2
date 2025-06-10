@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Wrench } from 'lucide-react';
+import { Plus, Wrench, Settings } from 'lucide-react';
 import MaintenanceForm from './MaintenanceForm';
 import MaintenanceList from './MaintenanceList';
+import TechnicalPanelRedesigned from './TechnicalPanel/TechnicalPanelRedesigned';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
 
 const MaintenanceManagement = () => {
@@ -13,6 +14,7 @@ const MaintenanceManagement = () => {
   const { maintenances } = useMaintenance();
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
+  const [showTechnicalPanel, setShowTechnicalPanel] = useState(false);
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -69,10 +71,20 @@ const MaintenanceManagement = () => {
             <span>R$ {totalCost.toFixed(2).replace('.', ',')} em custos</span>
           </div>
         </div>
-        <Button onClick={handleNewMaintenance} className="bg-revenshop-primary hover:bg-revenshop-primary/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Nova Manutenção
-        </Button>
+        <div className="flex gap-3">
+          <Button 
+            onClick={() => setShowTechnicalPanel(true)} 
+            variant="outline"
+            className="border-blue-600 text-blue-600 hover:bg-blue-50"
+          >
+            <Settings className="h-4 w-4 mr-2" />
+            Painel Técnico
+          </Button>
+          <Button onClick={handleNewMaintenance} className="bg-revenshop-primary hover:bg-revenshop-primary/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Manutenção
+          </Button>
+        </div>
       </div>
 
       <MaintenanceList 
@@ -83,6 +95,15 @@ const MaintenanceManagement = () => {
         <MaintenanceForm
           onClose={handleCloseForm}
           editingMaintenance={editingMaintenance}
+        />
+      )}
+
+      {showTechnicalPanel && (
+        <TechnicalPanelRedesigned
+          isOpen={showTechnicalPanel}
+          onClose={() => setShowTechnicalPanel(false)}
+          vehicleId={undefined}
+          vehicleName="Painel Geral"
         />
       )}
     </div>
