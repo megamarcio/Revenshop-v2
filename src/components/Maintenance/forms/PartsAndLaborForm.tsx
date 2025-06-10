@@ -34,10 +34,12 @@ const PartsAndLaborForm = ({
   onUpdateQuote,
   onRemoveQuote
 }: PartsAndLaborFormProps) => {
+  // Valor das peças utilizadas (valor real inserido manualmente)
   const calculatePartsTotal = () => {
     return parts.reduce((sum, part) => sum + (part.value || 0), 0);
   };
 
+  // Orçamento total de todas as cotações (compradas + não compradas)
   const calculateQuotesTotal = () => {
     return parts.reduce((sum, part) => {
       const partQuotesTotal = part.priceQuotes?.reduce((partSum, quote) => partSum + (quote.estimatedPrice || 0), 0) || 0;
@@ -45,6 +47,7 @@ const PartsAndLaborForm = ({
     }, 0);
   };
 
+  // Valor das peças compradas (apenas cotações marcadas como purchased)
   const calculatePurchasedQuotesTotal = () => {
     return parts.reduce((sum, part) => {
       const purchasedQuotesTotal = part.priceQuotes?.reduce((partSum, quote) => {
@@ -58,12 +61,9 @@ const PartsAndLaborForm = ({
     return labor.reduce((sum, labor) => sum + (labor.value || 0), 0);
   };
 
+  // Valor Total Real = Peças Utilizadas (valor real) + Peças Compradas (cotações marcadas) + Mão de Obra
   const calculateGrandTotal = () => {
-    return calculatePartsTotal() + calculateLaborTotal();
-  };
-
-  const calculateEstimatedTotal = () => {
-    return calculatePurchasedQuotesTotal() + calculateLaborTotal();
+    return calculatePartsTotal() + calculatePurchasedQuotesTotal() + calculateLaborTotal();
   };
 
   return (
@@ -95,7 +95,7 @@ const PartsAndLaborForm = ({
                   type="number" 
                   value={part.value || ''} 
                   onChange={e => onUpdatePart(part.id, 'value', parseFloat(e.target.value) || 0)} 
-                  placeholder="0.00"
+                  placeholder=""
                   className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 />
               </div>
@@ -146,7 +146,7 @@ const PartsAndLaborForm = ({
                 type="number" 
                 value={laborItem.value || ''} 
                 onChange={e => onUpdateLabor(laborItem.id, 'value', parseFloat(e.target.value) || 0)} 
-                placeholder="0.00"
+                placeholder=""
                 className="[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
             </div>
@@ -166,7 +166,7 @@ const PartsAndLaborForm = ({
       <div className="bg-gray-50 p-4 rounded-lg space-y-3">
         <div className="grid grid-cols-2 gap-4 text-sm">
           <div className="flex justify-between">
-            <span>Peças Utilizadas:</span>
+            <span>Peças Utilizadas (valor real):</span>
             <span className="font-medium">
               $ {calculatePartsTotal().toFixed(2)}
             </span>
@@ -185,40 +185,26 @@ const PartsAndLaborForm = ({
               $ {calculateQuotesTotal().toFixed(2)}
             </span>
           </div>
+
+          {calculatePurchasedQuotesTotal() > 0 && (
+            <div className="flex justify-between text-green-700">
+              <span>Peças Compradas (cotações):</span>
+              <span className="font-medium">
+                $ {calculatePurchasedQuotesTotal().toFixed(2)}
+              </span>
+            </div>
+          )}
           
-          <div className="flex justify-between text-revenshop-primary font-semibold">
+          <div className="flex justify-between text-revenshop-primary font-semibold col-span-2 border-t pt-2">
             <span>Valor Total Real:</span>
             <span>$ {calculateGrandTotal().toFixed(2)}</span>
           </div>
         </div>
 
-        {calculatePurchasedQuotesTotal() > 0 && (
-          <div className="border-t pt-3 mt-3">
-            <div className="flex justify-between items-center text-green-800 bg-green-100 p-2 rounded">
-              <span className="font-semibold">Valor Estimado (Comprados):</span>
-              <span className="text-lg font-bold">
-                $ {calculateEstimatedTotal().toFixed(2)}
-              </span>
-            </div>
-            <p className="text-xs text-gray-600 mt-1">
-              * Baseado nas cotações marcadas como compradas
-            </p>
-          </div>
-        )}
-
-        {calculateQuotesTotal() > 0 && calculatePurchasedQuotesTotal() === 0 && (
-          <div className="border-t pt-3 mt-3">
-            <div className="flex justify-between items-center text-blue-800 bg-blue-100 p-2 rounded">
-              <span className="font-semibold">Valor Estimado Total:</span>
-              <span className="text-lg font-bold">
-                $ {(calculateQuotesTotal() + calculateLaborTotal()).toFixed(2)}
-              </span>
-            </div>
-            <p className="text-xs text-gray-600 mt-1">
-              * Baseado nas cotações de preços coletadas
-            </p>
-          </div>
-        )}
+        <div className="text-xs text-gray-600 mt-2 space-y-1">
+          <p>* Orçamento de Peças: soma de todas as cotações coletadas</p>
+          <p>* Valor Total Real: Peças Utilizadas + Peças Compradas + Mão de Obra</p>
+        </div>
       </div>
     </>
   );
