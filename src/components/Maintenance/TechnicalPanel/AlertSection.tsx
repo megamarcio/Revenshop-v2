@@ -2,7 +2,12 @@
 import React from 'react';
 import { AlertTriangle, Clock, Wrench } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { AlertSectionProps } from './types';
+import { TechnicalItem } from '../../hooks/useTechnicalItems';
+
+interface AlertSectionProps {
+  trocarItems: TechnicalItem[];
+  proximoTrocaItems: TechnicalItem[];
+}
 
 const AlertSection = ({ trocarItems, proximoTrocaItems }: AlertSectionProps) => {
   if (trocarItems.length === 0 && proximoTrocaItems.length === 0) {

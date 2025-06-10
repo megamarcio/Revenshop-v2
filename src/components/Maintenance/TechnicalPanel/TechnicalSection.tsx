@@ -2,8 +2,22 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TechnicalSectionProps } from './types';
+import { LucideIcon } from 'lucide-react';
+import { TechnicalItem } from '../../hooks/useTechnicalItems';
 import EditableItemRow from './EditableItemRow';
+
+interface TechnicalSectionProps {
+  title: string;
+  icon: LucideIcon;
+  items: TechnicalItem[];
+  editingItem: string | null;
+  onEdit: (itemId: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onUpdate: (itemId: string, updates: Partial<TechnicalItem>) => void;
+  isHighlight?: boolean;
+  className?: string;
+}
 
 const TechnicalSection = ({ 
   title, 
