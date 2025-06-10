@@ -37,7 +37,7 @@ export const useTechnicalItems = (vehicleId?: string) => {
       const formattedItems: TechnicalItem[] = data.map(item => ({
         id: item.id,
         name: item.name,
-        icon: getIconForType(item.type),
+        icon: 'Wrench', // Simplified - icon will be handled in the component
         month: item.month || '',
         year: item.year || '',
         miles: item.miles || '',
@@ -133,12 +133,27 @@ export const useTechnicalItems = (vehicleId?: string) => {
 
       if (error) {
         console.error('Erro ao criar itens padrão:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao criar itens técnicos padrão',
+          variant: 'destructive'
+        });
         return;
       }
 
       await loadTechnicalItems();
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Itens técnicos padrão criados com sucesso!'
+      });
     } catch (error) {
       console.error('Erro ao criar itens padrão:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao criar itens técnicos padrão',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -149,12 +164,4 @@ export const useTechnicalItems = (vehicleId?: string) => {
     createDefaultItems,
     refresh: loadTechnicalItems
   };
-};
-
-// Função auxiliar para mapear tipos para ícones
-const getIconForType = (type: string) => {
-  // Como não podemos importar os ícones aqui diretamente, 
-  // retornamos o Wrench como padrão e deixamos o componente decidir
-  const { Wrench } = require('lucide-react');
-  return Wrench;
 };
