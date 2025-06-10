@@ -15,11 +15,6 @@ serve(async (req) => {
   }
 
   try {
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OPENAI_API_KEY não configurada');
-    }
-
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     
@@ -28,7 +23,7 @@ serve(async (req) => {
     const { vehicleData } = await req.json();
     console.log('Generating description for vehicle:', vehicleData);
 
-    // Buscar as instruções de descrição do banco de dados
+    // Buscar as configurações de IA do banco de dados incluindo a chave OpenAI
     const { data: aiSettings, error: settingsError } = await supabase
       .rpc('get_ai_settings');
 
@@ -37,10 +32,18 @@ serve(async (req) => {
       throw new Error('Erro ao buscar configurações de IA');
     }
 
-    let instructions = '';
-    if (aiSettings && aiSettings.length > 0) {
-      instructions = aiSettings[0].description_instructions || '';
+    if (!aiSettings || aiSettings.length === 0) {
+      throw new Error('Configurações de IA não encontradas');
     }
+
+    const settings = aiSettings[0];
+    const openAIApiKey = settings.openai_key;
+
+    if (!openAIApiKey) {
+      throw new Error('Chave da OpenAI não configurada. Configure a chave no painel de administração.');
+    }
+
+    let instructions = settings.description_instructions || '';
 
     // Instruções padrão caso não estejam configuradas
     if (!instructions) {
@@ -100,7 +103,9 @@ Gere uma descrição comercial atrativa para este veículo:`;
     });
 
     if (!response.ok) {
-      throw new Error(`OpenAI API error: ${response.status}`);
+      const errorText = await response.text();
+      console.error(`OpenAI API error: ${response.status} - ${errorText}`);
+      throw new Error(`Erro da API OpenAI: ${response.status}`);
     }
 
     const data = await response.json();
