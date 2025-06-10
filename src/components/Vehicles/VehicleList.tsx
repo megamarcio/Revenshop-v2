@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useVehicles, Vehicle } from '../../hooks/useVehicles';
+import { useVehicles, Vehicle } from '../../hooks/useVehicles/index';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
 import VehicleListHeader from './VehicleListHeader';
