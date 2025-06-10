@@ -1,193 +1,167 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, Clock, AlertTriangle, Save, X } from 'lucide-react';
-import { TechnicalItem, TIRE_BRANDS } from './types';
+import { Edit2, Save, X, CheckCircle, Clock, AlertTriangle, LucideIcon } from 'lucide-react';
+import { TechnicalItem } from '../../hooks/useTechnicalItems';
 
 interface MainItemCardProps {
-  item: TechnicalItem;
-  icon: React.ReactNode;
   title: string;
+  icon: LucideIcon;
+  item: TechnicalItem;
   isEditing: boolean;
   onEdit: (itemId: string) => void;
   onSave: () => void;
-  onUpdate: (itemId: string, updates: Partial<TechnicalItem>) => void;
   onCancel: () => void;
+  onUpdate: (itemId: string, updates: Partial<TechnicalItem>) => void;
 }
 
-const MainItemCard = ({ 
-  item, 
-  icon, 
-  title, 
-  isEditing, 
-  onEdit, 
-  onSave, 
-  onUpdate, 
-  onCancel 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'em-dia':
+      return 'bg-green-100 text-green-800 border-green-200';
+    case 'proximo-troca':
+      return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+    case 'trocar':
+      return 'bg-red-100 text-red-800 border-red-200';
+    default:
+      return 'bg-gray-100 text-gray-800 border-gray-200';
+  }
+};
+
+const MainItemCard = ({
+  title,
+  icon: Icon,
+  item,
+  isEditing,
+  onEdit,
+  onSave,
+  onCancel,
+  onUpdate
 }: MainItemCardProps) => {
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'em-dia': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'proximo-troca': return <Clock className="h-4 w-4 text-yellow-600" />;
-      case 'trocar': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      default: return <CheckCircle className="h-4 w-4 text-gray-400" />;
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'em-dia': return 'text-green-700 bg-green-50 border-green-200';
-      case 'proximo-troca': return 'text-yellow-700 bg-yellow-50 border-yellow-200';
-      case 'trocar': return 'text-red-700 bg-red-50 border-red-200';
-      default: return 'text-gray-700 bg-gray-50 border-gray-200';
-    }
-  };
-
-  const formatDate = (month: string, year: string) => {
-    if (!month || !year) return '--/--';
-    const m = month.padStart(2, '0');
-    const y = year.slice(-2);
-    return `${m}/${y}`;
-  };
-
   return (
-    <Card className={`${getStatusColor(item.status)} border-2`}>
+    <Card className="transition-all duration-200 hover:shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between text-lg">
           <div className="flex items-center gap-3">
-            {icon}
+            <div className="p-2 rounded-lg bg-blue-100">
+              <Icon className="h-5 w-5 text-blue-600" />
+            </div>
             <span>{title}</span>
           </div>
-          {getStatusIcon(item.status)}
+          <div className={`px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(item.status)}`}>
+            <div className="flex items-center gap-2">
+              {item.status === 'em-dia' && <CheckCircle className="h-4 w-4" />}
+              {item.status === 'proximo-troca' && <Clock className="h-4 w-4" />}
+              {item.status === 'trocar' && <AlertTriangle className="h-4 w-4" />}
+              <span>
+                {item.status === 'em-dia' && 'Em Dia'}
+                {item.status === 'proximo-troca' && 'Próximo da Troca'}
+                {item.status === 'trocar' && 'Precisa Trocar'}
+              </span>
+            </div>
+          </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
-        {item.type === 'tires' ? (
-          // Layout especial para pneus
-          <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-600">Tamanho:</div>
-            {isEditing ? (
+      <CardContent className="space-y-4">
+        {isEditing ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Mês</label>
               <Input
-                value={item.extraInfo || ''}
-                onChange={(e) => onUpdate(item.id, { extraInfo: e.target.value })}
-                placeholder="Ex: 205/55 R16"
-                className="text-sm"
+                type="text"
+                value={item.month || ''}
+                onChange={(e) => onUpdate(item.id, { month: e.target.value })}
+                placeholder="MM"
+                maxLength={2}
               />
-            ) : (
-              <div className="text-lg font-bold text-blue-800">
-                {item.extraInfo || 'Não informado'}
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-gray-700">Ano</label>
+              <Input
+                type="text"
+                value={item.year || ''}
+                onChange={(e) => onUpdate(item.id, { year: e.target.value })}
+                placeholder="YYYY"
+                maxLength={4}
+              />
+            </div>
+            {item.miles !== undefined && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-700">Milhas</label>
+                <Input
+                  type="text"
+                  value={item.miles || ''}
+                  onChange={(e) => onUpdate(item.id, { miles: e.target.value })}
+                  placeholder="Milhas"
+                />
               </div>
             )}
-            
-            <div className="text-sm font-medium text-gray-600">Marca:</div>
-            {isEditing ? (
+            <div className="space-y-2 md:col-span-3">
+              <label className="text-sm font-medium text-gray-700">Status</label>
               <Select
-                value={item.tireBrand || ''}
-                onValueChange={(value) => onUpdate(item.id, { tireBrand: value })}
+                value={item.status}
+                onValueChange={(value: 'em-dia' | 'proximo-troca' | 'trocar') => 
+                  onUpdate(item.id, { status: value })
+                }
               >
-                <SelectTrigger className="text-sm">
-                  <SelectValue placeholder="Selecionar marca" />
+                <SelectTrigger>
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {TIRE_BRANDS.map(brand => (
-                    <SelectItem key={brand} value={brand}>{brand}</SelectItem>
-                  ))}
+                  <SelectItem value="em-dia">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                      Em Dia
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="proximo-troca">
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-yellow-600" />
+                      Próximo da Troca
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="trocar">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="h-4 w-4 text-red-600" />
+                      Precisa Trocar
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
-            ) : (
-              <div className="text-sm text-gray-700">
-                {item.tireBrand || 'Não informado'}
-              </div>
-            )}
+            </div>
           </div>
         ) : (
-          // Layout para óleo e bateria
           <div className="space-y-2">
-            <div className="text-sm font-medium text-gray-600">Data:</div>
-            {isEditing ? (
-              <div className="flex items-center gap-2">
-                <Input
-                  type="text"
-                  value={item.month || ''}
-                  onChange={(e) => onUpdate(item.id, { month: e.target.value })}
-                  placeholder="MM"
-                  className="w-16 text-sm"
-                  maxLength={2}
-                />
-                <span>/</span>
-                <Input
-                  type="text"
-                  value={item.year || ''}
-                  onChange={(e) => onUpdate(item.id, { year: e.target.value })}
-                  placeholder="YYYY"
-                  className="w-20 text-sm"
-                  maxLength={4}
-                />
+            <div className="text-lg font-semibold text-gray-900">
+              {item.month && item.year ? `${item.month}/${item.year}` : 'Não informado'}
+              {item.miles && ` - ${item.miles} milhas`}
+            </div>
+            {item.next_change && (
+              <div className="text-sm text-gray-600">
+                Próxima troca: {new Date(item.next_change).toLocaleDateString('pt-BR')}
               </div>
-            ) : (
-              <div className="text-2xl font-bold tracking-wider">
-                {formatDate(item.month || '', item.year || '')}
-              </div>
-            )}
-            
-            {item.miles && (
-              <>
-                <div className="text-sm font-medium text-gray-600">Milhas:</div>
-                {isEditing ? (
-                  <Input
-                    type="text"
-                    value={item.miles || ''}
-                    onChange={(e) => onUpdate(item.id, { miles: e.target.value })}
-                    placeholder="Milhas"
-                    className="text-sm"
-                  />
-                ) : (
-                  <div className="text-sm text-gray-700">{item.miles} mi</div>
-                )}
-              </>
             )}
           </div>
         )}
-
-        <Separator />
-
-        <div className="flex items-center justify-between">
-          <Select
-            value={item.status}
-            onValueChange={(value: 'em-dia' | 'proximo-troca' | 'trocar') => 
-              onUpdate(item.id, { status: value })
-            }
-          >
-            <SelectTrigger className="w-32 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="em-dia">Em Dia</SelectItem>
-              <SelectItem value="proximo-troca">Próximo</SelectItem>
-              <SelectItem value="trocar">Trocar</SelectItem>
-            </SelectContent>
-          </Select>
-
+        
+        <div className="flex justify-end gap-2">
           {isEditing ? (
-            <div className="flex gap-1">
-              <Button size="sm" variant="ghost" onClick={onSave} className="h-8 w-8 p-0">
-                <Save className="h-3 w-3 text-green-600" />
+            <>
+              <Button variant="outline" onClick={onCancel}>
+                <X className="h-4 w-4 mr-2" />
+                Cancelar
               </Button>
-              <Button size="sm" variant="ghost" onClick={onCancel} className="h-8 w-8 p-0">
-                <X className="h-3 w-3 text-red-600" />
+              <Button onClick={onSave}>
+                <Save className="h-4 w-4 mr-2" />
+                Salvar
               </Button>
-            </div>
+            </>
           ) : (
-            <Button 
-              size="sm" 
-              variant="ghost" 
-              onClick={() => onEdit(item.id)}
-              className="h-8 px-3 text-xs"
-            >
+            <Button variant="outline" onClick={() => onEdit(item.id)}>
+              <Edit2 className="h-4 w-4 mr-2" />
               Editar
             </Button>
           )}

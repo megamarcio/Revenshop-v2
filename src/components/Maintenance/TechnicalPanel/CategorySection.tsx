@@ -1,56 +1,70 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Clock, AlertTriangle } from 'lucide-react';
-import { TechnicalItem } from './types';
+import { Badge } from '@/components/ui/badge';
+import { LucideIcon } from 'lucide-react';
+import { TechnicalItem } from '../../hooks/useTechnicalItems';
+import CompactTechnicalRow from './CompactTechnicalRow';
 
 interface CategorySectionProps {
-  categoryName: string;
-  CategoryIcon: React.ComponentType<{ className?: string }>;
+  title: string;
+  icon: LucideIcon;
   items: TechnicalItem[];
+  editingItem: string | null;
+  onEdit: (itemId: string) => void;
+  onSave: () => void;
+  onCancel: () => void;
+  onUpdate: (itemId: string, updates: Partial<TechnicalItem>) => void;
 }
 
-const CategorySection = ({ categoryName, CategoryIcon, items }: CategorySectionProps) => {
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'em-dia': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'proximo-troca': return <Clock className="h-4 w-4 text-yellow-600" />;
-      case 'trocar': return <AlertTriangle className="h-4 w-4 text-red-600" />;
-      default: return <CheckCircle className="h-4 w-4 text-gray-400" />;
-    }
-  };
-
-  const formatDate = (month?: string, year?: string) => {
-    if (!month || !year) return '--/--';
-    const m = month.padStart(2, '0');
-    const y = year.slice(-2);
-    return `${m}/${y}`;
-  };
-
-  if (items.length === 0) return null;
+const CategorySection = ({ 
+  title, 
+  icon: Icon, 
+  items, 
+  editingItem, 
+  onEdit, 
+  onSave, 
+  onCancel, 
+  onUpdate 
+}: CategorySectionProps) => {
+  const alertCount = items.filter(item => 
+    item.status === 'trocar' || item.status === 'proximo-troca'
+  ).length;
 
   return (
-    <Card className="border border-gray-200">
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <CategoryIcon className="h-4 w-4" />
-          {categoryName}
+    <Card className="transition-all duration-200 hover:shadow-md">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center justify-between text-base">
+          <div className="flex items-center gap-2">
+            <div className="p-1.5 rounded-md bg-gray-100">
+              <Icon className="h-4 w-4 text-gray-600" />
+            </div>
+            <span>{title}</span>
+          </div>
+          {alertCount > 0 && (
+            <Badge variant="destructive" className="text-xs px-2 py-0.5">
+              {alertCount}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <ul className="space-y-1">
-          {items.map(item => (
-            <li key={item.id} className="flex items-center justify-between py-1 px-2 rounded hover:bg-gray-50">
-              <span className="text-xs text-gray-700">{item.name}</span>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">
-                  {formatDate(item.month, item.year)}
-                </span>
-                {getStatusIcon(item.status)}
-              </div>
-            </li>
-          ))}
-        </ul>
+      <CardContent className="space-y-2">
+        {items.map(item => (
+          <CompactTechnicalRow
+            key={item.id}
+            item={item}
+            isEditing={editingItem === item.id}
+            onEdit={onEdit}
+            onSave={onSave}
+            onCancel={onCancel}
+            onUpdate={onUpdate}
+          />
+        ))}
+        {items.length === 0 && (
+          <div className="text-center py-4 text-gray-500 text-sm">
+            Nenhum item cadastrado
+          </div>
+        )}
       </CardContent>
     </Card>
   );
