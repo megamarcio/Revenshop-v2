@@ -42,8 +42,8 @@ const MaintenanceForm = ({ open, onClose, editingMaintenance }: MaintenanceFormP
   const selectedVehicle = vehicles.find(v => v.id === formData.vehicle_id);
 
   const calculateTotal = () => {
-    const partsTotal = formData.parts.reduce((sum, part) => sum + part.cost, 0);
-    const laborTotal = formData.labor.reduce((sum, labor) => sum + labor.cost, 0);
+    const partsTotal = formData.parts.reduce((sum, part) => sum + part.value, 0);
+    const laborTotal = formData.labor.reduce((sum, labor) => sum + labor.value, 0);
     return partsTotal + laborTotal;
   };
 
@@ -76,50 +76,93 @@ const MaintenanceForm = ({ open, onClose, editingMaintenance }: MaintenanceFormP
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <VehicleMaintenanceSelector
-            vehicles={vehicles}
             selectedVehicleId={formData.vehicle_id}
             onVehicleChange={(vehicleId) => setFormData(prev => ({ ...prev, vehicle_id: vehicleId }))}
-            disabled={!canEditVehicles}
-            loading={vehiclesLoading}
           />
 
           <DateSelectionForm
             detectionDate={detectionDate}
-            setDetectionDate={setDetectionDate}
             repairDate={repairDate}
-            setRepairDate={setRepairDate}
             promisedDate={promisedDate}
-            setPromisedDate={setPromisedDate}
+            onDetectionDateChange={setDetectionDate}
+            onRepairDateChange={setRepairDate}
+            onPromisedDateChange={setPromisedDate}
           />
 
           <MaintenanceItemsSelector
             maintenanceType={formData.maintenance_type}
-            setMaintenanceType={(type) => setFormData(prev => ({ ...prev, maintenance_type: type }))}
             maintenanceItems={formData.maintenance_items}
-            setMaintenanceItems={(items) => setFormData(prev => ({ ...prev, maintenance_items: items }))}
             customMaintenance={formData.custom_maintenance}
-            setCustomMaintenance={(custom) => setFormData(prev => ({ ...prev, custom_maintenance: custom }))}
-            details={formData.details}
-            setDetails={(details) => setFormData(prev => ({ ...prev, details: details }))}
+            onMaintenanceTypeChange={(type) => setFormData(prev => ({ ...prev, maintenance_type: type }))}
+            onMaintenanceItemChange={(item, checked) => {
+              if (checked) {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  maintenance_items: [...prev.maintenance_items, item] 
+                }));
+              } else {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  maintenance_items: prev.maintenance_items.filter(i => i !== item) 
+                }));
+              }
+            }}
+            onCustomMaintenanceChange={(custom) => setFormData(prev => ({ ...prev, custom_maintenance: custom }))}
           />
 
           <MechanicInfoForm
             mechanicName={formData.mechanic_name}
-            setMechanicName={(name) => setFormData(prev => ({ ...prev, mechanic_name: name }))}
             mechanicPhone={formData.mechanic_phone}
-            setMechanicPhone={(phone) => setFormData(prev => ({ ...prev, mechanic_phone: phone }))}
+            details={formData.details}
+            onMechanicNameChange={(name) => setFormData(prev => ({ ...prev, mechanic_name: name }))}
+            onMechanicPhoneChange={(phone) => setFormData(prev => ({ ...prev, mechanic_phone: phone }))}
+            onDetailsChange={(details) => setFormData(prev => ({ ...prev, details: details }))}
           />
 
           <PartsAndLaborForm
             parts={formData.parts}
-            setParts={(parts) => setFormData(prev => ({ ...prev, parts }))}
             labor={formData.labor}
-            setLabor={(labor) => setFormData(prev => ({ ...prev, labor }))}
+            onAddPart={() => {
+              const newPart = { id: crypto.randomUUID(), name: '', value: 0 };
+              setFormData(prev => ({ ...prev, parts: [...prev.parts, newPart] }));
+            }}
+            onUpdatePart={(id, field, value) => {
+              setFormData(prev => ({
+                ...prev,
+                parts: prev.parts.map(part => 
+                  part.id === id ? { ...part, [field]: value } : part
+                )
+              }));
+            }}
+            onRemovePart={(id) => {
+              setFormData(prev => ({
+                ...prev,
+                parts: prev.parts.filter(part => part.id !== id)
+              }));
+            }}
+            onAddLabor={() => {
+              const newLabor = { id: crypto.randomUUID(), description: '', value: 0 };
+              setFormData(prev => ({ ...prev, labor: [...prev.labor, newLabor] }));
+            }}
+            onUpdateLabor={(id, field, value) => {
+              setFormData(prev => ({
+                ...prev,
+                labor: prev.labor.map(labor => 
+                  labor.id === id ? { ...labor, [field]: value } : labor
+                )
+              }));
+            }}
+            onRemoveLabor={(id) => {
+              setFormData(prev => ({
+                ...prev,
+                labor: prev.labor.filter(labor => labor.id !== id)
+              }));
+            }}
           />
 
           <ReceiptUploadForm
             receiptUrls={formData.receipt_urls}
-            setReceiptUrls={(urls) => setFormData(prev => ({ ...prev, receipt_urls: urls }))}
+            onReceiptUrlsChange={(urls) => setFormData(prev => ({ ...prev, receipt_urls: urls }))}
           />
 
           <MaintenanceFormActions

@@ -152,6 +152,7 @@ const MaintenanceManagement = () => {
 
       {showForm && (
         <MaintenanceForm
+          open={showForm}
           onClose={handleCloseForm}
           editingMaintenance={editingMaintenance}
         />

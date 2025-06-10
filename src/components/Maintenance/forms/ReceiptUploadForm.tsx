@@ -3,7 +3,12 @@ import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Upload } from 'lucide-react';
 
-const ReceiptUploadForm = () => {
+interface ReceiptUploadFormProps {
+  receiptUrls: string[];
+  onReceiptUrlsChange: (urls: string[]) => void;
+}
+
+const ReceiptUploadForm = ({ receiptUrls, onReceiptUrlsChange }: ReceiptUploadFormProps) => {
   return (
     <div className="space-y-2">
       <Label>Recibos e Comprovantes</Label>
@@ -16,6 +21,11 @@ const ReceiptUploadForm = () => {
           PDF, JPG, PNG até 10MB cada
         </p>
       </div>
+      {receiptUrls.length > 0 && (
+        <div className="text-sm text-gray-600">
+          {receiptUrls.length} arquivo(s) anexado(s)
+        </div>
+      )}
     </div>
   );
 };
