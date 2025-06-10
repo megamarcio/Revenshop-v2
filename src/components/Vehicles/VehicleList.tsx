@@ -130,6 +130,7 @@ const VehicleList = () => {
             setEditingVehicle(null);
           }}
           onSave={(vehicleData) => handleSaveVehicle(vehicleData, editingVehicle)}
+          onDelete={editingVehicle ? () => handleDeleteVehicle(editingVehicle) : undefined}
           editingVehicle={editingVehicle}
         />
       )}

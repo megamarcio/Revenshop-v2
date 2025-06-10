@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -245,7 +244,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
                 generateDescription={generateDescription}
               />
 
-              <div className="flex justify-between items-center space-x-4 pt-6 border-t">
+              <div className="flex justify-end items-center space-x-4 pt-6 border-t">
                 <div className="flex space-x-2">
                   <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                     {t('cancel')}
