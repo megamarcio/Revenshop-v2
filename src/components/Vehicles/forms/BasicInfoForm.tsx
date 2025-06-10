@@ -12,7 +12,7 @@ interface BasicInfoFormProps {
     vin: string;
     year: string;
     model: string;
-    plate: string;
+    miles: string;
     internalCode: string;
     color: string;
     caNote: string;
@@ -81,7 +81,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
     // Allow only numbers and limit to 500000
     const numericValue = value.replace(/\D/g, '');
     if (parseInt(numericValue) <= 500000 || numericValue === '') {
-      onInputChange('plate', numericValue);
+      onInputChange('miles', numericValue);
     }
   };
 
@@ -176,13 +176,13 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           <Input
             id="miles"
             type="text"
-            value={formData.plate}
+            value={formData.miles}
             onChange={handleMilesChange}
             placeholder="Ex: 45000"
             max="500000"
-            className={errors.plate ? 'border-red-500' : ''}
+            className={errors.miles ? 'border-red-500' : ''}
           />
-          {errors.plate && <p className="text-sm text-red-500">{errors.plate}</p>}
+          {errors.miles && <p className="text-sm text-red-500">{errors.miles}</p>}
           <p className="text-xs text-gray-500">Máximo: 500,000 milhas</p>
         </div>
 
