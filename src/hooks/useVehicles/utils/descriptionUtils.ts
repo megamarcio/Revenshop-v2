@@ -1,8 +1,16 @@
 
 // Helper function to extract extended category from description
-export const extractExtendedCategory = (description: string): string => {
+export const extractExtendedCategory = (description: string): 'rental' | 'maintenance' | 'consigned' | null => {
   const match = description?.match(/\[CATEGORY:([^\]]+)\]/);
-  return match ? match[1] : '';
+  if (!match) return null;
+  
+  const category = match[1];
+  // Only return valid extended categories
+  if (category === 'rental' || category === 'maintenance' || category === 'consigned') {
+    return category;
+  }
+  
+  return null;
 };
 
 // Helper function to extract consignment store from description

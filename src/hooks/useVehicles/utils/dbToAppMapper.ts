@@ -25,7 +25,7 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
   });
   
   // Mapear corretamente os campos do banco para o formato da aplicação
-  const mappedVehicle = {
+  const mappedVehicle: Vehicle = {
     id: dbVehicle.id,
     name: dbVehicle.name || '',
     vin: dbVehicle.vin || '',
@@ -50,18 +50,8 @@ export const mapDbDataToAppData = (dbVehicle: any): Vehicle => {
     created_at: dbVehicle.created_at,
     updated_at: dbVehicle.updated_at,
     created_by: dbVehicle.created_by,
-    extended_category: extendedCategory || null,
-    consignment_store: consignmentStore || null,
-    titleInfo: titleInfo, // Add the reconstructed titleInfo field
-    // Adicionar aliases para compatibilidade
-    plate: dbVehicle.miles?.toString() || '0', // Alias para milhas no formulário
-    internalCode: dbVehicle.internal_code || '',
-    caNote: dbVehicle.ca_note?.toString() || '0',
-    purchasePrice: dbVehicle.purchase_price?.toString() || '0',
-    salePrice: dbVehicle.sale_price?.toString() || '0',
-    minNegotiable: dbVehicle.min_negotiable?.toString() || '',
-    carfaxPrice: dbVehicle.carfax_price?.toString() || '',
-    mmrValue: dbVehicle.mmr_value?.toString() || ''
+    extended_category: extendedCategory,
+    consignment_store: consignmentStore || undefined
   };
   
   console.log('mapDbDataToAppData - output:', mappedVehicle);
