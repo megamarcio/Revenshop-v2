@@ -12,14 +12,22 @@ interface VehicleData {
   equipamentos?: string;
 }
 
+interface GenerationOptions {
+  imageSize?: string;
+  textLength?: string;
+}
+
 export const useAIGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const generateDescription = async (vehicleData: VehicleData): Promise<string> => {
+  const generateDescription = async (vehicleData: VehicleData, options?: GenerationOptions): Promise<string> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-description', {
-        body: { vehicleData }
+        body: { 
+          vehicleData,
+          textLength: options?.textLength || 'medium'
+        }
       });
 
       if (error) {
@@ -35,11 +43,14 @@ export const useAIGeneration = () => {
     }
   };
 
-  const generateImage = async (vehicleData: VehicleData): Promise<string> => {
+  const generateImage = async (vehicleData: VehicleData, options?: GenerationOptions): Promise<string> => {
     setIsLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { vehicleData }
+        body: { 
+          vehicleData,
+          imageSize: options?.imageSize || '1024x1024'
+        }
       });
 
       if (error) {

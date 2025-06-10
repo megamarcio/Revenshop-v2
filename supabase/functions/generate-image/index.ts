@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
@@ -20,8 +19,8 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { vehicleData } = await req.json();
-    console.log('Generating image for vehicle:', vehicleData);
+    const { vehicleData, imageSize = '1024x1024' } = await req.json();
+    console.log('Generating image for vehicle:', vehicleData, 'with size:', imageSize);
 
     // Buscar as configurações de IA do banco de dados incluindo a chave OpenAI
     const { data: aiSettings, error: settingsError } = await supabase
@@ -74,7 +73,7 @@ serve(async (req) => {
         model: 'dall-e-3',
         prompt: finalPrompt,
         n: 1,
-        size: '1024x1024',
+        size: imageSize,
         quality: 'standard',
         style: 'natural'
       }),

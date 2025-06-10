@@ -4,9 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Download, CheckCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Download, CheckCircle, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAIGeneration } from '../../hooks/useAIGeneration';
+import { useVehicleSelection } from '../../hooks/useVehicleSelection';
 
 const ImageGenerator = () => {
   const [vehicleData, setVehicleData] = useState({
@@ -15,12 +17,38 @@ const ImageGenerator = () => {
     ano: '',
     cor: ''
   });
+  const [selectedVehicleId, setSelectedVehicleId] = useState('');
+  const [imageSize, setImageSize] = useState('1024x1024');
   const [generatedImage, setGeneratedImage] = useState('');
   const { generateImage, isLoading } = useAIGeneration();
+  const { vehicles, isLoading: isLoadingVehicles, refreshVehicles } = useVehicleSelection();
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
     setVehicleData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleVehicleSelect = (vehicleId: string) => {
+    setSelectedVehicleId(vehicleId);
+    const vehicle = vehicles.find(v => v.id === vehicleId);
+    if (vehicle) {
+      setVehicleData({
+        marca: vehicle.marca || '',
+        modelo: vehicle.modelo || '',
+        ano: vehicle.ano || '',
+        cor: vehicle.cor || ''
+      });
+    }
+  };
+
+  const clearForm = () => {
+    setSelectedVehicleId('');
+    setVehicleData({
+      marca: '',
+      modelo: '',
+      ano: '',
+      cor: ''
+    });
   };
 
   const handleGenerate = async () => {
@@ -34,7 +62,7 @@ const ImageGenerator = () => {
     }
 
     try {
-      const imageUrl = await generateImage(vehicleData);
+      const imageUrl = await generateImage(vehicleData, { imageSize });
       setGeneratedImage(imageUrl);
       toast({
         title: "Imagem gerada",
@@ -61,9 +89,36 @@ const ImageGenerator = () => {
     <div className="space-y-6">
       <Card>
         <CardHeader>
-          <CardTitle>Informações do Veículo</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            Informações do Veículo
+            <Button variant="outline" size="sm" onClick={refreshVehicles} disabled={isLoadingVehicles}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoadingVehicles ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="vehicle-select-img">Selecionar Veículo Existente</Label>
+            <Select value={selectedVehicleId} onValueChange={handleVehicleSelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Escolha um veículo ou preencha manualmente" />
+              </SelectTrigger>
+              <SelectContent>
+                {vehicles.map((vehicle) => (
+                  <SelectItem key={vehicle.id} value={vehicle.id}>
+                    {vehicle.marca} {vehicle.modelo} {vehicle.ano} - {vehicle.cor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedVehicleId && (
+              <Button variant="outline" size="sm" onClick={clearForm} className="mt-2">
+                Limpar e preencher manualmente
+              </Button>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="marca-img">Marca *</Label>
@@ -104,6 +159,20 @@ const ImageGenerator = () => {
                 placeholder="Ex: Prata"
               />
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="image-size">Tamanho da Imagem</Label>
+            <Select value={imageSize} onValueChange={setImageSize}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1024x1024">Quadrada (1024x1024)</SelectItem>
+                <SelectItem value="1536x1024">Paisagem (1536x1024)</SelectItem>
+                <SelectItem value="1024x1536">Retrato (1024x1536)</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           <Button onClick={handleGenerate} disabled={isLoading} className="w-full">

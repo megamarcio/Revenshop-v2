@@ -1,4 +1,3 @@
-
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
@@ -20,8 +19,8 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { vehicleData } = await req.json();
-    console.log('Generating description for vehicle:', vehicleData);
+    const { vehicleData, textLength = 'medium' } = await req.json();
+    console.log('Generating description for vehicle:', vehicleData, 'with text length:', textLength);
 
     // Buscar as configurações de IA do banco de dados incluindo a chave OpenAI
     const { data: aiSettings, error: settingsError } = await supabase
@@ -56,8 +55,18 @@ serve(async (req) => {
 - Finalizar com chamada para ação`;
     }
 
+    // Adicionar instrução de tamanho baseada no parâmetro
+    const textLengthInstructions = {
+      'short': 'Texto CURTO: máximo 100 palavras, direto e conciso.',
+      'medium': 'Texto MÉDIO: entre 100-200 palavras, equilibrado entre informação e concisão.',
+      'long': 'Texto LONGO: entre 200-350 palavras, detalhado e completo.'
+    };
+
+    const lengthInstruction = textLengthInstructions[textLength as keyof typeof textLengthInstructions] || textLengthInstructions.medium;
+    const finalInstructions = `${instructions}\n\nTAMANHO: ${lengthInstruction}`;
+
     // Substituir variáveis nas instruções
-    let finalInstructions = instructions
+    let processedInstructions = finalInstructions
       .replace(/\[MODELO\]/g, vehicleData.modelo || '')
       .replace(/\[ANO\]/g, vehicleData.ano || '')
       .replace(/\[COR\]/g, vehicleData.cor || '');
@@ -73,7 +82,7 @@ ${vehicleData.quilometragem ? `Quilometragem: ${vehicleData.quilometragem}` : ''
 ${vehicleData.equipamentos ? `Equipamentos: ${vehicleData.equipamentos}` : ''}
     `.trim();
 
-    const fullPrompt = `${finalInstructions}
+    const fullPrompt = `${processedInstructions}
 
 Informações do veículo:
 ${vehicleInfo}
@@ -98,7 +107,7 @@ Gere uma descrição comercial atrativa para este veículo:`;
           { role: 'user', content: fullPrompt }
         ],
         temperature: 0.7,
-        max_tokens: 500,
+        max_tokens: textLength === 'short' ? 150 : textLength === 'medium' ? 300 : 500,
       }),
     });
 
