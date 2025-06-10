@@ -15,7 +15,8 @@ export interface DatabaseMaintenanceRecord {
   id: string;
   vehicle_id: string;
   detection_date: string;
-  repair_date: string;
+  repair_date: string | null;
+  promised_date: string | null;
   maintenance_type: string;
   maintenance_items: string[];
   custom_maintenance: string | null;

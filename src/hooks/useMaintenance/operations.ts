@@ -48,12 +48,12 @@ export const addMaintenanceRecord = async (
   userId: string
 ): Promise<MaintenanceRecord | null> => {
   try {
-    // Preparar dados tratando strings vazias nas datas
+    // Preparar dados tratando strings vazias nas datas como null
     const insertData = {
       vehicle_id: maintenance.vehicle_id,
       detection_date: maintenance.detection_date,
-      repair_date: maintenance.repair_date || null, // Converter string vazia para null
-      promised_date: maintenance.promised_date || null, // Converter string vazia para null
+      repair_date: maintenance.repair_date === '' ? null : maintenance.repair_date,
+      promised_date: maintenance.promised_date === '' ? null : maintenance.promised_date,
       maintenance_type: maintenance.maintenance_type,
       maintenance_items: maintenance.maintenance_items,
       custom_maintenance: maintenance.custom_maintenance || null,
@@ -110,13 +110,14 @@ export const updateMaintenanceRecord = async (
   updates: Partial<MaintenanceRecord>
 ): Promise<boolean> => {
   try {
-    // Preparar atualizações tratando strings vazias nas datas
+    // Preparar atualizações tratando strings vazias nas datas como null
     const updateData: any = {};
     
     Object.keys(updates).forEach(key => {
       if (key === 'repair_date' || key === 'promised_date') {
         // Converter strings vazias para null para campos de data
-        updateData[key] = updates[key as keyof MaintenanceRecord] || null;
+        const value = updates[key as keyof MaintenanceRecord];
+        updateData[key] = value === '' ? null : value;
       } else if (key === 'parts' || key === 'labor') {
         // Cast arrays to Json type for Supabase
         updateData[key] = updates[key as keyof MaintenanceRecord] as any;

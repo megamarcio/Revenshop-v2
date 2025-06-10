@@ -390,8 +390,9 @@ export type Database = {
           mechanic_name: string
           mechanic_phone: string
           parts: Json
+          promised_date: string | null
           receipt_urls: string[]
-          repair_date: string
+          repair_date: string | null
           total_amount: number
           updated_at: string
           vehicle_id: string
@@ -409,8 +410,9 @@ export type Database = {
           mechanic_name: string
           mechanic_phone: string
           parts?: Json
+          promised_date?: string | null
           receipt_urls?: string[]
-          repair_date: string
+          repair_date?: string | null
           total_amount?: number
           updated_at?: string
           vehicle_id: string
@@ -428,8 +430,9 @@ export type Database = {
           mechanic_name?: string
           mechanic_phone?: string
           parts?: Json
+          promised_date?: string | null
           receipt_urls?: string[]
-          repair_date?: string
+          repair_date?: string | null
           total_amount?: number
           updated_at?: string
           vehicle_id?: string
