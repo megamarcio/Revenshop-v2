@@ -39,6 +39,7 @@ export interface VehicleFormData {
   dueDate: string;
   installmentValue: string;
   downPayment: string;
+  financedAmount: string;
   totalInstallments: string;
   paidInstallments: string;
   remainingInstallments: string;

@@ -160,12 +160,15 @@ const FinancingInfoForm = ({
               </div>
 
               <div>
-                <Label htmlFor="dueDate">Data de Vencimento</Label>
+                <Label htmlFor="dueDate">Dia de Vencimento (1-30)</Label>
                 <Input 
                   id="dueDate"
-                  type="date"
+                  type="number"
+                  min="1"
+                  max="30"
                   value={formData.dueDate} 
                   onChange={(e) => onInputChange('dueDate', e.target.value)} 
+                  placeholder="Ex: 15"
                 />
               </div>
 
@@ -189,6 +192,18 @@ const FinancingInfoForm = ({
                   step="0.01"
                   value={formData.downPayment} 
                   onChange={(e) => onInputChange('downPayment', e.target.value)} 
+                  placeholder="0.00"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="financedAmount">Valor Financiado</Label>
+                <Input 
+                  id="financedAmount"
+                  type="number"
+                  step="0.01"
+                  value={formData.financedAmount} 
+                  onChange={(e) => onInputChange('financedAmount', e.target.value)} 
                   placeholder="0.00"
                 />
               </div>

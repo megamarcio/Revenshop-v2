@@ -89,6 +89,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         // Campos de financiamento
         installmentValue: formData.installmentValue ? parseFloat(formData.installmentValue) : undefined,
         downPayment: formData.downPayment ? parseFloat(formData.downPayment) : undefined,
+        financedAmount: formData.financedAmount ? parseFloat(formData.financedAmount) : undefined,
         totalInstallments: formData.totalInstallments ? parseInt(formData.totalInstallments) : undefined,
         paidInstallments: formData.paidInstallments ? parseInt(formData.paidInstallments) : undefined,
         remainingInstallments: formData.remainingInstallments ? parseInt(formData.remainingInstallments) : undefined,

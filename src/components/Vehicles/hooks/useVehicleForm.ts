@@ -62,6 +62,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     dueDate: editingVehicle?.due_date || editingVehicle?.dueDate || '',
     installmentValue: editingVehicle?.installment_value?.toString() || editingVehicle?.installmentValue?.toString() || '',
     downPayment: editingVehicle?.down_payment?.toString() || editingVehicle?.downPayment?.toString() || '',
+    financedAmount: editingVehicle?.financed_amount?.toString() || editingVehicle?.financedAmount?.toString() || '',
     totalInstallments: editingVehicle?.total_installments?.toString() || editingVehicle?.totalInstallments?.toString() || '',
     paidInstallments: editingVehicle?.paid_installments?.toString() || editingVehicle?.paidInstallments?.toString() || '',
     remainingInstallments: editingVehicle?.remaining_installments?.toString() || editingVehicle?.remainingInstallments?.toString() || '',
