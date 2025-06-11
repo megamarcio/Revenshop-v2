@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { VehicleFormData } from '../types/vehicleFormTypes';
-import { createInitialFormData } from './utils/vehicleFormInitialData';
+import { getInitialFormData } from './utils/vehicleFormInitialData';
 import { useVehicleFormHandlers } from './utils/vehicleFormHandlers';
 import { useVehicleFormDescription } from './utils/vehicleFormDescription';
 import { useVehicleFormCalculations } from './utils/vehicleFormCalculations';
@@ -13,7 +13,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
   const isEditing = editingVehicle && editingVehicle.id;
   
   const [formData, setFormData] = useState<VehicleFormData>(
-    createInitialFormData(editingVehicle, isEditing)
+    getInitialFormData(editingVehicle)
   );
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
@@ -27,12 +27,6 @@ export const useVehicleForm = (editingVehicle?: any) => {
   console.log('useVehicleForm - formData initialized:', formData);
   console.log('useVehicleForm - miles value from editingVehicle:', editingVehicle?.miles);
   console.log('useVehicleForm - final miles in formData:', formData.miles);
-  console.log('useVehicleForm - title fields:', {
-    titleType: formData.titleType,
-    titleStatus: formData.titleStatus,
-    originalTitleType: editingVehicle?.title_type || editingVehicle?.titleType,
-    originalTitleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus
-  });
 
   const {
     handleInputChange,

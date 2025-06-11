@@ -8,7 +8,6 @@ export interface Vehicle {
   miles: number;
   internal_code: string;
   color: string;
-  ca_note: number;
   purchase_price: number;
   sale_price: number;
   profit_margin: number;
@@ -18,8 +17,6 @@ export interface Vehicle {
   description?: string;
   category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
   consignment_store?: string;
-  title_type?: 'clean-title' | 'rebuilt';
-  title_status?: 'em-maos' | 'em-transito';
   photos: string[];
   video?: string;
   created_at: string;

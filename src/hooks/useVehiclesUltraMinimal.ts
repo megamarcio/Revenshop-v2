@@ -1,9 +1,9 @@
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
-export interface VehicleUltraMinimal {
+export interface VehicleMinimal {
   id: string;
   name: string;
   vin: string;
@@ -12,25 +12,20 @@ export interface VehicleUltraMinimal {
   miles: number;
   internal_code: string;
   color: string;
-  ca_note: number;
   purchase_price: number;
   sale_price: number;
   profit_margin: number;
-  min_negotiable: number;
-  carfax_price: number;
-  mmr_value: number;
-  description: string;
+  min_negotiable?: number;
+  carfax_price?: number;
+  mmr_value?: number;
+  description?: string;
   category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
-  title_type?: 'clean-title' | 'rebuilt';
-  title_status?: 'em-maos' | 'em-transito';
   created_at: string;
   updated_at: string;
   created_by?: string;
-  main_photo_url?: string;
-  photos: string[]; // Added photos property
-  video?: string; // Added video property
+  video?: string;
   
-  // Add financing fields
+  // Campos de financiamento
   financing_bank?: string;
   financing_type?: string;
   original_financed_name?: string;
@@ -47,38 +42,30 @@ export interface VehicleUltraMinimal {
   payoff_date?: string;
   interest_rate?: number;
   custom_financing_bank?: string;
+  
+  photos: string[];
 }
 
-interface UseVehiclesUltraMinimalOptions {
-  category?: 'forSale' | 'sold';
-  limit?: number;
-  searchTerm?: string;
-}
-
-export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions = {}) => {
-  const [vehicles, setVehicles] = useState<VehicleUltraMinimal[]>([]);
+export const useVehiclesUltraMinimal = () => {
+  const [vehicles, setVehicles] = useState<VehicleMinimal[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
 
-  const { category = 'forSale', limit = 20, searchTerm } = options;
-
-  const fetchVehicles = useCallback(async (offset = 0) => {
+  const fetchVehicles = async () => {
     try {
-      console.log('Fetching ultra minimal vehicles with complete data:', { category, limit, offset, searchTerm });
+      setLoading(true);
       
-      // Query otimizada - todos os campos necessários, incluindo fotos
-      let query = supabase
+      // Buscar veículos básicos
+      const { data: vehiclesData, error: vehiclesError } = await supabase
         .from('vehicles')
         .select(`
-          id, 
-          name, 
-          vin, 
+          id,
+          name,
+          vin,
           year,
           model,
           miles,
           internal_code,
           color,
-          ca_note,
           purchase_price,
           sale_price,
           profit_margin,
@@ -87,8 +74,6 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
           mmr_value,
           description,
           category,
-          title_type,
-          title_status,
           created_at,
           updated_at,
           created_by,
@@ -108,136 +93,101 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
           payoff_value,
           payoff_date,
           interest_rate,
-          custom_financing_bank,
-          vehicle_photos!vehicle_photos_vehicle_id_fkey (
-            id, url, position, is_main
-          )
+          custom_financing_bank
         `)
         .order('created_at', { ascending: false });
 
-      // Filtrar por categoria se especificado
-      if (category) {
-        query = query.eq('category', category);
+      if (vehiclesError) {
+        console.error('Error fetching vehicles:', vehiclesError);
+        throw vehiclesError;
       }
 
-      // Adicionar busca por termo se especificado
-      if (searchTerm && searchTerm.length > 0) {
-        query = query.or(`name.ilike.%${searchTerm}%,internal_code.ilike.%${searchTerm}%,vin.ilike.%${searchTerm}%`);
-      }
-
-      // Adicionar paginação
-      query = query.range(offset, offset + limit - 1);
-
-      const { data: vehiclesData, error } = await query;
-
-      if (error) {
-        console.error('Supabase error fetching ultra minimal vehicles:', error);
-        throw error;
-      }
-
-      if (!vehiclesData) {
-        setVehicles([]);
-        setHasMore(false);
-        return;
-      }
-
-      // Criar os objetos VehicleUltraMinimal com todos os dados incluindo fotos
-      const vehiclesUltraMinimal = vehiclesData.map(vehicle => {
-        const vehiclePhotos = vehicle.vehicle_photos || [];
-        const photos = vehiclePhotos
-          .sort((a, b) => (a.position || 0) - (b.position || 0))
-          .map(photo => photo.url);
-        
-        // Buscar foto principal ou usar primeira foto como fallback
-        const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
-        const main_photo_url = mainPhoto?.url || photos[0] || null;
-
-        return {
-          id: vehicle.id,
-          name: vehicle.name || '',
-          vin: vehicle.vin || '',
-          year: vehicle.year || 2020,
-          model: vehicle.model || '',
-          miles: vehicle.miles || 0,
-          internal_code: vehicle.internal_code || '',
-          color: vehicle.color || '',
-          ca_note: vehicle.ca_note || 0,
-          purchase_price: vehicle.purchase_price || 0,
-          sale_price: vehicle.sale_price || 0,
-          profit_margin: vehicle.profit_margin || 0,
-          min_negotiable: vehicle.min_negotiable || 0,
-          carfax_price: vehicle.carfax_price || 0,
-          mmr_value: vehicle.mmr_value || 0,
-          description: vehicle.description || '',
-          category: vehicle.category || 'forSale',
-          title_type: vehicle.title_type,
-          title_status: vehicle.title_status,
-          created_at: vehicle.created_at,
-          updated_at: vehicle.updated_at,
-          created_by: vehicle.created_by,
-          main_photo_url,
-          photos,
-          video: vehicle.video,
-          
-          // Financing fields
-          financing_bank: vehicle.financing_bank,
-          financing_type: vehicle.financing_type,
-          original_financed_name: vehicle.original_financed_name,
-          purchase_date: vehicle.purchase_date,
-          due_date: vehicle.due_date,
-          installment_value: vehicle.installment_value,
-          down_payment: vehicle.down_payment,
-          financed_amount: vehicle.financed_amount,
-          total_installments: vehicle.total_installments,
-          paid_installments: vehicle.paid_installments,
-          remaining_installments: vehicle.remaining_installments,
-          total_to_pay: vehicle.total_to_pay,
-          payoff_value: vehicle.payoff_value,
-          payoff_date: vehicle.payoff_date,
-          interest_rate: vehicle.interest_rate,
-          custom_financing_bank: vehicle.custom_financing_bank,
-        } as VehicleUltraMinimal;
-      });
-
-      console.log('Ultra minimal vehicles with complete data fetched successfully:', vehiclesUltraMinimal.length, 'vehicles');
+      // Buscar fotos dos veículos
+      const vehicleIds = vehiclesData?.map(v => v.id) || [];
+      let photosData: any[] = [];
       
-      if (offset === 0) {
-        setVehicles(vehiclesUltraMinimal);
-      } else {
-        setVehicles(prev => [...prev, ...vehiclesUltraMinimal]);
+      if (vehicleIds.length > 0) {
+        const { data: photos, error: photosError } = await supabase
+          .from('vehicle_photos')
+          .select('vehicle_id, url')
+          .in('vehicle_id', vehicleIds);
+
+        if (photosError) {
+          console.error('Error fetching photos:', photosError);
+          // Continue sem fotos em caso de erro
+        } else {
+          photosData = photos || [];
+        }
       }
 
-      setHasMore(vehiclesUltraMinimal.length === limit);
+      // Mapear veículos com suas fotos
+      const mappedVehicles: VehicleMinimal[] = vehiclesData?.map(vehicle => ({
+        id: vehicle.id,
+        name: vehicle.name,
+        vin: vehicle.vin,
+        year: vehicle.year,
+        model: vehicle.model,
+        miles: vehicle.miles,
+        internal_code: vehicle.internal_code,
+        color: vehicle.color,
+        purchase_price: vehicle.purchase_price,
+        sale_price: vehicle.sale_price,
+        profit_margin: vehicle.profit_margin,
+        min_negotiable: vehicle.min_negotiable,
+        carfax_price: vehicle.carfax_price,
+        mmr_value: vehicle.mmr_value,
+        description: vehicle.description,
+        category: vehicle.category,
+        created_at: vehicle.created_at,
+        updated_at: vehicle.updated_at,
+        created_by: vehicle.created_by,
+        
+        video: vehicle.video,
+        
+        // Campos de financiamento
+        financing_bank: vehicle.financing_bank,
+        financing_type: vehicle.financing_type,
+        original_financed_name: vehicle.original_financed_name,
+        purchase_date: vehicle.purchase_date,
+        due_date: vehicle.due_date,
+        installment_value: vehicle.installment_value,
+        down_payment: vehicle.down_payment,
+        financed_amount: vehicle.financed_amount,
+        total_installments: vehicle.total_installments,
+        paid_installments: vehicle.paid_installments,
+        remaining_installments: vehicle.remaining_installments,
+        total_to_pay: vehicle.total_to_pay,
+        payoff_value: vehicle.payoff_value,
+        payoff_date: vehicle.payoff_date,
+        interest_rate: vehicle.interest_rate,
+        custom_financing_bank: vehicle.custom_financing_bank,
+        
+        photos: photosData
+          .filter(photo => photo.vehicle_id === vehicle.id)
+          .map(photo => photo.url)
+      })) || [];
+
+      setVehicles(mappedVehicles);
     } catch (error) {
-      console.error('Error fetching ultra minimal vehicles:', error);
+      console.error('Error fetching vehicles:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao carregar veículos',
+        description: 'Erro ao carregar veículos. Tente novamente.',
         variant: 'destructive',
       });
+      setVehicles([]);
     } finally {
       setLoading(false);
     }
-  }, [category, limit, searchTerm]);
-
-  const loadMore = useCallback(() => {
-    fetchVehicles(vehicles.length);
-  }, [fetchVehicles, vehicles.length]);
-
-  const refetch = useCallback(() => {
-    setLoading(true);
-    fetchVehicles();
-  }, [fetchVehicles]);
+  };
 
   useEffect(() => {
     fetchVehicles();
-  }, [fetchVehicles]);
+  }, []);
 
   return {
     vehicles,
     loading,
-    hasMore,
-    loadMore,
-    refetch,
+    refetch: fetchVehicles,
   };
 };
