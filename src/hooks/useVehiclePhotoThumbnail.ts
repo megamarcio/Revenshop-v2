@@ -24,10 +24,10 @@ export const useVehiclePhotoThumbnail = (vehicleId: string | null): UseVehiclePh
     try {
       console.log('Fetching photo thumbnail for vehicle:', vehicleId);
       
-      // Buscar apenas a foto principal do veículo com URLs de thumbnail e completa
+      // Buscar apenas a foto principal do veículo com URL
       const { data, error } = await supabase
         .from('vehicle_photos')
-        .select('url, thumbnail_url')
+        .select('url')
         .eq('vehicle_id', vehicleId)
         .eq('is_main', true)
         .single();
@@ -38,17 +38,18 @@ export const useVehiclePhotoThumbnail = (vehicleId: string | null): UseVehiclePh
       }
 
       if (data) {
-        // Se temos thumbnail_url, usar ela; senão, criar uma versão reduzida da URL original
-        const thumbnailUrlResult = data.thumbnail_url || (data.url ? `${data.url}?w=150&h=150&fit=crop` : null);
-        const fullUrlResult = data.url;
+        // Por enquanto, usar a mesma URL para thumbnail e completa
+        // No futuro, implementar sistema de thumbnails no Supabase Storage
+        const photoUrl = data.url;
+        const thumbnailUrlResult = photoUrl ? `${photoUrl}?w=150&h=150&fit=crop` : null;
         
         console.log('Photo URLs fetched for vehicle', vehicleId, ':', {
           thumbnail: thumbnailUrlResult ? 'found' : 'not found',
-          full: fullUrlResult ? 'found' : 'not found'
+          full: photoUrl ? 'found' : 'not found'
         });
         
         setThumbnailUrl(thumbnailUrlResult);
-        setFullPhotoUrl(fullUrlResult);
+        setFullPhotoUrl(photoUrl);
       } else {
         setThumbnailUrl(null);
         setFullPhotoUrl(null);

@@ -21,7 +21,6 @@ export interface VehicleUltraMinimal {
   mmr_value: number;
   description: string;
   category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
-  consignment_store?: string;
   title_type?: 'clean-title' | 'rebuilt';
   title_status?: 'em-maos' | 'em-transito';
   created_at: string;
@@ -68,7 +67,6 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
           mmr_value,
           description,
           category,
-          consignment_store,
           title_type,
           title_status,
           created_at,
@@ -122,7 +120,6 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
         mmr_value: vehicle.mmr_value || 0,
         description: vehicle.description || '',
         category: vehicle.category || 'forSale',
-        consignment_store: vehicle.consignment_store,
         title_type: vehicle.title_type,
         title_status: vehicle.title_status,
         created_at: vehicle.created_at,
