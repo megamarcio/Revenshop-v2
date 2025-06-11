@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
@@ -56,7 +55,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
 
   console.log('useVehicleForm - isEditing:', isEditing);
   console.log('useVehicleForm - formData initialized:', formData);
-  console.log('useVehicleForm - titleInfo final value:', formData.titleInfo);
+  console.log('useVehicleForm - titleStatus final value:', formData.titleStatus);
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     console.log('useVehicleForm - handleInputChange:', field, value);
