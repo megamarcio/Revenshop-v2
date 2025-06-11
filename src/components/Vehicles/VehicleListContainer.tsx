@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import VehicleList from './VehicleList';
+import VehicleGridView from './VehicleGridView';
 import VehicleForm from './VehicleForm';
 import VehicleListHeader from './VehicleListHeader';
 import EmptyVehicleState from './EmptyVehicleState';
@@ -24,18 +24,17 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
 
   // Use ultra minimal hook for list display with automatic refresh
   const { 
-    data: ultraMinimalVehicles, 
-    isLoading: isLoadingList, 
-    error: listError,
+    vehicles: ultraMinimalVehicles, 
+    loading: isLoadingList, 
     refetch: refetchList
   } = useVehiclesUltraMinimal();
 
   // Use full hook for CRUD operations
   const { 
-    addVehicle, 
+    createVehicle, 
     updateVehicle, 
     deleteVehicle, 
-    isLoading: isSaving 
+    loading: isSaving 
   } = useVehicles();
 
   // Convert data using the mapper
@@ -101,7 +100,7 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
       if (vehicleData.id) {
         await updateVehicle(vehicleData.id, vehicleData);
       } else {
-        await addVehicle(vehicleData);
+        await createVehicle(vehicleData);
       }
       
       // Refresh the list after successful save
@@ -114,27 +113,9 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     }
   };
 
-  if (listError) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-red-500">Erro ao carregar veículos: {listError.message}</p>
-        <Button onClick={() => refetchList()} className="mt-4">
-          Tentar Novamente
-        </Button>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
-      <VehicleListHeader
-        onAddVehicle={handleAddVehicle}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        vehicles={convertCardTypeToHookType(filteredVehicles)}
-      />
+      <VehicleListHeader onAddVehicle={handleAddVehicle} />
 
       {onNavigateToCustomers && (
         <Button 
@@ -152,12 +133,9 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
           <p>Carregando veículos...</p>
         </div>
       ) : filteredVehicles.length === 0 ? (
-        <EmptyVehicleState 
-          hasVehicles={convertedVehiclesForCards.length > 0}
-          onAddVehicle={handleAddVehicle}
-        />
+        <EmptyVehicleState />
       ) : (
-        <VehicleList
+        <VehicleGridView
           vehicles={filteredVehicles}
           onEdit={handleEditVehicle}
           onDuplicate={handleDuplicateVehicle}
