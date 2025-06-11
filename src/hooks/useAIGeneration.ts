@@ -10,6 +10,8 @@ interface VehicleData {
   motor?: string;
   quilometragem?: string;
   equipamentos?: string;
+  vin?: string;
+  precoVenda?: string;
 }
 
 interface GenerationOptions {
@@ -23,18 +25,34 @@ export const useAIGeneration = () => {
   const generateDescription = async (vehicleData: VehicleData, options?: GenerationOptions): Promise<string> => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-description', {
-        body: { 
-          vehicleData,
-          textLength: options?.textLength || 'medium'
-        }
-      });
+      // Formato específico solicitado
+      const description = `🚗 ${vehicleData.ano} ${vehicleData.marca.toUpperCase()} ${vehicleData.modelo.toUpperCase()} – Clean - In Hands 🚗
 
-      if (error) {
-        throw error;
-      }
+📍 Located in Orlando, FL
+💰 Price: $${vehicleData.precoVenda || '0.00'}
 
-      return data.description;
+✅ Only ${vehicleData.quilometragem || '0'} miles
+✅ Clean Title – No Accidents
+✅ Non-smoker
+✅ Runs and drives like new!
+✅ Super Fuel Efficient
+
+🛠️ Recent Maintenance Done:
+• Fresh oil change
+• Good tires
+• Brake pads replaced
+• Cold A/C just serviced
+
+📋 VIN ${vehicleData.vin || 'N/A'}
+💼 Financing available
+🧽 Clean inside & out (no smells) – Ready to go!
+💵 You're Welcome
+
+⚠️ Serious buyers only. Test drives by appointment.
+⚠️ No Dealer Fee.
+📲 Send a message now.`;
+
+      return description;
     } catch (error) {
       console.error('Error generating description:', error);
       throw error;

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -42,6 +41,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
     isLoading,
     errors,
     isEditing,
+    isGeneratingDescription,
     setPhotos,
     setVideos,
     setIsLoading,
@@ -225,6 +225,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
                 description={formData.description}
                 onDescriptionChange={(value) => handleInputChange('description', value)}
                 generateDescription={generateDescription}
+                isGenerating={isGeneratingDescription}
               />
 
               <div className="flex justify-end items-center space-x-4 pt-6 border-t">

@@ -97,6 +97,11 @@ export const useVehiclePhotos = (vehicleId?: string) => {
       console.log('Photo uploaded successfully:', photoData);
       setPhotos(prev => [...prev, photoData].sort((a, b) => (a.position || 0) - (b.position || 0)));
       
+      // Forçar atualização na tela principal
+      window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+        detail: { vehicleId, photos: [...photos, photoData] } 
+      }));
+      
       toast({
         title: 'Sucesso',
         description: 'Foto adicionada com sucesso.',
@@ -143,7 +148,13 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
       if (dbError) throw dbError;
       
-      setPhotos(prev => prev.filter(p => p.id !== photoId));
+      const updatedPhotos = photos.filter(p => p.id !== photoId);
+      setPhotos(updatedPhotos);
+      
+      // Forçar atualização na tela principal
+      window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+        detail: { vehicleId, photos: updatedPhotos } 
+      }));
       
       toast({
         title: 'Sucesso',
@@ -177,10 +188,16 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
       if (error) throw error;
       
-      setPhotos(prev => prev.map(p => ({ 
+      const updatedPhotos = photos.map(p => ({ 
         ...p, 
         is_main: p.id === photoId 
-      })));
+      }));
+      setPhotos(updatedPhotos);
+      
+      // Forçar atualização na tela principal
+      window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+        detail: { vehicleId, photos: updatedPhotos } 
+      }));
       
       toast({
         title: 'Sucesso',
@@ -198,6 +215,18 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
   useEffect(() => {
     fetchPhotos();
+  }, [vehicleId]);
+
+  // Listener para atualizações de fotos
+  useEffect(() => {
+    const handlePhotosUpdate = (event: any) => {
+      if (event.detail.vehicleId === vehicleId) {
+        fetchPhotos();
+      }
+    };
+
+    window.addEventListener('vehiclePhotosUpdated', handlePhotosUpdate);
+    return () => window.removeEventListener('vehiclePhotosUpdated', handlePhotosUpdate);
   }, [vehicleId]);
 
   return {

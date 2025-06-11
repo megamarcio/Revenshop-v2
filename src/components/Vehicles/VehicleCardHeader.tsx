@@ -3,10 +3,11 @@ import React from 'react';
 import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Download, Image as ImageIcon } from 'lucide-react';
+import { Download, Archive } from 'lucide-react';
 import VehicleStatusBadge from './VehicleStatusBadge';
 import VehiclePhotoDisplay from './VehiclePhotoDisplay';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
+import { downloadSinglePhoto, downloadAllPhotosAsZip } from '@/utils/photoDownloader';
 
 interface VehicleCardHeaderProps {
   vehicle: {
@@ -34,6 +35,17 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   // Use photo from vehicle_photos table if available, otherwise fallback to vehicle.photos
   const mainPhoto = vehiclePhotos.find(p => p.is_main)?.url || vehiclePhotos[0]?.url || vehicle.photos[0];
   const hasPhotos = vehiclePhotos.length > 0 || (vehicle.photos && vehicle.photos.length > 0);
+  const allPhotos = vehiclePhotos.length > 0 ? vehiclePhotos.map(p => p.url) : vehicle.photos;
+
+  const handleDownloadAll = async () => {
+    if (allPhotos.length > 0) {
+      try {
+        await downloadAllPhotosAsZip(allPhotos, vehicle.name);
+      } catch (error) {
+        console.error('Error downloading photos:', error);
+      }
+    }
+  };
 
   return (
     <CardHeader className="p-0 relative">
@@ -78,14 +90,14 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
                   variant="secondary"
                   size="sm"
                   className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                  onClick={onDownloadAll}
+                  onClick={handleDownloadAll}
                   disabled={downloading}
                 >
-                  <ImageIcon className="h-3 w-3" />
+                  <Archive className="h-3 w-3" />
                 </Button>
               </TooltipTrigger>
               <TooltipContent>
-                <p>Baixar todas as fotos</p>
+                <p>Baixar todas as fotos (ZIP)</p>
               </TooltipContent>
             </Tooltip>
           </div>

@@ -3,10 +3,12 @@ import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { VehicleFormData } from '../types/vehicleFormTypes';
-import { getTitleInfo, validateForm, generateDescription as generateDescriptionUtil, calculateProfitMargin } from '../utils/vehicleFormUtils';
+import { getTitleInfo, validateForm, calculateProfitMargin } from '../utils/vehicleFormUtils';
+import { useAIGeneration } from '../../../hooks/useAIGeneration';
 
 export const useVehicleForm = (editingVehicle?: any) => {
   const { t } = useLanguage();
+  const { generateDescription: generateAIDescription, isLoading: isGeneratingDescription } = useAIGeneration();
   
   console.log('useVehicleForm - editingVehicle received:', editingVehicle);
   
@@ -18,7 +20,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
-    miles: editingVehicle?.miles?.toString() || '0', // CORRIGIDO: garantir que miles sempre tenha um valor padrão
+    miles: editingVehicle?.miles?.toString() || '0',
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
@@ -93,13 +95,38 @@ export const useVehicleForm = (editingVehicle?: any) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const generateDescription = () => {
-    const description = generateDescriptionUtil(formData);
-    setFormData(prev => ({ ...prev, description }));
-    toast({
-      title: t('success'),
-      description: t('descriptionGenerated') || 'Descrição gerada automaticamente!',
-    });
+  const generateDescription = async () => {
+    try {
+      // Extrair marca do nome do veículo
+      const nameParts = formData.name.split(' ');
+      const marca = nameParts[0] || '';
+      const modelo = nameParts.slice(1).join(' ') || formData.model;
+
+      const vehicleData = {
+        marca,
+        modelo,
+        ano: formData.year,
+        cor: formData.color,
+        quilometragem: formData.miles,
+        vin: formData.vin,
+        precoVenda: formData.salePrice
+      };
+
+      const description = await generateAIDescription(vehicleData);
+      setFormData(prev => ({ ...prev, description }));
+      
+      toast({
+        title: t('success'),
+        description: 'Descrição gerada automaticamente!',
+      });
+    } catch (error) {
+      console.error('Error generating description:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao gerar descrição. Tente novamente.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const getProfitMargin = () => calculateProfitMargin(formData.purchasePrice, formData.salePrice);
@@ -111,6 +138,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     isLoading,
     errors,
     isEditing,
+    isGeneratingDescription,
     setPhotos,
     setVideos,
     setIsLoading,

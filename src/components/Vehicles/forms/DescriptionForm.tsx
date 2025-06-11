@@ -2,16 +2,22 @@
 import React from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Copy } from 'lucide-react';
+import { Copy, Loader2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
 interface DescriptionFormProps {
   description: string;
   onDescriptionChange: (value: string) => void;
   generateDescription: () => void;
+  isGenerating?: boolean;
 }
 
-const DescriptionForm = ({ description, onDescriptionChange, generateDescription }: DescriptionFormProps) => {
+const DescriptionForm = ({ 
+  description, 
+  onDescriptionChange, 
+  generateDescription,
+  isGenerating = false 
+}: DescriptionFormProps) => {
   const copyDescription = () => {
     navigator.clipboard.writeText(description);
     toast({
@@ -30,8 +36,16 @@ const DescriptionForm = ({ description, onDescriptionChange, generateDescription
             variant="outline"
             size="sm"
             onClick={generateDescription}
+            disabled={isGenerating}
           >
-            Gerar Automática
+            {isGenerating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                Gerando...
+              </>
+            ) : (
+              'Gerar Automática'
+            )}
           </Button>
           <Button
             type="button"
