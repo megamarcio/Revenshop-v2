@@ -14,6 +14,7 @@ interface VehicleCardHeaderProps {
     category: string;
     extended_category?: string;
     consignment_store?: string;
+    main_photo_url?: string;
   };
   onDownloadSingle: (photoUrl: string, index: number) => void;
   onDownloadAll: () => void;
@@ -26,7 +27,8 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   onDownloadAll,
   downloading
 }) => {
-  const mainPhoto = vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null;
+  // Usar main_photo_url prioritariamente, depois primeira foto do array
+  const mainPhoto = vehicle.main_photo_url || (vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null);
 
   return (
     <CardHeader className="p-0 relative">

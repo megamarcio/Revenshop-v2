@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -11,6 +10,7 @@ export interface VehicleMinimal {
   internal_code: string;
   photos: string[];
   image_url?: string;
+  main_photo_url?: string;
 }
 
 interface UseVehiclesMinimalOptions {
@@ -30,10 +30,18 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
     try {
       console.log('Fetching minimal vehicles with options:', { category, limit, offset, searchTerm });
       
-      // Query base dos veículos (SEM o campo photos)
+      // Query principal dos veículos com lookup da foto principal
       let query = supabase
         .from('vehicles')
-        .select('id, name, vin, sale_price, internal_code')
+        .select(`
+          id, 
+          name, 
+          vin, 
+          sale_price, 
+          internal_code,
+          main_photo:vehicle_photos!vehicle_photos_vehicle_id_fkey(url)
+        `)
+        .eq('vehicle_photos.is_main', true)
         .order('created_at', { ascending: false });
 
       // Filtrar por categoria se especificado
@@ -62,7 +70,7 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
         return;
       }
 
-      // Buscar fotos para todos os veículos retornados
+      // Buscar todas as fotos para os veículos retornados
       const vehicleIds = vehiclesData.map(v => v.id);
       const { data: photosData, error: photosError } = await supabase
         .from('vehicle_photos')
@@ -92,12 +100,14 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
           .map(photo => photo.url);
         
         const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
-        const image_url = mainPhoto?.url || sortedPhotos[0] || null;
+        const main_photo_url = (vehicle as any).main_photo?.[0]?.url || mainPhoto?.url || sortedPhotos[0] || null;
+        const image_url = main_photo_url;
 
         return {
           ...vehicle,
           photos: sortedPhotos,
           image_url,
+          main_photo_url,
         } as VehicleMinimal;
       });
 

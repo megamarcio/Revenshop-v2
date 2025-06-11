@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Vehicle } from './types';
@@ -19,8 +18,10 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       created_at, updated_at, created_by,
       vehicle_photos!vehicle_photos_vehicle_id_fkey (
         id, url, position, is_main
-      )
+      ),
+      main_photo:vehicle_photos!main_photo_lookup(url)
     `)
+    .eq('main_photo_lookup.is_main', true)
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -38,9 +39,13 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       .sort((a, b) => (a.position || 0) - (b.position || 0))
       .map(photo => photo.url);
     
+    // Extrair URL da foto principal do lookup
+    const main_photo_url = (vehicle as any).main_photo?.[0]?.url || null;
+    
     return mapDbDataToAppData({
       ...vehicle,
       photos,
+      main_photo_url,
       vehicle_photos: undefined // Remove from final object
     });
   }) || [];
