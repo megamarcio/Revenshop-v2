@@ -1,112 +1,80 @@
 
-import { supabase } from '@/integrations/supabase/client';
-
-export const mapFormDataToDbData = async (vehicleData: any) => {
-  console.log('mapFormDataToDbData - input:', vehicleData);
+export const mapFormToDbData = (formData: any) => {
+  console.log('mapFormToDbData - input formData:', formData);
   
-  // Map our extended categories to database enum values
-  let dbCategory: 'forSale' | 'sold' = 'forSale';
-  let extendedCategory: string | null = null;
+  // Build description with category and store info if needed
+  let description = formData.description || '';
   
-  if (vehicleData.category === 'sold') {
-    dbCategory = 'sold';
-  } else if (vehicleData.category === 'forSale') {
-    dbCategory = 'forSale';
-  } else {
-    // For rental, maintenance, consigned - store as forSale in DB but track extended category
-    dbCategory = 'forSale';
-    extendedCategory = vehicleData.category;
+  if (formData.category && !['forSale', 'sold'].includes(formData.category)) {
+    description = `[CATEGORY:${formData.category}] ${description}`;
+  }
+  
+  if (formData.consignmentStore) {
+    description = `[STORE:${formData.consignmentStore}] ${description}`;
   }
 
-  // Process title information - save combined format
-  let titleType = null;
-  let titleStatus = null;
-  
-  if (vehicleData.titleInfo) {
-    console.log('Processing titleInfo:', vehicleData.titleInfo);
-    const titleParts = vehicleData.titleInfo.split('-');
+  const dbData = {
+    name: formData.name,
+    vin: formData.vin,
+    year: formData.year,
+    model: formData.model,
+    miles: formData.miles || 0, // Garantir que miles seja tratado corretamente
+    internal_code: formData.internalCode,
+    color: formData.color,
+    ca_note: formData.caNote,
+    purchase_price: formData.purchasePrice,
+    sale_price: formData.salePrice,
+    min_negotiable: formData.minNegotiable,
+    carfax_price: formData.carfaxPrice,
+    mmr_value: formData.mmrValue,
+    description: description.trim(),
+    category: ['forSale', 'sold'].includes(formData.category) ? formData.category : 'forSale',
     
-    // Extract title type
-    if (titleParts[0] === 'clean-title' || titleParts[0] === 'rebuilt') {
-      titleType = titleParts[0];
-    }
+    // Garantir que title_type e title_status sejam mapeados corretamente
+    title_type: formData.titleType || 'clean-title',
+    title_status: formData.titleStatus || 'em-maos',
     
-    // Extract title status if present
-    if (titleParts.length > 1) {
-      const statusPart = titleParts.slice(1).join('-');
-      if (statusPart === 'em-maos' || statusPart === 'em-transito') {
-        titleStatus = statusPart;
-      }
-    }
-  }
-
-  // Preparar dados básicos
-  const baseData = {
-    name: vehicleData.name,
-    vin: vehicleData.vin,
-    year: parseInt(vehicleData.year),
-    model: vehicleData.model,
-    miles: parseInt(vehicleData.miles) || 0,
-    internal_code: vehicleData.internalCode,
-    color: vehicleData.color || null,
-    ca_note: parseInt(vehicleData.caNote),
-    purchase_price: parseFloat(vehicleData.purchasePrice),
-    sale_price: parseFloat(vehicleData.salePrice),
-    min_negotiable: vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null,
-    carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
-    mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
-    description: vehicleData.description || null,
-    category: dbCategory,
-    title_type: titleType,
-    title_status: titleStatus,
-    created_by: (await supabase.auth.getUser()).data.user?.id || null,
+    video: formData.video,
     
-    // Campos de financiamento - garantir que todos os campos sejam incluídos
-    financing_bank: vehicleData.financingBank || null,
-    financing_type: vehicleData.financingType || null,
-    original_financed_name: vehicleData.originalFinancedName || null,
-    purchase_date: vehicleData.purchaseDate || null,
-    due_date: vehicleData.dueDate || null,
-    installment_value: vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null,
-    down_payment: vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null,
-    financed_amount: vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null,
-    total_installments: vehicleData.totalInstallments ? parseInt(vehicleData.totalInstallments) : null,
-    paid_installments: vehicleData.paidInstallments ? parseInt(vehicleData.paidInstallments) : null,
-    remaining_installments: vehicleData.remainingInstallments ? parseInt(vehicleData.remainingInstallments) : null,
-    total_to_pay: vehicleData.totalToPay ? parseFloat(vehicleData.totalToPay) : null,
-    payoff_value: vehicleData.payoffValue ? parseFloat(vehicleData.payoffValue) : null,
-    payoff_date: vehicleData.payoffDate || null,
-    interest_rate: vehicleData.interestRate ? parseFloat(vehicleData.interestRate) : null,
-    custom_financing_bank: vehicleData.customFinancingBank || null
+    // Campos de financiamento - garantir mapeamento correto
+    financing_bank: formData.financingBank || '',
+    financing_type: formData.financingType || '',
+    original_financed_name: formData.originalFinancedName || '',
+    purchase_date: formData.purchaseDate || null,
+    due_date: formData.dueDate || null,
+    installment_value: formData.installmentValue || null,
+    down_payment: formData.downPayment || null,
+    financed_amount: formData.financedAmount || null,
+    total_installments: formData.totalInstallments || null,
+    paid_installments: formData.paidInstallments || null,
+    remaining_installments: formData.remainingInstallments || null,
+    total_to_pay: formData.totalToPay || null,
+    payoff_value: formData.payoffValue || null,
+    payoff_date: formData.payoffDate || null,
+    interest_rate: formData.interestRate || null,
+    custom_financing_bank: formData.customFinancingBank || ''
   };
 
-  console.log('mapFormDataToDbData - financing fields being saved:', {
-    financing_bank: baseData.financing_bank,
-    financing_type: baseData.financing_type,
-    installment_value: baseData.installment_value,
-    down_payment: baseData.down_payment,
-    financed_amount: baseData.financed_amount,
-    total_installments: baseData.total_installments,
-    paid_installments: baseData.paid_installments,
-    remaining_installments: baseData.remaining_installments,
-    total_to_pay: baseData.total_to_pay,
-    payoff_value: baseData.payoff_value,
-    interest_rate: baseData.interest_rate
+  console.log('mapFormToDbData - output dbData:', dbData);
+  console.log('mapFormToDbData - title fields mapped:', {
+    inputTitleType: formData.titleType,
+    outputTitleType: dbData.title_type,
+    inputTitleStatus: formData.titleStatus,
+    outputTitleStatus: dbData.title_status
   });
-
-  // Adicionar categoria estendida na descrição se necessário
-  if (extendedCategory) {
-    const currentDesc = baseData.description || '';
-    baseData.description = `[CATEGORY:${extendedCategory}]${currentDesc ? ' ' + currentDesc : ''}`;
-  }
-
-  // Adicionar informações de consignação na descrição se necessário
-  if (vehicleData.consignmentStore && vehicleData.category === 'consigned') {
-    const currentDesc = baseData.description || '';
-    const cleanDesc = currentDesc.replace(/\[STORE:[^\]]+\]\s*/, '');
-    baseData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
-  }
-
-  console.log('mapFormDataToDbData - output:', baseData);
-  return baseData;
+  console.log('mapFormToDbData - financing fields mapped:', {
+    financingBank: dbData.financing_bank,
+    financingType: dbData.financing_type,
+    installmentValue: dbData.installment_value,
+    downPayment: dbData.down_payment,
+    financedAmount: dbData.financed_amount,
+    totalInstallments: dbData.total_installments,
+    paidInstallments: dbData.paid_installments,
+    remainingInstallments: dbData.remaining_installments,
+    totalToPay: dbData.total_to_pay,
+    payoffValue: dbData.payoff_value,
+    interestRate: dbData.interest_rate
+  });
+  
+  return dbData;
 };
