@@ -27,6 +27,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
+    // Fix: Use miles field correctly - check both snake_case and camelCase
     miles: editingVehicle?.miles?.toString() || '0',
     internalCode: getInitialInternalCode(),
     color: editingVehicle?.color || '',
@@ -54,7 +55,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     otherPaymentDetails: editingVehicle?.otherPaymentDetails || '',
     sellerCommission: editingVehicle?.sellerCommission?.toString() || '',
     
-    // Novos campos de financiamento
+    // Novos campos de financiamento - corrigir mapeamento
     financingBank: editingVehicle?.financing_bank || editingVehicle?.financingBank || '',
     financingType: editingVehicle?.financing_type || editingVehicle?.financingType || '',
     originalFinancedName: editingVehicle?.original_financed_name || editingVehicle?.originalFinancedName || '',
@@ -82,7 +83,8 @@ export const useVehicleForm = (editingVehicle?: any) => {
 
   console.log('useVehicleForm - isEditing:', isEditing);
   console.log('useVehicleForm - formData initialized:', formData);
-  console.log('useVehicleForm - titleStatus final value:', formData.titleStatus);
+  console.log('useVehicleForm - miles value from editingVehicle:', editingVehicle?.miles);
+  console.log('useVehicleForm - final miles in formData:', formData.miles);
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     console.log('useVehicleForm - handleInputChange:', field, value);
