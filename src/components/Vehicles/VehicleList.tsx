@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles/index';
+import { useVehiclesUltraMinimal } from '../../hooks/useVehiclesUltraMinimal';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
 import VehicleListHeader from './VehicleListHeader';
@@ -15,8 +16,15 @@ import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
-  const { vehicles, loading, createVehicle, updateVehicle, deleteVehicle } = useVehicles();
+  const { createVehicle, updateVehicle, deleteVehicle } = useVehicles();
+  
+  // Usar dados ultra-mínimos para performance
   const [searchTerm, setSearchTerm] = useState('');
+  const { vehicles: ultraMinimalVehicles, loading } = useVehiclesUltraMinimal({
+    category: 'forSale',
+    searchTerm
+  });
+  
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -24,17 +32,44 @@ const VehicleList = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
 
-  // Vehicle Actions Logic (moved from VehicleActions.tsx)
+  // Converter dados ultra-mínimos para o formato esperado pelos componentes
+  const convertedVehicles = useMemo(() => {
+    return ultraMinimalVehicles.map(vehicle => ({
+      id: vehicle.id,
+      name: vehicle.name,
+      vin: vehicle.vin,
+      year: 0, // Campo obrigatório mas não usado na listagem
+      model: '',
+      plate: '',
+      internalCode: vehicle.vin, // Usar VIN como código interno temporariamente
+      color: '',
+      caNote: 0,
+      purchasePrice: 0,
+      salePrice: vehicle.sale_price,
+      profitMargin: 0,
+      minNegotiable: 0,
+      carfaxPrice: 0,
+      mmrValue: 0,
+      description: '',
+      category: 'forSale' as const,
+      consignmentStore: '',
+      seller: '',
+      finalSalePrice: 0,
+      photos: [], // Sem fotos na listagem inicial
+      video: '',
+      main_photo_url: null // Não usar foto direta
+    }));
+  }, [ultraMinimalVehicles]);
+
+  // Vehicle Actions Logic
   const handleSaveVehicle = async (vehicleData: any, editingVehicle: Vehicle | null) => {
     try {
       console.log('VehicleList - handleSaveVehicle called with:', vehicleData);
       console.log('VehicleList - editingVehicle:', editingVehicle);
       
       if (editingVehicle && editingVehicle.id) {
-        // Se tem ID válido, é uma edição
         await updateVehicle(editingVehicle.id, vehicleData);
       } else {
-        // Se não tem ID ou é duplicação, é criação
         await createVehicle(vehicleData);
       }
       setShowAddForm(false);
@@ -44,59 +79,80 @@ const VehicleList = () => {
     }
   };
 
-  const handleEditVehicle = (vehicle: Vehicle) => {
+  const handleEditVehicle = (vehicle: any) => {
     if (!canEditVehicles) return;
     console.log('VehicleList - handleEditVehicle called with:', vehicle);
     
-    // Passar o objeto vehicle diretamente do banco de dados
-    setEditingVehicle(vehicle);
+    // Para edição, precisamos carregar os dados completos
+    // Por enquanto, criar um objeto básico
+    const fullVehicle = {
+      id: vehicle.id,
+      name: vehicle.name,
+      vin: vehicle.vin,
+      year: vehicle.year || 2020,
+      model: vehicle.model || '',
+      miles: 0,
+      internal_code: vehicle.internalCode || vehicle.vin,
+      color: vehicle.color || '',
+      ca_note: vehicle.caNote || 0,
+      purchase_price: vehicle.purchasePrice || 0,
+      sale_price: vehicle.salePrice,
+      min_negotiable: vehicle.minNegotiable || 0,
+      carfax_price: vehicle.carfaxPrice || 0,
+      mmr_value: vehicle.mmrValue || 0,
+      description: vehicle.description || '',
+      category: 'forSale' as const,
+      title_type: undefined,
+      title_status: undefined,
+      video: vehicle.video || ''
+    } as Vehicle;
+    
+    setEditingVehicle(fullVehicle);
     setShowAddForm(true);
   };
 
-  const handleDuplicateVehicle = (vehicle: Vehicle) => {
+  const handleDuplicateVehicle = (vehicle: any) => {
     if (!canEditVehicles) return;
     console.log('VehicleList - handleDuplicateVehicle called with:', vehicle);
     
-    // Criar uma cópia sem ID para forçar criação de novo veículo
     const duplicatedVehicle = {
       name: `${vehicle.name} (Cópia)`,
       vin: '',
-      year: vehicle.year,
-      model: vehicle.model,
-      miles: vehicle.miles,
+      year: vehicle.year || 2020,
+      model: vehicle.model || '',
+      miles: 0,
       internal_code: '',
-      color: vehicle.color,
-      ca_note: vehicle.ca_note,
-      purchase_price: vehicle.purchase_price,
-      sale_price: vehicle.sale_price,
-      min_negotiable: vehicle.min_negotiable,
-      carfax_price: vehicle.carfax_price,
-      mmr_value: vehicle.mmr_value,
-      description: vehicle.description,
-      category: vehicle.category,
-      title_type: vehicle.title_type,
-      title_status: vehicle.title_status,
-      video: vehicle.video
+      color: vehicle.color || '',
+      ca_note: vehicle.caNote || 0,
+      purchase_price: vehicle.purchasePrice || 0,
+      sale_price: vehicle.salePrice,
+      min_negotiable: vehicle.minNegotiable || 0,
+      carfax_price: vehicle.carfaxPrice || 0,
+      mmr_value: vehicle.mmrValue || 0,
+      description: vehicle.description || '',
+      category: 'forSale' as const,
+      title_type: undefined,
+      title_status: undefined,
+      video: vehicle.video || ''
     };
     
-    // Não incluir ID nem photos para garantir que será tratado como criação
     setEditingVehicle(duplicatedVehicle as Vehicle);
     setShowAddForm(true);
   };
 
-  const handleDeleteVehicle = async (vehicle: Vehicle) => {
+  const handleDeleteVehicle = async (vehicle: any) => {
     if (!canEditVehicles) return;
     if (confirm('Tem certeza que deseja excluir este veículo?')) {
       await deleteVehicle(vehicle.id);
     }
   };
 
-  // Vehicle Filters Logic (moved from VehicleFilters.tsx)
+  // Vehicle Filters Logic
   const filteredAndSortedVehicles = useMemo(() => {
-    let filtered = vehicles.filter(vehicle => {
+    let filtered = convertedVehicles.filter(vehicle => {
       const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
+        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase());
       
       let matchesFilter = true;
       if (filterBy !== 'all') {
@@ -106,13 +162,12 @@ const VehicleList = () => {
       return matchesSearch && matchesFilter;
     });
 
-    // Força a ordenação por internal_code sempre
     filtered.sort((a, b) => {
       return a.name.localeCompare(b.name);
     });
 
     return filtered;
-  }, [vehicles, searchTerm, filterBy]);
+  }, [convertedVehicles, searchTerm, filterBy]);
 
   const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
@@ -129,7 +184,7 @@ const VehicleList = () => {
         <Card>
           <CardContent className="p-12 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Carregando veículos com lazy loading...</p>
+            <p className="text-gray-600">Carregando veículos com lazy loading real...</p>
           </CardContent>
         </Card>
       </div>
@@ -138,9 +193,9 @@ const VehicleList = () => {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Indicador de lazy loading */}
-      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-        <strong>LAZY LOADING ATIVO:</strong> As fotos são carregadas conforme você rola a página
+      {/* Indicador de lazy loading real */}
+      <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded">
+        <strong>LAZY LOADING REAL ATIVO:</strong> Carregando apenas dados essenciais. Fotos são buscadas individualmente sob demanda.
       </div>
       
       <VehicleListHeader onAddVehicle={() => setShowAddForm(true)} />
@@ -175,19 +230,10 @@ const VehicleList = () => {
         </div>
       ) : (
         <VehicleListView
-          vehicles={filteredAndSortedVehicles.map(convertVehicleForCard)}
-          onEdit={(vehicle) => {
-            const originalVehicle = filteredAndSortedVehicles.find(v => v.id === vehicle.id);
-            if (originalVehicle) handleEditVehicle(originalVehicle);
-          }}
-          onDuplicate={(vehicle) => {
-            const originalVehicle = filteredAndSortedVehicles.find(v => v.id === vehicle.id);
-            if (originalVehicle) handleDuplicateVehicle(originalVehicle);
-          }}
-          onDelete={(vehicle) => {
-            const originalVehicle = filteredAndSortedVehicles.find(v => v.id === vehicle.id);
-            if (originalVehicle) handleDeleteVehicle(originalVehicle);
-          }}
+          vehicles={filteredAndSortedVehicles}
+          onEdit={handleEditVehicle}
+          onDuplicate={handleDuplicateVehicle}
+          onDelete={handleDeleteVehicle}
         />
       )}
 

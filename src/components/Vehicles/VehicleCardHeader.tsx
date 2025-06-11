@@ -28,14 +28,14 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   onDownloadAll,
   downloading
 }) => {
-  const mainPhoto = vehicle.main_photo_url || (vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null);
+  // Para lazy loading real, vamos usar o vehicleId ao invés da foto direta
   const hasPhotos = vehicle.photos && vehicle.photos.length > 0;
 
   return (
     <CardHeader className="p-0 relative">
       <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative overflow-hidden">
         <LazyImage
-          src={mainPhoto}
+          vehicleId={vehicle.id}
           alt={`${vehicle.name} - Foto principal`}
           className="w-full h-full"
         />
@@ -56,8 +56,8 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
                   variant="secondary"
                   size="sm"
                   className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                  onClick={() => mainPhoto && onDownloadSingle(mainPhoto, 0)}
-                  disabled={downloading || !mainPhoto}
+                  onClick={() => vehicle.photos[0] && onDownloadSingle(vehicle.photos[0], 0)}
+                  disabled={downloading || !vehicle.photos[0]}
                 >
                   <Download className="h-3 w-3" />
                 </Button>

@@ -1,25 +1,29 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
+import { useVehiclePhoto } from '../../hooks/useVehiclePhoto';
 
 interface LazyImageProps {
-  src?: string;
+  vehicleId?: string;
   alt: string;
   className?: string;
   placeholder?: React.ReactNode;
 }
 
-const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className = '', placeholder }) => {
-  const [isLoaded, setIsLoaded] = useState(false);
+const LazyImage: React.FC<LazyImageProps> = ({ vehicleId, alt, className = '', placeholder }) => {
   const [isInView, setIsInView] = useState(false);
-  const [hasError, setHasError] = useState(false);
-  const imgRef = useRef<HTMLImageElement>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageError, setImageError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Só buscar foto quando estiver visível
+  const { photoUrl, loading: photoLoading } = useVehiclePhoto(isInView ? vehicleId || null : null);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
+          console.log('Vehicle', vehicleId, 'is now visible, loading photo...');
           setIsInView(true);
           observer.disconnect();
         }
@@ -35,22 +39,22 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className = '', placeho
     }
 
     return () => observer.disconnect();
-  }, []);
+  }, [vehicleId]);
 
-  const handleLoad = () => {
-    setIsLoaded(true);
+  const handleImageLoad = () => {
+    setImageLoaded(true);
   };
 
-  const handleError = () => {
-    setHasError(true);
-    setIsLoaded(true);
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoaded(true);
   };
 
-  const showPlaceholder = !src || !isInView || !isLoaded || hasError;
+  const shouldShowPlaceholder = !isInView || photoLoading || !photoUrl || !imageLoaded || imageError;
 
   return (
     <div ref={containerRef} className={`relative ${className}`}>
-      {showPlaceholder && (
+      {shouldShowPlaceholder && (
         <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
           {placeholder || (
             <div className="text-center">
@@ -59,7 +63,7 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className = '', placeho
                   <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                   <p className="text-xs text-gray-500">Carregando...</p>
                 </>
-              ) : !isLoaded && !hasError ? (
+              ) : photoLoading ? (
                 <Loader2 className="h-8 w-8 text-gray-400 animate-spin mx-auto" />
               ) : (
                 <>
@@ -72,16 +76,15 @@ const LazyImage: React.FC<LazyImageProps> = ({ src, alt, className = '', placeho
         </div>
       )}
       
-      {src && isInView && (
+      {photoUrl && isInView && (
         <img
-          ref={imgRef}
-          src={src}
+          src={photoUrl}
           alt={alt}
           className={`w-full h-full object-cover transition-opacity duration-300 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
+            imageLoaded ? 'opacity-100' : 'opacity-0'
           }`}
-          onLoad={handleLoad}
-          onError={handleError}
+          onLoad={handleImageLoad}
+          onError={handleImageError}
           loading="lazy"
         />
       )}
