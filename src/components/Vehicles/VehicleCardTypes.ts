@@ -5,7 +5,7 @@ export interface Vehicle {
   vin: string;
   year: number;
   model: string;
-  plate: string;
+  miles: string;
   internalCode: string;
   color: string;
   caNote: number;
