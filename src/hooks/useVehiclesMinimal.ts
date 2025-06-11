@@ -30,7 +30,7 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
     try {
       console.log('Fetching minimal vehicles with options:', { category, limit, offset, searchTerm });
       
-      // Query principal dos veículos com lookup da foto principal
+      // Query principal dos veículos
       let query = supabase
         .from('vehicles')
         .select(`
@@ -39,9 +39,8 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
           vin, 
           sale_price, 
           internal_code,
-          main_photo:vehicle_photos!vehicle_photos_vehicle_id_fkey(url)
+          vehicle_photos!vehicle_photos_vehicle_id_fkey(url, position, is_main)
         `)
-        .eq('vehicle_photos.is_main', true)
         .order('created_at', { ascending: false });
 
       // Filtrar por categoria se especificado
@@ -70,37 +69,15 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
         return;
       }
 
-      // Buscar todas as fotos para os veículos retornados
-      const vehicleIds = vehiclesData.map(v => v.id);
-      const { data: photosData, error: photosError } = await supabase
-        .from('vehicle_photos')
-        .select('vehicle_id, url, position, is_main')
-        .in('vehicle_id', vehicleIds)
-        .order('position', { ascending: true });
-
-      if (photosError) {
-        console.error('Error fetching vehicle photos:', photosError);
-        // Continuar sem fotos em caso de erro
-      }
-
-      // Mapear fotos por vehicle_id
-      const photosByVehicle = (photosData || []).reduce((acc, photo) => {
-        if (!acc[photo.vehicle_id]) {
-          acc[photo.vehicle_id] = [];
-        }
-        acc[photo.vehicle_id].push(photo);
-        return acc;
-      }, {} as Record<string, typeof photosData>);
-
       // Criar os objetos VehicleMinimal com as fotos
       const vehiclesWithPhotos = vehiclesData.map(vehicle => {
-        const vehiclePhotos = photosByVehicle[vehicle.id] || [];
+        const vehiclePhotos = vehicle.vehicle_photos || [];
         const sortedPhotos = vehiclePhotos
           .sort((a, b) => (a.position || 0) - (b.position || 0))
           .map(photo => photo.url);
         
         const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
-        const main_photo_url = (vehicle as any).main_photo?.[0]?.url || mainPhoto?.url || sortedPhotos[0] || null;
+        const main_photo_url = mainPhoto?.url || sortedPhotos[0] || null;
         const image_url = main_photo_url;
 
         return {
@@ -108,6 +85,7 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
           photos: sortedPhotos,
           image_url,
           main_photo_url,
+          vehicle_photos: undefined // Remove from final object
         } as VehicleMinimal;
       });
 

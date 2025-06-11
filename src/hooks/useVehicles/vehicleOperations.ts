@@ -18,10 +18,8 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       created_at, updated_at, created_by,
       vehicle_photos!vehicle_photos_vehicle_id_fkey (
         id, url, position, is_main
-      ),
-      main_photo:vehicle_photos!main_photo_lookup(url)
+      )
     `)
-    .eq('main_photo_lookup.is_main', true)
     .order('created_at', { ascending: false })
     .limit(100);
 
@@ -39,8 +37,9 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       .sort((a, b) => (a.position || 0) - (b.position || 0))
       .map(photo => photo.url);
     
-    // Extrair URL da foto principal do lookup
-    const main_photo_url = (vehicle as any).main_photo?.[0]?.url || null;
+    // Buscar foto principal ou usar primeira foto como fallback
+    const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
+    const main_photo_url = mainPhoto?.url || photos[0] || null;
     
     return mapDbDataToAppData({
       ...vehicle,
