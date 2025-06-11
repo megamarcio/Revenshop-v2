@@ -25,7 +25,7 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
     throw error;
   }
   
-  // Handle photos - if they are base64, upload to Storage first
+  // Handle photos - ALWAYS insert into vehicle_photos table
   if (photos && photos.length > 0) {
     const photoUrls: string[] = [];
     
@@ -64,12 +64,12 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
           console.error('Error processing base64 photo:', uploadError);
         }
       } else {
-        // Photo is already a URL
+        // Photo is already a URL (from Storage or external)
         photoUrls.push(photo);
       }
     }
     
-    // Insert photo records into vehicle_photos table
+    // SEMPRE inserir registros na tabela vehicle_photos
     if (photoUrls.length > 0) {
       const vehiclePhotosData = photoUrls.map((url, index) => ({
         vehicle_id: data.id,
@@ -77,6 +77,8 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
         position: index + 1,
         is_main: index === 0
       }));
+      
+      console.log('Inserting vehicle photos:', vehiclePhotosData);
       
       const { error: photosError } = await supabase
         .from('vehicle_photos')
@@ -89,10 +91,34 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
           description: 'Veículo criado mas houve erro ao salvar algumas fotos.',
           variant: 'destructive',
         });
+      } else {
+        console.log('Photos successfully inserted into vehicle_photos table');
       }
     }
   }
   
-  console.log('Vehicle created successfully:', data);
-  return mapDbDataToAppData({ ...data, photos: photos || [] });
+  // Fetch the vehicle with photos to return complete data
+  const { data: vehicleWithPhotos } = await supabase
+    .from('vehicles')
+    .select(`
+      *, 
+      vehicle_photos!vehicle_photos_vehicle_id_fkey (
+        id, url, position, is_main
+      )
+    `)
+    .eq('id', data.id)
+    .single();
+  
+  const finalVehicleData = vehicleWithPhotos || data;
+  const vehiclePhotos = finalVehicleData.vehicle_photos || [];
+  const photosList = vehiclePhotos
+    .sort((a, b) => (a.position || 0) - (b.position || 0))
+    .map(photo => photo.url);
+  
+  console.log('Vehicle created successfully with photos:', finalVehicleData);
+  return mapDbDataToAppData({ 
+    ...finalVehicleData, 
+    photos: photosList,
+    vehicle_photos: undefined 
+  });
 };

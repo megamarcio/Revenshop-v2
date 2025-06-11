@@ -34,12 +34,13 @@ const PhotoUploadSection = ({
     
     try {
       if (vehicleId) {
-        // Upload para Supabase Storage
+        // Upload para Supabase Storage via useVehiclePhotos hook
         for (const file of fileArray) {
           await uploadPhoto(file);
         }
       } else {
         // Upload local para base64 (para novos veículos)
+        console.log('Processing photos for new vehicle (base64)');
         const batchSize = 3;
         for (let i = 0; i < fileArray.length; i += batchSize) {
           const batch = fileArray.slice(i, i + batchSize);
@@ -74,6 +75,7 @@ const PhotoUploadSection = ({
           if (validResults.length > 0) {
             setPhotos(prev => {
               const newPhotos = [...prev, ...validResults];
+              console.log('Added photos to local state:', newPhotos.length, 'total photos');
               return newPhotos.slice(0, 10);
             });
           }
@@ -92,7 +94,11 @@ const PhotoUploadSection = ({
     if (vehicleId && vehiclePhotos[index]) {
       await removePhoto(vehiclePhotos[index].id);
     } else {
-      setPhotos(prev => prev.filter((_, i) => i !== index));
+      setPhotos(prev => {
+        const updated = prev.filter((_, i) => i !== index);
+        console.log('Removed photo from local state, remaining:', updated.length);
+        return updated;
+      });
     }
   };
 

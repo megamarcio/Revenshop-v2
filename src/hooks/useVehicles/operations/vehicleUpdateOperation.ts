@@ -26,50 +26,54 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
     throw error;
   }
   
-  // Update photos if provided - only for base64 photos (Storage photos are handled by MediaUploadForm)
-  if (photos !== undefined && photos.some((photo: string) => photo.startsWith('data:image/'))) {
-    // Convert base64 photos to Storage URLs
-    const photoUrls: string[] = [];
+  // Handle photos update - SEMPRE atualizar a tabela vehicle_photos quando photos são fornecidas
+  if (photos !== undefined) {
+    console.log('Updating vehicle photos for vehicle:', id);
     
-    for (let i = 0; i < photos.length; i++) {
-      const photo = photos[i];
+    // Se há fotos para processar
+    if (photos.length > 0) {
+      const photoUrls: string[] = [];
       
-      if (photo.startsWith('data:image/')) {
-        try {
-          const response = await fetch(photo);
-          const blob = await response.blob();
-          const file = new File([blob], `photo-${i}.jpg`, { type: 'image/jpeg' });
-          
-          // Generate unique filename
-          const fileExt = 'jpg';
-          const fileName = `${id}-${Date.now()}-${i}.${fileExt}`;
-          const filePath = `${id}/${fileName}`;
+      for (let i = 0; i < photos.length; i++) {
+        const photo = photos[i];
+        
+        if (photo.startsWith('data:image/')) {
+          // Convert base64 to Storage URL
+          try {
+            const response = await fetch(photo);
+            const blob = await response.blob();
+            const file = new File([blob], `photo-${i}.jpg`, { type: 'image/jpeg' });
+            
+            // Generate unique filename
+            const fileExt = 'jpg';
+            const fileName = `${id}-${Date.now()}-${i}.${fileExt}`;
+            const filePath = `${id}/${fileName}`;
 
-          // Upload to Supabase Storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('vehicle-photos')
-            .upload(filePath, file);
+            // Upload to Supabase Storage
+            const { data: uploadData, error: uploadError } = await supabase.storage
+              .from('vehicle-photos')
+              .upload(filePath, file);
 
-          if (uploadError) {
-            console.error('Error uploading photo to storage:', uploadError);
-            continue;
+            if (uploadError) {
+              console.error('Error uploading photo to storage:', uploadError);
+              continue;
+            }
+
+            // Get public URL
+            const { data: { publicUrl } } = supabase.storage
+              .from('vehicle-photos')
+              .getPublicUrl(filePath);
+
+            photoUrls.push(publicUrl);
+          } catch (uploadError) {
+            console.error('Error processing base64 photo:', uploadError);
           }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('vehicle-photos')
-            .getPublicUrl(filePath);
-
-          photoUrls.push(publicUrl);
-        } catch (uploadError) {
-          console.error('Error processing base64 photo:', uploadError);
+        } else {
+          // Photo is already a URL
+          photoUrls.push(photo);
         }
-      } else {
-        photoUrls.push(photo);
       }
-    }
-    
-    if (photoUrls.length > 0) {
+      
       // Remove existing photos for this vehicle
       await supabase
         .from('vehicle_photos')
@@ -77,28 +81,63 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
         .eq('vehicle_id', id);
 
       // Insert new photos
-      const vehiclePhotosData = photoUrls.map((url, index) => ({
-        vehicle_id: id,
-        url,
-        position: index + 1,
-        is_main: index === 0
-      }));
-      
-      const { error: photosError } = await supabase
-        .from('vehicle_photos')
-        .insert(vehiclePhotosData);
+      if (photoUrls.length > 0) {
+        const vehiclePhotosData = photoUrls.map((url, index) => ({
+          vehicle_id: id,
+          url,
+          position: index + 1,
+          is_main: index === 0
+        }));
+        
+        console.log('Inserting updated vehicle photos:', vehiclePhotosData);
+        
+        const { error: photosError } = await supabase
+          .from('vehicle_photos')
+          .insert(vehiclePhotosData);
 
-      if (photosError) {
-        console.error('Error updating vehicle photos:', photosError);
-        toast({
-          title: 'Aviso',
-          description: 'Veículo atualizado mas houve erro ao atualizar algumas fotos.',
-          variant: 'destructive',
-        });
+        if (photosError) {
+          console.error('Error updating vehicle photos:', photosError);
+          toast({
+            title: 'Aviso',
+            description: 'Veículo atualizado mas houve erro ao atualizar algumas fotos.',
+            variant: 'destructive',
+          });
+        } else {
+          console.log('Photos successfully updated in vehicle_photos table');
+        }
       }
+    } else {
+      // Se não há fotos, remover todas as fotos existentes
+      console.log('Removing all photos for vehicle:', id);
+      await supabase
+        .from('vehicle_photos')
+        .delete()
+        .eq('vehicle_id', id);
     }
   }
   
-  console.log('Vehicle updated successfully:', data);
-  return mapDbDataToAppData({ ...data, photos: photos || [] });
+  // Fetch the vehicle with photos to return complete data
+  const { data: vehicleWithPhotos } = await supabase
+    .from('vehicles')
+    .select(`
+      *, 
+      vehicle_photos!vehicle_photos_vehicle_id_fkey (
+        id, url, position, is_main
+      )
+    `)
+    .eq('id', id)
+    .single();
+  
+  const finalVehicleData = vehicleWithPhotos || data;
+  const vehiclePhotos = finalVehicleData.vehicle_photos || [];
+  const photosList = vehiclePhotos
+    .sort((a, b) => (a.position || 0) - (b.position || 0))
+    .map(photo => photo.url);
+  
+  console.log('Vehicle updated successfully with photos:', finalVehicleData);
+  return mapDbDataToAppData({ 
+    ...finalVehicleData, 
+    photos: photosList,
+    vehicle_photos: undefined 
+  });
 };
