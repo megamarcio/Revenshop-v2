@@ -14,6 +14,11 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       min_negotiable, carfax_price, mmr_value, description, 
       category, title_type, title_status, video, 
       created_at, updated_at, created_by,
+      financing_bank, financing_type, original_financed_name,
+      purchase_date, due_date, installment_value, down_payment,
+      financed_amount, total_installments, paid_installments,
+      remaining_installments, total_to_pay, payoff_value,
+      payoff_date, interest_rate, custom_financing_bank,
       vehicle_photos!vehicle_photos_vehicle_id_fkey (
         id, url, position, is_main
       )
@@ -46,6 +51,8 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
       vehicle_photos: undefined // Remove from final object
     });
   }) || [];
+  
+  console.log('Mapped vehicles with financing data:', mappedVehicles);
   
   return mappedVehicles;
 };

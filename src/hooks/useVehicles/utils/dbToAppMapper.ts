@@ -36,75 +36,87 @@ export const mapDbDataToAppData = (dbVehicle: any) => {
     vin: dbVehicle.vin,
     year: dbVehicle.year,
     model: dbVehicle.model,
-    miles: dbVehicle.miles || 0, // Ensure miles is properly mapped
+    miles: dbVehicle.miles || 0,
     internal_code: dbVehicle.internal_code,
-    internalCode: dbVehicle.internal_code, // Add camelCase alias
+    internalCode: dbVehicle.internal_code,
     color: dbVehicle.color,
     ca_note: dbVehicle.ca_note,
-    caNote: dbVehicle.ca_note, // Add camelCase alias
+    caNote: dbVehicle.ca_note,
     purchase_price: dbVehicle.purchase_price,
-    purchasePrice: dbVehicle.purchase_price, // Add camelCase alias
+    purchasePrice: dbVehicle.purchase_price,
     sale_price: dbVehicle.sale_price,
-    salePrice: dbVehicle.sale_price, // Add camelCase alias
+    salePrice: dbVehicle.sale_price,
     profit_margin: parseFloat(profitMargin),
-    profitMargin: parseFloat(profitMargin), // Add camelCase alias
+    profitMargin: parseFloat(profitMargin),
     min_negotiable: dbVehicle.min_negotiable,
-    minNegotiable: dbVehicle.min_negotiable, // Add camelCase alias
+    minNegotiable: dbVehicle.min_negotiable,
     carfax_price: dbVehicle.carfax_price,
-    carfaxPrice: dbVehicle.carfax_price, // Add camelCase alias
+    carfaxPrice: dbVehicle.carfax_price,
     mmr_value: dbVehicle.mmr_value,
-    mmrValue: dbVehicle.mmr_value, // Add camelCase alias
+    mmrValue: dbVehicle.mmr_value,
     description: cleanDescription,
     category: category,
     consignment_store: consignmentStore,
-    consignmentStore: consignmentStore, // Add camelCase alias
+    consignmentStore: consignmentStore,
     title_type: dbVehicle.title_type,
-    titleType: dbVehicle.title_type, // Add camelCase alias
+    titleType: dbVehicle.title_type,
     title_status: dbVehicle.title_status,
-    titleStatus: dbVehicle.title_status, // Add camelCase alias
+    titleStatus: dbVehicle.title_status,
     photos: dbVehicle.photos || [],
     video: dbVehicle.video,
     created_at: dbVehicle.created_at,
     updated_at: dbVehicle.updated_at,
     created_by: dbVehicle.created_by,
     
-    // Financing fields - ensure both snake_case and camelCase are available
-    financing_bank: dbVehicle.financing_bank,
-    financingBank: dbVehicle.financing_bank,
-    financing_type: dbVehicle.financing_type,
-    financingType: dbVehicle.financing_type,
-    original_financed_name: dbVehicle.original_financed_name,
-    originalFinancedName: dbVehicle.original_financed_name,
-    purchase_date: dbVehicle.purchase_date,
-    purchaseDate: dbVehicle.purchase_date,
-    due_date: dbVehicle.due_date,
-    dueDate: dbVehicle.due_date,
-    installment_value: dbVehicle.installment_value,
-    installmentValue: dbVehicle.installment_value,
-    down_payment: dbVehicle.down_payment,
-    downPayment: dbVehicle.down_payment,
-    financed_amount: dbVehicle.financed_amount,
-    financedAmount: dbVehicle.financed_amount,
-    total_installments: dbVehicle.total_installments,
-    totalInstallments: dbVehicle.total_installments,
-    paid_installments: dbVehicle.paid_installments,
-    paidInstallments: dbVehicle.paid_installments,
-    remaining_installments: dbVehicle.remaining_installments,
-    remainingInstallments: dbVehicle.remaining_installments,
-    total_to_pay: dbVehicle.total_to_pay,
-    totalToPay: dbVehicle.total_to_pay,
-    payoff_value: dbVehicle.payoff_value,
-    payoffValue: dbVehicle.payoff_value,
-    payoff_date: dbVehicle.payoff_date,
-    payoffDate: dbVehicle.payoff_date,
-    interest_rate: dbVehicle.interest_rate,
-    interestRate: dbVehicle.interest_rate,
-    custom_financing_bank: dbVehicle.custom_financing_bank,
-    customFinancingBank: dbVehicle.custom_financing_bank
+    // Campos de financiamento - garantir que todos sejam mapeados corretamente
+    financing_bank: dbVehicle.financing_bank || '',
+    financingBank: dbVehicle.financing_bank || '',
+    financing_type: dbVehicle.financing_type || '',
+    financingType: dbVehicle.financing_type || '',
+    original_financed_name: dbVehicle.original_financed_name || '',
+    originalFinancedName: dbVehicle.original_financed_name || '',
+    purchase_date: dbVehicle.purchase_date || '',
+    purchaseDate: dbVehicle.purchase_date || '',
+    due_date: dbVehicle.due_date || '',
+    dueDate: dbVehicle.due_date || '',
+    installment_value: dbVehicle.installment_value || 0,
+    installmentValue: dbVehicle.installment_value || 0,
+    down_payment: dbVehicle.down_payment || 0,
+    downPayment: dbVehicle.down_payment || 0,
+    financed_amount: dbVehicle.financed_amount || 0,
+    financedAmount: dbVehicle.financed_amount || 0,
+    total_installments: dbVehicle.total_installments || 0,
+    totalInstallments: dbVehicle.total_installments || 0,
+    paid_installments: dbVehicle.paid_installments || 0,
+    paidInstallments: dbVehicle.paid_installments || 0,
+    remaining_installments: dbVehicle.remaining_installments || 0,
+    remainingInstallments: dbVehicle.remaining_installments || 0,
+    total_to_pay: dbVehicle.total_to_pay || 0,
+    totalToPay: dbVehicle.total_to_pay || 0,
+    payoff_value: dbVehicle.payoff_value || 0,
+    payoffValue: dbVehicle.payoff_value || 0,
+    payoff_date: dbVehicle.payoff_date || '',
+    payoffDate: dbVehicle.payoff_date || '',
+    interest_rate: dbVehicle.interest_rate || 0,
+    interestRate: dbVehicle.interest_rate || 0,
+    custom_financing_bank: dbVehicle.custom_financing_bank || '',
+    customFinancingBank: dbVehicle.custom_financing_bank || ''
   };
 
   console.log('mapDbDataToAppData - output:', appData);
-  console.log('mapDbDataToAppData - miles value:', appData.miles);
+  console.log('mapDbDataToAppData - financing fields mapped:', {
+    financingBank: appData.financingBank,
+    financingType: appData.financingType,
+    installmentValue: appData.installmentValue,
+    downPayment: appData.downPayment,
+    financedAmount: appData.financedAmount,
+    totalInstallments: appData.totalInstallments,
+    paidInstallments: appData.paidInstallments,
+    remainingInstallments: appData.remainingInstallments,
+    totalToPay: appData.totalToPay,
+    payoffValue: appData.payoffValue,
+    interestRate: appData.interestRate
+  });
   
   return appData;
 };
