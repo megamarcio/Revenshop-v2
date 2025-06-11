@@ -24,7 +24,7 @@ export const useTechnicalItems = (vehicleId?: string) => {
     queryFn: () => fetchTechnicalItems(vehicleId!),
     enabled: !!vehicleId,
     staleTime: 30000, // 30 seconds
-    cacheTime: 300000, // 5 minutes
+    gcTime: 300000, // 5 minutes (renamed from cacheTime)
   });
 
   const createDefaultItemsMutation = useMutation({
