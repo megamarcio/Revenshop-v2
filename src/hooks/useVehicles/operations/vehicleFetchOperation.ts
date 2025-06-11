@@ -44,15 +44,19 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
     const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
     const main_photo_url = mainPhoto?.url || photos[0] || null;
     
+    // Garantir que miles seja um número válido
+    const miles = vehicle.miles || 0;
+    
     return mapDbDataToAppData({
       ...vehicle,
+      miles, // Garantir que o campo miles seja passado corretamente
       photos,
       main_photo_url,
       vehicle_photos: undefined // Remove from final object
     });
   }) || [];
   
-  console.log('Mapped vehicles with financing data:', mappedVehicles);
+  console.log('Mapped vehicles with financing data and miles:', mappedVehicles);
   
   return mappedVehicles;
 };

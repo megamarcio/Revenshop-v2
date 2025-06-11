@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
@@ -22,13 +23,24 @@ export const useVehicleForm = (editingVehicle?: any) => {
     return ''; // Start with blank for new vehicles
   };
   
+  // Função para garantir que miles seja tratado como número
+  const getMilesValue = () => {
+    if (editingVehicle?.miles !== undefined) {
+      const miles = typeof editingVehicle.miles === 'number' 
+        ? editingVehicle.miles 
+        : parseInt(editingVehicle.miles) || 0;
+      return miles.toString();
+    }
+    return '0';
+  };
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
-    // Fix: Use miles field correctly - check both snake_case and camelCase
-    miles: editingVehicle?.miles?.toString() || '0',
+    // Garantir que miles seja tratado corretamente como número
+    miles: getMilesValue(),
     internalCode: getInitialInternalCode(),
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',

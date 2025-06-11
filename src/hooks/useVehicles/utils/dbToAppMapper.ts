@@ -30,13 +30,16 @@ export const mapDbDataToAppData = (dbVehicle: any) => {
     ? (dbVehicle.sale_price / dbVehicle.purchase_price).toFixed(2)
     : '0.00';
 
+  // Garantir que miles seja um número válido
+  const miles = typeof dbVehicle.miles === 'number' ? dbVehicle.miles : parseInt(dbVehicle.miles) || 0;
+
   const appData = {
     id: dbVehicle.id,
     name: dbVehicle.name,
     vin: dbVehicle.vin,
     year: dbVehicle.year,
     model: dbVehicle.model,
-    miles: dbVehicle.miles || 0,
+    miles: miles, // Garantir que seja um número
     internal_code: dbVehicle.internal_code,
     internalCode: dbVehicle.internal_code,
     color: dbVehicle.color,
@@ -104,6 +107,11 @@ export const mapDbDataToAppData = (dbVehicle: any) => {
   };
 
   console.log('mapDbDataToAppData - output:', appData);
+  console.log('mapDbDataToAppData - miles field mapped:', {
+    originalMiles: dbVehicle.miles,
+    mappedMiles: appData.miles,
+    type: typeof appData.miles
+  });
   console.log('mapDbDataToAppData - financing fields mapped:', {
     financingBank: appData.financingBank,
     financingType: appData.financingType,
