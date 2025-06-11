@@ -113,12 +113,11 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     }
   };
 
-  // Function to handle delete from form (receives vehicle object)
-  const handleFormDelete = async (vehicle: VehicleCardType) => {
-    if (vehicle.id) {
-      await deleteVehicle(vehicle.id);
-      await refetchList();
-    }
+  // Function to handle delete from form (receives vehicle ID string)
+  const handleFormDelete = async (id: string) => {
+    await deleteVehicle(id);
+    await refetchList();
+    handleFormClose();
   };
 
   return (
