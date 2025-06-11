@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Star, Loader2, Image } from 'lucide-react';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
+import { toast } from '@/hooks/use-toast';
 
 interface PhotoUploadSectionProps {
   vehicleId?: string;
@@ -32,10 +33,13 @@ const PhotoUploadSection = ({
     const maxFiles = Math.min(files.length, 10 - displayPhotos.length);
     const fileArray = Array.from(files).slice(0, maxFiles);
     
+    console.log(`Processing ${fileArray.length} files for upload`);
+    
     try {
       if (vehicleId) {
         // Upload para Supabase Storage via useVehiclePhotos hook
         for (const file of fileArray) {
+          console.log('Uploading file via useVehiclePhotos:', file.name);
           await uploadPhoto(file);
         }
       } else {
@@ -47,8 +51,13 @@ const PhotoUploadSection = ({
           
           const batchPromises = batch.map(file => {
             return new Promise<string>((resolve, reject) => {
-              if (file.size > 2 * 1024 * 1024) {
+              if (file.size > 5 * 1024 * 1024) {
                 console.warn(`File ${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Skipping.`);
+                toast({
+                  title: 'Arquivo muito grande',
+                  description: `${file.name} tem mais de 5MB e foi ignorado.`,
+                  variant: 'destructive',
+                });
                 resolve('');
                 return;
               }
@@ -56,6 +65,7 @@ const PhotoUploadSection = ({
               const reader = new FileReader();
               reader.onload = (e) => {
                 if (e.target?.result) {
+                  console.log(`File ${file.name} converted to base64`);
                   resolve(e.target.result as string);
                 } else {
                   resolve('');
@@ -80,9 +90,21 @@ const PhotoUploadSection = ({
             });
           }
         }
+
+        if (fileArray.length > 0) {
+          toast({
+            title: 'Fotos adicionadas',
+            description: `${fileArray.length} foto(s) adicionada(s). Salve o veículo para confirmar.`,
+          });
+        }
       }
     } catch (error) {
       console.error('Error processing photos:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao processar fotos. Tente novamente.',
+        variant: 'destructive',
+      });
     }
     
     event.target.value = '';

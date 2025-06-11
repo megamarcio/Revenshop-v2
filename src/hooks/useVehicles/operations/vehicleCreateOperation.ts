@@ -25,12 +25,15 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
     throw error;
   }
   
-  // Handle photos - ALWAYS insert into vehicle_photos table
+  console.log('Vehicle created successfully, now processing photos:', photos?.length || 0);
+
+  // Handle photos - SEMPRE inserir na tabela vehicle_photos
   if (photos && photos.length > 0) {
     const photoUrls: string[] = [];
     
     for (let i = 0; i < photos.length; i++) {
       const photo = photos[i];
+      console.log(`Processing photo ${i + 1}/${photos.length}:`, photo.substring(0, 50) + '...');
       
       if (photo.startsWith('data:image/')) {
         // Convert base64 to file and upload to Storage
@@ -44,27 +47,36 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
           const fileName = `${data.id}-${Date.now()}-${i}.${fileExt}`;
           const filePath = `${data.id}/${fileName}`;
 
+          console.log(`Uploading photo to Storage: ${filePath}`);
+
           // Upload to Supabase Storage
           const { data: uploadData, error: uploadError } = await supabase.storage
             .from('vehicle-photos')
-            .upload(filePath, file);
+            .upload(filePath, file, {
+              cacheControl: '3600',
+              upsert: false
+            });
 
           if (uploadError) {
             console.error('Error uploading photo to storage:', uploadError);
             continue;
           }
 
+          console.log('Photo uploaded successfully:', uploadData);
+
           // Get public URL
           const { data: { publicUrl } } = supabase.storage
             .from('vehicle-photos')
             .getPublicUrl(filePath);
 
+          console.log('Got public URL:', publicUrl);
           photoUrls.push(publicUrl);
         } catch (uploadError) {
           console.error('Error processing base64 photo:', uploadError);
         }
-      } else {
+      } else if (photo.startsWith('http')) {
         // Photo is already a URL (from Storage or external)
+        console.log('Photo is already a URL:', photo);
         photoUrls.push(photo);
       }
     }
@@ -78,11 +90,12 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
         is_main: index === 0
       }));
       
-      console.log('Inserting vehicle photos:', vehiclePhotosData);
+      console.log('Inserting vehicle photos into database:', vehiclePhotosData);
       
-      const { error: photosError } = await supabase
+      const { data: photosInsertData, error: photosError } = await supabase
         .from('vehicle_photos')
-        .insert(vehiclePhotosData);
+        .insert(vehiclePhotosData)
+        .select();
 
       if (photosError) {
         console.error('Error inserting vehicle photos:', photosError);
@@ -92,8 +105,18 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
           variant: 'destructive',
         });
       } else {
-        console.log('Photos successfully inserted into vehicle_photos table');
+        console.log('Photos successfully inserted into vehicle_photos table:', photosInsertData);
+        toast({
+          title: 'Sucesso',
+          description: `Veículo criado com ${photoUrls.length} foto(s) salva(s).`,
+        });
       }
+    } else {
+      console.log('No photos to save');
+      toast({
+        title: 'Sucesso',
+        description: 'Veículo criado sem fotos.',
+      });
     }
   }
   

@@ -28,14 +28,25 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
   
   // Handle photos update - SEMPRE atualizar a tabela vehicle_photos quando photos são fornecidas
   if (photos !== undefined) {
-    console.log('Updating vehicle photos for vehicle:', id);
+    console.log('Updating vehicle photos for vehicle:', id, 'with', photos.length, 'photos');
     
+    // Remove existing photos from database first
+    const { error: deleteError } = await supabase
+      .from('vehicle_photos')
+      .delete()
+      .eq('vehicle_id', id);
+
+    if (deleteError) {
+      console.error('Error deleting existing photos:', deleteError);
+    }
+
     // Se há fotos para processar
     if (photos.length > 0) {
       const photoUrls: string[] = [];
       
       for (let i = 0; i < photos.length; i++) {
         const photo = photos[i];
+        console.log(`Processing photo ${i + 1}/${photos.length}:`, photo.substring(0, 50) + '...');
         
         if (photo.startsWith('data:image/')) {
           // Convert base64 to Storage URL
@@ -49,37 +60,40 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
             const fileName = `${id}-${Date.now()}-${i}.${fileExt}`;
             const filePath = `${id}/${fileName}`;
 
+            console.log(`Uploading photo to Storage: ${filePath}`);
+
             // Upload to Supabase Storage
             const { data: uploadData, error: uploadError } = await supabase.storage
               .from('vehicle-photos')
-              .upload(filePath, file);
+              .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+              });
 
             if (uploadError) {
               console.error('Error uploading photo to storage:', uploadError);
               continue;
             }
 
+            console.log('Photo uploaded successfully:', uploadData);
+
             // Get public URL
             const { data: { publicUrl } } = supabase.storage
               .from('vehicle-photos')
               .getPublicUrl(filePath);
 
+            console.log('Got public URL:', publicUrl);
             photoUrls.push(publicUrl);
           } catch (uploadError) {
             console.error('Error processing base64 photo:', uploadError);
           }
-        } else {
+        } else if (photo.startsWith('http')) {
           // Photo is already a URL
+          console.log('Photo is already a URL:', photo);
           photoUrls.push(photo);
         }
       }
       
-      // Remove existing photos for this vehicle
-      await supabase
-        .from('vehicle_photos')
-        .delete()
-        .eq('vehicle_id', id);
-
       // Insert new photos
       if (photoUrls.length > 0) {
         const vehiclePhotosData = photoUrls.map((url, index) => ({
@@ -91,9 +105,10 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
         
         console.log('Inserting updated vehicle photos:', vehiclePhotosData);
         
-        const { error: photosError } = await supabase
+        const { data: photosInsertData, error: photosError } = await supabase
           .from('vehicle_photos')
-          .insert(vehiclePhotosData);
+          .insert(vehiclePhotosData)
+          .select();
 
         if (photosError) {
           console.error('Error updating vehicle photos:', photosError);
@@ -103,16 +118,19 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
             variant: 'destructive',
           });
         } else {
-          console.log('Photos successfully updated in vehicle_photos table');
+          console.log('Photos successfully updated in vehicle_photos table:', photosInsertData);
+          toast({
+            title: 'Sucesso',
+            description: `Veículo atualizado com ${photoUrls.length} foto(s).`,
+          });
         }
       }
     } else {
-      // Se não há fotos, remover todas as fotos existentes
-      console.log('Removing all photos for vehicle:', id);
-      await supabase
-        .from('vehicle_photos')
-        .delete()
-        .eq('vehicle_id', id);
+      console.log('No photos to save - all photos removed');
+      toast({
+        title: 'Sucesso',
+        description: 'Veículo atualizado sem fotos.',
+      });
     }
   }
   
