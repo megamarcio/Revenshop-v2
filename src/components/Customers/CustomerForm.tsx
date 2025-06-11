@@ -1,18 +1,19 @@
+
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import ImageUpload from '../ui/image-upload';
-import { DocumentUpload } from '../ui/document-upload';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useCustomerDocuments } from '@/hooks/useCustomerDocuments';
+import { BasicInfoSection } from './forms/BasicInfoSection';
+import { EmploymentSection } from './forms/EmploymentSection';
+import { DocumentsSection } from './forms/DocumentsSection';
+import { ReferencesSection } from './forms/ReferencesSection';
+import { BusinessInfoSection } from './forms/BusinessInfoSection';
+import { CustomerFormActions } from './forms/CustomerFormActions';
 
 interface Customer {
   id: string;
@@ -80,7 +81,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
   const [referencesOpen, setReferencesOpen] = useState(false);
   const [documentsOpen, setDocumentsOpen] = useState(false);
 
-  // Use the new document hooks
+  // Use the document hooks
   const {
     bankStatements,
     paymentDocuments,
@@ -224,329 +225,49 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Basic Info */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Informações Básicas</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">{t('customerName')} *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => handleInputChange('name', e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="phone">{t('customerPhone')} *</Label>
-                  <Input
-                    id="phone"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">{t('customerEmail')}</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange('email', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="address">{t('customerAddress')}</Label>
-                  <Input
-                    id="address"
-                    value={formData.address}
-                    onChange={(e) => handleInputChange('address', e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
+            <BasicInfoSection
+              formData={formData}
+              onInputChange={handleInputChange}
+            />
 
-            {/* Document Info */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Documentação</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="social_security_type">{t('socialSecurityType')}</Label>
-                  <Select value={formData.social_security_type} onValueChange={(value) => handleInputChange('social_security_type', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ssn">{t('ssn')}</SelectItem>
-                      <SelectItem value="passport">{t('passport')}</SelectItem>
-                      <SelectItem value="drivers_license">Driver's License</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="social_security_number">{t('socialSecurityNumber')}</Label>
-                  <Input
-                    id="social_security_number"
-                    value={formData.social_security_number}
-                    onChange={(e) => handleInputChange('social_security_number', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Foto do Documento</Label>
-                  <ImageUpload
-                    value={formData.document_photo}
-                    onChange={(value) => handleInputChange('document_photo', value)}
-                    size="sm"
-                  />
-                </div>
-              </div>
-            </div>
+            <EmploymentSection
+              formData={formData}
+              onInputChange={handleInputChange}
+              isOpen={employmentOpen}
+              onToggle={setEmploymentOpen}
+            />
 
-            {/* Employment and Income Info - Collapsible */}
-            <Collapsible open={employmentOpen} onOpenChange={setEmploymentOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  <span className="font-semibold text-lg">Informações de Emprego e Renda</span>
-                  <span>{employmentOpen ? '−' : '+'}</span>
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="monthly_income">Rendimento Mensal (R$)</Label>
-                    <Input
-                      id="monthly_income"
-                      type="number"
-                      value={formData.monthly_income}
-                      onChange={(e) => handleInputChange('monthly_income', Number(e.target.value))}
-                      placeholder="0.00"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="current_job">Emprego Atual</Label>
-                    <Input
-                      id="current_job"
-                      value={formData.current_job}
-                      onChange={(e) => handleInputChange('current_job', e.target.value)}
-                      placeholder="Ex: Vendedor, Motorista, etc."
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="employer_name">Nome do Empregador</Label>
-                    <Input
-                      id="employer_name"
-                      value={formData.employer_name}
-                      onChange={(e) => handleInputChange('employer_name', e.target.value)}
-                      placeholder="Nome da empresa"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="employer_phone">Telefone do Empregador</Label>
-                    <Input
-                      id="employer_phone"
-                      value={formData.employer_phone}
-                      onChange={(e) => handleInputChange('employer_phone', e.target.value)}
-                      placeholder="(11) 99999-9999"
-                    />
-                  </div>
-                  <div className="md:col-span-2">
-                    <Label htmlFor="employment_duration">Há quanto tempo trabalha no local?</Label>
-                    <Input
-                      id="employment_duration"
-                      value={formData.employment_duration}
-                      onChange={(e) => handleInputChange('employment_duration', e.target.value)}
-                      placeholder="Ex: 2 anos, 6 meses, etc."
-                    />
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            <DocumentsSection
+              customerId={customer?.id}
+              bankStatements={bankStatements}
+              paymentDocuments={paymentDocuments}
+              onAddBankStatement={addBankStatement}
+              onAddPaymentDocument={addPaymentDocument}
+              onRemoveBankStatement={removeBankStatement}
+              onRemovePaymentDocument={removePaymentDocument}
+              isOpen={documentsOpen}
+              onToggle={setDocumentsOpen}
+            />
 
-            {/* Document Uploads - Collapsible */}
-            <Collapsible open={documentsOpen} onOpenChange={setDocumentsOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  <span className="font-semibold text-lg">Comprovantes e Documentos</span>
-                  <span>{documentsOpen ? '−' : '+'}</span>
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-4 mt-4">
-                {customer?.id && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <DocumentUpload
-                      title="Comprovantes de Pagamento"
-                      description="Upload dos comprovantes de pagamento da compra"
-                      documents={paymentDocuments}
-                      onUpload={addPaymentDocument}
-                      onRemove={removePaymentDocument}
-                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                      maxFiles={5}
-                    />
-                    <DocumentUpload
-                      title="Extratos Bancários"
-                      description="Upload dos extratos bancários dos últimos 3 meses"
-                      documents={bankStatements}
-                      onUpload={addBankStatement}
-                      onRemove={removeBankStatement}
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      maxFiles={3}
-                    />
-                  </div>
-                )}
-                {!customer?.id && (
-                  <p className="text-sm text-gray-500 text-center py-4">
-                    Salve o cliente primeiro para poder enviar documentos
-                  </p>
-                )}
-              </CollapsibleContent>
-            </Collapsible>
+            <ReferencesSection
+              formData={formData}
+              onInputChange={handleInputChange}
+              isOpen={referencesOpen}
+              onToggle={setReferencesOpen}
+            />
 
-            {/* References - Collapsible */}
-            <Collapsible open={referencesOpen} onOpenChange={setReferencesOpen}>
-              <CollapsibleTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
-                  <span className="font-semibold text-lg">Referências Pessoais</span>
-                  <span>{referencesOpen ? '−' : '+'}</span>
-                </Button>
-              </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-6 mt-4">
-                {/* Reference 1 */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-md border-b pb-2">{t('reference1')}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="reference1_name">{t('referenceName')}</Label>
-                      <Input
-                        id="reference1_name"
-                        value={formData.reference1_name}
-                        onChange={(e) => handleInputChange('reference1_name', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="reference1_email">{t('referenceEmail')}</Label>
-                      <Input
-                        id="reference1_email"
-                        type="email"
-                        value={formData.reference1_email}
-                        onChange={(e) => handleInputChange('reference1_email', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="reference1_phone">{t('referencePhone')}</Label>
-                      <Input
-                        id="reference1_phone"
-                        value={formData.reference1_phone}
-                        onChange={(e) => handleInputChange('reference1_phone', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
+            <BusinessInfoSection
+              formData={formData}
+              onInputChange={handleInputChange}
+              sellers={sellers}
+              vehicles={vehicles}
+            />
 
-                {/* Reference 2 */}
-                <div className="space-y-4">
-                  <h4 className="font-medium text-md border-b pb-2">{t('reference2')}</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="reference2_name">{t('referenceName')}</Label>
-                      <Input
-                        id="reference2_name"
-                        value={formData.reference2_name}
-                        onChange={(e) => handleInputChange('reference2_name', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="reference2_email">{t('referenceEmail')}</Label>
-                      <Input
-                        id="reference2_email"
-                        type="email"
-                        value={formData.reference2_email}
-                        onChange={(e) => handleInputChange('reference2_email', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="reference2_phone">{t('referencePhone')}</Label>
-                      <Input
-                        id="reference2_phone"
-                        value={formData.reference2_phone}
-                        onChange={(e) => handleInputChange('reference2_phone', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
-
-            {/* Business Info */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-lg border-b pb-2">Informações Comerciais</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="responsible_seller_id">{t('responsibleSeller')}</Label>
-                  <Select value={formData.responsible_seller_id} onValueChange={(value) => handleInputChange('responsible_seller_id', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectSeller')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {sellers.map((seller) => (
-                        <SelectItem key={seller.id} value={seller.id}>
-                          {seller.first_name} {seller.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="interested_vehicle_id">{t('interestedVehicle')}</Label>
-                  <Select value={formData.interested_vehicle_id} onValueChange={(value) => handleInputChange('interested_vehicle_id', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder={t('selectVehicle')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {vehicles.map((vehicle) => (
-                        <SelectItem key={vehicle.id} value={vehicle.id}>
-                          {vehicle.year} {vehicle.name} {vehicle.model} - R$ {vehicle.sale_price?.toLocaleString()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="deal_status">{t('dealStatus')}</Label>
-                  <Select value={formData.deal_status} onValueChange={(value) => handleInputChange('deal_status', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="quote">{t('quote')}</SelectItem>
-                      <SelectItem value="pending">Venda Pendente</SelectItem>
-                      <SelectItem value="completed">{t('completedSale')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="payment_type">{t('paymentType')}</Label>
-                  <Select value={formData.payment_type} onValueChange={(value) => handleInputChange('payment_type', value)}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">{t('cash')}</SelectItem>
-                      <SelectItem value="financing">{t('financing')}</SelectItem>
-                      <SelectItem value="bhph">{t('bhph')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex space-x-4">
-              <Button type="submit" disabled={saveCustomerMutation.isPending}>
-                {saveCustomerMutation.isPending ? t('saving') : t('save')}
-              </Button>
-              <Button type="button" variant="outline" onClick={onCancel}>
-                {t('cancel')}
-              </Button>
-            </div>
+            <CustomerFormActions
+              onSubmit={handleSubmit}
+              onCancel={onCancel}
+              isSaving={saveCustomerMutation.isPending}
+            />
           </form>
         </CardContent>
       </Card>
