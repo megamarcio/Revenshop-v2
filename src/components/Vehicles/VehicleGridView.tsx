@@ -1,7 +1,6 @@
 
 import React from 'react';
 import VehicleCard from './VehicleCard';
-import { convertVehicleForCard } from './VehicleDataProcessor';
 import { Vehicle as VehicleCardType } from './VehicleCardTypes';
 
 interface VehicleGridViewProps {
@@ -17,7 +16,7 @@ const VehicleGridView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleGri
       {vehicles.map((vehicle) => (
         <VehicleCard
           key={vehicle.id}
-          vehicle={convertVehicleForCard(vehicle)}
+          vehicle={vehicle}
           onEdit={() => onEdit(vehicle)}
           onDuplicate={() => onDuplicate(vehicle)}
           onDelete={() => onDelete(vehicle)}
