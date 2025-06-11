@@ -3,17 +3,21 @@ import { supabase } from '@/integrations/supabase/client';
 import { mapFormToDbData } from '../utils/formToDbMapper';
 
 export const updateVehicle = async (vehicleData: any) => {
-  console.log('Updating vehicle with data:', vehicleData);
+  console.log('updateVehicle - input vehicleData:', vehicleData);
   
-  if (!vehicleData.id) {
+  if (!vehicleData || !vehicleData.id) {
+    console.error('updateVehicle - Vehicle ID is missing:', vehicleData);
     throw new Error('Vehicle ID is required for update');
   }
+
+  const vehicleId = vehicleData.id;
+  console.log('updateVehicle - extracted vehicleId:', vehicleId);
 
   // Map form data to database format
   const dbVehicleData = mapFormToDbData(vehicleData);
   
-  console.log('Mapped vehicle data for update:', dbVehicleData);
-  console.log('Update - title fields being sent:', {
+  console.log('updateVehicle - mapped dbVehicleData:', dbVehicleData);
+  console.log('updateVehicle - title fields being sent:', {
     title_type: dbVehicleData.title_type,
     title_status: dbVehicleData.title_status
   });
@@ -21,7 +25,7 @@ export const updateVehicle = async (vehicleData: any) => {
   const { data, error } = await supabase
     .from('vehicles')
     .update(dbVehicleData)
-    .eq('id', vehicleData.id)
+    .eq('id', vehicleId)
     .select()
     .single();
 
@@ -40,12 +44,12 @@ export const updateVehicle = async (vehicleData: any) => {
     await supabase
       .from('vehicle_photos')
       .delete()
-      .eq('vehicle_id', vehicleData.id);
+      .eq('vehicle_id', vehicleId);
 
     // Then insert new photos
     if (vehicleData.photos.length > 0) {
       const photoInserts = vehicleData.photos.map((url: string, index: number) => ({
-        vehicle_id: vehicleData.id,
+        vehicle_id: vehicleId,
         url: url,
         position: index,
         is_main: index === 0

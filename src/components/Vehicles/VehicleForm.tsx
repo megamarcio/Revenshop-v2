@@ -36,6 +36,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
     calculateProfitMargin
   } = useVehicleForm(editingVehicle);
 
+  console.log('VehicleForm - editingVehicle:', editingVehicle);
+  console.log('VehicleForm - isEditing:', isEditing);
+  console.log('VehicleForm - editingVehicle.id:', editingVehicle?.id);
+
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
   };
@@ -107,23 +111,17 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
         videos: videos,
-        titleInfo: formData.titleInfo,
-        ...(isEditing && { id: editingVehicle.id })
+        titleInfo: formData.titleInfo
       };
 
-      console.log('VehicleForm - submitting vehicleData with financing info:', {
-        financingBank: vehicleData.financingBank,
-        financingType: vehicleData.financingType,
-        installmentValue: vehicleData.installmentValue,
-        downPayment: vehicleData.downPayment,
-        financedAmount: vehicleData.financedAmount,
-        totalInstallments: vehicleData.totalInstallments,
-        paid_installments: vehicleData.paidInstallments,
-        remaining_installments: vehicleData.remainingInstallments,
-        total_to_pay: vehicleData.totalToPay,
-        payoff_value: vehicleData.payoffValue,
-        interest_rate: vehicleData.interestRate
-      });
+      // CRÍTICO: Garantir que o ID seja incluído para edição
+      if (isEditing && editingVehicle?.id) {
+        vehicleData.id = editingVehicle.id;
+        console.log('VehicleForm - handleSubmit - adding ID for update:', editingVehicle.id);
+      }
+
+      console.log('VehicleForm - submitting vehicleData:', vehicleData);
+      console.log('VehicleForm - vehicleData.id:', vehicleData.id);
 
       await onSave(vehicleData);
       

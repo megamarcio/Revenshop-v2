@@ -56,7 +56,11 @@ export const useVehicles = () => {
 
   const updateVehicle = async (id: string, vehicleData: Partial<any>) => {
     try {
-      const data = await updateVehicleOperation(id, vehicleData);
+      // Garantir que o ID está incluído nos dados do veículo
+      const dataWithId = { ...vehicleData, id };
+      console.log('useVehicles - updateVehicle - dataWithId:', dataWithId);
+      
+      const data = await updateVehicleOperation(dataWithId);
       setVehicles(prev => prev.map(v => v.id === id ? data : v));
       toast({
         title: 'Sucesso',
