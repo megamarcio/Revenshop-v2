@@ -38,18 +38,37 @@ export const useVehiclePhotoThumbnail = (vehicleId: string | null): UseVehiclePh
       }
 
       if (data) {
-        // Por enquanto, usar a mesma URL para thumbnail e completa
-        // No futuro, implementar sistema de thumbnails no Supabase Storage
         const photoUrl = data.url;
-        const thumbnailUrlResult = photoUrl ? `${photoUrl}?w=150&h=150&fit=crop` : null;
         
-        console.log('Photo URLs fetched for vehicle', vehicleId, ':', {
-          thumbnail: thumbnailUrlResult ? 'found' : 'not found',
-          full: photoUrl ? 'found' : 'not found'
-        });
-        
-        setThumbnailUrl(thumbnailUrlResult);
-        setFullPhotoUrl(photoUrl);
+        // Se for URL do Supabase Storage, aplicar transformações de thumbnail
+        if (photoUrl && photoUrl.includes('supabase')) {
+          // Para URLs do Supabase Storage, adicionar parâmetros de transformação
+          const url = new URL(photoUrl);
+          url.searchParams.set('width', '300');
+          url.searchParams.set('height', '200');
+          url.searchParams.set('resize', 'cover');
+          const thumbnailUrlResult = url.toString();
+          
+          console.log('Supabase Storage photo URLs fetched for vehicle', vehicleId, ':', {
+            thumbnail: 'generated',
+            full: 'available'
+          });
+          
+          setThumbnailUrl(thumbnailUrlResult);
+          setFullPhotoUrl(photoUrl);
+        } else if (photoUrl) {
+          // Para outras URLs (incluindo base64), usar diretamente
+          console.log('External/base64 photo URLs fetched for vehicle', vehicleId, ':', {
+            thumbnail: 'direct',
+            full: 'direct'
+          });
+          
+          setThumbnailUrl(photoUrl);
+          setFullPhotoUrl(photoUrl);
+        } else {
+          setThumbnailUrl(null);
+          setFullPhotoUrl(null);
+        }
       } else {
         setThumbnailUrl(null);
         setFullPhotoUrl(null);

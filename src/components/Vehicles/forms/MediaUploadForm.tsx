@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Upload, Image, Video, Star } from 'lucide-react';
+import { Plus, X, Upload, Image, Video, Star, Loader2 } from 'lucide-react';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 
 interface MediaUploadFormProps {
@@ -21,7 +21,7 @@ const MediaUploadForm = ({
   setVideos,
   readOnly = false 
 }: MediaUploadFormProps) => {
-  const { photos: vehiclePhotos, addPhoto, removePhoto, setMainPhoto } = useVehiclePhotos(vehicleId);
+  const { photos: vehiclePhotos, uploading, uploadPhoto, removePhoto, setMainPhoto } = useVehiclePhotos(vehicleId);
 
   // Use vehicle_photos if vehicleId is provided, otherwise use local state
   const displayPhotos = vehicleId ? vehiclePhotos.map(p => p.url) : photos;
@@ -37,45 +37,45 @@ const MediaUploadForm = ({
     const fileArray = Array.from(files).slice(0, maxFiles);
     
     try {
-      const batchSize = 3;
-      for (let i = 0; i < fileArray.length; i += batchSize) {
-        const batch = fileArray.slice(i, i + batchSize);
-        
-        const batchPromises = batch.map(file => {
-          return new Promise<string>((resolve, reject) => {
-            if (file.size > 2 * 1024 * 1024) {
-              console.warn(`File ${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Skipping.`);
-              resolve('');
-              return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              if (e.target?.result) {
-                resolve(e.target.result as string);
-              } else {
+      if (vehicleId) {
+        // Upload para Supabase Storage
+        for (const file of fileArray) {
+          await uploadPhoto(file);
+        }
+      } else {
+        // Upload local para base64 (para novos veículos)
+        const batchSize = 3;
+        for (let i = 0; i < fileArray.length; i += batchSize) {
+          const batch = fileArray.slice(i, i + batchSize);
+          
+          const batchPromises = batch.map(file => {
+            return new Promise<string>((resolve, reject) => {
+              if (file.size > 2 * 1024 * 1024) {
+                console.warn(`File ${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Skipping.`);
                 resolve('');
+                return;
               }
-            };
-            reader.onerror = () => {
-              console.error(`Error reading file ${file.name}`);
-              resolve('');
-            };
-            reader.readAsDataURL(file);
-          });
-        });
 
-        const batchResults = await Promise.all(batchPromises);
-        const validResults = batchResults.filter(result => result !== '');
-        
-        if (validResults.length > 0) {
-          if (vehicleId) {
-            // Add photos to vehicle_photos table
-            for (const photoUrl of validResults) {
-              await addPhoto(photoUrl);
-            }
-          } else {
-            // Add to local state
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                if (e.target?.result) {
+                  resolve(e.target.result as string);
+                } else {
+                  resolve('');
+                }
+              };
+              reader.onerror = () => {
+                console.error(`Error reading file ${file.name}`);
+                resolve('');
+              };
+              reader.readAsDataURL(file);
+            });
+          });
+
+          const batchResults = await Promise.all(batchPromises);
+          const validResults = batchResults.filter(result => result !== '');
+          
+          if (validResults.length > 0) {
             setPhotos(prev => {
               const newPhotos = [...prev, ...validResults];
               return newPhotos.slice(0, 10);
@@ -148,6 +148,7 @@ const MediaUploadForm = ({
         <h3 className="text-lg font-semibold flex items-center space-x-2">
           <Image className="h-5 w-5" />
           <span>Fotos ({displayPhotos.length}/10)</span>
+          {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
         </h3>
         
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
@@ -165,7 +166,7 @@ const MediaUploadForm = ({
                 {isMain && (
                   <Star className="absolute top-1 left-1 h-4 w-4 text-yellow-500 fill-current" />
                 )}
-                {canEdit && (
+                {canEdit && !uploading && (
                   <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {vehicleId && !isMain && (
                       <button
@@ -190,7 +191,7 @@ const MediaUploadForm = ({
             );
           })}
           
-          {canEdit && displayPhotos.length < 10 && (
+          {canEdit && displayPhotos.length < 10 && !uploading && (
             <label className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex items-center justify-center cursor-pointer hover:border-revenshop-primary">
               <Plus className="h-6 w-6 text-gray-400" />
               <input
@@ -201,6 +202,12 @@ const MediaUploadForm = ({
                 className="hidden"
               />
             </label>
+          )}
+          
+          {uploading && (
+            <div className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 text-gray-400 animate-spin" />
+            </div>
           )}
         </div>
         

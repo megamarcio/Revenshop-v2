@@ -36,7 +36,7 @@ const OptimizedLazyImage: React.FC<OptimizedLazyImageProps> = ({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          console.log('Vehicle', vehicleId, 'is now visible, loading optimized thumbnail...');
+          console.log('Vehicle', vehicleId, 'is now visible, loading photo from Storage...');
           setIsInView(true);
           observer.disconnect();
         }

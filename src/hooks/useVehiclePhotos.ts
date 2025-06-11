@@ -14,6 +14,7 @@ export interface VehiclePhoto {
 export const useVehiclePhotos = (vehicleId?: string) => {
   const [photos, setPhotos] = useState<VehiclePhoto[]>([]);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const fetchPhotos = async () => {
     if (!vehicleId) return;
@@ -40,47 +41,105 @@ export const useVehiclePhotos = (vehicleId?: string) => {
     }
   };
 
-  const addPhoto = async (url: string, position?: number) => {
-    if (!vehicleId) return;
+  const uploadPhoto = async (file: File, position?: number): Promise<VehiclePhoto | null> => {
+    if (!vehicleId) return null;
 
     try {
-      const nextPosition = position || (photos.length > 0 ? Math.max(...photos.map(p => p.position || 0)) + 1 : 1);
-      const isMain = photos.length === 0; // Primera foto é principal
+      setUploading(true);
+      
+      // Validar arquivo
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Apenas arquivos de imagem são permitidos.');
+      }
 
-      const { data, error } = await supabase
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 5MB.');
+      }
+
+      // Gerar nome único para o arquivo
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${vehicleId}-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${vehicleId}/${fileName}`;
+
+      // Upload para Supabase Storage
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('vehicle-photos')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
+        .from('vehicle-photos')
+        .getPublicUrl(filePath);
+
+      // Salvar no banco de dados
+      const nextPosition = position || (photos.length > 0 ? Math.max(...photos.map(p => p.position || 0)) + 1 : 1);
+      const isMain = photos.length === 0; // Primeira foto é principal
+
+      const { data: photoData, error: dbError } = await supabase
         .from('vehicle_photos')
         .insert({
           vehicle_id: vehicleId,
-          url,
+          url: publicUrl,
           position: nextPosition,
           is_main: isMain
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (dbError) throw dbError;
       
-      setPhotos(prev => [...prev, data].sort((a, b) => (a.position || 0) - (b.position || 0)));
-      return data;
+      setPhotos(prev => [...prev, photoData].sort((a, b) => (a.position || 0) - (b.position || 0)));
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Foto adicionada com sucesso.',
+      });
+      
+      return photoData;
     } catch (error) {
-      console.error('Error adding photo:', error);
+      console.error('Error uploading photo:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao adicionar foto.',
+        description: error instanceof Error ? error.message : 'Erro ao adicionar foto.',
         variant: 'destructive',
       });
-      throw error;
+      return null;
+    } finally {
+      setUploading(false);
     }
   };
 
   const removePhoto = async (photoId: string) => {
     try {
-      const { error } = await supabase
+      const photo = photos.find(p => p.id === photoId);
+      if (!photo) return;
+
+      // Extrair path do storage da URL
+      const url = new URL(photo.url);
+      const pathSegments = url.pathname.split('/');
+      const bucketIndex = pathSegments.findIndex(segment => segment === 'vehicle-photos');
+      if (bucketIndex !== -1 && bucketIndex < pathSegments.length - 1) {
+        const storagePath = pathSegments.slice(bucketIndex + 1).join('/');
+        
+        // Remover do Storage
+        const { error: storageError } = await supabase.storage
+          .from('vehicle-photos')
+          .remove([storagePath]);
+
+        if (storageError) {
+          console.warn('Error removing from storage:', storageError);
+        }
+      }
+
+      // Remover do banco de dados
+      const { error: dbError } = await supabase
         .from('vehicle_photos')
         .delete()
         .eq('id', photoId);
 
-      if (error) throw error;
+      if (dbError) throw dbError;
       
       setPhotos(prev => prev.filter(p => p.id !== photoId));
       
@@ -95,7 +154,6 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         description: 'Erro ao remover foto.',
         variant: 'destructive',
       });
-      throw error;
     }
   };
 
@@ -131,7 +189,6 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         description: 'Erro ao definir foto principal.',
         variant: 'destructive',
       });
-      throw error;
     }
   };
 
@@ -142,7 +199,8 @@ export const useVehiclePhotos = (vehicleId?: string) => {
   return {
     photos,
     loading,
-    addPhoto,
+    uploading,
+    uploadPhoto,
     removePhoto,
     setMainPhoto,
     refetch: fetchPhotos
