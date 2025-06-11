@@ -684,6 +684,38 @@ export type Database = {
           },
         ]
       }
+      vehicle_photos: {
+        Row: {
+          id: string
+          is_main: boolean | null
+          position: number | null
+          url: string
+          vehicle_id: string
+        }
+        Insert: {
+          id?: string
+          is_main?: boolean | null
+          position?: number | null
+          url: string
+          vehicle_id: string
+        }
+        Update: {
+          id?: string
+          is_main?: boolean | null
+          position?: number | null
+          url?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_photos_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           ca_note: number
