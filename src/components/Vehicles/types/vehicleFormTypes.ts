@@ -1,4 +1,5 @@
 
+
 export interface VehicleFormData {
   name: string;
   vin: string;
@@ -15,7 +16,7 @@ export interface VehicleFormData {
   carfaxPrice: string;
   mmrValue: string;
   description: string;
-  category: string;
+  category: "forSale" | "sold" | "consigned" | "rental" | "maintenance";
   consignmentStore: string;
   seller: string;
   finalSalePrice: string;
@@ -37,3 +38,4 @@ export interface VehicleFormProps {
   editingVehicle?: any;
   onNavigateToCustomers?: () => void;
 }
+
