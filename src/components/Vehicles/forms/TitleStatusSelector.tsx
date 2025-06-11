@@ -10,10 +10,11 @@ interface TitleStatusSelectorProps {
 }
 
 const titleStatusOptions = [
-  { value: 'clean-title-financiado-proprio', label: 'Clean Title - financiado Próprio nome' },
-  { value: 'clean-title-financiado-terceiro', label: 'Clean Title - financiado nome terceiro' },
-  { value: 'clean-title-leilao-aguardando', label: 'Clean Title - Leilão - Aguardando' },
-  { value: 'rebuilt-leilao-aguardando', label: 'Rebuilt - Leilão - Aguardando' },
+  { value: 'em-maos', label: 'Em Mãos' },
+  { value: 'financiado-proprio', label: 'Financiado Próprio nome' },
+  { value: 'financiado-terceiro', label: 'Financiado Nome Terceiro' },
+  { value: 'leilao-aguardando', label: 'Leilão - Aguardando' },
+  { value: 'junk', label: 'Junk' },
   { value: 'sem-titulo', label: 'Sem Título' },
 ];
 

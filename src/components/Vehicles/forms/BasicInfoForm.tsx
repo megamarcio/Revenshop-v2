@@ -7,6 +7,7 @@ import { VehicleFormData } from '../types/vehicleFormTypes';
 import ColorSelector from './ColorSelector';
 import ConditionReportSelector from './ConditionReportSelector';
 import TitleStatusSelector from './TitleStatusSelector';
+import TitleTypeSelector from './TitleTypeSelector';
 
 interface BasicInfoFormProps {
   formData: VehicleFormData;
@@ -83,12 +84,16 @@ const BasicInfoForm = ({
         </div>
 
         <div>
-          <Label htmlFor="internalCode">{t('internalCode')} *</Label>
+          <div className="flex items-center gap-1">
+            <Label htmlFor="internalCode">{t('internalCode')} *</Label>
+            <span className="text-xs text-gray-500">📋</span>
+          </div>
           <Input 
             id="internalCode" 
             value={formData.internalCode} 
             onChange={e => onInputChange('internalCode', e.target.value)} 
             className={errors.internalCode ? 'border-red-500' : ''} 
+            placeholder="Ex: 25001"
           />
           {errors.internalCode && <span className="text-red-500 text-sm">{errors.internalCode}</span>}
         </div>
@@ -106,11 +111,19 @@ const BasicInfoForm = ({
         />
       </div>
 
-      <TitleStatusSelector
-        value={formData.titleStatus}
-        onChange={(value) => onInputChange('titleStatus', value)}
-        error={errors.titleStatus}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <TitleTypeSelector
+          value={formData.titleType || 'clean-title'}
+          onChange={(value) => onInputChange('titleType', value)}
+          error={errors.titleType}
+        />
+
+        <TitleStatusSelector
+          value={formData.titleStatus || 'em-maos'}
+          onChange={(value) => onInputChange('titleStatus', value)}
+          error={errors.titleStatus}
+        />
+      </div>
     </div>
   );
 };

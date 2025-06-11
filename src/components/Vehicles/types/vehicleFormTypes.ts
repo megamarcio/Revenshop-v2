@@ -1,5 +1,4 @@
 
-
 export interface VehicleFormData {
   name: string;
   vin: string;
@@ -10,6 +9,8 @@ export interface VehicleFormData {
   color: string;
   caNote: string;
   titleInfo: string;
+  titleType: string;
+  titleStatus: string;
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;
@@ -29,7 +30,6 @@ export interface VehicleFormData {
   checkDetails: string;
   otherPaymentDetails: string;
   sellerCommission: string;
-  titleStatus: string;
 }
 
 export interface VehicleFormProps {
@@ -38,4 +38,3 @@ export interface VehicleFormProps {
   editingVehicle?: any;
   onNavigateToCustomers?: () => void;
 }
-

@@ -14,16 +14,27 @@ export const useVehicleForm = (editingVehicle?: any) => {
   // Determine if editing (has valid ID) or creating/duplicating (no ID)
   const isEditing = editingVehicle && editingVehicle.id;
   
+  // Generate internal code starting with 25
+  const generateInternalCode = () => {
+    if (editingVehicle?.internal_code || editingVehicle?.internalCode) {
+      return editingVehicle.internal_code || editingVehicle.internalCode;
+    }
+    const timestamp = Date.now().toString().slice(-4);
+    return `25${timestamp}`;
+  };
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
     miles: editingVehicle?.miles?.toString() || '0',
-    internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
+    internalCode: generateInternalCode(),
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
     titleInfo: getTitleInfo(editingVehicle),
+    titleType: editingVehicle?.title_type || editingVehicle?.titleType || 'clean-title',
+    titleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus || 'em-maos',
     purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '',
     salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '',
     minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
@@ -42,8 +53,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     financingCompany: editingVehicle?.financingCompany || '',
     checkDetails: editingVehicle?.checkDetails || '',
     otherPaymentDetails: editingVehicle?.otherPaymentDetails || '',
-    sellerCommission: editingVehicle?.sellerCommission?.toString() || '',
-    titleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus || ''
+    sellerCommission: editingVehicle?.sellerCommission?.toString() || ''
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
