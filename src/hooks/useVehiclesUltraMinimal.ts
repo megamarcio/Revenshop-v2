@@ -27,6 +27,26 @@ export interface VehicleUltraMinimal {
   updated_at: string;
   created_by?: string;
   main_photo_url?: string;
+  photos: string[]; // Added photos property
+  video?: string; // Added video property
+  
+  // Add financing fields
+  financing_bank?: string;
+  financing_type?: string;
+  original_financed_name?: string;
+  purchase_date?: string;
+  due_date?: string;
+  installment_value?: number;
+  down_payment?: number;
+  financed_amount?: number;
+  total_installments?: number;
+  paid_installments?: number;
+  remaining_installments?: number;
+  total_to_pay?: number;
+  payoff_value?: number;
+  payoff_date?: string;
+  interest_rate?: number;
+  custom_financing_bank?: string;
 }
 
 interface UseVehiclesUltraMinimalOptions {
@@ -46,7 +66,7 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
     try {
       console.log('Fetching ultra minimal vehicles with complete data:', { category, limit, offset, searchTerm });
       
-      // Query otimizada - todos os campos necessários, sem relacionamentos pesados
+      // Query otimizada - todos os campos necessários, incluindo fotos
       let query = supabase
         .from('vehicles')
         .select(`
@@ -71,7 +91,27 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
           title_status,
           created_at,
           updated_at,
-          created_by
+          created_by,
+          video,
+          financing_bank,
+          financing_type,
+          original_financed_name,
+          purchase_date,
+          due_date,
+          installment_value,
+          down_payment,
+          financed_amount,
+          total_installments,
+          paid_installments,
+          remaining_installments,
+          total_to_pay,
+          payoff_value,
+          payoff_date,
+          interest_rate,
+          custom_financing_bank,
+          vehicle_photos!vehicle_photos_vehicle_id_fkey (
+            id, url, position, is_main
+          )
         `)
         .order('created_at', { ascending: false });
 
@@ -101,32 +141,63 @@ export const useVehiclesUltraMinimal = (options: UseVehiclesUltraMinimalOptions 
         return;
       }
 
-      // Criar os objetos VehicleUltraMinimal com todos os dados
-      const vehiclesUltraMinimal = vehiclesData.map(vehicle => ({
-        id: vehicle.id,
-        name: vehicle.name || '',
-        vin: vehicle.vin || '',
-        year: vehicle.year || 2020,
-        model: vehicle.model || '',
-        miles: vehicle.miles || 0,
-        internal_code: vehicle.internal_code || '',
-        color: vehicle.color || '',
-        ca_note: vehicle.ca_note || 0,
-        purchase_price: vehicle.purchase_price || 0,
-        sale_price: vehicle.sale_price || 0,
-        profit_margin: vehicle.profit_margin || 0,
-        min_negotiable: vehicle.min_negotiable || 0,
-        carfax_price: vehicle.carfax_price || 0,
-        mmr_value: vehicle.mmr_value || 0,
-        description: vehicle.description || '',
-        category: vehicle.category || 'forSale',
-        title_type: vehicle.title_type,
-        title_status: vehicle.title_status,
-        created_at: vehicle.created_at,
-        updated_at: vehicle.updated_at,
-        created_by: vehicle.created_by,
-        main_photo_url: undefined, // Fotos serão carregadas sob demanda
-      } as VehicleUltraMinimal));
+      // Criar os objetos VehicleUltraMinimal com todos os dados incluindo fotos
+      const vehiclesUltraMinimal = vehiclesData.map(vehicle => {
+        const vehiclePhotos = vehicle.vehicle_photos || [];
+        const photos = vehiclePhotos
+          .sort((a, b) => (a.position || 0) - (b.position || 0))
+          .map(photo => photo.url);
+        
+        // Buscar foto principal ou usar primeira foto como fallback
+        const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
+        const main_photo_url = mainPhoto?.url || photos[0] || null;
+
+        return {
+          id: vehicle.id,
+          name: vehicle.name || '',
+          vin: vehicle.vin || '',
+          year: vehicle.year || 2020,
+          model: vehicle.model || '',
+          miles: vehicle.miles || 0,
+          internal_code: vehicle.internal_code || '',
+          color: vehicle.color || '',
+          ca_note: vehicle.ca_note || 0,
+          purchase_price: vehicle.purchase_price || 0,
+          sale_price: vehicle.sale_price || 0,
+          profit_margin: vehicle.profit_margin || 0,
+          min_negotiable: vehicle.min_negotiable || 0,
+          carfax_price: vehicle.carfax_price || 0,
+          mmr_value: vehicle.mmr_value || 0,
+          description: vehicle.description || '',
+          category: vehicle.category || 'forSale',
+          title_type: vehicle.title_type,
+          title_status: vehicle.title_status,
+          created_at: vehicle.created_at,
+          updated_at: vehicle.updated_at,
+          created_by: vehicle.created_by,
+          main_photo_url,
+          photos,
+          video: vehicle.video,
+          
+          // Financing fields
+          financing_bank: vehicle.financing_bank,
+          financing_type: vehicle.financing_type,
+          original_financed_name: vehicle.original_financed_name,
+          purchase_date: vehicle.purchase_date,
+          due_date: vehicle.due_date,
+          installment_value: vehicle.installment_value,
+          down_payment: vehicle.down_payment,
+          financed_amount: vehicle.financed_amount,
+          total_installments: vehicle.total_installments,
+          paid_installments: vehicle.paid_installments,
+          remaining_installments: vehicle.remaining_installments,
+          total_to_pay: vehicle.total_to_pay,
+          payoff_value: vehicle.payoff_value,
+          payoff_date: vehicle.payoff_date,
+          interest_rate: vehicle.interest_rate,
+          custom_financing_bank: vehicle.custom_financing_bank,
+        } as VehicleUltraMinimal;
+      });
 
       console.log('Ultra minimal vehicles with complete data fetched successfully:', vehiclesUltraMinimal.length, 'vehicles');
       
