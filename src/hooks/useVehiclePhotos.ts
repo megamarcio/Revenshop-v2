@@ -18,13 +18,12 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
   const fetchPhotos = async () => {
     if (!vehicleId) {
-      console.log('useVehiclePhotos: No vehicleId provided, clearing photos');
       setPhotos([]);
       return;
     }
     
     setLoading(true);
-    console.log('useVehiclePhotos: Fetching photos for vehicle:', vehicleId);
+    console.log('Fetching photos for vehicle:', vehicleId);
     
     try {
       const { data, error } = await supabase
@@ -35,28 +34,22 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
       if (error) throw error;
       
-      const fetchedPhotos = data || [];
-      console.log('useVehiclePhotos: Fetched photos:', fetchedPhotos.length, 'photos');
-      setPhotos(fetchedPhotos);
+      console.log('Fetched photos:', data);
+      setPhotos(data || []);
     } catch (error) {
       console.error('Error fetching vehicle photos:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao carregar fotos do veículo.',
-        variant: 'destructive',
-      });
       setPhotos([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const uploadPhoto = async (file: File, position?: number): Promise<VehiclePhoto | null> => {
+  const uploadPhoto = async (file: File): Promise<VehiclePhoto | null> => {
     if (!vehicleId) return null;
 
     try {
       setUploading(true);
-      console.log('useVehiclePhotos: Starting upload for vehicle:', vehicleId);
+      console.log('Uploading photo for vehicle:', vehicleId);
       
       // Validar arquivo
       if (!file.type.startsWith('image/')) {
@@ -85,8 +78,8 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         .getPublicUrl(filePath);
 
       // Salvar no banco de dados
-      const nextPosition = position || (photos.length > 0 ? Math.max(...photos.map(p => p.position || 0)) + 1 : 1);
-      const isMain = photos.length === 0; // Primeira foto é principal
+      const nextPosition = photos.length > 0 ? Math.max(...photos.map(p => p.position || 0)) + 1 : 1;
+      const isMain = photos.length === 0;
 
       const { data: photoData, error: dbError } = await supabase
         .from('vehicle_photos')
@@ -101,7 +94,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
       if (dbError) throw dbError;
       
-      console.log('useVehiclePhotos: Photo uploaded successfully:', photoData);
+      console.log('Photo uploaded successfully:', photoData);
       setPhotos(prev => [...prev, photoData].sort((a, b) => (a.position || 0) - (b.position || 0)));
       
       toast({
@@ -125,7 +118,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
   const removePhoto = async (photoId: string) => {
     try {
-      console.log('useVehiclePhotos: Removing photo:', photoId);
+      console.log('Removing photo:', photoId);
       const photo = photos.find(p => p.id === photoId);
       if (!photo) return;
 
@@ -137,13 +130,9 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         const storagePath = pathSegments.slice(bucketIndex + 1).join('/');
         
         // Remover do Storage
-        const { error: storageError } = await supabase.storage
+        await supabase.storage
           .from('vehicle-photos')
           .remove([storagePath]);
-
-        if (storageError) {
-          console.warn('Error removing from storage:', storageError);
-        }
       }
 
       // Remover do banco de dados
@@ -172,7 +161,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
   const setMainPhoto = async (photoId: string) => {
     try {
-      console.log('useVehiclePhotos: Setting main photo:', photoId);
+      console.log('Setting main photo:', photoId);
       
       // Primeiro, remove a marca principal de todas as fotos
       await supabase
@@ -208,7 +197,6 @@ export const useVehiclePhotos = (vehicleId?: string) => {
   };
 
   useEffect(() => {
-    console.log('useVehiclePhotos: Effect triggered, vehicleId:', vehicleId);
     fetchPhotos();
   }, [vehicleId]);
 

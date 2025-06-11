@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import { Car, X, Save, ExternalLink, Wrench, Trash2 } from 'lucide-react';
 import BasicInfoForm from './forms/BasicInfoForm';
 import FinancialInfoForm from './forms/FinancialInfoForm';
 import SaleInfoForm from './forms/SaleInfoForm';
-import MediaUploadForm from './forms/MediaUploadForm';
+import MediaUploadForm from './forms/MediaUpload';
 import DescriptionForm from './forms/DescriptionForm';
 import MaintenanceViewModal from '../Maintenance/MaintenanceViewModal';
 import { VehicleFormProps } from './types/vehicleFormTypes';
@@ -104,14 +105,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       return;
     }
 
-    // Validate number of photos to avoid timeouts
-    if (photos.length > 8) {
-      const confirmed = window.confirm(
-        t('photoWarning') || `Você está tentando salvar ${photos.length} fotos. Isso pode tornar o processo mais lento. Deseja continuar?`
-      );
-      if (!confirmed) return;
-    }
-
     setIsLoading(true);
     try {
       const vehicleData = {
@@ -133,16 +126,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       };
 
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
-      console.log('VehicleForm - operation type:', isEditing ? 'update' : 'create');
-
-      // Show loading with estimated timeout based on number of photos
-      const estimatedTime = Math.max(5, photos.length * 2);
-      if (photos.length > 5) {
-        toast({
-          title: t('processing') || 'Processando...',
-          description: t('savingPhotos') || `Salvando ${photos.length} fotos. Isso pode levar até ${estimatedTime} segundos.`,
-        });
-      }
 
       await onSave(vehicleData);
       
@@ -155,7 +138,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       onClose();
     } catch (error) {
       console.error('Error saving vehicle:', error);
-      // Error already handled in useVehicles hook
     } finally {
       setIsLoading(false);
     }
@@ -232,6 +214,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
               />
 
               <MediaUploadForm
+                vehicleId={isEditing ? editingVehicle?.id : undefined}
                 photos={photos}
                 videos={videos}
                 setPhotos={setPhotos}
@@ -282,13 +265,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
                   }
                 </Button>
               </div>
-              
-              {isLoading && photos.length > 5 && (
-                <div className="text-center text-sm text-gray-600">
-                  <p>{t('processingPhotos') || `Processando ${photos.length} fotos... Isso pode levar alguns minutos.`}</p>
-                  <p>{t('dontCloseWindow') || 'Por favor, não feche esta janela.'}</p>
-                </div>
-              )}
             </form>
           </CardContent>
         </Card>

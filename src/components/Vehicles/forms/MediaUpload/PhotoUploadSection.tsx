@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, X, Star, Loader2, Image } from 'lucide-react';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 import { toast } from '@/hooks/use-toast';
-import ProgressiveImage from '../../ProgressiveImage';
+import VehiclePhotoDisplay from '../../VehiclePhotoDisplay';
 
 interface PhotoUploadSectionProps {
   vehicleId?: string;
@@ -19,17 +19,15 @@ const PhotoUploadSection = ({
   setPhotos,
   readOnly = false 
 }: PhotoUploadSectionProps) => {
-  const { photos: vehiclePhotos, uploading, uploadPhoto, removePhoto, setMainPhoto, refetch } = useVehiclePhotos(vehicleId);
+  const { photos: vehiclePhotos, uploading, uploadPhoto, removePhoto, setMainPhoto } = useVehiclePhotos(vehicleId);
 
   console.log('PhotoUploadSection - vehicleId:', vehicleId);
-  console.log('PhotoUploadSection - vehiclePhotos from hook:', vehiclePhotos);
-  console.log('PhotoUploadSection - local photos state:', photos);
+  console.log('PhotoUploadSection - vehiclePhotos:', vehiclePhotos);
+  console.log('PhotoUploadSection - local photos:', photos);
 
   // Use vehicle_photos if vehicleId is provided, otherwise use local state
   const displayPhotos = vehicleId ? vehiclePhotos : photos;
   const canEdit = !readOnly;
-
-  console.log('PhotoUploadSection - displayPhotos final:', displayPhotos);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!canEdit) return;
@@ -49,55 +47,36 @@ const PhotoUploadSection = ({
           console.log('Uploading file via useVehiclePhotos:', file.name);
           await uploadPhoto(file);
         }
-        // Refresh photos after upload
-        await refetch();
       } else {
         // Upload local para base64 (para novos veículos)
         console.log('Processing photos for new vehicle (base64)');
-        const batchSize = 3;
-        for (let i = 0; i < fileArray.length; i += batchSize) {
-          const batch = fileArray.slice(i, i + batchSize);
-          
-          const batchPromises = batch.map(file => {
-            return new Promise<string>((resolve, reject) => {
-              if (file.size > 5 * 1024 * 1024) {
-                console.warn(`File ${file.name} is too large (${(file.size / 1024 / 1024).toFixed(2)}MB). Skipping.`);
-                toast({
-                  title: 'Arquivo muito grande',
-                  description: `${file.name} tem mais de 5MB e foi ignorado.`,
-                  variant: 'destructive',
-                });
-                resolve('');
-                return;
-              }
-
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                if (e.target?.result) {
-                  console.log(`File ${file.name} converted to base64`);
-                  resolve(e.target.result as string);
-                } else {
-                  resolve('');
-                }
-              };
-              reader.onerror = () => {
-                console.error(`Error reading file ${file.name}`);
-                resolve('');
-              };
-              reader.readAsDataURL(file);
+        
+        for (const file of fileArray) {
+          if (file.size > 5 * 1024 * 1024) {
+            console.warn(`File ${file.name} is too large. Skipping.`);
+            toast({
+              title: 'Arquivo muito grande',
+              description: `${file.name} tem mais de 5MB e foi ignorado.`,
+              variant: 'destructive',
             });
-          });
-
-          const batchResults = await Promise.all(batchPromises);
-          const validResults = batchResults.filter(result => result !== '');
-          
-          if (validResults.length > 0) {
-            setPhotos(prev => {
-              const newPhotos = [...prev, ...validResults];
-              console.log('Added photos to local state:', newPhotos.length, 'total photos');
-              return newPhotos.slice(0, 10);
-            });
+            continue;
           }
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target?.result) {
+              console.log(`File ${file.name} converted to base64`);
+              setPhotos(prev => {
+                const newPhotos = [...prev, e.target!.result as string];
+                console.log('Added photo to local state:', newPhotos.length, 'total photos');
+                return newPhotos.slice(0, 10);
+              });
+            }
+          };
+          reader.onerror = () => {
+            console.error(`Error reading file ${file.name}`);
+          };
+          reader.readAsDataURL(file);
         }
 
         if (fileArray.length > 0) {
@@ -124,7 +103,6 @@ const PhotoUploadSection = ({
     
     if (vehicleId && vehiclePhotos[index]) {
       await removePhoto(vehiclePhotos[index].id);
-      await refetch();
     } else {
       setPhotos(prev => {
         const updated = prev.filter((_, i) => i !== index);
@@ -138,7 +116,6 @@ const PhotoUploadSection = ({
     if (!canEdit || !vehicleId || !vehiclePhotos[index]) return;
     
     await setMainPhoto(vehiclePhotos[index].id);
-    await refetch();
   };
 
   const getPhotoUrl = (index: number): string => {
@@ -167,22 +144,11 @@ const PhotoUploadSection = ({
           
           return (
             <div key={index} className="relative group">
-              {vehicleId ? (
-                <ProgressiveImage
-                  vehicleId={vehiclePhotos[index]?.vehicle_id}
-                  alt={`Foto ${index + 1}`}
-                  className="w-full h-24 rounded-lg"
-                  showZoom={true}
-                  autoLoadMedium={true}
-                />
-              ) : (
-                <img
-                  src={photoUrl}
-                  alt={`Foto ${index + 1}`}
-                  className="w-full h-24 object-cover rounded-lg"
-                  loading="lazy"
-                />
-              )}
+              <VehiclePhotoDisplay
+                photoUrl={photoUrl}
+                alt={`Foto ${index + 1}`}
+                className="w-full h-24 rounded-lg"
+              />
               
               {isMain && (
                 <Star className="absolute top-1 left-1 h-4 w-4 text-yellow-500 fill-current" />

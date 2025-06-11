@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Download, Image as ImageIcon } from 'lucide-react';
 import VehicleStatusBadge from './VehicleStatusBadge';
-import OptimizedLazyImage from './OptimizedLazyImage';
+import VehiclePhotoDisplay from './VehiclePhotoDisplay';
+import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 
 interface VehicleCardHeaderProps {
   vehicle: {
@@ -28,17 +29,20 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   onDownloadAll,
   downloading
 }) => {
-  // Para lazy loading otimizado, vamos usar o vehicleId
-  const hasPhotos = vehicle.photos && vehicle.photos.length > 0;
+  const { photos: vehiclePhotos, loading } = useVehiclePhotos(vehicle.id);
+  
+  // Use photo from vehicle_photos table if available, otherwise fallback to vehicle.photos
+  const mainPhoto = vehiclePhotos.find(p => p.is_main)?.url || vehiclePhotos[0]?.url || vehicle.photos[0];
+  const hasPhotos = vehiclePhotos.length > 0 || (vehicle.photos && vehicle.photos.length > 0);
 
   return (
     <CardHeader className="p-0 relative">
       <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-        <OptimizedLazyImage
-          vehicleId={vehicle.id}
+        <VehiclePhotoDisplay
+          photoUrl={mainPhoto}
           alt={`${vehicle.name} - Foto principal`}
           className="w-full h-full"
-          showZoom={true}
+          showLoader={loading}
         />
         
         {/* Status Badge */}
@@ -57,8 +61,8 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
                   variant="secondary"
                   size="sm"
                   className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                  onClick={() => vehicle.photos[0] && onDownloadSingle(vehicle.photos[0], 0)}
-                  disabled={downloading || !vehicle.photos[0]}
+                  onClick={() => mainPhoto && onDownloadSingle(mainPhoto, 0)}
+                  disabled={downloading || !mainPhoto}
                 >
                   <Download className="h-3 w-3" />
                 </Button>
