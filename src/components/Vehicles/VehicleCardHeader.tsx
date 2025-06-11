@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Download, Image as ImageIcon } from 'lucide-react';
 import VehicleStatusBadge from './VehicleStatusBadge';
-import LazyImage from './LazyImage';
+import OptimizedLazyImage from './OptimizedLazyImage';
 
 interface VehicleCardHeaderProps {
   vehicle: {
@@ -28,16 +28,17 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   onDownloadAll,
   downloading
 }) => {
-  // Para lazy loading real, vamos usar o vehicleId ao invés da foto direta
+  // Para lazy loading otimizado, vamos usar o vehicleId
   const hasPhotos = vehicle.photos && vehicle.photos.length > 0;
 
   return (
     <CardHeader className="p-0 relative">
       <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-        <LazyImage
+        <OptimizedLazyImage
           vehicleId={vehicle.id}
           alt={`${vehicle.name} - Foto principal`}
           className="w-full h-full"
+          showZoom={true}
         />
         
         {/* Status Badge */}
