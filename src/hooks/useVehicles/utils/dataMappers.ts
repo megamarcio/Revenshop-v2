@@ -63,12 +63,12 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     video: vehicleData.video || null,
     created_by: (await supabase.auth.getUser()).data.user?.id || null,
     
-    // Campos de financiamento
+    // Campos de financiamento - corrigido o campo due_date para ser string
     financing_bank: vehicleData.financingBank || null,
     financing_type: vehicleData.financingType || null,
     original_financed_name: vehicleData.originalFinancedName || null,
     purchase_date: vehicleData.purchaseDate || null,
-    due_date: vehicleData.dueDate || null,
+    due_date: vehicleData.dueDate || null, // Mantém como string (dia do mês)
     installment_value: vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null,
     down_payment: vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null,
     financed_amount: vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null,
@@ -123,12 +123,12 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.carfaxPrice !== undefined) dbUpdateData.carfax_price = vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null;
   if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
   
-  // Campos de financiamento
+  // Campos de financiamento - corrigido o campo due_date para ser string
   if (vehicleData.financingBank !== undefined) dbUpdateData.financing_bank = vehicleData.financingBank || null;
   if (vehicleData.financingType !== undefined) dbUpdateData.financing_type = vehicleData.financingType || null;
   if (vehicleData.originalFinancedName !== undefined) dbUpdateData.original_financed_name = vehicleData.originalFinancedName || null;
   if (vehicleData.purchaseDate !== undefined) dbUpdateData.purchase_date = vehicleData.purchaseDate || null;
-  if (vehicleData.dueDate !== undefined) dbUpdateData.due_date = vehicleData.dueDate || null;
+  if (vehicleData.dueDate !== undefined) dbUpdateData.due_date = vehicleData.dueDate || null; // Mantém como string
   if (vehicleData.installmentValue !== undefined) dbUpdateData.installment_value = vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null;
   if (vehicleData.downPayment !== undefined) dbUpdateData.down_payment = vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null;
   if (vehicleData.financedAmount !== undefined) dbUpdateData.financed_amount = vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null;

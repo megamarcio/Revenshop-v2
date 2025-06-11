@@ -113,6 +113,14 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     }
   };
 
+  // Function to handle delete from form (receives vehicle object)
+  const handleFormDelete = async (vehicle: VehicleCardType) => {
+    if (vehicle.id) {
+      await deleteVehicle(vehicle.id);
+      await refetchList();
+    }
+  };
+
   return (
     <div className="space-y-6">
       <VehicleListHeader onAddVehicle={handleAddVehicle} />
@@ -149,7 +157,7 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
           onSave={handleFormSave}
           editingVehicle={editingVehicle}
           onNavigateToCustomers={onNavigateToCustomers}
-          onDelete={handleDeleteVehicle}
+          onDelete={handleFormDelete}
         />
       )}
     </div>
