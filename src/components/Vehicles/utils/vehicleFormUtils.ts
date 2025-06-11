@@ -43,6 +43,11 @@ export const validateRequiredFields = (formData: VehicleFormData): { [key: strin
   return errors;
 };
 
+// Função para validar o formulário completo
+export const validateForm = (formData: VehicleFormData): { [key: string]: string } => {
+  return validateRequiredFields(formData);
+};
+
 export const formatCurrency = (value: string): string => {
   // Remove all non-numeric characters except decimal point
   const numericValue = value.replace(/[^\d.]/g, '');

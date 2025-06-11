@@ -1,3 +1,4 @@
+
 import { Vehicle } from '../../hooks/useVehicles/types';
 
 // Função para converter dados do banco para o formato do formulário
@@ -10,7 +11,6 @@ export const convertVehicleForCard = (vehicle: Vehicle) => ({
   plate: vehicle.miles?.toString() || '',
   internalCode: vehicle.internal_code,
   color: vehicle.color,
-  caNote: vehicle.ca_note,
   purchasePrice: vehicle.purchase_price,
   salePrice: vehicle.sale_price,
   profitMargin: vehicle.profit_margin || 0,

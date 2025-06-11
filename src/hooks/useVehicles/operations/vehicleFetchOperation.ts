@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { mapDbToAppData } from '../utils/dbToAppMapper';
+import { mapDbDataToAppData } from '../utils/dbToAppMapper';
 
 export const fetchVehicles = async () => {
   console.log('fetchVehicles - Starting fetch operation');
@@ -46,7 +46,7 @@ export const fetchVehicles = async () => {
       };
 
       console.log('Mapped vehicle:', mappedVehicle);
-      return mapDbToAppData(mappedVehicle);
+      return mapDbDataToAppData(mappedVehicle);
     });
 
     console.log('fetchVehicles - Final mapped vehicles:', mappedVehicles);
