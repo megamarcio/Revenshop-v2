@@ -8,7 +8,6 @@ export interface Vehicle {
   miles: number; // Corrigido: de string para number e mantido como miles
   internalCode: string;
   color: string;
-  caNote: number;
   purchasePrice: number;
   salePrice: number;
   profitMargin: number;

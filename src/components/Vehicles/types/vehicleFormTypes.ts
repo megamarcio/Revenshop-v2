@@ -8,6 +8,7 @@ export interface VehicleFormData {
   internalCode: string;
   color: string;
   titleInfo: string;
+  titleTypeId: string; // Novo campo para título
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;

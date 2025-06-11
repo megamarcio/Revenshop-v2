@@ -89,6 +89,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         
+        // Campo de título
+        titleTypeId: formData.titleTypeId,
+        
         // Campos de financiamento - garantir que todos sejam enviados
         financingBank: formData.financingBank,
         financingType: formData.financingType,

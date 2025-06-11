@@ -742,6 +742,36 @@ export type Database = {
           },
         ]
       }
+      title_types: {
+        Row: {
+          code: string
+          created_at: string
+          description: string
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          description: string
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          description?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       vehicle_photos: {
         Row: {
           id: string
@@ -806,6 +836,7 @@ export type Database = {
           purchase_price: number
           remaining_installments: number | null
           sale_price: number
+          title_type_id: string | null
           total_installments: number | null
           total_to_pay: number | null
           updated_at: string | null
@@ -844,6 +875,7 @@ export type Database = {
           purchase_price: number
           remaining_installments?: number | null
           sale_price: number
+          title_type_id?: string | null
           total_installments?: number | null
           total_to_pay?: number | null
           updated_at?: string | null
@@ -882,6 +914,7 @@ export type Database = {
           purchase_price?: number
           remaining_installments?: number | null
           sale_price?: number
+          title_type_id?: string | null
           total_installments?: number | null
           total_to_pay?: number | null
           updated_at?: string | null
@@ -895,6 +928,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_title_type_id_fkey"
+            columns: ["title_type_id"]
+            isOneToOne: false
+            referencedRelation: "title_types"
             referencedColumns: ["id"]
           },
         ]

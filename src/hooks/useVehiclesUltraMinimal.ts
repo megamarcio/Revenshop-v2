@@ -24,6 +24,7 @@ export interface VehicleMinimal {
   updated_at: string;
   created_by?: string;
   video?: string;
+  title_type_id?: string;
   
   // Campos de financiamento
   financing_bank?: string;
@@ -78,6 +79,7 @@ export const useVehiclesUltraMinimal = () => {
           updated_at,
           created_by,
           video,
+          title_type_id,
           financing_bank,
           financing_type,
           original_financed_name,
@@ -143,6 +145,7 @@ export const useVehiclesUltraMinimal = () => {
         created_by: vehicle.created_by,
         
         video: vehicle.video,
+        title_type_id: vehicle.title_type_id,
         
         // Campos de financiamento
         financing_bank: vehicle.financing_bank,
