@@ -312,6 +312,35 @@ export type Database = {
           },
         ]
       }
+      customer_bank_statements: {
+        Row: {
+          customer_id: string
+          id: string
+          uploaded_at: string | null
+          url: string
+        }
+        Insert: {
+          customer_id: string
+          id?: string
+          uploaded_at?: string | null
+          url: string
+        }
+        Update: {
+          customer_id?: string
+          id?: string
+          uploaded_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_bank_statements_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "bhph_customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       customer_deals: {
         Row: {
           created_at: string | null
@@ -372,6 +401,35 @@ export type Database = {
             columns: ["vehicle_id"]
             isOneToOne: false
             referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      customer_payment_documents: {
+        Row: {
+          customer_id: string
+          id: string
+          uploaded_at: string | null
+          url: string
+        }
+        Insert: {
+          customer_id: string
+          id?: string
+          uploaded_at?: string | null
+          url: string
+        }
+        Update: {
+          customer_id?: string
+          id?: string
+          uploaded_at?: string | null
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_payment_documents_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "bhph_customers"
             referencedColumns: ["id"]
           },
         ]

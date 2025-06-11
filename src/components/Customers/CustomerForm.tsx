@@ -5,14 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Upload } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { supabase } from '../../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '../ui/image-upload';
-import MultipleFileUpload from '../ui/multiple-file-upload';
+import { DocumentUpload } from '../ui/document-upload';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useCustomerDocuments } from '@/hooks/useCustomerDocuments';
 
 interface Customer {
   id: string;
@@ -38,8 +38,6 @@ interface Customer {
   employer_name?: string;
   employer_phone?: string;
   employment_duration?: string;
-  payment_proof_documents?: string[];
-  bank_statements?: string[];
 }
 
 interface CustomerFormProps {
@@ -76,13 +74,23 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     employer_name: '',
     employer_phone: '',
     employment_duration: '',
-    payment_proof_documents: [] as string[],
-    bank_statements: [] as string[],
   });
 
   const [employmentOpen, setEmploymentOpen] = useState(false);
   const [referencesOpen, setReferencesOpen] = useState(false);
   const [documentsOpen, setDocumentsOpen] = useState(false);
+
+  // Use the new document hooks
+  const {
+    bankStatements,
+    paymentDocuments,
+    fetchBankStatements,
+    fetchPaymentDocuments,
+    addBankStatement,
+    addPaymentDocument,
+    removeBankStatement,
+    removePaymentDocument,
+  } = useCustomerDocuments(customer?.id);
 
   useEffect(() => {
     if (customer) {
@@ -109,11 +117,13 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
         employer_name: customer.employer_name || '',
         employer_phone: customer.employer_phone || '',
         employment_duration: customer.employment_duration || '',
-        payment_proof_documents: customer.payment_proof_documents || [],
-        bank_statements: customer.bank_statements || [],
       });
+
+      // Fetch documents when customer is loaded
+      fetchBankStatements();
+      fetchPaymentDocuments();
     }
-  }, [customer]);
+  }, [customer, fetchBankStatements, fetchPaymentDocuments]);
 
   // Fetch sellers
   const { data: sellers = [] } = useQuery({
@@ -195,7 +205,7 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
     saveCustomerMutation.mutate(formData);
   };
 
-  const handleInputChange = (field: string, value: string | number | string[]) => {
+  const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -361,24 +371,33 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-4 mt-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <MultipleFileUpload
-                    title="Comprovantes de Pagamento"
-                    description="Upload dos comprovantes de pagamento da compra"
-                    value={formData.payment_proof_documents}
-                    onChange={(value) => handleInputChange('payment_proof_documents', value)}
-                    accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                    maxFiles={5}
-                  />
-                  <MultipleFileUpload
-                    title="Extratos Bancários"
-                    description="Upload dos extratos bancários dos últimos 3 meses"
-                    value={formData.bank_statements}
-                    onChange={(value) => handleInputChange('bank_statements', value)}
-                    accept=".pdf,.jpg,.jpeg,.png"
-                    maxFiles={3}
-                  />
-                </div>
+                {customer?.id && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <DocumentUpload
+                      title="Comprovantes de Pagamento"
+                      description="Upload dos comprovantes de pagamento da compra"
+                      documents={paymentDocuments}
+                      onUpload={addPaymentDocument}
+                      onRemove={removePaymentDocument}
+                      accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      maxFiles={5}
+                    />
+                    <DocumentUpload
+                      title="Extratos Bancários"
+                      description="Upload dos extratos bancários dos últimos 3 meses"
+                      documents={bankStatements}
+                      onUpload={addBankStatement}
+                      onRemove={removeBankStatement}
+                      accept=".pdf,.jpg,.jpeg,.png"
+                      maxFiles={3}
+                    />
+                  </div>
+                )}
+                {!customer?.id && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Salve o cliente primeiro para poder enviar documentos
+                  </p>
+                )}
               </CollapsibleContent>
             </Collapsible>
 
