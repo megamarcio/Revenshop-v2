@@ -23,9 +23,12 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       miles: editingVehicle.miles?.toString() || '',
       internalCode: editingVehicle.internalCode || editingVehicle.internal_code || '',
       color: editingVehicle.color || '',
+      
+      // Priorizar os campos já mapeados, depois os campos do banco
       titleTypeId: editingVehicle.titleTypeId || editingVehicle.title_type_id || '',
       titleLocationId: editingVehicle.titleLocationId || editingVehicle.title_location_id || '',
       titleLocationCustom: editingVehicle.titleLocationCustom || editingVehicle.title_location_custom || '',
+      
       purchasePrice: editingVehicle.purchasePrice?.toString() || editingVehicle.purchase_price?.toString() || '',
       salePrice: editingVehicle.salePrice?.toString() || editingVehicle.sale_price?.toString() || '',
       minNegotiable: editingVehicle.minNegotiable?.toString() || editingVehicle.min_negotiable?.toString() || '',
