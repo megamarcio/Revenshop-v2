@@ -27,7 +27,7 @@ const VehicleList = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
 
-  // TESTE: Converter dados ultra minimal para formato compatível
+  // TESTE: Converter dados ultra minimal para formato compatível com Vehicle
   const testVehicles = useMemo(() => {
     return ultraMinimalVehicles.map(vehicle => ({
       id: vehicle.id,
@@ -35,22 +35,28 @@ const VehicleList = () => {
       vin: vehicle.vin,
       year: 2020, // Valor padrão para teste
       model: 'Test Model',
-      plate: '',
-      internalCode: vehicle.id.substring(0, 8), // Usar parte do ID como código
+      miles: 0, // Campo obrigatório
+      internal_code: vehicle.id.substring(0, 8), // Usar parte do ID como código
       color: 'Unknown',
-      caNote: 0,
-      purchasePrice: 0,
-      salePrice: vehicle.sale_price,
-      profitMargin: 0,
-      minNegotiable: 0,
-      carfaxPrice: 0,
-      mmrValue: 0,
+      ca_note: 0, // Campo obrigatório
+      purchase_price: 0, // Campo obrigatório
+      sale_price: vehicle.sale_price,
+      profit_margin: 0,
+      min_negotiable: 0,
+      carfax_price: 0,
+      mmr_value: 0,
       description: '',
       category: 'forSale' as const,
+      consignment_store: undefined,
+      title_type: undefined,
+      title_status: undefined,
       photos: [], // TESTE: Sem fotos
       video: '',
-      main_photo_url: undefined // TESTE: Sem foto principal
-    }));
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      created_by: undefined,
+      extended_category: undefined
+    } as Vehicle));
   }, [ultraMinimalVehicles]);
 
   // Vehicle Actions Logic (moved from VehicleActions.tsx)
@@ -125,7 +131,7 @@ const VehicleList = () => {
     let filtered = testVehicles.filter(vehicle => {
       const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase());
+        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
       
       let matchesFilter = true;
       if (filterBy !== 'all') {
@@ -197,9 +203,9 @@ const VehicleList = () => {
             <VehicleCard
               key={vehicle.id}
               vehicle={convertVehicleForCard(vehicle)}
-              onEdit={() => handleEditVehicle(vehicle as Vehicle)}
-              onDuplicate={() => handleDuplicateVehicle(vehicle as Vehicle)}
-              onDelete={() => handleDeleteVehicle(vehicle as Vehicle)}
+              onEdit={() => handleEditVehicle(vehicle)}
+              onDuplicate={() => handleDuplicateVehicle(vehicle)}
+              onDelete={() => handleDeleteVehicle(vehicle)}
             />
           ))}
         </div>
@@ -207,15 +213,15 @@ const VehicleList = () => {
         <VehicleListView
           vehicles={filteredAndSortedVehicles.map(convertVehicleForCard)}
           onEdit={(vehicle) => {
-            const originalVehicle = vehicles.find(v => v.id === vehicle.id);
+            const originalVehicle = filteredAndSortedVehicles.find(v => v.id === vehicle.id);
             if (originalVehicle) handleEditVehicle(originalVehicle);
           }}
           onDuplicate={(vehicle) => {
-            const originalVehicle = vehicles.find(v => v.id === vehicle.id);
+            const originalVehicle = filteredAndSortedVehicles.find(v => v.id === vehicle.id);
             if (originalVehicle) handleDuplicateVehicle(originalVehicle);
           }}
           onDelete={(vehicle) => {
-            const originalVehicle = vehicles.find(v => v.id === vehicle.id);
+            const originalVehicle = filteredAndSortedVehicles.find(v => v.id === vehicle.id);
             if (originalVehicle) handleDeleteVehicle(originalVehicle);
           }}
         />
