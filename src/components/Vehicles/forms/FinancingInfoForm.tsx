@@ -54,6 +54,21 @@ const FinancingInfoForm = ({
     return total.toFixed(2);
   };
 
+  // Calcular taxa de juros usando a fórmula
+  const calculateInterestRate = () => {
+    const financedAmount = parseFloat(formData.financedAmount) || 0;
+    const installmentValue = parseFloat(formData.installmentValue) || 0;
+    const totalInstallments = parseInt(formData.totalInstallments) || 0;
+
+    if (financedAmount > 0 && installmentValue > 0 && totalInstallments > 0) {
+      const totalPayment = installmentValue * totalInstallments;
+      const rate = Math.pow(totalPayment / financedAmount, 1.0 / totalInstallments) - 1;
+      // Retorna a taxa mensal em percentual
+      return (rate * 100).toFixed(4);
+    }
+    return '';
+  };
+
   // Atualizar campos calculados quando necessário
   React.useEffect(() => {
     if (formData.totalInstallments && formData.paidInstallments) {
@@ -72,6 +87,16 @@ const FinancingInfoForm = ({
       }
     }
   }, [formData.remainingInstallments, formData.installmentValue]);
+
+  // Calcular taxa de juros automaticamente
+  React.useEffect(() => {
+    if (formData.financedAmount && formData.installmentValue && formData.totalInstallments) {
+      const newRate = calculateInterestRate();
+      if (newRate !== formData.interestRate && newRate !== '') {
+        onInputChange('interestRate', newRate);
+      }
+    }
+  }, [formData.financedAmount, formData.installmentValue, formData.totalInstallments]);
 
   return (
     <Collapsible open={isOpen} onOpenChange={onToggle}>
@@ -278,15 +303,21 @@ const FinancingInfoForm = ({
               </div>
 
               <div>
-                <Label htmlFor="interestRate">Taxa de Juros (%)</Label>
+                <Label htmlFor="interestRate">Taxa de Juros (% mensal)</Label>
                 <Input 
                   id="interestRate"
                   type="number"
-                  step="0.01"
+                  step="0.0001"
                   value={formData.interestRate} 
-                  onChange={(e) => onInputChange('interestRate', e.target.value)} 
-                  placeholder="0.00"
+                  readOnly
+                  className="bg-gray-100"
+                  placeholder="Calculada automaticamente"
                 />
+                {formData.interestRate && (
+                  <p className="text-xs text-gray-600 mt-1">
+                    Calculada com base no valor financiado, parcela e total de parcelas
+                  </p>
+                )}
               </div>
             </div>
           </CardContent>
