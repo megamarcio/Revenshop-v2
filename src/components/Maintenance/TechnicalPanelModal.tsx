@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useTechnicalItems, TechnicalItem } from '../../hooks/useTechnicalItems';
 import TechnicalPanelHeader from './TechnicalPanel/TechnicalPanelHeader';
@@ -16,31 +16,31 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
   const { items, isLoading, refetch, updateItem, createDefaultItems } = useTechnicalItems(vehicleId);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
-  const handleEdit = (itemId: string) => {
+  const handleEdit = useCallback((itemId: string) => {
     setEditingItem(itemId);
-  };
+  }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setEditingItem(null);
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditingItem(null);
-  };
+  }, []);
 
-  const handleUpdate = (itemId: string, updates: Partial<TechnicalItem>) => {
+  const handleUpdate = useCallback((itemId: string, updates: Partial<TechnicalItem>) => {
     updateItem({ itemId, updates });
-  };
+  }, [updateItem]);
 
-  const handleCreateDefaults = () => {
+  const handleCreateDefaults = useCallback(() => {
     if (vehicleId) {
       createDefaultItems(vehicleId);
     }
-  };
+  }, [vehicleId, createDefaultItems]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

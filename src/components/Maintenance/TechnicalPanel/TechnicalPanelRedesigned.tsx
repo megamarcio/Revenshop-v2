@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useTechnicalItems } from '../../../hooks/useTechnicalItems';
 import TechnicalPanelHeader from './TechnicalPanelHeader';
@@ -35,41 +35,41 @@ const TechnicalPanelRedesigned = ({
     isCreatingDefaultItems
   } = useTechnicalItems(vehicleId || undefined);
 
-  const handleEdit = (itemId: string) => {
+  const handleEdit = useCallback((itemId: string) => {
     setEditingItem(itemId);
-  };
+  }, []);
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     setEditingItem(null);
-  };
+  }, []);
 
-  const handleCancel = () => {
+  const handleCancel = useCallback(() => {
     setEditingItem(null);
-  };
+  }, []);
 
-  const handleUpdate = (itemId: string, updates: any) => {
+  const handleUpdate = useCallback((itemId: string, updates: any) => {
     updateItem({ itemId, updates });
-  };
+  }, [updateItem]);
 
-  const handleAddItem = (name: string, type: string) => {
+  const handleAddItem = useCallback((name: string, type: string) => {
     if (vehicleId) {
       createItem({ vehicleId, name, type });
     }
-  };
+  }, [vehicleId, createItem]);
 
-  const handleDeleteItem = (itemId: string) => {
+  const handleDeleteItem = useCallback((itemId: string) => {
     deleteItem(itemId);
-  };
+  }, [deleteItem]);
 
-  const handleCreateDefaults = () => {
+  const handleCreateDefaults = useCallback(() => {
     if (vehicleId) {
       createDefaultItems(vehicleId);
     }
-  };
+  }, [vehicleId, createDefaultItems]);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     refetch();
-  };
+  }, [refetch]);
 
   if (!vehicleId) {
     return (

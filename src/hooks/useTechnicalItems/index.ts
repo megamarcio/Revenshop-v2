@@ -9,6 +9,7 @@ import {
 } from './operations';
 import { TechnicalItem } from './types';
 import { toast } from '@/hooks/use-toast';
+import { useCallback } from 'react';
 
 export const useTechnicalItems = (vehicleId?: string) => {
   const queryClient = useQueryClient();
@@ -22,6 +23,8 @@ export const useTechnicalItems = (vehicleId?: string) => {
     queryKey: ['technical-items', vehicleId],
     queryFn: () => fetchTechnicalItems(vehicleId!),
     enabled: !!vehicleId,
+    staleTime: 30000, // 30 seconds
+    cacheTime: 300000, // 5 minutes
   });
 
   const createDefaultItemsMutation = useMutation({
@@ -47,7 +50,14 @@ export const useTechnicalItems = (vehicleId?: string) => {
     mutationFn: ({ itemId, updates }: { itemId: string; updates: Partial<TechnicalItem> }) =>
       updateTechnicalItem(itemId, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['technical-items', vehicleId] });
+      // Use a more targeted invalidation to prevent cascading updates
+      queryClient.setQueryData(['technical-items', vehicleId], (oldData: any) => {
+        return oldData; // Let the optimistic update handle the UI
+      });
+      // Only invalidate after a delay to prevent rapid successive calls
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['technical-items', vehicleId] });
+      }, 100);
     },
     onError: (error) => {
       console.error('Error updating item:', error);
@@ -98,11 +108,16 @@ export const useTechnicalItems = (vehicleId?: string) => {
     },
   });
 
+  // Memoize the refetch function to prevent unnecessary re-renders
+  const memoizedRefetch = useCallback(() => {
+    refetch();
+  }, [refetch]);
+
   return {
     items,
     isLoading,
     error,
-    refetch,
+    refetch: memoizedRefetch,
     createDefaultItems: createDefaultItemsMutation.mutate,
     updateItem: updateItemMutation.mutate,
     createItem: createItemMutation.mutate,
