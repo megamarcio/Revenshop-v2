@@ -2,6 +2,13 @@
 import { Vehicle as HookVehicle } from '../../hooks/useVehicles/types';
 import { Vehicle as VehicleCardType } from './VehicleCardTypes';
 
+// Photo display components for vehicles
+export { default as VehiclePhotoGallery } from './VehiclePhotoGallery';
+export { default as VehiclePhotoThumbnails } from './VehiclePhotoThumbnails';
+export { default as VehicleMainPhoto } from './VehicleMainPhoto';
+export { default as VehiclePhotoViewer } from './VehiclePhotoViewer';
+export { default as VehiclePhotoDisplay } from './VehiclePhotoDisplay';
+
 export class VehicleDataMapper {
   static mapVehicleData(hookVehicles: HookVehicle[]) {
     // Convert HookVehicle to VehicleCardType
@@ -11,7 +18,7 @@ export class VehicleDataMapper {
       vin: vehicle.vin,
       year: vehicle.year,
       model: vehicle.model,
-      miles: vehicle.miles || 0, // Corrigido: mapear miles corretamente
+      miles: vehicle.miles || 0,
       internalCode: vehicle.internal_code,
       color: vehicle.color,
       caNote: vehicle.ca_note,
@@ -24,8 +31,8 @@ export class VehicleDataMapper {
       description: vehicle.description || '',
       category: vehicle.category,
       consignmentStore: vehicle.consignment_store,
-      seller: '', // Este campo não existe no HookVehicle, manter vazio
-      finalSalePrice: 0, // Este campo não existe no HookVehicle, manter como 0
+      seller: '',
+      finalSalePrice: 0,
       photos: vehicle.photos,
       video: vehicle.video,
       
@@ -56,7 +63,7 @@ export class VehicleDataMapper {
         vin: vehicle.vin,
         year: vehicle.year,
         model: vehicle.model,
-        miles: vehicle.miles || 0, // Corrigido: mapear miles corretamente
+        miles: vehicle.miles || 0,
         internal_code: vehicle.internalCode,
         color: vehicle.color,
         ca_note: vehicle.caNote,
@@ -98,5 +105,18 @@ export class VehicleDataMapper {
     };
 
     return { convertedVehiclesForCards, convertCardTypeToHookType };
+  }
+
+  // Helper methods for photo handling
+  static getMainPhotoUrl(photos: string[]): string | undefined {
+    return photos && photos.length > 0 ? photos[0] : undefined;
+  }
+
+  static hasPhotos(photos: string[]): boolean {
+    return photos && photos.length > 0;
+  }
+
+  static getPhotoCount(photos: string[]): number {
+    return photos ? photos.length : 0;
   }
 }
