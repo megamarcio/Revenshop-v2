@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
@@ -85,10 +84,11 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
   const {
     bankStatements,
     paymentDocuments,
+    uploading,
     fetchBankStatements,
     fetchPaymentDocuments,
-    addBankStatement,
-    addPaymentDocument,
+    uploadBankStatement,
+    uploadPaymentDocument,
     removeBankStatement,
     removePaymentDocument,
   } = useCustomerDocuments(customer?.id);
@@ -241,10 +241,11 @@ const CustomerForm = ({ customer, onSave, onCancel }: CustomerFormProps) => {
               customerId={customer?.id}
               bankStatements={bankStatements}
               paymentDocuments={paymentDocuments}
-              onAddBankStatement={addBankStatement}
-              onAddPaymentDocument={addPaymentDocument}
+              onUploadBankStatement={uploadBankStatement}
+              onUploadPaymentDocument={uploadPaymentDocument}
               onRemoveBankStatement={removeBankStatement}
               onRemovePaymentDocument={removePaymentDocument}
+              uploading={uploading}
               isOpen={documentsOpen}
               onToggle={setDocumentsOpen}
             />
