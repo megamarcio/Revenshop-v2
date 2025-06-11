@@ -20,9 +20,17 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
 }) => {
   const { photos: vehiclePhotos, loading } = useVehiclePhotos(vehicleId);
   
-  // Use vehicle_photos if vehicleId is provided, otherwise use fallback
-  const photos = vehicleId ? vehiclePhotos : fallbackPhotos;
-  const mainPhoto = photos.find(p => p.is_main)?.url || photos[0]?.url || fallbackPhotos[0];
+  // Determine the main photo URL based on whether we have vehicleId or not
+  let mainPhoto: string | undefined;
+  
+  if (vehicleId && vehiclePhotos.length > 0) {
+    // Use vehicle_photos from database - find main photo or use first one
+    const mainPhotoObj = vehiclePhotos.find(p => p.is_main);
+    mainPhoto = mainPhotoObj?.url || vehiclePhotos[0]?.url;
+  } else if (fallbackPhotos.length > 0) {
+    // Use fallback photos (strings)
+    mainPhoto = fallbackPhotos[0];
+  }
   
   return (
     <VehiclePhotoDisplay
