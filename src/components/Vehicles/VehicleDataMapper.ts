@@ -33,7 +33,8 @@ export class VehicleDataMapper {
       consignmentStore: vehicle.consignment_store,
       seller: '',
       finalSalePrice: 0,
-      photos: vehicle.photos,
+      // Use empty array as fallback since photos come from vehicle_photos table
+      photos: [],
       video: vehicle.video,
       
       // Campos de financiamento mapeados
@@ -107,16 +108,19 @@ export class VehicleDataMapper {
     return { convertedVehiclesForCards, convertCardTypeToHookType };
   }
 
-  // Helper methods for photo handling
-  static getMainPhotoUrl(photos: string[]): string | undefined {
-    return photos && photos.length > 0 ? photos[0] : undefined;
+  // Helper methods for photo handling - trabalham com vehicle_photos via useVehiclePhotos hook
+  static getMainPhotoUrl(vehicleId: string): string | undefined {
+    // Esta função agora só retorna undefined pois as fotos devem ser buscadas via useVehiclePhotos
+    return undefined;
   }
 
-  static hasPhotos(photos: string[]): boolean {
-    return photos && photos.length > 0;
+  static hasPhotos(vehicleId: string): boolean {
+    // Esta função agora retorna false pois as fotos devem ser verificadas via useVehiclePhotos
+    return false;
   }
 
-  static getPhotoCount(photos: string[]): number {
-    return photos ? photos.length : 0;
+  static getPhotoCount(vehicleId: string): number {
+    // Esta função agora retorna 0 pois a contagem deve ser feita via useVehiclePhotos
+    return 0;
   }
 }

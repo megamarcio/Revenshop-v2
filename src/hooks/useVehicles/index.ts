@@ -43,6 +43,12 @@ export const useVehicles = () => {
         photos: (data as any).photos || []
       };
       setVehicles(prev => [vehicleWithPhotos, ...prev]);
+      
+      // Força um refetch para garantir que os dados das fotos sejam atualizados
+      setTimeout(() => {
+        fetchVehicles();
+      }, 1000);
+      
       toast({
         title: 'Sucesso',
         description: 'Veículo criado com sucesso!',
@@ -72,6 +78,12 @@ export const useVehicles = () => {
         photos: (data as any).photos || []
       };
       setVehicles(prev => prev.map(v => v.id === id ? vehicleWithPhotos : v));
+      
+      // Força um refetch para garantir que os dados das fotos sejam atualizados
+      setTimeout(() => {
+        fetchVehicles();
+      }, 1000);
+      
       toast({
         title: 'Sucesso',
         description: 'Veículo atualizado com sucesso!',
@@ -115,6 +127,16 @@ export const useVehicles = () => {
 
   useEffect(() => {
     fetchVehicles();
+  }, []);
+
+  // Escutar eventos de atualização de fotos
+  useEffect(() => {
+    const handlePhotosUpdate = () => {
+      fetchVehicles();
+    };
+
+    window.addEventListener('vehiclePhotosUpdated', handlePhotosUpdate);
+    return () => window.removeEventListener('vehiclePhotosUpdated', handlePhotosUpdate);
   }, []);
 
   return {

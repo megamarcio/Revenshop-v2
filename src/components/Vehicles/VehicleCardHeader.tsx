@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Download, Archive } from 'lucide-react';
 import VehicleStatusBadge from './VehicleStatusBadge';
-import VehiclePhotoDisplay from './VehiclePhotoDisplay';
+import VehicleMainPhoto from './VehicleMainPhoto';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 import { downloadSinglePhoto, downloadAllPhotosAsZip } from '@/utils/photoDownloader';
 
@@ -32,10 +32,10 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
 }) => {
   const { photos: vehiclePhotos, loading } = useVehiclePhotos(vehicle.id);
   
-  // Use photo from vehicle_photos table if available, otherwise fallback to vehicle.photos
-  const mainPhoto = vehiclePhotos.find(p => p.is_main)?.url || vehiclePhotos[0]?.url || vehicle.photos[0];
+  // Use vehiclePhotos from database, fallback to vehicle.photos if needed
   const hasPhotos = vehiclePhotos.length > 0 || (vehicle.photos && vehicle.photos.length > 0);
   const allPhotos = vehiclePhotos.length > 0 ? vehiclePhotos.map(p => p.url) : vehicle.photos;
+  const mainPhoto = vehiclePhotos.find(p => p.is_main)?.url || vehiclePhotos[0]?.url || vehicle.photos[0];
 
   const handleDownloadAll = async () => {
     if (allPhotos.length > 0) {
@@ -50,9 +50,10 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   return (
     <CardHeader className="p-0 relative">
       <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative overflow-hidden">
-        <VehiclePhotoDisplay
-          photoUrl={mainPhoto}
-          alt={`${vehicle.name} - Foto principal`}
+        <VehicleMainPhoto
+          vehicleId={vehicle.id}
+          fallbackPhotos={vehicle.photos}
+          vehicleName={vehicle.name}
           className="w-full h-full"
           showLoader={loading}
         />
