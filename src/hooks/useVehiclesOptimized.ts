@@ -104,7 +104,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
             title_location_custom,
             vehicle_photos (
               id,
-              photo_url,
+              url,
               is_main,
               created_at
             ),

@@ -14,15 +14,18 @@ const VehicleInfo = ({ vehicle }: VehicleInfoProps) => {
     }).format(value);
   };
 
+  // Get the first photo from the photos array
+  const mainPhoto = vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null;
+
   return (
     <div className="mt-4 p-3 bg-blue-50 rounded-lg">
       <h4 className="font-medium text-blue-900 mb-3 text-sm">Veículo Selecionado</h4>
       
       {/* Imagem do veículo */}
-      {vehicle.image_url && (
+      {mainPhoto && (
         <div className="mb-3 flex justify-center">
           <img 
-            src={vehicle.image_url} 
+            src={mainPhoto} 
             alt={`${vehicle.name} ${vehicle.year}`}
             className="max-w-full h-24 sm:h-32 object-cover rounded border"
             onError={(e) => {
