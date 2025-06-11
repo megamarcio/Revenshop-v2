@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { mapUpdateDataToDbData } from '../utils/dataMappers';
+import { mapUpdateDataToDbData } from '../utils/updateDataMapper';
 import { mapDbDataToAppData } from '../utils/dbToAppMapper';
 
 export const updateVehicle = async (id: string, vehicleData: Partial<any>) => {

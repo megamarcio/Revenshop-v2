@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { mapFormDataToDbData } from '../utils/dataMappers';
+import { mapFormDataToDbData } from '../utils/formToDbMapper';
 import { mapDbDataToAppData } from '../utils/dbToAppMapper';
 
 export const createVehicle = async (vehicleData: any) => {
