@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -8,8 +9,7 @@ export interface VehicleMinimal {
   vin: string;
   sale_price: number;
   internal_code: string;
-  photos: string[];
-  image_url?: string;
+  category: string;
   main_photo_url?: string;
 }
 
@@ -30,7 +30,7 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
     try {
       console.log('Fetching minimal vehicles with options:', { category, limit, offset, searchTerm });
       
-      // Query principal dos veículos
+      // Query otimizada - apenas campos essenciais + foto principal
       let query = supabase
         .from('vehicles')
         .select(`
@@ -39,8 +39,10 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
           vin, 
           sale_price, 
           internal_code,
-          vehicle_photos!vehicle_photos_vehicle_id_fkey(url, position, is_main)
+          category,
+          vehicle_photos!vehicle_photos_vehicle_id_fkey(url)
         `)
+        .eq('vehicle_photos.is_main', true)
         .order('created_at', { ascending: false });
 
       // Filtrar por categoria se especificado
@@ -69,23 +71,19 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
         return;
       }
 
-      // Criar os objetos VehicleMinimal com as fotos
+      // Criar os objetos VehicleMinimal otimizados
       const vehiclesWithPhotos = vehiclesData.map(vehicle => {
         const vehiclePhotos = vehicle.vehicle_photos || [];
-        const sortedPhotos = vehiclePhotos
-          .sort((a, b) => (a.position || 0) - (b.position || 0))
-          .map(photo => photo.url);
-        
-        const mainPhoto = vehiclePhotos.find(photo => photo.is_main);
-        const main_photo_url = mainPhoto?.url || sortedPhotos[0] || null;
-        const image_url = main_photo_url;
+        const main_photo_url = vehiclePhotos[0]?.url || null;
 
         return {
-          ...vehicle,
-          photos: sortedPhotos,
-          image_url,
+          id: vehicle.id,
+          name: vehicle.name,
+          vin: vehicle.vin,
+          sale_price: vehicle.sale_price,
+          internal_code: vehicle.internal_code,
+          category: vehicle.category,
           main_photo_url,
-          vehicle_photos: undefined // Remove from final object
         } as VehicleMinimal;
       });
 
