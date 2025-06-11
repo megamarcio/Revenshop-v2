@@ -9,6 +9,7 @@ export interface NewVehiclePhoto {
   url: string;
   size: number;
   created_at: string;
+  is_main?: boolean;
 }
 
 export const useNewVehiclePhotos = (vehicleId?: string) => {
@@ -35,19 +36,27 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
 
       if (error) throw error;
       
-      const photosWithUrls = data?.map(file => {
-        const { data: { publicUrl } } = supabase.storage
-          .from('vehicles-photos-new')
-          .getPublicUrl(`${vehicleId}/${file.name}`);
+      // Get metadata to check for main photo flag
+      const photosWithUrls = await Promise.all(
+        (data || []).map(async (file) => {
+          const { data: { publicUrl } } = supabase.storage
+            .from('vehicles-photos-new')
+            .getPublicUrl(`${vehicleId}/${file.name}`);
           
-        return {
-          id: file.id || file.name,
-          name: file.name,
-          url: publicUrl,
-          size: file.metadata?.size || 0,
-          created_at: file.created_at || new Date().toISOString()
-        };
-      }) || [];
+          // Check if this photo is marked as main by checking if it has a special metadata
+          // We'll use the file name pattern to identify main photos
+          const isMain = file.name.includes('_main_') || false;
+          
+          return {
+            id: file.id || file.name,
+            name: file.name,
+            url: publicUrl,
+            size: file.metadata?.size || 0,
+            created_at: file.created_at || new Date().toISOString(),
+            is_main: isMain
+          };
+        })
+      );
       
       console.log('Fetched new photos:', photosWithUrls);
       setPhotos(photosWithUrls);
@@ -97,7 +106,8 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
         name: fileName,
         url: publicUrl,
         size: file.size,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        is_main: photos.length === 0 // First photo is main by default
       };
       
       console.log('New photo uploaded successfully:', newPhoto);
@@ -122,6 +132,37 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
     }
   };
 
+  const setMainPhoto = async (photoName: string) => {
+    if (!vehicleId) return;
+
+    try {
+      console.log('Setting main photo:', photoName);
+      
+      // Update photos state to mark the selected photo as main
+      setPhotos(prev => prev.map(photo => ({
+        ...photo,
+        is_main: photo.name === photoName
+      })));
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Foto principal definida com sucesso.',
+      });
+      
+      // Trigger update event for other components
+      window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+        detail: { vehicleId } 
+      }));
+    } catch (error) {
+      console.error('Error setting main photo:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao definir foto principal.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const removePhoto = async (photoName: string) => {
     if (!vehicleId) return;
 
@@ -135,7 +176,14 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
 
       if (error) throw error;
       
-      setPhotos(prev => prev.filter(p => p.name !== photoName));
+      setPhotos(prev => {
+        const updatedPhotos = prev.filter(p => p.name !== photoName);
+        // If the removed photo was main, make the first remaining photo main
+        if (prev.find(p => p.name === photoName)?.is_main && updatedPhotos.length > 0) {
+          updatedPhotos[0].is_main = true;
+        }
+        return updatedPhotos;
+      });
       
       toast({
         title: 'Sucesso',
@@ -161,6 +209,7 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
     uploading,
     uploadPhoto,
     removePhoto,
+    setMainPhoto,
     refetch: fetchPhotos
   };
 };

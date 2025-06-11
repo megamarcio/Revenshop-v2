@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus, X, Loader2, Image } from 'lucide-react';
+import { Plus, X, Loader2, Image, Star } from 'lucide-react';
 import { useNewVehiclePhotos } from '@/hooks/useNewVehiclePhotos';
 import { toast } from '@/hooks/use-toast';
 import VehiclePhotoDisplay from '../../VehiclePhotoDisplay';
@@ -15,7 +15,7 @@ const NewPhotosSection = ({
   vehicleId, 
   readOnly = false 
 }: NewPhotosSectionProps) => {
-  const { photos, uploading, uploadPhoto, removePhoto } = useNewVehiclePhotos(vehicleId);
+  const { photos, uploading, uploadPhoto, removePhoto, setMainPhoto } = useNewVehiclePhotos(vehicleId);
 
   console.log('NewPhotosSection - vehicleId:', vehicleId);
   console.log('NewPhotosSection - photos:', photos);
@@ -72,6 +72,11 @@ const NewPhotosSection = ({
     await removePhoto(photoName);
   };
 
+  const handleSetMainPhoto = async (photoName: string) => {
+    if (!canEdit) return;
+    await setMainPhoto(photoName);
+  };
+
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -101,6 +106,25 @@ const NewPhotosSection = ({
               {formatFileSize(photo.size)}
             </div>
             
+            {/* Star button for main photo */}
+            {canEdit && !uploading && (
+              <div className="absolute top-1 left-1">
+                <button
+                  type="button"
+                  onClick={() => handleSetMainPhoto(photo.name)}
+                  className={`rounded-full p-1 transition-all ${
+                    photo.is_main 
+                      ? 'bg-yellow-500 text-white' 
+                      : 'bg-black/50 text-white hover:bg-yellow-500'
+                  }`}
+                  title={photo.is_main ? 'Foto principal' : 'Marcar como principal'}
+                >
+                  <Star className={`h-3 w-3 ${photo.is_main ? 'fill-current' : ''}`} />
+                </button>
+              </div>
+            )}
+            
+            {/* Delete button */}
             {canEdit && !uploading && (
               <div className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
