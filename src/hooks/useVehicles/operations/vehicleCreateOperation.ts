@@ -1,147 +1,93 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
-import { Vehicle } from '../types';
 import { mapFormDataToDbData } from '../utils/dataMappers';
 import { mapDbDataToAppData } from '../utils/dbToAppMapper';
 
-export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
-  console.log('Creating vehicle with data:', vehicleData);
+export const createVehicle = async (vehicleData: any) => {
+  console.log('createVehicle - input data:', vehicleData);
   
-  const dbVehicleData = await mapFormDataToDbData(vehicleData);
-  console.log('Mapped vehicle data for database:', dbVehicleData);
-
-  // Separate photos from vehicle data
-  const { photos, ...vehicleDataWithoutPhotos } = dbVehicleData;
-
-  const { data, error } = await supabase
-    .from('vehicles')
-    .insert(vehicleDataWithoutPhotos)
-    .select()
-    .single();
-
-  if (error) {
-    console.error('Supabase error creating vehicle:', error);
-    throw error;
-  }
-  
-  console.log('Vehicle created successfully, now processing photos:', photos?.length || 0);
-
-  // Handle photos - SEMPRE inserir na tabela vehicle_photos
-  if (photos && photos.length > 0) {
-    const photoUrls: string[] = [];
+  try {
+    // Map data to database format
+    const dbData = await mapFormDataToDbData(vehicleData);
+    console.log('createVehicle - mapped data:', dbData);
     
-    for (let i = 0; i < photos.length; i++) {
-      const photo = photos[i];
-      console.log(`Processing photo ${i + 1}/${photos.length}:`, photo.substring(0, 50) + '...');
-      
-      if (photo.startsWith('data:image/')) {
-        // Convert base64 to file and upload to Storage
-        try {
-          const response = await fetch(photo);
-          const blob = await response.blob();
-          const file = new File([blob], `photo-${i}.jpg`, { type: 'image/jpeg' });
-          
-          // Generate unique filename
-          const fileExt = 'jpg';
-          const fileName = `${data.id}-${Date.now()}-${i}.${fileExt}`;
-          const filePath = `${data.id}/${fileName}`;
+    // Extract photos and video data
+    const photos = vehicleData.photos || [];
+    const video = vehicleData.video || vehicleData.videos?.[0];
+    
+    // Create the vehicle first
+    const { data: newVehicle, error: createError } = await supabase
+      .from('vehicles')
+      .insert({
+        ...dbData,
+        video: video || null
+      })
+      .select('*')
+      .single();
 
-          console.log(`Uploading photo to Storage: ${filePath}`);
-
-          // Upload to Supabase Storage
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('vehicle-photos')
-            .upload(filePath, file, {
-              cacheControl: '3600',
-              upsert: false
-            });
-
-          if (uploadError) {
-            console.error('Error uploading photo to storage:', uploadError);
-            continue;
-          }
-
-          console.log('Photo uploaded successfully:', uploadData);
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('vehicle-photos')
-            .getPublicUrl(filePath);
-
-          console.log('Got public URL:', publicUrl);
-          photoUrls.push(publicUrl);
-        } catch (uploadError) {
-          console.error('Error processing base64 photo:', uploadError);
-        }
-      } else if (photo.startsWith('http')) {
-        // Photo is already a URL (from Storage or external)
-        console.log('Photo is already a URL:', photo);
-        photoUrls.push(photo);
-      }
+    if (createError) {
+      console.error('Error creating vehicle:', createError);
+      throw new Error(`Erro ao criar veículo: ${createError.message}`);
     }
-    
-    // SEMPRE inserir registros na tabela vehicle_photos
-    if (photoUrls.length > 0) {
-      const vehiclePhotosData = photoUrls.map((url, index) => ({
-        vehicle_id: data.id,
+
+    console.log('Vehicle created successfully:', newVehicle);
+
+    // Handle photos if provided
+    if (photos && photos.length > 0) {
+      const photoInserts = photos.map((url: string, index: number) => ({
+        vehicle_id: newVehicle.id,
         url,
         position: index + 1,
         is_main: index === 0
       }));
-      
-      console.log('Inserting vehicle photos into database:', vehiclePhotosData);
-      
-      const { data: photosInsertData, error: photosError } = await supabase
+
+      const { error: photosError } = await supabase
         .from('vehicle_photos')
-        .insert(vehiclePhotosData)
-        .select();
+        .insert(photoInserts);
 
       if (photosError) {
         console.error('Error inserting vehicle photos:', photosError);
-        toast({
-          title: 'Aviso',
-          description: 'Veículo criado mas houve erro ao salvar algumas fotos.',
-          variant: 'destructive',
-        });
-      } else {
-        console.log('Photos successfully inserted into vehicle_photos table:', photosInsertData);
-        toast({
-          title: 'Sucesso',
-          description: `Veículo criado com ${photoUrls.length} foto(s) salva(s).`,
-        });
+        // Don't throw here, vehicle was created successfully
       }
-    } else {
-      console.log('No photos to save');
-      toast({
-        title: 'Sucesso',
-        description: 'Veículo criado sem fotos.',
-      });
     }
+
+    // Fetch complete vehicle data with photos
+    const { data: completeVehicle, error: fetchError } = await supabase
+      .from('vehicles')
+      .select(`
+        *,
+        vehicle_photos(url, position, is_main)
+      `)
+      .eq('id', newVehicle.id)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching complete vehicle:', fetchError);
+      // Return the basic vehicle data if fetch fails
+      const vehicleWithPhotos = {
+        ...newVehicle,
+        photos: photos
+      };
+      return mapDbDataToAppData(vehicleWithPhotos);
+    }
+
+    // Map photos back to the expected format
+    const vehiclePhotos = completeVehicle.vehicle_photos
+      ?.sort((a: any, b: any) => a.position - b.position)
+      ?.map((photo: any) => photo.url) || [];
+
+    const vehicleWithPhotos = {
+      ...completeVehicle,
+      photos: vehiclePhotos,
+      vehicle_photos: undefined // Remove the nested photos object
+    };
+
+    console.log('createVehicle - final result:', vehicleWithPhotos);
+    
+    // Map back to application format
+    return mapDbDataToAppData(vehicleWithPhotos);
+  } catch (error) {
+    console.error('createVehicle - error:', error);
+    throw error;
   }
-  
-  // Fetch the vehicle with photos to return complete data
-  const { data: vehicleWithPhotos } = await supabase
-    .from('vehicles')
-    .select(`
-      *, 
-      vehicle_photos!vehicle_photos_vehicle_id_fkey (
-        id, url, position, is_main
-      )
-    `)
-    .eq('id', data.id)
-    .single();
-  
-  const finalVehicleData = vehicleWithPhotos || data;
-  const vehiclePhotos = (finalVehicleData as any).vehicle_photos || [];
-  const photosList = vehiclePhotos
-    .sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
-    .map((photo: any) => photo.url);
-  
-  console.log('Vehicle created successfully with photos:', finalVehicleData);
-  return mapDbDataToAppData({ 
-    ...finalVehicleData, 
-    photos: photosList,
-    vehicle_photos: undefined 
-  });
 };

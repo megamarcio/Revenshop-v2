@@ -59,8 +59,6 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     category: dbCategory,
     title_type: titleType,
     title_status: titleStatus,
-    photos: vehicleData.photos || [],
-    video: vehicleData.video || null,
     created_by: (await supabase.auth.getUser()).data.user?.id || null,
     
     // Campos de financiamento - corrigido o campo due_date para ser string
@@ -210,14 +208,6 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
       title_type: dbUpdateData.title_type, 
       title_status: dbUpdateData.title_status 
     });
-  }
-  
-  if (vehicleData.photos !== undefined) {
-    dbUpdateData.photos = vehicleData.photos || [];
-  }
-  
-  if (vehicleData.video !== undefined) {
-    dbUpdateData.video = vehicleData.video || null;
   }
 
   console.log('mapUpdateDataToDbData - output:', dbUpdateData);
