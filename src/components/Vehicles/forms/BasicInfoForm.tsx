@@ -16,7 +16,6 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
   const { t } = useLanguage();
 
   const titleOptions = [
-    { value: '', label: 'Selecione o status do título' },
     { value: 'clean-title-em-maos', label: 'Clean Title - Em Mãos' },
     { value: 'clean-title-em-transito', label: 'Clean Title - Em Trânsito' },
     { value: 'rebuilt-em-maos', label: 'Rebuilt - Em Mãos' },
