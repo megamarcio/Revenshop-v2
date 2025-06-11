@@ -23,6 +23,8 @@ export interface Vehicle {
   updated_at: string;
   created_by?: string;
   title_type_id?: string;
+  title_location_id?: string;
+  title_location_custom?: string;
   
   // Campos de financiamento adicionados
   financing_bank?: string;

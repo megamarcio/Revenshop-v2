@@ -742,6 +742,36 @@ export type Database = {
           },
         ]
       }
+      title_locations: {
+        Row: {
+          allows_custom: boolean
+          code: string
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          allows_custom?: boolean
+          code: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          allows_custom?: boolean
+          code?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       title_types: {
         Row: {
           code: string
@@ -836,6 +866,8 @@ export type Database = {
           purchase_price: number
           remaining_installments: number | null
           sale_price: number
+          title_location_custom: string | null
+          title_location_id: string | null
           title_type_id: string | null
           total_installments: number | null
           total_to_pay: number | null
@@ -875,6 +907,8 @@ export type Database = {
           purchase_price: number
           remaining_installments?: number | null
           sale_price: number
+          title_location_custom?: string | null
+          title_location_id?: string | null
           title_type_id?: string | null
           total_installments?: number | null
           total_to_pay?: number | null
@@ -914,6 +948,8 @@ export type Database = {
           purchase_price?: number
           remaining_installments?: number | null
           sale_price?: number
+          title_location_custom?: string | null
+          title_location_id?: string | null
           title_type_id?: string | null
           total_installments?: number | null
           total_to_pay?: number | null
@@ -928,6 +964,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_title_location_id_fkey"
+            columns: ["title_location_id"]
+            isOneToOne: false
+            referencedRelation: "title_locations"
             referencedColumns: ["id"]
           },
           {

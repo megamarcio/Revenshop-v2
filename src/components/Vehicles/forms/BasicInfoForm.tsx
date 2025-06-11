@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import ColorSelector from './ColorSelector';
 import TitleTypeSelector from './TitleTypeSelector';
+import TitleLocationSelector from './TitleLocationSelector';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
 interface BasicInfoFormProps {
@@ -103,11 +104,21 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
         </div>
 
-        <div className="md:col-span-2">
+        <div>
           <TitleTypeSelector
             value={formData.titleTypeId}
             onChange={(value) => onInputChange('titleTypeId', value)}
             error={errors.titleTypeId}
+          />
+        </div>
+
+        <div>
+          <TitleLocationSelector
+            value={formData.titleLocationId}
+            customValue={formData.titleLocationCustom}
+            onChange={(value) => onInputChange('titleLocationId', value)}
+            onCustomChange={(value) => onInputChange('titleLocationCustom', value)}
+            error={errors.titleLocationId}
           />
         </div>
 
