@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import { useVehicles, Vehicle } from '../../hooks/useVehicles/index';
+import { useVehicles, Vehicle as HookVehicle } from '../../hooks/useVehicles/index';
 import { useVehiclesUltraMinimal } from '../../hooks/useVehiclesUltraMinimal';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
@@ -27,7 +27,7 @@ const VehicleList = () => {
   });
   
   const [showAddForm, setShowAddForm] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
+  const [editingVehicle, setEditingVehicle] = useState<HookVehicle | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('internal_code');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -88,11 +88,41 @@ const VehicleList = () => {
       created_by: undefined,
       created_at: undefined,
       updated_at: undefined
-    } as Vehicle));
+    } as HookVehicle));
   }, [ultraMinimalVehicles]);
 
+  // Função para converter de CardType para HookType para exportação
+  const convertCardTypeToHookType = (vehicles: VehicleCardType[]): HookVehicle[] => {
+    return vehicles.map(vehicle => ({
+      id: vehicle.id,
+      name: vehicle.name,
+      vin: vehicle.vin,
+      year: vehicle.year,
+      model: vehicle.model,
+      miles: 0,
+      internal_code: vehicle.internalCode,
+      color: vehicle.color,
+      ca_note: vehicle.caNote,
+      purchase_price: vehicle.purchasePrice,
+      sale_price: vehicle.salePrice,
+      profit_margin: vehicle.profitMargin,
+      min_negotiable: vehicle.minNegotiable,
+      carfax_price: vehicle.carfaxPrice,
+      mmr_value: vehicle.mmrValue,
+      description: vehicle.description,
+      category: vehicle.category,
+      title_type: undefined,
+      title_status: undefined,
+      photos: vehicle.photos,
+      video: vehicle.video,
+      created_by: undefined,
+      created_at: undefined,
+      updated_at: undefined
+    } as HookVehicle));
+  };
+
   // Vehicle Actions Logic
-  const handleSaveVehicle = async (vehicleData: any, editingVehicle: Vehicle | null) => {
+  const handleSaveVehicle = async (vehicleData: any, editingVehicle: HookVehicle | null) => {
     try {
       console.log('VehicleList - handleSaveVehicle called with:', vehicleData);
       console.log('VehicleList - editingVehicle:', editingVehicle);
@@ -136,7 +166,7 @@ const VehicleList = () => {
         internal_code: '',
         created_at: undefined,
         updated_at: undefined
-      } as Vehicle;
+      } as HookVehicle;
       
       setEditingVehicle(duplicatedVehicle);
       setShowAddForm(true);
@@ -178,7 +208,9 @@ const VehicleList = () => {
   };
 
   const handleExportData = (format: 'csv' | 'xls') => {
-    handleExport(filteredAndSortedVehicles, format);
+    // Converter para o formato esperado pela função de exportação
+    const vehiclesForExport = convertCardTypeToHookType(filteredAndSortedVehicles);
+    handleExport(vehiclesForExport, format);
   };
 
   if (loading) {
