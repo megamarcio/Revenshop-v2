@@ -21,12 +21,12 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.carfaxPrice !== undefined) dbUpdateData.carfax_price = vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null;
   if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
   
-  // Campos de financiamento - corrigido o campo due_date para ser string
+  // Campos de financiamento - incluir TODOS os campos, mesmo vazios
   if (vehicleData.financingBank !== undefined) dbUpdateData.financing_bank = vehicleData.financingBank || null;
   if (vehicleData.financingType !== undefined) dbUpdateData.financing_type = vehicleData.financingType || null;
   if (vehicleData.originalFinancedName !== undefined) dbUpdateData.original_financed_name = vehicleData.originalFinancedName || null;
   if (vehicleData.purchaseDate !== undefined) dbUpdateData.purchase_date = vehicleData.purchaseDate || null;
-  if (vehicleData.dueDate !== undefined) dbUpdateData.due_date = vehicleData.dueDate || null; // Mantém como string
+  if (vehicleData.dueDate !== undefined) dbUpdateData.due_date = vehicleData.dueDate || null;
   if (vehicleData.installmentValue !== undefined) dbUpdateData.installment_value = vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null;
   if (vehicleData.downPayment !== undefined) dbUpdateData.down_payment = vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null;
   if (vehicleData.financedAmount !== undefined) dbUpdateData.financed_amount = vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null;
@@ -38,6 +38,20 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.payoffDate !== undefined) dbUpdateData.payoff_date = vehicleData.payoffDate || null;
   if (vehicleData.interestRate !== undefined) dbUpdateData.interest_rate = vehicleData.interestRate ? parseFloat(vehicleData.interestRate) : null;
   if (vehicleData.customFinancingBank !== undefined) dbUpdateData.custom_financing_bank = vehicleData.customFinancingBank || null;
+  
+  console.log('mapUpdateDataToDbData - financing fields being updated:', {
+    financing_bank: dbUpdateData.financing_bank,
+    financing_type: dbUpdateData.financing_type,
+    installment_value: dbUpdateData.installment_value,
+    down_payment: dbUpdateData.down_payment,
+    financed_amount: dbUpdateData.financed_amount,
+    total_installments: dbUpdateData.total_installments,
+    paid_installments: dbUpdateData.paid_installments,
+    remaining_installments: dbUpdateData.remaining_installments,
+    total_to_pay: dbUpdateData.total_to_pay,
+    payoff_value: dbUpdateData.payoff_value,
+    interest_rate: dbUpdateData.interest_rate
+  });
   
   // Handle category mapping
   if (vehicleData.category) {

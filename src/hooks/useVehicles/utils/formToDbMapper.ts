@@ -61,12 +61,12 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     title_status: titleStatus,
     created_by: (await supabase.auth.getUser()).data.user?.id || null,
     
-    // Campos de financiamento - corrigido o campo due_date para ser string
+    // Campos de financiamento - garantir que todos os campos sejam incluídos
     financing_bank: vehicleData.financingBank || null,
     financing_type: vehicleData.financingType || null,
     original_financed_name: vehicleData.originalFinancedName || null,
     purchase_date: vehicleData.purchaseDate || null,
-    due_date: vehicleData.dueDate || null, // Mantém como string (dia do mês)
+    due_date: vehicleData.dueDate || null,
     installment_value: vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null,
     down_payment: vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null,
     financed_amount: vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null,
@@ -80,7 +80,19 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     custom_financing_bank: vehicleData.customFinancingBank || null
   };
 
-  console.log('mapFormDataToDbData - color being saved:', baseData.color);
+  console.log('mapFormDataToDbData - financing fields being saved:', {
+    financing_bank: baseData.financing_bank,
+    financing_type: baseData.financing_type,
+    installment_value: baseData.installment_value,
+    down_payment: baseData.down_payment,
+    financed_amount: baseData.financed_amount,
+    total_installments: baseData.total_installments,
+    paid_installments: baseData.paid_installments,
+    remaining_installments: baseData.remaining_installments,
+    total_to_pay: baseData.total_to_pay,
+    payoff_value: baseData.payoff_value,
+    interest_rate: baseData.interest_rate
+  });
 
   // Adicionar categoria estendida na descrição se necessário
   if (extendedCategory) {

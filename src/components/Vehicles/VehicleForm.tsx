@@ -80,13 +80,18 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         caNote: parseInt(formData.caNote),
         purchasePrice: parseFloat(formData.purchasePrice),
         salePrice: parseFloat(formData.salePrice),
-        minNegotiable: parseFloat(formData.minNegotiable || '0'),
-        carfaxPrice: parseFloat(formData.carfaxPrice || '0'),
-        mmrValue: parseFloat(formData.mmrValue || '0'),
+        minNegotiable: formData.minNegotiable ? parseFloat(formData.minNegotiable) : undefined,
+        carfaxPrice: formData.carfaxPrice ? parseFloat(formData.carfaxPrice) : undefined,
+        mmrValue: formData.mmrValue ? parseFloat(formData.mmrValue) : undefined,
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         
-        // Campos de financiamento
+        // Campos de financiamento - garantir que todos sejam enviados
+        financingBank: formData.financingBank,
+        financingType: formData.financingType,
+        originalFinancedName: formData.originalFinancedName,
+        purchaseDate: formData.purchaseDate,
+        dueDate: formData.dueDate,
         installmentValue: formData.installmentValue ? parseFloat(formData.installmentValue) : undefined,
         downPayment: formData.downPayment ? parseFloat(formData.downPayment) : undefined,
         financedAmount: formData.financedAmount ? parseFloat(formData.financedAmount) : undefined,
@@ -95,7 +100,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         remainingInstallments: formData.remainingInstallments ? parseInt(formData.remainingInstallments) : undefined,
         totalToPay: formData.totalToPay ? parseFloat(formData.totalToPay) : undefined,
         payoffValue: formData.payoffValue ? parseFloat(formData.payoffValue) : undefined,
+        payoffDate: formData.payoffDate,
         interestRate: formData.interestRate ? parseFloat(formData.interestRate) : undefined,
+        customFinancingBank: formData.customFinancingBank,
         
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
@@ -104,7 +111,19 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         ...(isEditing && { id: editingVehicle.id })
       };
 
-      console.log('VehicleForm - submitting vehicleData:', vehicleData);
+      console.log('VehicleForm - submitting vehicleData with financing info:', {
+        financingBank: vehicleData.financingBank,
+        financingType: vehicleData.financingType,
+        installmentValue: vehicleData.installmentValue,
+        downPayment: vehicleData.downPayment,
+        financedAmount: vehicleData.financedAmount,
+        totalInstallments: vehicleData.totalInstallments,
+        paid_installments: vehicleData.paidInstallments,
+        remaining_installments: vehicleData.remainingInstallments,
+        total_to_pay: vehicleData.totalToPay,
+        payoff_value: vehicleData.payoffValue,
+        interest_rate: vehicleData.interestRate
+      });
 
       await onSave(vehicleData);
       
