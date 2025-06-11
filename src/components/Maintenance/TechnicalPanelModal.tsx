@@ -13,7 +13,7 @@ interface TechnicalPanelModalProps {
 }
 
 const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: TechnicalPanelModalProps) => {
-  const { items, isLoading, updateItem, createDefaultItems } = useTechnicalItems(vehicleId);
+  const { items, isLoading, refetch, updateItem, createDefaultItems } = useTechnicalItems(vehicleId);
   const [editingItem, setEditingItem] = useState<string | null>(null);
 
   const handleEdit = (itemId: string) => {
@@ -39,7 +39,7 @@ const TechnicalPanelModal = ({ isOpen, onClose, vehicleId, vehicleName }: Techni
   };
 
   const handleRefresh = () => {
-    window.location.reload();
+    refetch();
   };
 
   return (

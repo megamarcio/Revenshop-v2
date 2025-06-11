@@ -16,7 +16,8 @@ export const useTechnicalItems = (vehicleId?: string) => {
   const {
     data: items = [],
     isLoading,
-    error
+    error,
+    refetch
   } = useQuery({
     queryKey: ['technical-items', vehicleId],
     queryFn: () => fetchTechnicalItems(vehicleId!),
@@ -101,6 +102,7 @@ export const useTechnicalItems = (vehicleId?: string) => {
     items,
     isLoading,
     error,
+    refetch,
     createDefaultItems: createDefaultItemsMutation.mutate,
     updateItem: updateItemMutation.mutate,
     createItem: createItemMutation.mutate,

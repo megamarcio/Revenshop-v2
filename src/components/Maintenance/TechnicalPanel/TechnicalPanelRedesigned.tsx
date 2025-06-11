@@ -27,6 +27,7 @@ const TechnicalPanelRedesigned = ({
   const {
     items,
     isLoading,
+    refetch,
     createDefaultItems,
     updateItem,
     createItem,
@@ -66,6 +67,10 @@ const TechnicalPanelRedesigned = ({
     }
   };
 
+  const handleRefresh = () => {
+    refetch();
+  };
+
   if (!vehicleId) {
     return (
       <NoVehicleSelected 
@@ -82,7 +87,7 @@ const TechnicalPanelRedesigned = ({
           vehicleName={vehicleName}
           loading={isLoading}
           itemsCount={items.length}
-          onRefresh={() => window.location.reload()}
+          onRefresh={handleRefresh}
           onCreateDefaults={handleCreateDefaults}
         />
 
