@@ -78,7 +78,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
     setIsLoading(true);
     try {
-      const vehicleData = {
+      const vehicleData: any = {
         ...formData,
         year: parseInt(formData.year),
         caNote: parseInt(formData.caNote),

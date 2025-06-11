@@ -37,12 +37,17 @@ export const useVehicles = () => {
   const createVehicle = async (vehicleData: any) => {
     try {
       const data = await createVehicleOperation(vehicleData);
-      setVehicles(prev => [data, ...prev]);
+      // Ensure the returned data has photos array if missing
+      const vehicleWithPhotos = {
+        ...data,
+        photos: data.photos || []
+      };
+      setVehicles(prev => [vehicleWithPhotos, ...prev]);
       toast({
         title: 'Sucesso',
         description: 'Veículo criado com sucesso!',
       });
-      return data;
+      return vehicleWithPhotos;
     } catch (error) {
       console.error('Error creating vehicle:', error);
       toast({
@@ -61,12 +66,17 @@ export const useVehicles = () => {
       console.log('useVehicles - updateVehicle - dataWithId:', dataWithId);
       
       const data = await updateVehicleOperation(dataWithId);
-      setVehicles(prev => prev.map(v => v.id === id ? data : v));
+      // Ensure the returned data has photos array if missing
+      const vehicleWithPhotos = {
+        ...data,
+        photos: data.photos || []
+      };
+      setVehicles(prev => prev.map(v => v.id === id ? vehicleWithPhotos : v));
       toast({
         title: 'Sucesso',
         description: 'Veículo atualizado com sucesso!',
       });
-      return data;
+      return vehicleWithPhotos;
     } catch (error) {
       console.error('Error updating vehicle:', error);
       
