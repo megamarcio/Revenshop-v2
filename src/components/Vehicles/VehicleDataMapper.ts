@@ -11,7 +11,7 @@ export class VehicleDataMapper {
       vin: vehicle.vin,
       year: vehicle.year,
       model: vehicle.model,
-      plate: vehicle.miles,
+      plate: vehicle.plate,
       internalCode: vehicle.internal_code,
       color: vehicle.color,
       caNote: vehicle.ca_note,
