@@ -30,6 +30,23 @@ export interface VehicleFormData {
   checkDetails: string;
   otherPaymentDetails: string;
   sellerCommission: string;
+  
+  // Novos campos de financiamento
+  financingBank: string;
+  financingType: 'comprou-direto' | 'assumiu-financiamento' | '';
+  originalFinancedName: string;
+  purchaseDate: string;
+  dueDate: string;
+  installmentValue: string;
+  downPayment: string;
+  totalInstallments: string;
+  paidInstallments: string;
+  remainingInstallments: string;
+  totalToPay: string;
+  payoffValue: string;
+  payoffDate: string;
+  interestRate: string;
+  customFinancingBank: string;
 }
 
 export interface VehicleFormProps {

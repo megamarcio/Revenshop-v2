@@ -20,6 +20,7 @@ import FinancialInfoForm from './forms/FinancialInfoForm';
 import SaleInfoForm from './forms/SaleInfoForm';
 import MediaUploadForm from './forms/MediaUpload';
 import DescriptionForm from './forms/DescriptionForm';
+import FinancingInfoForm from './forms/FinancingInfoForm';
 import MaintenanceViewModal from '../Maintenance/MaintenanceViewModal';
 import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
@@ -33,6 +34,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   const { t } = useLanguage();
   const { isAdmin, isInternalSeller, canEditVehicles } = useAuth();
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
+  const [showFinancingInfo, setShowFinancingInfo] = useState(false);
   
   const {
     formData,
@@ -118,6 +120,17 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         mmrValue: parseFloat(formData.mmrValue || '0'),
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
+        
+        // Campos de financiamento
+        installmentValue: formData.installmentValue ? parseFloat(formData.installmentValue) : undefined,
+        downPayment: formData.downPayment ? parseFloat(formData.downPayment) : undefined,
+        totalInstallments: formData.totalInstallments ? parseInt(formData.totalInstallments) : undefined,
+        paidInstallments: formData.paidInstallments ? parseInt(formData.paidInstallments) : undefined,
+        remainingInstallments: formData.remainingInstallments ? parseInt(formData.remainingInstallments) : undefined,
+        totalToPay: formData.totalToPay ? parseFloat(formData.totalToPay) : undefined,
+        payoffValue: formData.payoffValue ? parseFloat(formData.payoffValue) : undefined,
+        interestRate: formData.interestRate ? parseFloat(formData.interestRate) : undefined,
+        
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
         videos: videos,
@@ -204,6 +217,14 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
                 calculateProfitMargin={calculateProfitMargin}
                 vehicleId={isEditing ? editingVehicle?.id : undefined}
                 onViewMaintenance={handleViewMaintenance}
+              />
+
+              <FinancingInfoForm
+                formData={formData}
+                errors={errors}
+                onInputChange={handleInputChange}
+                isOpen={showFinancingInfo}
+                onToggle={() => setShowFinancingInfo(!showFinancingInfo)}
               />
 
               <SaleInfoForm

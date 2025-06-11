@@ -52,7 +52,24 @@ export const useVehicleForm = (editingVehicle?: any) => {
     financingCompany: editingVehicle?.financingCompany || '',
     checkDetails: editingVehicle?.checkDetails || '',
     otherPaymentDetails: editingVehicle?.otherPaymentDetails || '',
-    sellerCommission: editingVehicle?.sellerCommission?.toString() || ''
+    sellerCommission: editingVehicle?.sellerCommission?.toString() || '',
+    
+    // Novos campos de financiamento
+    financingBank: editingVehicle?.financing_bank || editingVehicle?.financingBank || '',
+    financingType: editingVehicle?.financing_type || editingVehicle?.financingType || '',
+    originalFinancedName: editingVehicle?.original_financed_name || editingVehicle?.originalFinancedName || '',
+    purchaseDate: editingVehicle?.purchase_date || editingVehicle?.purchaseDate || '',
+    dueDate: editingVehicle?.due_date || editingVehicle?.dueDate || '',
+    installmentValue: editingVehicle?.installment_value?.toString() || editingVehicle?.installmentValue?.toString() || '',
+    downPayment: editingVehicle?.down_payment?.toString() || editingVehicle?.downPayment?.toString() || '',
+    totalInstallments: editingVehicle?.total_installments?.toString() || editingVehicle?.totalInstallments?.toString() || '',
+    paidInstallments: editingVehicle?.paid_installments?.toString() || editingVehicle?.paidInstallments?.toString() || '',
+    remainingInstallments: editingVehicle?.remaining_installments?.toString() || editingVehicle?.remainingInstallments?.toString() || '',
+    totalToPay: editingVehicle?.total_to_pay?.toString() || editingVehicle?.totalToPay?.toString() || '',
+    payoffValue: editingVehicle?.payoff_value?.toString() || editingVehicle?.payoffValue?.toString() || '',
+    payoffDate: editingVehicle?.payoff_date || editingVehicle?.payoffDate || '',
+    interestRate: editingVehicle?.interest_rate?.toString() || editingVehicle?.interestRate?.toString() || '',
+    customFinancingBank: editingVehicle?.custom_financing_bank || editingVehicle?.customFinancingBank || ''
   });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
