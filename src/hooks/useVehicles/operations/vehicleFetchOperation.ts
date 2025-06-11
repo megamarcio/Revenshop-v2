@@ -15,6 +15,17 @@ export const fetchVehicles = async () => {
           url,
           is_main,
           position
+        ),
+        title_types (
+          id,
+          name,
+          code
+        ),
+        title_locations (
+          id,
+          name,
+          code,
+          allows_custom
         )
       `)
       .order('created_at', { ascending: false });
@@ -34,6 +45,13 @@ export const fetchVehicles = async () => {
     // Map the database data to application format
     const mappedVehicles = vehiclesData.map(vehicle => {
       console.log('Processing vehicle:', vehicle.id);
+      console.log('Vehicle title fields from DB:', {
+        title_type_id: vehicle.title_type_id,
+        title_location_id: vehicle.title_location_id,
+        title_location_custom: vehicle.title_location_custom,
+        title_types: vehicle.title_types,
+        title_locations: vehicle.title_locations
+      });
       
       // Extract photos from vehicle_photos relationship
       const photos = vehicle.vehicle_photos?.map((photo: any) => photo.url) || [];

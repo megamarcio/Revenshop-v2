@@ -6,14 +6,21 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
   
   if (editingVehicle) {
     console.log('getInitialFormData - editing existing vehicle');
-    console.log('getInitialFormData - editingVehicle.miles:', editingVehicle.miles);
+    console.log('getInitialFormData - title fields from vehicle:', {
+      title_type_id: editingVehicle.title_type_id,
+      titleTypeId: editingVehicle.titleTypeId,
+      title_location_id: editingVehicle.title_location_id,
+      titleLocationId: editingVehicle.titleLocationId,
+      title_location_custom: editingVehicle.title_location_custom,
+      titleLocationCustom: editingVehicle.titleLocationCustom
+    });
     
     const result = {
       name: editingVehicle.name || '',
       vin: editingVehicle.vin || '',
       year: editingVehicle.year?.toString() || '',
       model: editingVehicle.model || '',
-      miles: editingVehicle.miles?.toString() || '', // CONFIRMADO: usando miles
+      miles: editingVehicle.miles?.toString() || '',
       internalCode: editingVehicle.internalCode || editingVehicle.internal_code || '',
       color: editingVehicle.color || '',
       titleTypeId: editingVehicle.titleTypeId || editingVehicle.title_type_id || '',
@@ -58,7 +65,12 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       customFinancingBank: editingVehicle.customFinancingBank || editingVehicle.custom_financing_bank || ''
     };
     
-    console.log('getInitialFormData - result.miles:', result.miles);
+    console.log('getInitialFormData - mapped title fields:', {
+      titleTypeId: result.titleTypeId,
+      titleLocationId: result.titleLocationId,
+      titleLocationCustom: result.titleLocationCustom
+    });
+    
     return result;
   }
 
@@ -68,7 +80,7 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     vin: '',
     year: '',
     model: '',
-    miles: '', // CONFIRMADO: usando miles
+    miles: '',
     internalCode: '',
     color: '',
     titleTypeId: '',

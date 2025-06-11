@@ -45,5 +45,11 @@ export const mapFormToDbData = (formData: VehicleFormData & { id?: string }) => 
     dbData.id = formData.id;
   }
 
+  console.log('mapFormToDbData - title fields being mapped:', {
+    title_type_id: dbData.title_type_id,
+    title_location_id: dbData.title_location_id,
+    title_location_custom: dbData.title_location_custom
+  });
+
   return dbData;
 };
