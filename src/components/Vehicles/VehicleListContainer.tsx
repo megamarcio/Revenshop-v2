@@ -1,198 +1,177 @@
 
 import React, { useState, useMemo } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
-import { useVehicles, Vehicle as HookVehicle } from '../../hooks/useVehicles/index';
-import { useVehiclesUltraMinimal } from '../../hooks/useVehiclesUltraMinimal';
+import VehicleList from './VehicleList';
 import VehicleForm from './VehicleForm';
 import VehicleListHeader from './VehicleListHeader';
-import VehicleSearchBar from './VehicleSearchBar';
-import VehicleControls from './VehicleControls';
-import VehicleGridView from './VehicleGridView';
-import VehicleListView from './VehicleListView';
 import EmptyVehicleState from './EmptyVehicleState';
-import { Card, CardContent } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
-import { handleExport } from './VehicleDataProcessor';
-import { Vehicle as VehicleCardType } from './VehicleCardTypes';
+import { useVehicles } from '../../hooks/useVehicles';
+import { useVehiclesUltraMinimal } from '../../hooks/useVehiclesUltraMinimal';
 import { VehicleDataMapper } from './VehicleDataMapper';
+import { Button } from '@/components/ui/button';
+import { Users } from 'lucide-react';
+import { Vehicle as VehicleCardType } from './VehicleCardTypes';
+import { Vehicle as HookVehicle } from '../../hooks/useVehicles/types';
 
-const VehicleListContainer = () => {
-  const { canEditVehicles } = useAuth();
-  const { createVehicle, updateVehicle, deleteVehicle } = useVehicles();
-  
-  // Estados do componente
+interface VehicleListContainerProps {
+  onNavigateToCustomers?: () => void;
+}
+
+const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerProps) => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<VehicleCardType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState<HookVehicle | null>(null);
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('internal_code');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [filterBy, setFilterBy] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  // Buscar dados dos veículos
-  const { vehicles: ultraMinimalVehicles, loading } = useVehiclesUltraMinimal({
-    category: 'forSale',
-    searchTerm
-  });
-
-  // Mapear dados para formatos necessários
+  // Use ultra minimal hook for list display with automatic refresh
   const { 
-    convertedVehiclesForCards, 
-    convertedVehiclesForEditing,
-    convertCardTypeToHookType 
-  } = useMemo(() => VehicleDataMapper.mapVehicleData(ultraMinimalVehicles), [ultraMinimalVehicles]);
+    data: ultraMinimalVehicles, 
+    isLoading: isLoadingList, 
+    error: listError,
+    refetch: refetchList
+  } = useVehiclesUltraMinimal();
 
-  // Filtros e ordenação
-  const filteredAndSortedVehicles = useMemo(() => {
-    let filtered = convertedVehiclesForCards.filter(vehicle => {
-      const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  // Use full hook for CRUD operations
+  const { 
+    addVehicle, 
+    updateVehicle, 
+    deleteVehicle, 
+    isLoading: isSaving 
+  } = useVehicles();
+
+  // Convert data using the mapper
+  const { convertedVehiclesForCards, convertCardTypeToHookType } = useMemo(() => {
+    if (!ultraMinimalVehicles) return { convertedVehiclesForCards: [], convertCardTypeToHookType: () => [] };
+    return VehicleDataMapper.mapVehicleData(ultraMinimalVehicles);
+  }, [ultraMinimalVehicles]);
+
+  const filteredVehicles = useMemo(() => {
+    if (!convertedVehiclesForCards) return [];
+    
+    return convertedVehiclesForCards.filter(vehicle => {
+      const matchesSearch = !searchTerm || 
+        vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase());
+        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        vehicle.color.toLowerCase().includes(searchTerm.toLowerCase());
       
-      let matchesFilter = true;
-      if (filterBy !== 'all') {
-        matchesFilter = vehicle.category === filterBy;
-      }
+      const matchesCategory = selectedCategory === 'all' || vehicle.category === selectedCategory;
       
-      return matchesSearch && matchesFilter;
+      return matchesSearch && matchesCategory;
     });
+  }, [convertedVehiclesForCards, searchTerm, selectedCategory]);
 
-    filtered.sort((a, b) => a.name.localeCompare(b.name));
-    return filtered;
-  }, [convertedVehiclesForCards, searchTerm, filterBy]);
-
-  // Handlers de ações dos veículos
-  const handleSaveVehicle = async (vehicleData: any, editingVehicle: HookVehicle | null) => {
-    try {
-      if (editingVehicle && editingVehicle.id) {
-        await updateVehicle(editingVehicle.id, vehicleData);
-      } else {
-        await createVehicle(vehicleData);
-      }
-      setShowAddForm(false);
-      setEditingVehicle(null);
-    } catch (error) {
-      console.error('Error saving vehicle:', error);
-    }
+  const handleAddVehicle = () => {
+    setEditingVehicle(null);
+    setIsFormOpen(true);
   };
 
   const handleEditVehicle = (vehicle: VehicleCardType) => {
-    if (!canEditVehicles) return;
-    
-    const vehicleForEditing = convertedVehiclesForEditing.find(v => v.id === vehicle.id);
-    if (vehicleForEditing) {
-      setEditingVehicle(vehicleForEditing);
-      setShowAddForm(true);
-    }
+    console.log('VehicleListContainer - Editing vehicle:', vehicle);
+    setEditingVehicle(vehicle);
+    setIsFormOpen(true);
   };
 
   const handleDuplicateVehicle = (vehicle: VehicleCardType) => {
-    if (!canEditVehicles) return;
-    
-    const vehicleForEditing = convertedVehiclesForEditing.find(v => v.id === vehicle.id);
-    if (vehicleForEditing) {
-      const duplicatedVehicle = {
-        ...vehicleForEditing,
-        id: undefined,
-        name: `${vehicleForEditing.name} (Cópia)`,
-        vin: '',
-        internal_code: '',
-        created_at: undefined,
-        updated_at: undefined
-      } as HookVehicle;
-      
-      setEditingVehicle(duplicatedVehicle);
-      setShowAddForm(true);
-    }
+    const duplicatedVehicle = { 
+      ...vehicle, 
+      id: undefined,
+      name: `${vehicle.name} (Cópia)`,
+      internalCode: ''
+    };
+    setEditingVehicle(duplicatedVehicle);
+    setIsFormOpen(true);
   };
 
   const handleDeleteVehicle = async (vehicle: VehicleCardType) => {
-    if (!canEditVehicles) return;
-    if (confirm('Tem certeza que deseja excluir este veículo?')) {
+    if (vehicle.id) {
       await deleteVehicle(vehicle.id);
+      await refetchList();
     }
   };
 
-  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
-    setSortBy(newSortBy);
-    setSortOrder(newSortOrder);
+  const handleFormClose = () => {
+    setIsFormOpen(false);
+    setEditingVehicle(null);
   };
 
-  const handleExportData = (format: 'csv' | 'xls') => {
-    const vehiclesForExport = convertCardTypeToHookType(filteredAndSortedVehicles);
-    handleExport(vehiclesForExport, format);
+  const handleFormSave = async (vehicleData: any) => {
+    console.log('VehicleListContainer - Saving vehicle data:', vehicleData);
+    
+    try {
+      if (vehicleData.id) {
+        await updateVehicle(vehicleData.id, vehicleData);
+      } else {
+        await addVehicle(vehicleData);
+      }
+      
+      // Refresh the list after successful save
+      await refetchList();
+      
+      handleFormClose();
+    } catch (error) {
+      console.error('Error saving vehicle:', error);
+      throw error;
+    }
   };
 
-  if (loading) {
+  if (listError) {
     return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="p-12 text-center">
-            <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Carregando veículos com dados completos...</p>
-          </CardContent>
-        </Card>
+      <div className="text-center py-8">
+        <p className="text-red-500">Erro ao carregar veículos: {listError.message}</p>
+        <Button onClick={() => refetchList()} className="mt-4">
+          Tentar Novamente
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {/* Indicador de otimização */}
-      <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
-        <strong>OTIMIZAÇÃO ATIVA:</strong> Dados completos carregados de forma otimizada. Fotos com thumbnails sob demanda.
-      </div>
-      
-      <VehicleListHeader onAddVehicle={() => setShowAddForm(true)} />
-      
-      <VehicleSearchBar 
-        searchTerm={searchTerm} 
-        onSearchChange={setSearchTerm} 
+    <div className="space-y-6">
+      <VehicleListHeader
+        onAddVehicle={handleAddVehicle}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        vehicles={convertCardTypeToHookType(filteredVehicles)}
       />
 
-      <VehicleControls
-        viewMode={viewMode}
-        onViewModeChange={setViewMode}
-        sortBy={sortBy}
-        sortOrder={sortOrder}
-        onSortChange={handleSortChange}
-        filterBy={filterBy}
-        onFilterChange={setFilterBy}
-        onExport={handleExportData}
-      />
+      {onNavigateToCustomers && (
+        <Button 
+          onClick={onNavigateToCustomers} 
+          className="mb-4"
+          variant="outline"
+        >
+          <Users className="mr-2 h-4 w-4" />
+          Gerenciar Clientes
+        </Button>
+      )}
 
-      {viewMode === 'grid' ? (
-        <VehicleGridView
-          vehicles={filteredAndSortedVehicles}
-          onEdit={handleEditVehicle}
-          onDuplicate={handleDuplicateVehicle}
-          onDelete={handleDeleteVehicle}
+      {isLoadingList ? (
+        <div className="text-center py-8">
+          <p>Carregando veículos...</p>
+        </div>
+      ) : filteredVehicles.length === 0 ? (
+        <EmptyVehicleState 
+          hasVehicles={convertedVehiclesForCards.length > 0}
+          onAddVehicle={handleAddVehicle}
         />
       ) : (
-        <VehicleListView
-          vehicles={filteredAndSortedVehicles}
+        <VehicleList
+          vehicles={filteredVehicles}
           onEdit={handleEditVehicle}
           onDuplicate={handleDuplicateVehicle}
           onDelete={handleDeleteVehicle}
         />
       )}
 
-      {filteredAndSortedVehicles.length === 0 && !loading && <EmptyVehicleState />}
-
-      {showAddForm && canEditVehicles && (
+      {isFormOpen && (
         <VehicleForm
-          onClose={() => {
-            setShowAddForm(false);
-            setEditingVehicle(null);
-          }}
-          onSave={(vehicleData) => handleSaveVehicle(vehicleData, editingVehicle)}
-          onDelete={editingVehicle ? async () => {
-            const vehicleForCard = convertedVehiclesForCards.find(v => v.id === editingVehicle.id);
-            if (vehicleForCard) {
-              await handleDeleteVehicle(vehicleForCard);
-            }
-          } : undefined}
+          onClose={handleFormClose}
+          onSave={handleFormSave}
           editingVehicle={editingVehicle}
+          onNavigateToCustomers={onNavigateToCustomers}
+          onDelete={handleDeleteVehicle}
         />
       )}
     </div>

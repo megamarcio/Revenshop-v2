@@ -782,19 +782,35 @@ export type Database = {
           color: string
           created_at: string | null
           created_by: string | null
+          custom_financing_bank: string | null
           description: string | null
+          down_payment: number | null
+          due_date: string | null
+          financed_amount: number | null
+          financing_bank: string | null
+          financing_type: string | null
           id: string
+          installment_value: number | null
+          interest_rate: number | null
           internal_code: string
           miles: number
           min_negotiable: number | null
           mmr_value: number | null
           model: string
           name: string
+          original_financed_name: string | null
+          paid_installments: number | null
+          payoff_date: string | null
+          payoff_value: number | null
           profit_margin: number | null
+          purchase_date: string | null
           purchase_price: number
+          remaining_installments: number | null
           sale_price: number
           title_status: Database["public"]["Enums"]["title_status"] | null
           title_type: Database["public"]["Enums"]["title_type"] | null
+          total_installments: number | null
+          total_to_pay: number | null
           updated_at: string | null
           video: string | null
           vin: string
@@ -807,19 +823,35 @@ export type Database = {
           color: string
           created_at?: string | null
           created_by?: string | null
+          custom_financing_bank?: string | null
           description?: string | null
+          down_payment?: number | null
+          due_date?: string | null
+          financed_amount?: number | null
+          financing_bank?: string | null
+          financing_type?: string | null
           id?: string
+          installment_value?: number | null
+          interest_rate?: number | null
           internal_code: string
           miles: number
           min_negotiable?: number | null
           mmr_value?: number | null
           model: string
           name: string
+          original_financed_name?: string | null
+          paid_installments?: number | null
+          payoff_date?: string | null
+          payoff_value?: number | null
           profit_margin?: number | null
+          purchase_date?: string | null
           purchase_price: number
+          remaining_installments?: number | null
           sale_price: number
           title_status?: Database["public"]["Enums"]["title_status"] | null
           title_type?: Database["public"]["Enums"]["title_type"] | null
+          total_installments?: number | null
+          total_to_pay?: number | null
           updated_at?: string | null
           video?: string | null
           vin: string
@@ -832,19 +864,35 @@ export type Database = {
           color?: string
           created_at?: string | null
           created_by?: string | null
+          custom_financing_bank?: string | null
           description?: string | null
+          down_payment?: number | null
+          due_date?: string | null
+          financed_amount?: number | null
+          financing_bank?: string | null
+          financing_type?: string | null
           id?: string
+          installment_value?: number | null
+          interest_rate?: number | null
           internal_code?: string
           miles?: number
           min_negotiable?: number | null
           mmr_value?: number | null
           model?: string
           name?: string
+          original_financed_name?: string | null
+          paid_installments?: number | null
+          payoff_date?: string | null
+          payoff_value?: number | null
           profit_margin?: number | null
+          purchase_date?: string | null
           purchase_price?: number
+          remaining_installments?: number | null
           sale_price?: number
           title_status?: Database["public"]["Enums"]["title_status"] | null
           title_type?: Database["public"]["Enums"]["title_type"] | null
+          total_installments?: number | null
+          total_to_pay?: number | null
           updated_at?: string | null
           video?: string | null
           vin?: string

@@ -40,7 +40,7 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     }
   }
 
-  // Preparar dados básicos - CORRIGIDO: garantir que color seja sempre salvo
+  // Preparar dados básicos
   const baseData = {
     name: vehicleData.name,
     vin: vehicleData.vin,
@@ -48,7 +48,7 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     model: vehicleData.model,
     miles: parseInt(vehicleData.miles) || 0,
     internal_code: vehicleData.internalCode,
-    color: vehicleData.color || null, // CORRIGIDO: garantir que cor seja mapeada corretamente
+    color: vehicleData.color || null,
     ca_note: parseInt(vehicleData.caNote),
     purchase_price: parseFloat(vehicleData.purchasePrice),
     sale_price: parseFloat(vehicleData.salePrice),
@@ -61,7 +61,25 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     title_status: titleStatus,
     photos: vehicleData.photos || [],
     video: vehicleData.video || null,
-    created_by: (await supabase.auth.getUser()).data.user?.id || null
+    created_by: (await supabase.auth.getUser()).data.user?.id || null,
+    
+    // Campos de financiamento
+    financing_bank: vehicleData.financingBank || null,
+    financing_type: vehicleData.financingType || null,
+    original_financed_name: vehicleData.originalFinancedName || null,
+    purchase_date: vehicleData.purchaseDate || null,
+    due_date: vehicleData.dueDate || null,
+    installment_value: vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null,
+    down_payment: vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null,
+    financed_amount: vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null,
+    total_installments: vehicleData.totalInstallments ? parseInt(vehicleData.totalInstallments) : null,
+    paid_installments: vehicleData.paidInstallments ? parseInt(vehicleData.paidInstallments) : null,
+    remaining_installments: vehicleData.remainingInstallments ? parseInt(vehicleData.remainingInstallments) : null,
+    total_to_pay: vehicleData.totalToPay ? parseFloat(vehicleData.totalToPay) : null,
+    payoff_value: vehicleData.payoffValue ? parseFloat(vehicleData.payoffValue) : null,
+    payoff_date: vehicleData.payoffDate || null,
+    interest_rate: vehicleData.interestRate ? parseFloat(vehicleData.interestRate) : null,
+    custom_financing_bank: vehicleData.customFinancingBank || null
   };
 
   console.log('mapFormDataToDbData - color being saved:', baseData.color);
@@ -94,7 +112,7 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.model) dbUpdateData.model = vehicleData.model;
   if (vehicleData.miles !== undefined) dbUpdateData.miles = parseInt(vehicleData.miles) || 0;
   if (vehicleData.internalCode) dbUpdateData.internal_code = vehicleData.internalCode;
-  if (vehicleData.color !== undefined) { // CORRIGIDO: verificar se cor foi fornecida
+  if (vehicleData.color !== undefined) {
     dbUpdateData.color = vehicleData.color || null;
     console.log('mapUpdateDataToDbData - color being updated:', dbUpdateData.color);
   }
@@ -104,6 +122,24 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.minNegotiable !== undefined) dbUpdateData.min_negotiable = vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null;
   if (vehicleData.carfaxPrice !== undefined) dbUpdateData.carfax_price = vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null;
   if (vehicleData.mmrValue !== undefined) dbUpdateData.mmr_value = vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null;
+  
+  // Campos de financiamento
+  if (vehicleData.financingBank !== undefined) dbUpdateData.financing_bank = vehicleData.financingBank || null;
+  if (vehicleData.financingType !== undefined) dbUpdateData.financing_type = vehicleData.financingType || null;
+  if (vehicleData.originalFinancedName !== undefined) dbUpdateData.original_financed_name = vehicleData.originalFinancedName || null;
+  if (vehicleData.purchaseDate !== undefined) dbUpdateData.purchase_date = vehicleData.purchaseDate || null;
+  if (vehicleData.dueDate !== undefined) dbUpdateData.due_date = vehicleData.dueDate || null;
+  if (vehicleData.installmentValue !== undefined) dbUpdateData.installment_value = vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null;
+  if (vehicleData.downPayment !== undefined) dbUpdateData.down_payment = vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null;
+  if (vehicleData.financedAmount !== undefined) dbUpdateData.financed_amount = vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null;
+  if (vehicleData.totalInstallments !== undefined) dbUpdateData.total_installments = vehicleData.totalInstallments ? parseInt(vehicleData.totalInstallments) : null;
+  if (vehicleData.paidInstallments !== undefined) dbUpdateData.paid_installments = vehicleData.paidInstallments ? parseInt(vehicleData.paidInstallments) : null;
+  if (vehicleData.remainingInstallments !== undefined) dbUpdateData.remaining_installments = vehicleData.remainingInstallments ? parseInt(vehicleData.remainingInstallments) : null;
+  if (vehicleData.totalToPay !== undefined) dbUpdateData.total_to_pay = vehicleData.totalToPay ? parseFloat(vehicleData.totalToPay) : null;
+  if (vehicleData.payoffValue !== undefined) dbUpdateData.payoff_value = vehicleData.payoffValue ? parseFloat(vehicleData.payoffValue) : null;
+  if (vehicleData.payoffDate !== undefined) dbUpdateData.payoff_date = vehicleData.payoffDate || null;
+  if (vehicleData.interestRate !== undefined) dbUpdateData.interest_rate = vehicleData.interestRate ? parseFloat(vehicleData.interestRate) : null;
+  if (vehicleData.customFinancingBank !== undefined) dbUpdateData.custom_financing_bank = vehicleData.customFinancingBank || null;
   
   // Handle category mapping
   if (vehicleData.category) {
