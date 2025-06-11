@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
@@ -17,7 +18,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     vin: editingVehicle?.vin || '',
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
-    miles: editingVehicle?.miles?.toString() || editingVehicle?.plate || '',
+    miles: editingVehicle?.miles?.toString() || '0', // CORRIGIDO: garantir que miles sempre tenha um valor padrão
     internalCode: editingVehicle?.internal_code || editingVehicle?.internalCode || '',
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
