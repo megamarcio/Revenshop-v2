@@ -232,10 +232,14 @@ const MaintenanceForm = ({
             onRemoveQuote={handleRemoveQuote}
           />
 
-          <ReceiptUploadForm receiptUrls={formData.receipt_urls} onReceiptUrlsChange={urls => setFormData(prev => ({
-          ...prev,
-          receipt_urls: urls
-        }))} />
+          <ReceiptUploadForm 
+            maintenanceId={editingMaintenance?.id}
+            receiptUrls={formData.receipt_urls} 
+            onReceiptUrlsChange={urls => setFormData(prev => ({
+              ...prev,
+              receipt_urls: urls
+            }))} 
+          />
 
           <MaintenanceFormActions onCancel={onClose} loading={loading} vehiclesLoading={vehiclesLoading} isEditing={isEditing} />
         </form>
