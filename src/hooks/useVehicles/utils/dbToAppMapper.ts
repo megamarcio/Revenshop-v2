@@ -1,4 +1,5 @@
 
+
 export const mapDbDataToAppData = (dbVehicle: any) => {
   console.log('mapDbDataToAppData - input:', dbVehicle);
   
@@ -33,6 +34,10 @@ export const mapDbDataToAppData = (dbVehicle: any) => {
   // Garantir que miles seja um número válido
   const miles = typeof dbVehicle.miles === 'number' ? dbVehicle.miles : parseInt(dbVehicle.miles) || 0;
 
+  // Garantir que os campos de título sejam tratados corretamente
+  const titleType = dbVehicle.title_type || 'clean-title';
+  const titleStatus = dbVehicle.title_status || 'em-maos';
+
   const appData = {
     id: dbVehicle.id,
     name: dbVehicle.name,
@@ -61,10 +66,10 @@ export const mapDbDataToAppData = (dbVehicle: any) => {
     category: category,
     consignment_store: consignmentStore,
     consignmentStore: consignmentStore,
-    title_type: dbVehicle.title_type,
-    titleType: dbVehicle.title_type,
-    title_status: dbVehicle.title_status,
-    titleStatus: dbVehicle.title_status,
+    title_type: titleType, // Garantir que seja mapeado corretamente
+    titleType: titleType, // Versão camelCase
+    title_status: titleStatus, // Garantir que seja mapeado corretamente
+    titleStatus: titleStatus, // Versão camelCase
     photos: dbVehicle.photos || [],
     video: dbVehicle.video,
     created_at: dbVehicle.created_at,
@@ -111,6 +116,12 @@ export const mapDbDataToAppData = (dbVehicle: any) => {
     originalMiles: dbVehicle.miles,
     mappedMiles: appData.miles,
     type: typeof appData.miles
+  });
+  console.log('mapDbDataToAppData - title fields mapped:', {
+    originalTitleType: dbVehicle.title_type,
+    mappedTitleType: appData.title_type,
+    originalTitleStatus: dbVehicle.title_status,
+    mappedTitleStatus: appData.title_status
   });
   console.log('mapDbDataToAppData - financing fields mapped:', {
     financingBank: appData.financingBank,

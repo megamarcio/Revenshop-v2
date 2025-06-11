@@ -1,4 +1,5 @@
 
+
 import { useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
@@ -34,6 +35,16 @@ export const useVehicleForm = (editingVehicle?: any) => {
     return '0';
   };
   
+  // Função para garantir que title_type seja tratado corretamente
+  const getTitleTypeValue = () => {
+    return editingVehicle?.title_type || editingVehicle?.titleType || 'clean-title';
+  };
+  
+  // Função para garantir que title_status seja tratado corretamente
+  const getTitleStatusValue = () => {
+    return editingVehicle?.title_status || editingVehicle?.titleStatus || 'em-maos';
+  };
+  
   const [formData, setFormData] = useState<VehicleFormData>({
     name: editingVehicle?.name || '',
     vin: editingVehicle?.vin || '',
@@ -45,8 +56,8 @@ export const useVehicleForm = (editingVehicle?: any) => {
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
     titleInfo: getTitleInfo(editingVehicle),
-    titleType: editingVehicle?.title_type || editingVehicle?.titleType || 'clean-title',
-    titleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus || 'em-maos',
+    titleType: getTitleTypeValue(), // Garantir que seja tratado corretamente
+    titleStatus: getTitleStatusValue(), // Garantir que seja tratado corretamente
     purchasePrice: editingVehicle?.purchase_price?.toString() || editingVehicle?.purchasePrice?.toString() || '',
     salePrice: editingVehicle?.sale_price?.toString() || editingVehicle?.salePrice?.toString() || '',
     minNegotiable: editingVehicle?.min_negotiable?.toString() || editingVehicle?.minNegotiable?.toString() || '',
@@ -97,6 +108,12 @@ export const useVehicleForm = (editingVehicle?: any) => {
   console.log('useVehicleForm - formData initialized:', formData);
   console.log('useVehicleForm - miles value from editingVehicle:', editingVehicle?.miles);
   console.log('useVehicleForm - final miles in formData:', formData.miles);
+  console.log('useVehicleForm - title fields:', {
+    titleType: formData.titleType,
+    titleStatus: formData.titleStatus,
+    originalTitleType: editingVehicle?.title_type || editingVehicle?.titleType,
+    originalTitleStatus: editingVehicle?.title_status || editingVehicle?.titleStatus
+  });
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
     console.log('useVehicleForm - handleInputChange:', field, value);

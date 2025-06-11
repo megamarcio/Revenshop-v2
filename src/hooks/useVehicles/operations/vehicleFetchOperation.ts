@@ -47,16 +47,22 @@ export const fetchVehicles = async (): Promise<Vehicle[]> => {
     // Garantir que miles seja um número válido
     const miles = vehicle.miles || 0;
     
+    // Garantir que os campos de título sejam tratados corretamente
+    const titleType = vehicle.title_type || 'clean-title';
+    const titleStatus = vehicle.title_status || 'em-maos';
+    
     return mapDbDataToAppData({
       ...vehicle,
       miles, // Garantir que o campo miles seja passado corretamente
+      title_type: titleType, // Garantir que title_type seja passado
+      title_status: titleStatus, // Garantir que title_status seja passado
       photos,
       main_photo_url,
       vehicle_photos: undefined // Remove from final object
     });
   }) || [];
   
-  console.log('Mapped vehicles with financing data and miles:', mappedVehicles);
+  console.log('Mapped vehicles with financing data, miles and title fields:', mappedVehicles);
   
   return mappedVehicles;
 };
