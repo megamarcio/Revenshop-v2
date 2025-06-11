@@ -9,7 +9,6 @@ export interface VehicleMinimal {
   vin: string;
   sale_price: number;
   internal_code: string;
-  category: string;
   main_photo_url?: string;
 }
 
@@ -30,7 +29,7 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
     try {
       console.log('Fetching minimal vehicles with options:', { category, limit, offset, searchTerm });
       
-      // Query otimizada - apenas campos essenciais + foto principal
+      // Query super otimizada - apenas campos essenciais
       let query = supabase
         .from('vehicles')
         .select(`
@@ -39,7 +38,6 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
           vin, 
           sale_price, 
           internal_code,
-          category,
           vehicle_photos!vehicle_photos_vehicle_id_fkey(url)
         `)
         .eq('vehicle_photos.is_main', true)
@@ -71,8 +69,8 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
         return;
       }
 
-      // Criar os objetos VehicleMinimal otimizados
-      const vehiclesWithPhotos = vehiclesData.map(vehicle => {
+      // Criar os objetos VehicleMinimal super simples
+      const vehiclesMinimal = vehiclesData.map(vehicle => {
         const vehiclePhotos = vehicle.vehicle_photos || [];
         const main_photo_url = vehiclePhotos[0]?.url || null;
 
@@ -82,20 +80,19 @@ export const useVehiclesMinimal = (options: UseVehiclesMinimalOptions = {}) => {
           vin: vehicle.vin,
           sale_price: vehicle.sale_price,
           internal_code: vehicle.internal_code,
-          category: vehicle.category,
           main_photo_url,
         } as VehicleMinimal;
       });
 
-      console.log('Minimal vehicles fetched successfully:', vehiclesWithPhotos.length, 'vehicles');
+      console.log('Minimal vehicles fetched successfully:', vehiclesMinimal.length, 'vehicles');
       
       if (offset === 0) {
-        setVehicles(vehiclesWithPhotos);
+        setVehicles(vehiclesMinimal);
       } else {
-        setVehicles(prev => [...prev, ...vehiclesWithPhotos]);
+        setVehicles(prev => [...prev, ...vehiclesMinimal]);
       }
 
-      setHasMore(vehiclesWithPhotos.length === limit);
+      setHasMore(vehiclesMinimal.length === limit);
     } catch (error) {
       console.error('Error fetching minimal vehicles:', error);
       toast({
