@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Download, Image as ImageIcon } from 'lucide-react';
 import VehicleStatusBadge from './VehicleStatusBadge';
+import LazyImage from './LazyImage';
 
 interface VehicleCardHeaderProps {
   vehicle: {
@@ -27,18 +28,17 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
   onDownloadAll,
   downloading
 }) => {
-  // TESTE: Sem fotos durante o teste de performance
-  const mainPhoto = null;
-  const hasPhotos = false;
+  const mainPhoto = vehicle.main_photo_url || (vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null);
+  const hasPhotos = vehicle.photos && vehicle.photos.length > 0;
 
   return (
     <CardHeader className="p-0 relative">
-      {/* TESTE: Sempre mostrar placeholder sem foto durante teste */}
-      <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative">
-        <div className="text-center">
-          <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-          <p className="text-xs text-gray-500">TESTE: Sem fotos</p>
-        </div>
+      <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative overflow-hidden">
+        <LazyImage
+          src={mainPhoto}
+          alt={`${vehicle.name} - Foto principal`}
+          className="w-full h-full"
+        />
         
         {/* Status Badge */}
         <VehicleStatusBadge 
@@ -47,40 +47,44 @@ const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
           consignment_store={vehicle.consignment_store}
         />
         
-        {/* TESTE: Botões de download desabilitados */}
-        <div className="absolute top-2 right-2 flex gap-1 opacity-50">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                disabled={true}
-              >
-                <Download className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Download desabilitado (modo teste)</p>
-            </TooltipContent>
-          </Tooltip>
-          
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="secondary"
-                size="sm"
-                className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                disabled={true}
-              >
-                <ImageIcon className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Download desabilitado (modo teste)</p>
-            </TooltipContent>
-          </Tooltip>
-        </div>
+        {/* Download buttons - só mostrar se tiver fotos */}
+        {hasPhotos && (
+          <div className="absolute top-2 right-2 flex gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                  onClick={() => mainPhoto && onDownloadSingle(mainPhoto, 0)}
+                  disabled={downloading || !mainPhoto}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Baixar esta foto</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                  onClick={onDownloadAll}
+                  disabled={downloading}
+                >
+                  <ImageIcon className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Baixar todas as fotos</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </div>
     </CardHeader>
   );
