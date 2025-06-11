@@ -38,27 +38,27 @@ const VehicleList = () => {
       id: vehicle.id,
       name: vehicle.name,
       vin: vehicle.vin,
-      year: 0, // Campo obrigatório mas não usado na listagem
+      year: 2020, // Campo obrigatório mas não usado na listagem
       model: '',
-      plate: '',
-      internalCode: vehicle.vin, // Usar VIN como código interno temporariamente
+      miles: 0,
+      internal_code: vehicle.vin, // Usar VIN como código interno temporariamente
       color: '',
-      caNote: 0,
-      purchasePrice: 0,
-      salePrice: vehicle.sale_price,
-      profitMargin: 0,
-      minNegotiable: 0,
-      carfaxPrice: 0,
-      mmrValue: 0,
+      ca_note: 0,
+      purchase_price: 0,
+      sale_price: vehicle.sale_price,
+      profit_margin: 0,
+      min_negotiable: 0,
+      carfax_price: 0,
+      mmr_value: 0,
       description: '',
       category: 'forSale' as const,
-      consignmentStore: '',
-      seller: '',
-      finalSalePrice: 0,
-      photos: [], // Sem fotos na listagem inicial
+      title_type: undefined,
+      title_status: undefined,
       video: '',
-      main_photo_url: null // Não usar foto direta
-    }));
+      created_by: undefined,
+      created_at: undefined,
+      updated_at: undefined
+    } as Vehicle));
   }, [ultraMinimalVehicles]);
 
   // Vehicle Actions Logic
@@ -79,68 +79,33 @@ const VehicleList = () => {
     }
   };
 
-  const handleEditVehicle = (vehicle: any) => {
+  const handleEditVehicle = (vehicle: Vehicle) => {
     if (!canEditVehicles) return;
     console.log('VehicleList - handleEditVehicle called with:', vehicle);
     
-    // Para edição, precisamos carregar os dados completos
-    // Por enquanto, criar um objeto básico
-    const fullVehicle = {
-      id: vehicle.id,
-      name: vehicle.name,
-      vin: vehicle.vin,
-      year: vehicle.year || 2020,
-      model: vehicle.model || '',
-      miles: 0,
-      internal_code: vehicle.internalCode || vehicle.vin,
-      color: vehicle.color || '',
-      ca_note: vehicle.caNote || 0,
-      purchase_price: vehicle.purchasePrice || 0,
-      sale_price: vehicle.salePrice,
-      min_negotiable: vehicle.minNegotiable || 0,
-      carfax_price: vehicle.carfaxPrice || 0,
-      mmr_value: vehicle.mmrValue || 0,
-      description: vehicle.description || '',
-      category: 'forSale' as const,
-      title_type: undefined,
-      title_status: undefined,
-      video: vehicle.video || ''
-    } as Vehicle;
-    
-    setEditingVehicle(fullVehicle);
+    setEditingVehicle(vehicle);
     setShowAddForm(true);
   };
 
-  const handleDuplicateVehicle = (vehicle: any) => {
+  const handleDuplicateVehicle = (vehicle: Vehicle) => {
     if (!canEditVehicles) return;
     console.log('VehicleList - handleDuplicateVehicle called with:', vehicle);
     
     const duplicatedVehicle = {
+      ...vehicle,
+      id: undefined,
       name: `${vehicle.name} (Cópia)`,
       vin: '',
-      year: vehicle.year || 2020,
-      model: vehicle.model || '',
-      miles: 0,
       internal_code: '',
-      color: vehicle.color || '',
-      ca_note: vehicle.caNote || 0,
-      purchase_price: vehicle.purchasePrice || 0,
-      sale_price: vehicle.salePrice,
-      min_negotiable: vehicle.minNegotiable || 0,
-      carfax_price: vehicle.carfaxPrice || 0,
-      mmr_value: vehicle.mmrValue || 0,
-      description: vehicle.description || '',
-      category: 'forSale' as const,
-      title_type: undefined,
-      title_status: undefined,
-      video: vehicle.video || ''
-    };
+      created_at: undefined,
+      updated_at: undefined
+    } as Vehicle;
     
-    setEditingVehicle(duplicatedVehicle as Vehicle);
+    setEditingVehicle(duplicatedVehicle);
     setShowAddForm(true);
   };
 
-  const handleDeleteVehicle = async (vehicle: any) => {
+  const handleDeleteVehicle = async (vehicle: Vehicle) => {
     if (!canEditVehicles) return;
     if (confirm('Tem certeza que deseja excluir este veículo?')) {
       await deleteVehicle(vehicle.id);
@@ -152,7 +117,7 @@ const VehicleList = () => {
     let filtered = convertedVehicles.filter(vehicle => {
       const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase());
+        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
       
       let matchesFilter = true;
       if (filterBy !== 'all') {
