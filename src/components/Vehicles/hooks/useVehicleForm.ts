@@ -14,13 +14,12 @@ export const useVehicleForm = (editingVehicle?: any) => {
   // Determine if editing (has valid ID) or creating/duplicating (no ID)
   const isEditing = editingVehicle && editingVehicle.id;
   
-  // Generate internal code starting with 25
-  const generateInternalCode = () => {
-    if (editingVehicle?.internal_code || editingVehicle?.internalCode) {
+  // For new vehicles, start with blank internal code
+  const getInitialInternalCode = () => {
+    if (isEditing && (editingVehicle?.internal_code || editingVehicle?.internalCode)) {
       return editingVehicle.internal_code || editingVehicle.internalCode;
     }
-    const timestamp = Date.now().toString().slice(-4);
-    return `25${timestamp}`;
+    return ''; // Start with blank for new vehicles
   };
   
   const [formData, setFormData] = useState<VehicleFormData>({
@@ -29,7 +28,7 @@ export const useVehicleForm = (editingVehicle?: any) => {
     year: editingVehicle?.year?.toString() || '',
     model: editingVehicle?.model || '',
     miles: editingVehicle?.miles?.toString() || '0',
-    internalCode: generateInternalCode(),
+    internalCode: getInitialInternalCode(),
     color: editingVehicle?.color || '',
     caNote: editingVehicle?.ca_note?.toString() || editingVehicle?.caNote?.toString() || '',
     titleInfo: getTitleInfo(editingVehicle),

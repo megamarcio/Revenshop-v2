@@ -84,10 +84,7 @@ const BasicInfoForm = ({
         </div>
 
         <div>
-          <div className="flex items-center gap-1">
-            <Label htmlFor="internalCode">{t('internalCode')} *</Label>
-            <span className="text-xs text-gray-500">📋</span>
-          </div>
+          <Label htmlFor="internalCode">{t('internalCode')} *</Label>
           <Input 
             id="internalCode" 
             value={formData.internalCode} 
