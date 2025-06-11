@@ -13,6 +13,7 @@ import EmptyVehicleState from './EmptyVehicleState';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
+import { Vehicle as VehicleCardType } from './VehicleCardTypes';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
@@ -32,16 +33,44 @@ const VehicleList = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
 
-  // Converter dados ultra-mínimos para o formato esperado pelos componentes
-  const convertedVehicles = useMemo(() => {
+  // Converter dados ultra-mínimos para o formato esperado pelos componentes de card
+  const convertedVehiclesForCards = useMemo(() => {
     return ultraMinimalVehicles.map(vehicle => ({
       id: vehicle.id,
       name: vehicle.name,
       vin: vehicle.vin,
-      year: 2020, // Campo obrigatório mas não usado na listagem
+      year: 2020,
+      model: '',
+      plate: '',
+      internalCode: vehicle.vin,
+      color: '',
+      caNote: 0,
+      purchasePrice: 0,
+      salePrice: vehicle.sale_price,
+      profitMargin: 0,
+      minNegotiable: 0,
+      carfaxPrice: 0,
+      mmrValue: 0,
+      description: '',
+      category: 'forSale' as const,
+      consignmentStore: '',
+      seller: '',
+      finalSalePrice: 0,
+      photos: [],
+      video: ''
+    } as VehicleCardType));
+  }, [ultraMinimalVehicles]);
+
+  // Converter dados ultra-mínimos para o formato do hook useVehicles (para edição)
+  const convertedVehiclesForEditing = useMemo(() => {
+    return ultraMinimalVehicles.map(vehicle => ({
+      id: vehicle.id,
+      name: vehicle.name,
+      vin: vehicle.vin,
+      year: 2020,
       model: '',
       miles: 0,
-      internal_code: vehicle.vin, // Usar VIN como código interno temporariamente
+      internal_code: vehicle.vin,
       color: '',
       ca_note: 0,
       purchase_price: 0,
@@ -54,6 +83,7 @@ const VehicleList = () => {
       category: 'forSale' as const,
       title_type: undefined,
       title_status: undefined,
+      photos: [],
       video: '',
       created_by: undefined,
       created_at: undefined,
@@ -79,33 +109,41 @@ const VehicleList = () => {
     }
   };
 
-  const handleEditVehicle = (vehicle: Vehicle) => {
+  const handleEditVehicle = (vehicle: VehicleCardType) => {
     if (!canEditVehicles) return;
     console.log('VehicleList - handleEditVehicle called with:', vehicle);
     
-    setEditingVehicle(vehicle);
-    setShowAddForm(true);
+    // Converter do formato de card para o formato de edição
+    const vehicleForEditing = convertedVehiclesForEditing.find(v => v.id === vehicle.id);
+    if (vehicleForEditing) {
+      setEditingVehicle(vehicleForEditing);
+      setShowAddForm(true);
+    }
   };
 
-  const handleDuplicateVehicle = (vehicle: Vehicle) => {
+  const handleDuplicateVehicle = (vehicle: VehicleCardType) => {
     if (!canEditVehicles) return;
     console.log('VehicleList - handleDuplicateVehicle called with:', vehicle);
     
-    const duplicatedVehicle = {
-      ...vehicle,
-      id: undefined,
-      name: `${vehicle.name} (Cópia)`,
-      vin: '',
-      internal_code: '',
-      created_at: undefined,
-      updated_at: undefined
-    } as Vehicle;
-    
-    setEditingVehicle(duplicatedVehicle);
-    setShowAddForm(true);
+    // Converter para formato de edição e duplicar
+    const vehicleForEditing = convertedVehiclesForEditing.find(v => v.id === vehicle.id);
+    if (vehicleForEditing) {
+      const duplicatedVehicle = {
+        ...vehicleForEditing,
+        id: undefined,
+        name: `${vehicleForEditing.name} (Cópia)`,
+        vin: '',
+        internal_code: '',
+        created_at: undefined,
+        updated_at: undefined
+      } as Vehicle;
+      
+      setEditingVehicle(duplicatedVehicle);
+      setShowAddForm(true);
+    }
   };
 
-  const handleDeleteVehicle = async (vehicle: Vehicle) => {
+  const handleDeleteVehicle = async (vehicle: VehicleCardType) => {
     if (!canEditVehicles) return;
     if (confirm('Tem certeza que deseja excluir este veículo?')) {
       await deleteVehicle(vehicle.id);
@@ -114,10 +152,10 @@ const VehicleList = () => {
 
   // Vehicle Filters Logic
   const filteredAndSortedVehicles = useMemo(() => {
-    let filtered = convertedVehicles.filter(vehicle => {
+    let filtered = convertedVehiclesForCards.filter(vehicle => {
       const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
+        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase());
       
       let matchesFilter = true;
       if (filterBy !== 'all') {
@@ -132,7 +170,7 @@ const VehicleList = () => {
     });
 
     return filtered;
-  }, [convertedVehicles, searchTerm, filterBy]);
+  }, [convertedVehiclesForCards, searchTerm, filterBy]);
 
   const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
