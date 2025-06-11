@@ -129,10 +129,10 @@ export const updateVehicle = async (id: string, vehicleData: Partial<any>): Prom
     .single();
   
   const finalVehicleData = vehicleWithPhotos || data;
-  const vehiclePhotos = finalVehicleData.vehicle_photos || [];
+  const vehiclePhotos = (finalVehicleData as any).vehicle_photos || [];
   const photosList = vehiclePhotos
-    .sort((a, b) => (a.position || 0) - (b.position || 0))
-    .map(photo => photo.url);
+    .sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+    .map((photo: any) => photo.url);
   
   console.log('Vehicle updated successfully with photos:', finalVehicleData);
   return mapDbDataToAppData({ 

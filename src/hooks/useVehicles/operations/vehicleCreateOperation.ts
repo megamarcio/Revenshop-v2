@@ -110,10 +110,10 @@ export const createVehicle = async (vehicleData: any): Promise<Vehicle> => {
     .single();
   
   const finalVehicleData = vehicleWithPhotos || data;
-  const vehiclePhotos = finalVehicleData.vehicle_photos || [];
+  const vehiclePhotos = (finalVehicleData as any).vehicle_photos || [];
   const photosList = vehiclePhotos
-    .sort((a, b) => (a.position || 0) - (b.position || 0))
-    .map(photo => photo.url);
+    .sort((a: any, b: any) => (a.position || 0) - (b.position || 0))
+    .map((photo: any) => photo.url);
   
   console.log('Vehicle created successfully with photos:', finalVehicleData);
   return mapDbDataToAppData({ 
