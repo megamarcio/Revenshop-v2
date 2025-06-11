@@ -2,6 +2,7 @@
 import React from 'react';
 import PhotoUploadSection from './PhotoUploadSection';
 import VideoUploadSection from './VideoUploadSection';
+import NewPhotosSection from './NewPhotosSection';
 
 interface MediaUploadFormProps {
   vehicleId?: string;
@@ -32,6 +33,11 @@ const MediaUploadForm = ({
       <VideoUploadSection
         videos={videos}
         setVideos={setVideos}
+        readOnly={readOnly}
+      />
+
+      <NewPhotosSection
+        vehicleId={vehicleId}
         readOnly={readOnly}
       />
     </>
