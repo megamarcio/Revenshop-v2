@@ -81,7 +81,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       const vehicleData: any = {
         ...formData,
         year: parseInt(formData.year),
-        caNote: parseInt(formData.caNote),
         purchasePrice: parseFloat(formData.purchasePrice),
         salePrice: parseFloat(formData.salePrice),
         minNegotiable: formData.minNegotiable ? parseFloat(formData.minNegotiable) : undefined,

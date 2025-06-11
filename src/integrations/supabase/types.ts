@@ -776,7 +776,6 @@ export type Database = {
       }
       vehicles: {
         Row: {
-          ca_note: number
           carfax_price: number | null
           category: Database["public"]["Enums"]["vehicle_category"]
           color: string
@@ -807,8 +806,6 @@ export type Database = {
           purchase_price: number
           remaining_installments: number | null
           sale_price: number
-          title_status: Database["public"]["Enums"]["title_status"] | null
-          title_type: Database["public"]["Enums"]["title_type"] | null
           total_installments: number | null
           total_to_pay: number | null
           updated_at: string | null
@@ -817,7 +814,6 @@ export type Database = {
           year: number
         }
         Insert: {
-          ca_note: number
           carfax_price?: number | null
           category?: Database["public"]["Enums"]["vehicle_category"]
           color: string
@@ -848,8 +844,6 @@ export type Database = {
           purchase_price: number
           remaining_installments?: number | null
           sale_price: number
-          title_status?: Database["public"]["Enums"]["title_status"] | null
-          title_type?: Database["public"]["Enums"]["title_type"] | null
           total_installments?: number | null
           total_to_pay?: number | null
           updated_at?: string | null
@@ -858,7 +852,6 @@ export type Database = {
           year: number
         }
         Update: {
-          ca_note?: number
           carfax_price?: number | null
           category?: Database["public"]["Enums"]["vehicle_category"]
           color?: string
@@ -889,8 +882,6 @@ export type Database = {
           purchase_price?: number
           remaining_installments?: number | null
           sale_price?: number
-          title_status?: Database["public"]["Enums"]["title_status"] | null
-          title_type?: Database["public"]["Enums"]["title_type"] | null
           total_installments?: number | null
           total_to_pay?: number | null
           updated_at?: string | null
@@ -969,8 +960,6 @@ export type Database = {
     }
     Enums: {
       payment_method: "cash" | "financing" | "bhph" | "check" | "other"
-      title_status: "em-maos" | "em-transito"
-      title_type: "clean-title" | "rebuilt"
       user_role: "admin" | "manager" | "seller" | "internal_seller"
       vehicle_category: "forSale" | "sold"
     }
@@ -1089,8 +1078,6 @@ export const Constants = {
   public: {
     Enums: {
       payment_method: ["cash", "financing", "bhph", "check", "other"],
-      title_status: ["em-maos", "em-transito"],
-      title_type: ["clean-title", "rebuilt"],
       user_role: ["admin", "manager", "seller", "internal_seller"],
       vehicle_category: ["forSale", "sold"],
     },

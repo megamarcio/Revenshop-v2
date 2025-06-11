@@ -2,123 +2,99 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import { VehicleFormData } from '../types/vehicleFormTypes';
 import ColorSelector from './ColorSelector';
-import ConditionReportSelector from './ConditionReportSelector';
-import TitleStatusSelector from './TitleStatusSelector';
-import TitleTypeSelector from './TitleTypeSelector';
+import { VehicleFormData } from '../types/vehicleFormTypes';
 
 interface BasicInfoFormProps {
   formData: VehicleFormData;
-  errors: Partial<VehicleFormData>;
   onInputChange: (field: keyof VehicleFormData, value: string) => void;
+  errors: Record<string, string>;
 }
 
-const BasicInfoForm = ({
-  formData,
-  errors,
-  onInputChange
-}: BasicInfoFormProps) => {
-  const { t } = useLanguage();
-
+const BasicInfoForm = ({ formData, onInputChange, errors }: BasicInfoFormProps) => {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">{t('vehicleName')} *</Label>
-          <Input 
-            id="name" 
-            value={formData.name} 
-            onChange={e => onInputChange('name', e.target.value)} 
-            className={errors.name ? 'border-red-500' : ''} 
-          />
-          {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
-        </div>
-
-        <div>
-          <Label htmlFor="vin">VIN *</Label>
-          <Input 
-            id="vin" 
-            value={formData.vin} 
-            onChange={e => onInputChange('vin', e.target.value)} 
-            className={errors.vin ? 'border-red-500' : ''} 
-          />
-          {errors.vin && <span className="text-red-500 text-sm">{errors.vin}</span>}
-        </div>
-
-        <div>
-          <Label htmlFor="year">{t('year')} *</Label>
-          <Input 
-            id="year" 
-            type="number" 
-            value={formData.year} 
-            onChange={e => onInputChange('year', e.target.value)} 
-            className={errors.year ? 'border-red-500' : ''} 
-          />
-          {errors.year && <span className="text-red-500 text-sm">{errors.year}</span>}
-        </div>
-
-        <div>
-          <Label htmlFor="model">{t('model')} *</Label>
-          <Input 
-            id="model" 
-            value={formData.model} 
-            onChange={e => onInputChange('model', e.target.value)} 
-            className={errors.model ? 'border-red-500' : ''} 
-          />
-          {errors.model && <span className="text-red-500 text-sm">{errors.model}</span>}
-        </div>
-
-        <div>
-          <Label htmlFor="miles">Quilometragem (Miles) *</Label>
-          <Input 
-            id="miles" 
-            type="number" 
-            value={formData.miles} 
-            onChange={e => onInputChange('miles', e.target.value)} 
-            className={errors.miles ? 'border-red-500' : ''} 
-            placeholder="Ex: 50000" 
-          />
-          {errors.miles && <span className="text-red-500 text-sm">{errors.miles}</span>}
-        </div>
-
-        <div>
-          <Label htmlFor="internalCode">{t('internalCode')} *</Label>
-          <Input 
-            id="internalCode" 
-            value={formData.internalCode} 
-            onChange={e => onInputChange('internalCode', e.target.value)} 
-            className={errors.internalCode ? 'border-red-500' : ''} 
-            placeholder="Ex: 25001"
-          />
-          {errors.internalCode && <span className="text-red-500 text-sm">{errors.internalCode}</span>}
-        </div>
-
-        <ColorSelector
-          value={formData.color}
-          onChange={(value) => onInputChange('color', value)}
-          error={errors.color}
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div>
+        <Label htmlFor="name">Nome do Veículo *</Label>
+        <Input
+          id="name"
+          value={formData.name}
+          onChange={(e) => onInputChange('name', e.target.value)}
+          className={errors.name ? 'border-red-500' : ''}
         />
-
-        <ConditionReportSelector
-          value={formData.caNote}
-          onChange={(value) => onInputChange('caNote', value)}
-          error={errors.caNote}
-        />
+        {errors.name && <span className="text-red-500 text-sm">{errors.name}</span>}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <TitleTypeSelector
-          value={formData.titleType || 'clean-title'}
-          onChange={(value) => onInputChange('titleType', value)}
-          error={errors.titleType}
+      <div>
+        <Label htmlFor="vin">VIN *</Label>
+        <Input
+          id="vin"
+          value={formData.vin}
+          onChange={(e) => onInputChange('vin', e.target.value)}
+          className={errors.vin ? 'border-red-500' : ''}
         />
+        {errors.vin && <span className="text-red-500 text-sm">{errors.vin}</span>}
+      </div>
 
-        <TitleStatusSelector
-          value={formData.titleStatus || 'em-maos'}
-          onChange={(value) => onInputChange('titleStatus', value)}
-          error={errors.titleStatus}
+      <div>
+        <Label htmlFor="year">Ano *</Label>
+        <Input
+          id="year"
+          type="number"
+          value={formData.year}
+          onChange={(e) => onInputChange('year', e.target.value)}
+          className={errors.year ? 'border-red-500' : ''}
+        />
+        {errors.year && <span className="text-red-500 text-sm">{errors.year}</span>}
+      </div>
+
+      <div>
+        <Label htmlFor="model">Modelo *</Label>
+        <Input
+          id="model"
+          value={formData.model}
+          onChange={(e) => onInputChange('model', e.target.value)}
+          className={errors.model ? 'border-red-500' : ''}
+        />
+        {errors.model && <span className="text-red-500 text-sm">{errors.model}</span>}
+      </div>
+
+      <div>
+        <Label htmlFor="miles">Milhas *</Label>
+        <Input
+          id="miles"
+          type="number"
+          value={formData.miles}
+          onChange={(e) => onInputChange('miles', e.target.value)}
+          className={errors.miles ? 'border-red-500' : ''}
+        />
+        {errors.miles && <span className="text-red-500 text-sm">{errors.miles}</span>}
+      </div>
+
+      <div>
+        <Label htmlFor="internalCode">Código Interno *</Label>
+        <Input
+          id="internalCode"
+          value={formData.internalCode}
+          onChange={(e) => onInputChange('internalCode', e.target.value)}
+          className={errors.internalCode ? 'border-red-500' : ''}
+        />
+        {errors.internalCode && <span className="text-red-500 text-sm">{errors.internalCode}</span>}
+      </div>
+
+      <ColorSelector
+        value={formData.color}
+        onChange={(value) => onInputChange('color', value)}
+        error={errors.color}
+      />
+
+      <div className="md:col-span-2 lg:col-span-3">
+        <Label htmlFor="titleInfo">Informações do Título</Label>
+        <Input
+          id="titleInfo"
+          value={formData.titleInfo}
+          onChange={(e) => onInputChange('titleInfo', e.target.value)}
+          placeholder="Informações adicionais sobre o título"
         />
       </div>
     </div>

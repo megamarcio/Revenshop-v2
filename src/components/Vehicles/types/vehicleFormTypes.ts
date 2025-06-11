@@ -7,10 +7,7 @@ export interface VehicleFormData {
   miles: string; // CONFIRMADO: campo miles está definido
   internalCode: string;
   color: string;
-  caNote: string;
   titleInfo: string;
-  titleType: string;
-  titleStatus: string;
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;
