@@ -1,7 +1,7 @@
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { mapDbDataToAppData } from './useVehicles/utils/dbToAppMapper';
 
 export interface Vehicle {
   id: string;
@@ -12,162 +12,167 @@ export interface Vehicle {
   miles: number;
   internal_code: string;
   color: string;
-  ca_note: number;
   purchase_price: number;
   sale_price: number;
   profit_margin: number;
-  min_negotiable?: number;
-  carfax_price?: number;
-  mmr_value?: number;
-  description?: string;
-  category: 'forSale' | 'sold';
-  title_type?: 'clean-title' | 'rebuilt';
-  title_status?: 'em-maos' | 'em-transito';
-  photos: string[];
-  video?: string;
+  min_negotiable: number;
+  carfax_price: number;
+  mmr_value: number;
+  description: string;
+  category: string;
   created_at: string;
   updated_at: string;
-  created_by?: string;
-  image_url?: string;
+  created_by: string;
+  photos: any[];
 }
 
-interface UseVehiclesOptions {
-  category?: 'forSale' | 'sold';
-  limit?: number;
+interface UseVehiclesOptimizedOptions {
+  category?: string;
   searchTerm?: string;
+  limit?: number;
+  sellerId?: string;
   minimal?: boolean;
 }
 
-export const useVehiclesOptimized = (options: UseVehiclesOptions = {}) => {
+export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const { category, limit = 20, searchTerm, minimal = false } = options;
-
-  const fetchVehicles = useCallback(async (offset = 0) => {
-    try {
-      console.log('Fetching vehicles with options:', { category, limit, offset, searchTerm, minimal });
-      
-      // Selecionar colunas baseado no tipo de consulta
-      const selectColumns = minimal 
-        ? 'id, name, vin, sale_price, internal_code, photos'
-        : 'id, name, vin, year, model, miles, internal_code, color, ca_note, purchase_price, sale_price, profit_margin, category, photos, created_at, updated_at';
-
-      let query = supabase
-        .from('vehicles')
-        .select(selectColumns)
-        .order('created_at', { ascending: false });
-
-      // Filtrar por categoria se especificado
-      if (category) {
-        query = query.eq('category', category);
-      }
-
-      // Adicionar busca por termo se especificado
-      if (searchTerm && searchTerm.length > 0) {
-        query = query.or(`name.ilike.%${searchTerm}%,internal_code.ilike.%${searchTerm}%,vin.ilike.%${searchTerm}%`);
-      }
-
-      // Adicionar paginação
-      query = query.range(offset, offset + limit - 1);
-
-      const { data, error } = await query;
-
-      if (error) {
-        console.error('Supabase error fetching vehicles:', error);
-        throw error;
-      }
-      
-      // Verificar se data é um array válido antes de processar
-      if (!Array.isArray(data)) {
-        console.error('Data is not an array:', data);
-        throw new Error('Invalid data format received from database');
-      }
-
-      // Adicionar image_url baseado na primeira foto e garantir que todos os campos necessários existam
-      const vehiclesWithImages = data.map(vehicle => {
-        // Verificar se vehicle é um objeto válido
-        if (!vehicle || typeof vehicle !== 'object') {
-          console.error('Invalid vehicle object:', vehicle);
-          return null;
-        }
-
-        // Cast para garantir que temos um objeto válido
-        const validVehicle = vehicle as Record<string, any>;
-
-        const baseVehicle = {
-          ...validVehicle,
-          image_url: validVehicle.photos && Array.isArray(validVehicle.photos) && validVehicle.photos.length > 0 ? validVehicle.photos[0] : null,
-        };
-
-        // Para consultas mínimas, adicionar campos padrão
-        if (minimal) {
-          return {
-            ...baseVehicle,
-            year: 0,
-            model: '',
-            miles: 0,
-            color: '',
-            ca_note: 0,
-            purchase_price: 0,
-            profit_margin: 0,
-            category: category || 'forSale' as const,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        } else {
-          return {
-            ...baseVehicle,
-            updated_at: validVehicle.updated_at || validVehicle.created_at || new Date().toISOString()
-          };
-        }
-      }).filter(vehicle => vehicle !== null) as Vehicle[];
-
-      console.log('Vehicles fetched successfully:', vehiclesWithImages.length, 'vehicles');
-      
-      if (offset === 0) {
-        setVehicles(vehiclesWithImages);
-      } else {
-        setVehicles(prev => [...prev, ...vehiclesWithImages]);
-      }
-
-      setHasMore(vehiclesWithImages.length === limit);
-    } catch (error) {
-      console.error('Error fetching vehicles:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao carregar veículos',
-        variant: 'destructive',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [category, limit, searchTerm, minimal]);
-
-  // Memoizar veículos para venda especificamente para a calculadora
-  const forSaleVehicles = useMemo(() => {
-    return vehicles.filter(v => v.category === 'forSale');
-  }, [vehicles]);
-
-  const loadMore = useCallback(() => {
-    fetchVehicles(vehicles.length);
-  }, [fetchVehicles, vehicles.length]);
-
-  const refetch = useCallback(() => {
-    setLoading(true);
-    fetchVehicles();
-  }, [fetchVehicles]);
+  const {
+    category,
+    searchTerm = '',
+    limit = 50,
+    sellerId,
+    minimal = false
+  } = options;
 
   useEffect(() => {
+    const fetchVehicles = async () => {
+      console.log('Fetching vehicles with options:', {
+        category,
+        limit,
+        offset: 0,
+        searchTerm,
+        minimal
+      });
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        let query = supabase
+          .from('vehicles')
+          .select(`
+            id,
+            name,
+            vin,
+            year,
+            model,
+            miles,
+            internal_code,
+            color,
+            purchase_price,
+            sale_price,
+            profit_margin,
+            min_negotiable,
+            carfax_price,
+            mmr_value,
+            description,
+            category,
+            created_at,
+            updated_at,
+            created_by,
+            financing_bank,
+            financing_type,
+            original_financed_name,
+            purchase_date,
+            due_date,
+            installment_value,
+            down_payment,
+            financed_amount,
+            total_installments,
+            paid_installments,
+            remaining_installments,
+            total_to_pay,
+            payoff_value,
+            payoff_date,
+            interest_rate,
+            custom_financing_bank,
+            title_type_id,
+            title_location_id,
+            title_location_custom,
+            vehicle_photos (
+              id,
+              photo_url,
+              is_main,
+              created_at
+            ),
+            title_types (
+              id,
+              name
+            ),
+            title_locations (
+              id,
+              name
+            )
+          `)
+          .order('created_at', { ascending: false });
+
+        // Apply category filter
+        if (category) {
+          query = query.eq('category', category);
+        }
+
+        // Apply seller filter for non-admin users
+        if (sellerId) {
+          query = query.eq('created_by', sellerId);
+        }
+
+        // Apply search filter
+        if (searchTerm && searchTerm.trim()) {
+          query = query.or(`
+            name.ilike.%${searchTerm}%,
+            model.ilike.%${searchTerm}%,
+            vin.ilike.%${searchTerm}%,
+            color.ilike.%${searchTerm}%,
+            internal_code.ilike.%${searchTerm}%
+          `);
+        }
+
+        // Apply limit
+        query = query.limit(limit);
+
+        const { data, error: supabaseError } = await query;
+
+        if (supabaseError) {
+          console.error('Supabase error fetching vehicles:', supabaseError);
+          throw supabaseError;
+        }
+
+        console.log('Raw vehicles data from Supabase:', data);
+
+        // Map the data using the existing mapper
+        const mappedVehicles = data?.map(mapDbDataToAppData) || [];
+        
+        console.log('Mapped vehicles:', mappedVehicles);
+        
+        setVehicles(mappedVehicles);
+      } catch (error: any) {
+        console.error('Error fetching vehicles:', error);
+        setError(error.message || 'Failed to fetch vehicles');
+        setVehicles([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchVehicles();
-  }, [fetchVehicles]);
+  }, [category, searchTerm, limit, sellerId, minimal]);
 
   return {
-    vehicles: category === 'forSale' ? forSaleVehicles : vehicles,
+    vehicles,
     loading,
-    hasMore,
-    loadMore,
-    refetch,
+    error,
   };
 };
