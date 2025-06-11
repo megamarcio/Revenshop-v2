@@ -5,7 +5,7 @@ import Sidebar from './components/Layout/Sidebar';
 import Navbar from './components/Layout/Navbar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Loader2 } from 'lucide-react';
-import VehicleList from './components/Vehicles/VehicleList';
+import VehicleListContainer from './components/Vehicles/VehicleListContainer';
 
 // Lazy loading dos componentes para melhor performance
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
@@ -47,7 +47,7 @@ const App: React.FC = () => {
       case 'dashboard':
         return canAccessDashboard ? <Dashboard /> : null;
       case 'vehicles':
-        return <VehicleList />;
+        return <VehicleListContainer />;
       case 'customers':
         return <CustomerManagement />;
       case 'auctions':
