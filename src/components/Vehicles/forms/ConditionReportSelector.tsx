@@ -12,8 +12,6 @@ interface ConditionReportSelectorProps {
 }
 
 const crOptions = [
-  { value: '0', label: '0' },
-  { value: '5', label: '5' },
   { value: '10', label: '10' },
   { value: '15', label: '15' },
   { value: '20', label: '20' },
@@ -35,7 +33,7 @@ const ConditionReportSelector = ({ value, onChange, error }: ConditionReportSele
             <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
           </TooltipTrigger>
           <TooltipContent>
-            <p>Condition Report</p>
+            <p>Condition Report (10-50)</p>
           </TooltipContent>
         </Tooltip>
       </div>

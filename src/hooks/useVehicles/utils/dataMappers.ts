@@ -40,15 +40,15 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     }
   }
 
-  // Preparar dados básicos - CORRIGIDO: miles agora mapeia corretamente
+  // Preparar dados básicos - CORRIGIDO: garantir que color seja sempre salvo
   const baseData = {
     name: vehicleData.name,
     vin: vehicleData.vin,
     year: parseInt(vehicleData.year),
     model: vehicleData.model,
-    miles: parseInt(vehicleData.miles) || 0, // CORRIGIDO: usar vehicleData.miles em vez de plate
+    miles: parseInt(vehicleData.miles) || 0,
     internal_code: vehicleData.internalCode,
-    color: vehicleData.color,
+    color: vehicleData.color || null, // CORRIGIDO: garantir que cor seja mapeada corretamente
     ca_note: parseInt(vehicleData.caNote),
     purchase_price: parseFloat(vehicleData.purchasePrice),
     sale_price: parseFloat(vehicleData.salePrice),
@@ -63,6 +63,8 @@ export const mapFormDataToDbData = async (vehicleData: any) => {
     video: vehicleData.video || null,
     created_by: (await supabase.auth.getUser()).data.user?.id || null
   };
+
+  console.log('mapFormDataToDbData - color being saved:', baseData.color);
 
   // Adicionar categoria estendida na descrição se necessário
   if (extendedCategory) {
@@ -90,9 +92,12 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
   if (vehicleData.vin) dbUpdateData.vin = vehicleData.vin;
   if (vehicleData.year) dbUpdateData.year = parseInt(vehicleData.year);
   if (vehicleData.model) dbUpdateData.model = vehicleData.model;
-  if (vehicleData.miles !== undefined) dbUpdateData.miles = parseInt(vehicleData.miles) || 0; // CORRIGIDO: usar miles
+  if (vehicleData.miles !== undefined) dbUpdateData.miles = parseInt(vehicleData.miles) || 0;
   if (vehicleData.internalCode) dbUpdateData.internal_code = vehicleData.internalCode;
-  if (vehicleData.color) dbUpdateData.color = vehicleData.color;
+  if (vehicleData.color !== undefined) { // CORRIGIDO: verificar se cor foi fornecida
+    dbUpdateData.color = vehicleData.color || null;
+    console.log('mapUpdateDataToDbData - color being updated:', dbUpdateData.color);
+  }
   if (vehicleData.caNote) dbUpdateData.ca_note = parseInt(vehicleData.caNote);
   if (vehicleData.purchasePrice) dbUpdateData.purchase_price = parseFloat(vehicleData.purchasePrice);
   if (vehicleData.salePrice) dbUpdateData.sale_price = parseFloat(vehicleData.salePrice);
@@ -134,7 +139,7 @@ export const mapUpdateDataToDbData = (vehicleData: Partial<any>) => {
     dbUpdateData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
   }
   
-  // Processar informações do título - CORRIGIDO para salvar corretamente
+  // Processar informações do título
   if (vehicleData.titleInfo !== undefined) {
     console.log('Processing titleInfo for update:', vehicleData.titleInfo);
     
