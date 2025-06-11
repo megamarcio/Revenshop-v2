@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus, X, Star, Loader2, Image } from 'lucide-react';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 import { toast } from '@/hooks/use-toast';
+import ProgressiveImage from '../../ProgressiveImage';
 
 interface PhotoUploadSectionProps {
   vehicleId?: string;
@@ -18,11 +19,17 @@ const PhotoUploadSection = ({
   setPhotos,
   readOnly = false 
 }: PhotoUploadSectionProps) => {
-  const { photos: vehiclePhotos, uploading, uploadPhoto, removePhoto, setMainPhoto } = useVehiclePhotos(vehicleId);
+  const { photos: vehiclePhotos, uploading, uploadPhoto, removePhoto, setMainPhoto, refetch } = useVehiclePhotos(vehicleId);
+
+  console.log('PhotoUploadSection - vehicleId:', vehicleId);
+  console.log('PhotoUploadSection - vehiclePhotos from hook:', vehiclePhotos);
+  console.log('PhotoUploadSection - local photos state:', photos);
 
   // Use vehicle_photos if vehicleId is provided, otherwise use local state
-  const displayPhotos = vehicleId ? vehiclePhotos.map(p => p.url) : photos;
+  const displayPhotos = vehicleId ? vehiclePhotos : photos;
   const canEdit = !readOnly;
+
+  console.log('PhotoUploadSection - displayPhotos final:', displayPhotos);
 
   const handlePhotoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!canEdit) return;
@@ -42,6 +49,8 @@ const PhotoUploadSection = ({
           console.log('Uploading file via useVehiclePhotos:', file.name);
           await uploadPhoto(file);
         }
+        // Refresh photos after upload
+        await refetch();
       } else {
         // Upload local para base64 (para novos veículos)
         console.log('Processing photos for new vehicle (base64)');
@@ -115,6 +124,7 @@ const PhotoUploadSection = ({
     
     if (vehicleId && vehiclePhotos[index]) {
       await removePhoto(vehiclePhotos[index].id);
+      await refetch();
     } else {
       setPhotos(prev => {
         const updated = prev.filter((_, i) => i !== index);
@@ -128,31 +138,56 @@ const PhotoUploadSection = ({
     if (!canEdit || !vehicleId || !vehiclePhotos[index]) return;
     
     await setMainPhoto(vehiclePhotos[index].id);
+    await refetch();
+  };
+
+  const getPhotoUrl = (index: number): string => {
+    if (vehicleId) {
+      return vehiclePhotos[index]?.url || '';
+    }
+    return photos[index] || '';
+  };
+
+  const getPhotoCount = (): number => {
+    return vehicleId ? vehiclePhotos.length : photos.length;
   };
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold flex items-center space-x-2">
         <Image className="h-5 w-5" />
-        <span>Fotos ({displayPhotos.length}/10)</span>
+        <span>Fotos ({getPhotoCount()}/10)</span>
         {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
       </h3>
       
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {displayPhotos.map((photo, index) => {
+        {Array.from({ length: getPhotoCount() }).map((_, index) => {
+          const photoUrl = getPhotoUrl(index);
           const isMain = vehicleId ? vehiclePhotos[index]?.is_main : index === 0;
           
           return (
             <div key={index} className="relative group">
-              <img
-                src={photo}
-                alt={`Foto ${index + 1}`}
-                className="w-full h-24 object-cover rounded-lg"
-                loading="lazy"
-              />
+              {vehicleId ? (
+                <ProgressiveImage
+                  vehicleId={vehiclePhotos[index]?.vehicle_id}
+                  alt={`Foto ${index + 1}`}
+                  className="w-full h-24 rounded-lg"
+                  showZoom={true}
+                  autoLoadMedium={true}
+                />
+              ) : (
+                <img
+                  src={photoUrl}
+                  alt={`Foto ${index + 1}`}
+                  className="w-full h-24 object-cover rounded-lg"
+                  loading="lazy"
+                />
+              )}
+              
               {isMain && (
                 <Star className="absolute top-1 left-1 h-4 w-4 text-yellow-500 fill-current" />
               )}
+              
               {canEdit && !uploading && (
                 <div className="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   {vehicleId && !isMain && (
@@ -178,7 +213,7 @@ const PhotoUploadSection = ({
           );
         })}
         
-        {canEdit && displayPhotos.length < 10 && !uploading && (
+        {canEdit && getPhotoCount() < 10 && !uploading && (
           <label className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex items-center justify-center cursor-pointer hover:border-revenshop-primary">
             <Plus className="h-6 w-6 text-gray-400" />
             <input
@@ -198,7 +233,7 @@ const PhotoUploadSection = ({
         )}
       </div>
       
-      {displayPhotos.length >= 8 && (
+      {getPhotoCount() >= 8 && (
         <p className="text-sm text-amber-600">
           Atenção: Muitas fotos podem tornar o salvamento mais lento
         </p>

@@ -17,9 +17,15 @@ export const useVehiclePhotos = (vehicleId?: string) => {
   const [uploading, setUploading] = useState(false);
 
   const fetchPhotos = async () => {
-    if (!vehicleId) return;
+    if (!vehicleId) {
+      console.log('useVehiclePhotos: No vehicleId provided, clearing photos');
+      setPhotos([]);
+      return;
+    }
     
     setLoading(true);
+    console.log('useVehiclePhotos: Fetching photos for vehicle:', vehicleId);
+    
     try {
       const { data, error } = await supabase
         .from('vehicle_photos')
@@ -28,7 +34,10 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         .order('position', { ascending: true });
 
       if (error) throw error;
-      setPhotos(data || []);
+      
+      const fetchedPhotos = data || [];
+      console.log('useVehiclePhotos: Fetched photos:', fetchedPhotos.length, 'photos');
+      setPhotos(fetchedPhotos);
     } catch (error) {
       console.error('Error fetching vehicle photos:', error);
       toast({
@@ -36,6 +45,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         description: 'Erro ao carregar fotos do veículo.',
         variant: 'destructive',
       });
+      setPhotos([]);
     } finally {
       setLoading(false);
     }
@@ -46,6 +56,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
     try {
       setUploading(true);
+      console.log('useVehiclePhotos: Starting upload for vehicle:', vehicleId);
       
       // Validar arquivo
       if (!file.type.startsWith('image/')) {
@@ -90,6 +101,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
       if (dbError) throw dbError;
       
+      console.log('useVehiclePhotos: Photo uploaded successfully:', photoData);
       setPhotos(prev => [...prev, photoData].sort((a, b) => (a.position || 0) - (b.position || 0)));
       
       toast({
@@ -113,6 +125,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
   const removePhoto = async (photoId: string) => {
     try {
+      console.log('useVehiclePhotos: Removing photo:', photoId);
       const photo = photos.find(p => p.id === photoId);
       if (!photo) return;
 
@@ -159,6 +172,8 @@ export const useVehiclePhotos = (vehicleId?: string) => {
 
   const setMainPhoto = async (photoId: string) => {
     try {
+      console.log('useVehiclePhotos: Setting main photo:', photoId);
+      
       // Primeiro, remove a marca principal de todas as fotos
       await supabase
         .from('vehicle_photos')
@@ -193,6 +208,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
   };
 
   useEffect(() => {
+    console.log('useVehiclePhotos: Effect triggered, vehicleId:', vehicleId);
     fetchPhotos();
   }, [vehicleId]);
 
