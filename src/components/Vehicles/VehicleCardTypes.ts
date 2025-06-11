@@ -5,7 +5,7 @@ export interface Vehicle {
   vin: string;
   year: number;
   model: string;
-  miles: string;
+  miles: number; // Corrigido: de string para number e mantido como miles
   internalCode: string;
   color: string;
   caNote: number;
@@ -22,6 +22,24 @@ export interface Vehicle {
   finalSalePrice?: number;
   photos: string[];
   video?: string;
+  
+  // Campos de financiamento adicionados
+  financingBank?: string;
+  financingType?: string;
+  originalFinancedName?: string;
+  purchaseDate?: string;
+  dueDate?: string;
+  installmentValue?: number;
+  downPayment?: number;
+  financedAmount?: number;
+  totalInstallments?: number;
+  paidInstallments?: number;
+  remainingInstallments?: number;
+  totalToPay?: number;
+  payoffValue?: number;
+  payoffDate?: string;
+  interestRate?: number;
+  customFinancingBank?: string;
 }
 
 export interface VehicleCardProps {

@@ -11,7 +11,7 @@ export class VehicleDataMapper {
       vin: vehicle.vin,
       year: vehicle.year,
       model: vehicle.model,
-      plate: vehicle.plate,
+      miles: vehicle.miles || 0, // Corrigido: mapear miles corretamente
       internalCode: vehicle.internal_code,
       color: vehicle.color,
       caNote: vehicle.ca_note,
@@ -27,7 +27,25 @@ export class VehicleDataMapper {
       seller: '', // Este campo não existe no HookVehicle, manter vazio
       finalSalePrice: 0, // Este campo não existe no HookVehicle, manter como 0
       photos: vehicle.photos,
-      video: vehicle.video
+      video: vehicle.video,
+      
+      // Campos de financiamento mapeados
+      financingBank: vehicle.financing_bank || '',
+      financingType: vehicle.financing_type || '',
+      originalFinancedName: vehicle.original_financed_name || '',
+      purchaseDate: vehicle.purchase_date || '',
+      dueDate: vehicle.due_date || '',
+      installmentValue: vehicle.installment_value || 0,
+      downPayment: vehicle.down_payment || 0,
+      financedAmount: vehicle.financed_amount || 0,
+      totalInstallments: vehicle.total_installments || 0,
+      paidInstallments: vehicle.paid_installments || 0,
+      remainingInstallments: vehicle.remaining_installments || 0,
+      totalToPay: vehicle.total_to_pay || 0,
+      payoffValue: vehicle.payoff_value || 0,
+      payoffDate: vehicle.payoff_date || '',
+      interestRate: vehicle.interest_rate || 0,
+      customFinancingBank: vehicle.custom_financing_bank || ''
     }));
 
     // Function to convert VehicleCardType back to HookVehicle for operations
@@ -38,7 +56,7 @@ export class VehicleDataMapper {
         vin: vehicle.vin,
         year: vehicle.year,
         model: vehicle.model,
-        miles: parseInt(vehicle.plate) || 0, // Corrigido: converter plate de volta para miles
+        miles: vehicle.miles || 0, // Corrigido: mapear miles corretamente
         internal_code: vehicle.internalCode,
         color: vehicle.color,
         ca_note: vehicle.caNote,
@@ -57,7 +75,25 @@ export class VehicleDataMapper {
         video: vehicle.video,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        created_by: undefined
+        created_by: undefined,
+        
+        // Campos de financiamento mapeados de volta
+        financing_bank: vehicle.financingBank || '',
+        financing_type: vehicle.financingType || '',
+        original_financed_name: vehicle.originalFinancedName || '',
+        purchase_date: vehicle.purchaseDate || '',
+        due_date: vehicle.dueDate || '',
+        installment_value: vehicle.installmentValue || 0,
+        down_payment: vehicle.downPayment || 0,
+        financed_amount: vehicle.financedAmount || 0,
+        total_installments: vehicle.totalInstallments || 0,
+        paid_installments: vehicle.paidInstallments || 0,
+        remaining_installments: vehicle.remainingInstallments || 0,
+        total_to_pay: vehicle.totalToPay || 0,
+        payoff_value: vehicle.payoffValue || 0,
+        payoff_date: vehicle.payoffDate || '',
+        interest_rate: vehicle.interestRate || 0,
+        custom_financing_bank: vehicle.customFinancingBank || ''
       }));
     };
 
