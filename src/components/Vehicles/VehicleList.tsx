@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles, Vehicle } from '../../hooks/useVehicles/index';
+import { useVehiclesUltraMinimal } from '../../hooks/useVehiclesUltraMinimal';
 import VehicleForm from './VehicleForm';
 import VehicleCard from './VehicleCard';
 import VehicleListHeader from './VehicleListHeader';
@@ -15,6 +16,8 @@ import { convertVehicleForCard, handleExport } from './VehicleDataProcessor';
 
 const VehicleList = () => {
   const { canEditVehicles } = useAuth();
+  // TESTE: Usando hook ultra minimal para verificar performance
+  const { vehicles: ultraMinimalVehicles, loading: ultraLoading } = useVehiclesUltraMinimal();
   const { vehicles, loading, createVehicle, updateVehicle, deleteVehicle } = useVehicles();
   const [searchTerm, setSearchTerm] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
@@ -23,6 +26,32 @@ const VehicleList = () => {
   const [sortBy, setSortBy] = useState('internal_code');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [filterBy, setFilterBy] = useState('all');
+
+  // TESTE: Converter dados ultra minimal para formato compatível
+  const testVehicles = useMemo(() => {
+    return ultraMinimalVehicles.map(vehicle => ({
+      id: vehicle.id,
+      name: vehicle.name,
+      vin: vehicle.vin,
+      year: 2020, // Valor padrão para teste
+      model: 'Test Model',
+      plate: '',
+      internalCode: vehicle.id.substring(0, 8), // Usar parte do ID como código
+      color: 'Unknown',
+      caNote: 0,
+      purchasePrice: 0,
+      salePrice: vehicle.sale_price,
+      profitMargin: 0,
+      minNegotiable: 0,
+      carfaxPrice: 0,
+      mmrValue: 0,
+      description: '',
+      category: 'forSale' as const,
+      photos: [], // TESTE: Sem fotos
+      video: '',
+      main_photo_url: undefined // TESTE: Sem foto principal
+    }));
+  }, [ultraMinimalVehicles]);
 
   // Vehicle Actions Logic (moved from VehicleActions.tsx)
   const handleSaveVehicle = async (vehicleData: any, editingVehicle: Vehicle | null) => {
@@ -93,21 +122,14 @@ const VehicleList = () => {
 
   // Vehicle Filters Logic (moved from VehicleFilters.tsx)
   const filteredAndSortedVehicles = useMemo(() => {
-    let filtered = vehicles.filter(vehicle => {
+    let filtered = testVehicles.filter(vehicle => {
       const matchesSearch = vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        vehicle.internal_code.toLowerCase().includes(searchTerm.toLowerCase());
+        vehicle.internalCode.toLowerCase().includes(searchTerm.toLowerCase());
       
       let matchesFilter = true;
       if (filterBy !== 'all') {
-        // Check if it's a direct category match or extended category match
-        if (vehicle.category === filterBy) {
-          matchesFilter = true;
-        } else if (vehicle.extended_category === filterBy) {
-          matchesFilter = true;
-        } else {
-          matchesFilter = false;
-        }
+        matchesFilter = vehicle.category === filterBy;
       }
       
       return matchesSearch && matchesFilter;
@@ -115,20 +137,11 @@ const VehicleList = () => {
 
     // Força a ordenação por internal_code sempre
     filtered.sort((a, b) => {
-      // Ordenação numérica do código interno
-      const aCode = parseInt(a.internal_code) || 0;
-      const bCode = parseInt(b.internal_code) || 0;
-      
-      if (aCode !== bCode) {
-        return aCode - bCode; // Sempre do menor para o maior
-      }
-      
-      // Se os códigos numéricos forem iguais, ordenar alfabeticamente
-      return a.internal_code.localeCompare(b.internal_code, undefined, { numeric: true });
+      return a.name.localeCompare(b.name);
     });
 
     return filtered;
-  }, [vehicles, searchTerm, filterBy]);
+  }, [testVehicles, searchTerm, filterBy]);
 
   const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
     setSortBy(newSortBy);
@@ -139,13 +152,14 @@ const VehicleList = () => {
     handleExport(filteredAndSortedVehicles, format);
   };
 
-  if (loading) {
+  // TESTE: Usar loading do hook ultra minimal
+  if (ultraLoading) {
     return (
       <div className="p-6">
         <Card>
           <CardContent className="p-12 text-center">
             <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
-            <p className="text-gray-600">Carregando veículos...</p>
+            <p className="text-gray-600">Carregando veículos (teste ultra minimal)...</p>
           </CardContent>
         </Card>
       </div>
@@ -154,6 +168,11 @@ const VehicleList = () => {
 
   return (
     <div className="p-6 space-y-6">
+      {/* TESTE: Indicador visual do modo de teste */}
+      <div className="bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded">
+        <strong>MODO TESTE:</strong> Carregando dados ultra minimais sem fotos para testar performance
+      </div>
+      
       <VehicleListHeader onAddVehicle={() => setShowAddForm(true)} />
       
       <VehicleSearchBar 
@@ -178,9 +197,9 @@ const VehicleList = () => {
             <VehicleCard
               key={vehicle.id}
               vehicle={convertVehicleForCard(vehicle)}
-              onEdit={() => handleEditVehicle(vehicle)}
-              onDuplicate={() => handleDuplicateVehicle(vehicle)}
-              onDelete={() => handleDeleteVehicle(vehicle)}
+              onEdit={() => handleEditVehicle(vehicle as Vehicle)}
+              onDuplicate={() => handleDuplicateVehicle(vehicle as Vehicle)}
+              onDelete={() => handleDeleteVehicle(vehicle as Vehicle)}
             />
           ))}
         </div>
@@ -202,7 +221,7 @@ const VehicleList = () => {
         />
       )}
 
-      {filteredAndSortedVehicles.length === 0 && !loading && <EmptyVehicleState />}
+      {filteredAndSortedVehicles.length === 0 && !ultraLoading && <EmptyVehicleState />}
 
       {showAddForm && canEditVehicles && (
         <VehicleForm
