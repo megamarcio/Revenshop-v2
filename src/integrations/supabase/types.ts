@@ -790,7 +790,6 @@ export type Database = {
           mmr_value: number | null
           model: string
           name: string
-          photos: string[] | null
           profit_margin: number | null
           purchase_price: number
           sale_price: number
@@ -816,7 +815,6 @@ export type Database = {
           mmr_value?: number | null
           model: string
           name: string
-          photos?: string[] | null
           profit_margin?: number | null
           purchase_price: number
           sale_price: number
@@ -842,7 +840,6 @@ export type Database = {
           mmr_value?: number | null
           model?: string
           name?: string
-          photos?: string[] | null
           profit_margin?: number | null
           purchase_price?: number
           sale_price?: number

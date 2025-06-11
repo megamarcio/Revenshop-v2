@@ -76,11 +76,10 @@ const VehicleList = () => {
       category: vehicle.category,
       title_type: vehicle.title_type,
       title_status: vehicle.title_status,
-      photos: vehicle.photos,
       video: vehicle.video
     };
     
-    // Não incluir ID para garantir que será tratado como criação
+    // Não incluir ID nem photos para garantir que será tratado como criação
     setEditingVehicle(duplicatedVehicle as Vehicle);
     setShowAddForm(true);
   };
