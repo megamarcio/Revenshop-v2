@@ -16,7 +16,6 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       miles: editingVehicle.miles?.toString() || '', // CONFIRMADO: usando miles
       internalCode: editingVehicle.internalCode || editingVehicle.internal_code || '',
       color: editingVehicle.color || '',
-      titleInfo: editingVehicle.titleInfo || '',
       titleTypeId: editingVehicle.titleTypeId || editingVehicle.title_type_id || '',
       titleLocationId: editingVehicle.titleLocationId || editingVehicle.title_location_id || '',
       titleLocationCustom: editingVehicle.titleLocationCustom || editingVehicle.title_location_custom || '',
@@ -72,7 +71,6 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     miles: '', // CONFIRMADO: usando miles
     internalCode: '',
     color: '',
-    titleInfo: '',
     titleTypeId: '',
     titleLocationId: '',
     titleLocationCustom: '',

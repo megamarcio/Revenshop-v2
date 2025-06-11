@@ -10,7 +10,6 @@ export const mapFormToDbData = (formData: VehicleFormData & { id?: string }) => 
     miles: parseInt(formData.miles),
     internal_code: formData.internalCode,
     color: formData.color,
-    title_info: formData.titleInfo,
     title_type_id: formData.titleTypeId || null,
     title_location_id: formData.titleLocationId || null,
     title_location_custom: formData.titleLocationCustom || null,

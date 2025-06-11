@@ -112,8 +112,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
-        videos: videos,
-        titleInfo: formData.titleInfo
+        videos: videos
       };
 
       // CRÍTICO: Garantir que o ID seja incluído para edição

@@ -7,7 +7,6 @@ export interface VehicleFormData {
   miles: string; // CONFIRMADO: campo miles está definido
   internalCode: string;
   color: string;
-  titleInfo: string;
   titleTypeId: string; // Campo para tipo de título
   titleLocationId: string; // Novo campo para local do título
   titleLocationCustom: string; // Novo campo para local customizado

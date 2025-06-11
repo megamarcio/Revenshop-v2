@@ -121,16 +121,6 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
             error={errors.titleLocationId}
           />
         </div>
-
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Informações do Título</label>
-          <Input
-            type="text"
-            value={formData.titleInfo}
-            onChange={(e) => onInputChange('titleInfo', e.target.value)}
-            placeholder="Informações adicionais sobre o título"
-          />
-        </div>
       </CardContent>
     </Card>
   );
