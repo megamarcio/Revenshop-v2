@@ -1,7 +1,5 @@
 
 import React from 'react';
-import PhotoUploadSection from './PhotoUploadSection';
-import VideoUploadSection from './VideoUploadSection';
 import NewPhotosSection from './NewPhotosSection';
 
 interface MediaUploadFormProps {
@@ -23,19 +21,6 @@ const MediaUploadForm = ({
 }: MediaUploadFormProps) => {
   return (
     <>
-      <PhotoUploadSection
-        vehicleId={vehicleId}
-        photos={photos}
-        setPhotos={setPhotos}
-        readOnly={readOnly}
-      />
-
-      <VideoUploadSection
-        videos={videos}
-        setVideos={setVideos}
-        readOnly={readOnly}
-      />
-
       <NewPhotosSection
         vehicleId={vehicleId}
         readOnly={readOnly}
