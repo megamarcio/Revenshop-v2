@@ -38,9 +38,9 @@ export const useVehicles = () => {
     try {
       const data = await createVehicleOperation(vehicleData);
       // Ensure the returned data has photos array if missing
-      const vehicleWithPhotos = {
+      const vehicleWithPhotos: Vehicle = {
         ...data,
-        photos: data.photos || []
+        photos: (data as any).photos || []
       };
       setVehicles(prev => [vehicleWithPhotos, ...prev]);
       toast({
@@ -67,9 +67,9 @@ export const useVehicles = () => {
       
       const data = await updateVehicleOperation(dataWithId);
       // Ensure the returned data has photos array if missing
-      const vehicleWithPhotos = {
+      const vehicleWithPhotos: Vehicle = {
         ...data,
-        photos: data.photos || []
+        photos: (data as any).photos || []
       };
       setVehicles(prev => prev.map(v => v.id === id ? vehicleWithPhotos : v));
       toast({

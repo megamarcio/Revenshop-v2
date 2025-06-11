@@ -11,11 +11,7 @@ interface TitleStatusSelectorProps {
 
 const titleStatusOptions = [
   { value: 'em-maos', label: 'Em Mãos' },
-  { value: 'financiado-proprio', label: 'Financiado Próprio nome' },
-  { value: 'financiado-terceiro', label: 'Financiado Nome Terceiro' },
-  { value: 'leilao-aguardando', label: 'Leilão - Aguardando' },
-  { value: 'junk', label: 'Junk' },
-  { value: 'sem-titulo', label: 'Sem Título' },
+  { value: 'em-transito', label: 'Em Trânsito' },
 ];
 
 const TitleStatusSelector = ({ value, onChange, error }: TitleStatusSelectorProps) => {
