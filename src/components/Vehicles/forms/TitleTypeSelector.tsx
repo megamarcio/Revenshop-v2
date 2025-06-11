@@ -65,6 +65,10 @@ const titleTypeOptions = [
 ];
 
 const TitleTypeSelector = ({ value, onChange, error }: TitleTypeSelectorProps) => {
+  // Find the selected option to show its tooltip
+  const selectedOption = titleTypeOptions.find(option => option.value === value);
+  const tooltipText = selectedOption ? selectedOption.tooltip : 'Tipo de Título';
+
   return (
     <TooltipProvider>
       <div>
@@ -75,7 +79,7 @@ const TitleTypeSelector = ({ value, onChange, error }: TitleTypeSelectorProps) =
               <FileText className="h-4 w-4 text-gray-400 cursor-help" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>Tipo de Título</p>
+              <p>{tooltipText}</p>
             </TooltipContent>
           </Tooltip>
         </div>
