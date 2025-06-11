@@ -31,7 +31,7 @@ const VehicleCardContent = ({
           VIN: {vehicle.vin}
         </span>
         <span className="text-[11px] text-gray-600 mt-1 block font-bold">
-          Milhas: {vehicle.miles}
+          Milhas: {vehicle.plate}
         </span>
       </div>
 
