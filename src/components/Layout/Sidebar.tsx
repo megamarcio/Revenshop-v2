@@ -66,12 +66,7 @@ const AppSidebar = ({
       id: 'ai-beta',
       label: 'IA (beta)',
       icon: Bot
-    },
-    ...(canAccessAdmin ? [{
-      id: 'admin',
-      label: 'Configurações',
-      icon: Settings
-    }] : [])
+    }
   ];
 
   const handleLogisticaClick = (submenu: string) => {
@@ -234,6 +229,19 @@ const AppSidebar = ({
                           </CollapsibleContent>
                         </Collapsible>
                       </SidebarMenuSubItem>
+                      
+                      {/* Menu Admin (antigo) se o usuário tem acesso */}
+                      {canAccessAdmin && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            onClick={() => setActiveTab('admin')}
+                            className={`cursor-pointer ${activeTab === 'admin' ? 'bg-revenshop-primary text-white' : ''}`}
+                          >
+                            <Settings className="h-4 w-4" />
+                            <span>Admin</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 </Collapsible>
