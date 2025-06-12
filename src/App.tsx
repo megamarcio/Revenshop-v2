@@ -51,7 +51,12 @@ function App() {
                           <Routes>
                             <Route 
                               path="/" 
-                              element={<Index />} 
+                              element={
+                                <Index 
+                                  activeSection={activeSection}
+                                  setActiveSection={setActiveSection}
+                                />
+                              } 
                             />
                             <Route path="*" element={<NotFound />} />
                           </Routes>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLanguage } from '../contexts/LanguageContext';
 import Dashboard from '../components/Dashboard/Dashboard';
@@ -14,10 +14,14 @@ import UserManagement from '../components/Users/UserManagement';
 import AdminPanel from '../components/Admin/AdminPanel';
 import ProfilePage from '../components/Profile/ProfilePage';
 
-const Index = () => {
+interface IndexProps {
+  activeSection: string;
+  setActiveSection: (section: string) => void;
+}
+
+const Index = ({ activeSection, setActiveSection }: IndexProps) => {
   const { canAccessDashboard } = useAuth();
   const { t } = useLanguage();
-  const [activeSection, setActiveSection] = useState('vehicles');
 
   const handleNavigateToUsers = () => {
     setActiveSection('users');
