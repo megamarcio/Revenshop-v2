@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -58,6 +57,13 @@ const QuoteGenerator = ({ customer, onBack }: QuoteGeneratorProps) => {
 
   const handleExport = () => {
     console.log('Exporting quote...');
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
   };
 
   return (
