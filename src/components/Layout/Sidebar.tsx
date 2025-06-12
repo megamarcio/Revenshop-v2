@@ -197,37 +197,28 @@ const AppSidebar = ({
                   </CollapsibleTrigger>
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {/* Submenu Geral */}
+                      {/* Menu Usuários */}
+                      {canManageUsers && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            onClick={() => setActiveTab('users')}
+                            className={`cursor-pointer ${activeTab === 'users' ? 'bg-revenshop-primary text-white' : ''}`}
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>{t('users')}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
+                      
+                      {/* Menu Perfil */}
                       <SidebarMenuSubItem>
-                        <Collapsible className="group/collapsible-sub">
-                          <CollapsibleTrigger asChild>
-                            <SidebarMenuSubButton className="cursor-pointer hover:bg-muted data-[state=open]:bg-muted">
-                              <Settings className="h-4 w-4" />
-                              <span>Geral</span>
-                              <ChevronRight className="ml-auto h-3 w-3 transition-transform group-data-[state=open]/collapsible-sub:rotate-90" />
-                            </SidebarMenuSubButton>
-                          </CollapsibleTrigger>
-                          <CollapsibleContent>
-                            <div className="ml-4">
-                              {canManageUsers && (
-                                <SidebarMenuSubButton
-                                  onClick={() => setActiveTab('users')}
-                                  className={`cursor-pointer ${activeTab === 'users' ? 'bg-revenshop-primary text-white' : ''}`}
-                                >
-                                  <Users className="h-4 w-4" />
-                                  <span>{t('users')}</span>
-                                </SidebarMenuSubButton>
-                              )}
-                              <SidebarMenuSubButton
-                                onClick={() => setActiveTab('profile')}
-                                className={`cursor-pointer ${activeTab === 'profile' ? 'bg-revenshop-primary text-white' : ''}`}
-                              >
-                                <User className="h-4 w-4" />
-                                <span>{t('profile')}</span>
-                              </SidebarMenuSubButton>
-                            </div>
-                          </CollapsibleContent>
-                        </Collapsible>
+                        <SidebarMenuSubButton
+                          onClick={() => setActiveTab('profile')}
+                          className={`cursor-pointer ${activeTab === 'profile' ? 'bg-revenshop-primary text-white' : ''}`}
+                        >
+                          <User className="h-4 w-4" />
+                          <span>{t('profile')}</span>
+                        </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       
                       {/* Menu Admin (antigo) se o usuário tem acesso */}
