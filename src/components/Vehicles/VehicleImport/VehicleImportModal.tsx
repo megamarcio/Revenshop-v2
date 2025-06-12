@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
-import { Download, Upload, AlertCircle, CheckCircle } from 'lucide-react';
+import { Download, Upload, AlertCircle, CheckCircle, FileDown } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useVehicles } from '../../../hooks/useVehicles';
 
@@ -16,11 +16,19 @@ interface VehicleImportModalProps {
   onImportComplete: () => void;
 }
 
+interface ImportError {
+  linha: number;
+  erro: string;
+  dados?: any;
+  timestamp: string;
+}
+
 const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImportModalProps) => {
   const [file, setFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [results, setResults] = useState<{ success: number; errors: string[] } | null>(null);
+  const [detailedErrors, setDetailedErrors] = useState<ImportError[]>([]);
 
   const { createVehicle } = useVehicles();
 
@@ -80,6 +88,44 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
     document.body.removeChild(link);
   };
 
+  const downloadErrorLog = () => {
+    if (detailedErrors.length === 0) return;
+
+    const logContent = [
+      '=== LOG DE ERROS - IMPORTAÇÃO DE VEÍCULOS ===',
+      `Data/Hora: ${new Date().toLocaleString('pt-BR')}`,
+      `Arquivo importado: ${file?.name || 'N/A'}`,
+      `Total de erros: ${detailedErrors.length}`,
+      '',
+      '=== DETALHES DOS ERROS ===',
+      ''
+    ];
+
+    detailedErrors.forEach((error, index) => {
+      logContent.push(`ERRO #${index + 1}`);
+      logContent.push(`Linha: ${error.linha}`);
+      logContent.push(`Erro: ${error.erro}`);
+      logContent.push(`Timestamp: ${error.timestamp}`);
+      if (error.dados) {
+        logContent.push(`Dados da linha: ${JSON.stringify(error.dados, null, 2)}`);
+      }
+      logContent.push('---');
+      logContent.push('');
+    });
+
+    const logText = logContent.join('\n');
+    const blob = new Blob([logText], { type: 'text/plain;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `log_erros_importacao_${timestamp}.txt`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const parseCSV = (text: string): any[] => {
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
@@ -127,6 +173,17 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
     return vehicles;
   };
 
+  const logError = (linha: number, erro: string, dados?: any) => {
+    const errorLog: ImportError = {
+      linha,
+      erro,
+      dados,
+      timestamp: new Date().toISOString()
+    };
+    
+    setDetailedErrors(prev => [...prev, errorLog]);
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
@@ -134,6 +191,7 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
       if (fileType === 'csv' || fileType === 'xls' || fileType === 'xlsx') {
         setFile(selectedFile);
         setResults(null);
+        setDetailedErrors([]); // Limpar erros anteriores
       } else {
         toast({
           title: 'Erro',
@@ -149,6 +207,7 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
 
     setImporting(true);
     setProgress(0);
+    setDetailedErrors([]); // Limpar erros anteriores
     const errors: string[] = [];
     let successCount = 0;
 
@@ -157,17 +216,22 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
       const vehicles = parseCSV(text);
 
       if (vehicles.length === 0) {
-        throw new Error('Nenhum veículo válido encontrado no arquivo');
+        const errorMsg = 'Nenhum veículo válido encontrado no arquivo';
+        logError(0, errorMsg);
+        throw new Error(errorMsg);
       }
 
       for (let i = 0; i < vehicles.length; i++) {
         try {
           const vehicle = vehicles[i];
+          const lineNumber = i + 2; // +2 porque começamos na linha 1 e pulamos o header
           
           // Validar campos obrigatórios
           if (!vehicle.name || !vehicle.vin || !vehicle.year || !vehicle.model || 
               !vehicle.internal_code || !vehicle.color || !vehicle.purchase_price || !vehicle.sale_price) {
-            errors.push(`Linha ${i + 2}: Campos obrigatórios em falta`);
+            const errorMsg = 'Campos obrigatórios em falta (name, vin, year, model, internal_code, color, purchase_price, sale_price)';
+            logError(lineNumber, errorMsg, vehicle);
+            errors.push(`Linha ${lineNumber}: ${errorMsg}`);
             continue;
           }
 
@@ -211,8 +275,10 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
           await createVehicle(formData);
           successCount++;
         } catch (error) {
+          const errorMsg = error.message || 'Erro desconhecido ao criar veículo';
           console.error('Erro ao importar veículo:', error);
-          errors.push(`Linha ${i + 2}: ${error.message || 'Erro desconhecido'}`);
+          logError(i + 2, errorMsg, vehicles[i]);
+          errors.push(`Linha ${i + 2}: ${errorMsg}`);
         }
 
         setProgress(((i + 1) / vehicles.length) * 100);
@@ -226,6 +292,15 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
           description: `${successCount} veículo(s) importado(s) com sucesso.`,
         });
         onImportComplete();
+      }
+
+      // Se houver erros, mostrar opção de download
+      if (detailedErrors.length > 0) {
+        toast({
+          title: 'Erros encontrados',
+          description: `${detailedErrors.length} erro(s) encontrado(s). Você pode baixar o log detalhado.`,
+          variant: 'destructive',
+        });
       }
 
     } catch (error) {
@@ -244,6 +319,7 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
     if (!importing) {
       setFile(null);
       setResults(null);
+      setDetailedErrors([]);
       setProgress(0);
       onClose();
     }
@@ -322,6 +398,19 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
                   </AlertDescription>
                 </Alert>
               )}
+
+              {/* Error Log Download Button */}
+              {detailedErrors.length > 0 && (
+                <div className="space-y-2">
+                  <Button onClick={downloadErrorLog} variant="outline" className="w-full">
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Baixar Log Detalhado de Erros ({detailedErrors.length} erros)
+                  </Button>
+                  <p className="text-sm text-gray-600">
+                    O log contém informações detalhadas sobre cada erro encontrado, incluindo linha, dados e timestamp.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -351,6 +440,7 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
                 <li>Use valores numéricos para preços (ex: 18000.00)</li>
                 <li>Para category use: forSale, sold, rental, maintenance, consigned</li>
                 <li>Para financing_type use: comprou-direto ou assumiu-financiamento</li>
+                <li>Em caso de erros, você pode baixar um log detalhado para análise</li>
               </ul>
             </AlertDescription>
           </Alert>
