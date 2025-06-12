@@ -83,19 +83,13 @@ export const useWhatsAppGroups = () => {
           description: "Grupo atualizado com sucesso!",
         });
       } else {
-        // Criar novo grupo - obter user_id primeiro
-        const { data: user } = await supabase.auth.getUser();
-        if (!user.user) {
-          throw new Error('Usuário não autenticado');
-        }
-
+        // Criar novo grupo
         const { error } = await supabase
           .from('whatsapp_groups')
           .insert({
             name: group.name,
             description: group.description,
-            phone: group.phone,
-            user_id: user.user.id
+            phone: group.phone
           });
 
         if (error) throw error;
