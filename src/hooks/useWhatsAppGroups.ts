@@ -36,9 +36,11 @@ export const useWhatsAppGroups = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Erro do Supabase ao carregar grupos:', error);
         throw error;
       }
 
+      console.log('Grupos carregados:', data);
       setGroups(data || []);
     } catch (error) {
       console.error('Erro ao carregar grupos:', error);
@@ -66,6 +68,7 @@ export const useWhatsAppGroups = () => {
     try {
       if (group.id) {
         // Atualizar grupo existente
+        console.log('Atualizando grupo:', group);
         const { error } = await supabase
           .from('whatsapp_groups')
           .update({
@@ -76,7 +79,10 @@ export const useWhatsAppGroups = () => {
           })
           .eq('id', group.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao atualizar grupo:', error);
+          throw error;
+        }
 
         toast({
           title: "Sucesso",
@@ -84,16 +90,22 @@ export const useWhatsAppGroups = () => {
         });
       } else {
         // Criar novo grupo
-        const { error } = await supabase
+        console.log('Criando novo grupo:', group);
+        const { data, error } = await supabase
           .from('whatsapp_groups')
           .insert({
             name: group.name,
             description: group.description,
             phone: group.phone
-          });
+          })
+          .select();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Erro ao criar grupo:', error);
+          throw error;
+        }
 
+        console.log('Grupo criado:', data);
         toast({
           title: "Sucesso",
           description: "Grupo criado com sucesso!",
@@ -103,12 +115,12 @@ export const useWhatsAppGroups = () => {
       setEditingGroup(null);
       setIsAddingGroup(false);
       setNewGroup({ name: '', description: '', phone: '' });
-      loadGroups();
+      await loadGroups(); // Recarregar a lista
     } catch (error) {
       console.error('Erro ao salvar grupo:', error);
       toast({
         title: "Erro",
-        description: "Erro ao salvar grupo. Tente novamente.",
+        description: `Erro ao salvar grupo: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     } finally {
@@ -123,24 +135,28 @@ export const useWhatsAppGroups = () => {
 
     setIsLoading(true);
     try {
+      console.log('Excluindo grupo:', id);
       const { error } = await supabase
         .from('whatsapp_groups')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Erro ao excluir grupo:', error);
+        throw error;
+      }
 
       toast({
         title: "Sucesso",
         description: "Grupo excluído com sucesso!",
       });
       
-      loadGroups();
+      await loadGroups(); // Recarregar a lista
     } catch (error) {
       console.error('Erro ao excluir grupo:', error);
       toast({
         title: "Erro",
-        description: "Erro ao excluir grupo. Tente novamente.",
+        description: `Erro ao excluir grupo: ${error.message || 'Erro desconhecido'}`,
         variant: "destructive",
       });
     } finally {
