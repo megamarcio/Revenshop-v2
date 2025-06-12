@@ -96,7 +96,7 @@ const VehicleSearch = ({
                   <span className="font-semibold text-blue-600">
                     {vehicle.internal_code}
                   </span>
-                  <span>{vehicle.internal_code} - {vehicle.name}</span>
+                  <span>{vehicle.name}</span>
                 </div>
               </SelectItem>
             ))
