@@ -43,7 +43,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                       onClick={() => setActiveTab(item.id)} 
                       tooltip={state === "collapsed" ? item.label : undefined}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon />
                       <span className="text-sm px-0 mx-0">{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
