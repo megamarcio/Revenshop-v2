@@ -1,116 +1,43 @@
 
-import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-
-interface WhatsAppGroup {
-  id: string;
-  name: string;
-  phone: string;
-}
+import { useWhatsAppGroups } from './hooks/useWhatsAppGroups';
+import { useWhatsAppState } from './hooks/useWhatsAppState';
+import { useWhatsAppValidation } from './hooks/useWhatsAppValidation';
+import { getVehiclePhotos } from './utils/vehiclePhotoService';
+import { sendWebhookRequest, createWebhookData } from './utils/webhookService';
 
 export const useWhatsAppSend = () => {
-  const [sendType, setSendType] = useState<'client' | 'group'>('client');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [selectedGroup, setSelectedGroup] = useState('');
-  const [groups, setGroups] = useState<WhatsAppGroup[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-
-  const loadGroups = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('whatsapp_groups')
-        .select('id, name, phone')
-        .order('name');
-
-      if (error) throw error;
-      setGroups(data || []);
-    } catch (error) {
-      console.error('Erro ao carregar grupos:', error);
-    }
-  };
+  const { groups, loadGroups } = useWhatsAppGroups();
+  const {
+    sendType,
+    setSendType,
+    phoneNumber,
+    setPhoneNumber,
+    selectedGroup,
+    setSelectedGroup,
+    isLoading,
+    setIsLoading,
+    resetState
+  } = useWhatsAppState();
+  const { validateSendData } = useWhatsAppValidation();
 
   const sendViaWhatsApp = async (vehicleData: any, onClose: () => void) => {
-    if (sendType === 'client' && !phoneNumber.trim()) {
-      toast({
-        title: "Erro",
-        description: "Número de telefone é obrigatório para envio individual.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (sendType === 'group' && !selectedGroup) {
-      toast({
-        title: "Erro",
-        description: "Selecione um grupo para envio.",
-        variant: "destructive",
-      });
+    if (!validateSendData(sendType, phoneNumber, selectedGroup)) {
       return;
     }
 
     setIsLoading(true);
     try {
-      const webhookUrl = localStorage.getItem('whatsapp_webhook_url');
-      if (!webhookUrl) {
-        toast({
-          title: "Erro",
-          description: "URL do webhook não configurada. Configure em Configurações WhatsApp.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      console.log('Tentando enviar para webhook:', webhookUrl);
-
       const selectedGroupData = sendType === 'group' 
         ? groups.find(g => g.id === selectedGroup)
         : null;
 
-      // Buscar fotos do veículo no banco de dados
+      // Buscar fotos do veículo
       let vehiclePhotos: string[] = [];
       
       if (vehicleData.id) {
-        console.log('Buscando fotos para veículo ID:', vehicleData.id);
-        
-        try {
-          // Buscar fotos da tabela vehicle_photos
-          const { data: photos, error: photosError } = await supabase
-            .from('vehicle_photos')
-            .select('url')
-            .eq('vehicle_id', vehicleData.id)
-            .order('position', { ascending: true });
-
-          if (photosError) {
-            console.error('Erro ao buscar fotos:', photosError);
-          } else if (photos && photos.length > 0) {
-            vehiclePhotos = photos.map(p => p.url);
-            console.log('Fotos encontradas no banco:', vehiclePhotos.length);
-          }
-
-          // Se não encontrou fotos no banco, buscar fotos novas do bucket
-          if (vehiclePhotos.length === 0) {
-            console.log('Tentando buscar fotos do bucket vehicles-photos-new');
-            
-            const { data: bucketFiles, error: bucketError } = await supabase.storage
-              .from('vehicles-photos-new')
-              .list(vehicleData.id);
-
-            if (!bucketError && bucketFiles && bucketFiles.length > 0) {
-              console.log('Arquivos encontrados no bucket:', bucketFiles.length);
-              
-              vehiclePhotos = bucketFiles.map(file => {
-                const { data } = supabase.storage
-                  .from('vehicles-photos-new')
-                  .getPublicUrl(`${vehicleData.id}/${file.name}`);
-                return data.publicUrl;
-              });
-            }
-          }
-        } catch (error) {
-          console.error('Erro ao buscar fotos do veículo:', error);
-        }
+        vehiclePhotos = await getVehiclePhotos(vehicleData.id);
       }
 
       // Se ainda não encontrou fotos, usar as fotos do objeto vehicleData
@@ -122,32 +49,14 @@ export const useWhatsAppSend = () => {
       console.log('Total de fotos para envio via webhook:', vehiclePhotos.length);
       console.log('URLs das fotos:', vehiclePhotos);
 
-      const webhookData = {
-        type: 'vehicle_share',
+      const webhookData = createWebhookData(
         sendType,
-        recipient: sendType === 'client' ? {
-          phone: phoneNumber
-        } : {
-          groupId: selectedGroup,
-          groupName: selectedGroupData?.name,
-          groupPhone: selectedGroupData?.phone
-        },
-        vehicle: {
-          id: vehicleData.id,
-          name: vehicleData.name,
-          year: vehicleData.year,
-          model: vehicleData.model,
-          color: vehicleData.color,
-          miles: vehicleData.miles,
-          vin: vehicleData.vin,
-          salePrice: vehicleData.salePrice,
-          description: vehicleData.description,
-          photos: vehiclePhotos, // URLs das fotos para o webhook
-          photoCount: vehiclePhotos.length,
-          video: vehicleData.video
-        },
-        timestamp: new Date().toISOString()
-      };
+        phoneNumber,
+        selectedGroup,
+        selectedGroupData,
+        vehicleData,
+        vehiclePhotos
+      );
 
       console.log('Dados do webhook:', {
         ...webhookData,
@@ -157,45 +66,7 @@ export const useWhatsAppSend = () => {
         }
       });
 
-      const webhookSecret = localStorage.getItem('whatsapp_webhook_secret');
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json'
-      };
-
-      if (webhookSecret) {
-        headers['X-Webhook-Secret'] = webhookSecret;
-      }
-
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(webhookData)
-      });
-
-      console.log('Resposta do webhook:', response.status, response.statusText);
-
-      if (!response.ok) {
-        let errorMessage = `Erro ${response.status}: ${response.statusText}`;
-        
-        try {
-          const errorText = await response.text();
-          if (errorText) {
-            errorMessage += ` - ${errorText}`;
-          }
-        } catch (e) {
-          // Ignorar erro ao ler resposta
-        }
-
-        if (response.status === 404) {
-          errorMessage = `Webhook não encontrado (404). Verifique se a URL está correta: ${webhookUrl}`;
-        } else if (response.status === 500) {
-          errorMessage = `Erro interno do servidor (500). Verifique se o serviço está funcionando corretamente.`;
-        } else if (response.status === 403) {
-          errorMessage = `Acesso negado (403). Verifique as credenciais ou chave secreta.`;
-        }
-
-        throw new Error(errorMessage);
-      }
+      await sendWebhookRequest(webhookData);
 
       toast({
         title: "Sucesso",
@@ -203,9 +74,7 @@ export const useWhatsAppSend = () => {
       });
 
       onClose();
-      setSendType('client');
-      setPhoneNumber('');
-      setSelectedGroup('');
+      resetState();
     } catch (error) {
       console.error('Erro ao enviar via WhatsApp:', error);
       toast({

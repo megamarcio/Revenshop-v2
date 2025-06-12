@@ -67,8 +67,8 @@ const AppSidebar = ({ onNavigate, activeSection }: AppSidebarProps) => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        <FinancingMenu />
-        <SettingsMenu />
+        <FinancingMenu activeTab={activeSection} setActiveTab={onNavigate} />
+        <SettingsMenu activeTab={activeSection} setActiveTab={onNavigate} />
       </SidebarContent>
     </Sidebar>
   );
