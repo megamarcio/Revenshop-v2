@@ -106,7 +106,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
               id,
               url,
               is_main,
-              created_at
+              position
             ),
             title_types (
               id,
