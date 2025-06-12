@@ -32,6 +32,47 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
 
   const { createVehicle } = useVehicles();
 
+  // Função para validar e limitar valores numéricos
+  const validateNumericField = (value: string, fieldName: string, maxDigits: number = 5, maxDecimals: number = 2): { isValid: boolean; cleanValue: number | null; error?: string } => {
+    if (!value || value === '') {
+      return { isValid: true, cleanValue: null };
+    }
+
+    const numericValue = parseFloat(value);
+    
+    if (isNaN(numericValue)) {
+      return { 
+        isValid: false, 
+        cleanValue: null, 
+        error: `Valor inválido para ${fieldName}: "${value}" não é um número` 
+      };
+    }
+
+    // Verificar se o valor não excede os limites do banco
+    const maxValue = Math.pow(10, maxDigits - maxDecimals) - 0.01;
+    
+    if (numericValue > maxValue) {
+      return { 
+        isValid: false, 
+        cleanValue: null, 
+        error: `Valor muito alto para ${fieldName}: ${numericValue}. Máximo permitido: ${maxValue}` 
+      };
+    }
+
+    if (numericValue < 0) {
+      return { 
+        isValid: false, 
+        cleanValue: null, 
+        error: `Valor negativo não permitido para ${fieldName}: ${numericValue}` 
+      };
+    }
+
+    // Arredondar para o número correto de casas decimais
+    const roundedValue = Math.round(numericValue * Math.pow(10, maxDecimals)) / Math.pow(10, maxDecimals);
+    
+    return { isValid: true, cleanValue: roundedValue };
+  };
+
   const downloadTemplate = () => {
     const headers = [
       'name', 'vin', 'year', 'model', 'miles', 'internal_code', 'color',
@@ -140,14 +181,18 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
       headers.forEach((header, index) => {
         const value = values[index] || '';
         
-        // Mapear os campos para o formato correto
+        // Mapear os campos para o formato correto com validação numérica
         switch (header) {
           case 'year':
           case 'miles':
           case 'total_installments':
           case 'paid_installments':
           case 'remaining_installments':
-            vehicle[header] = value ? parseInt(value) : '';
+            const intValidation = validateNumericField(value, header, 10, 0); // Inteiros até 10 dígitos
+            if (!intValidation.isValid) {
+              vehicle[`${header}_error`] = intValidation.error;
+            }
+            vehicle[header] = intValidation.cleanValue || '';
             break;
           case 'purchase_price':
           case 'sale_price':
@@ -159,8 +204,18 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
           case 'financed_amount':
           case 'total_to_pay':
           case 'payoff_value':
+            const priceValidation = validateNumericField(value, header, 10, 2); // Até 10 dígitos, 2 decimais
+            if (!priceValidation.isValid) {
+              vehicle[`${header}_error`] = priceValidation.error;
+            }
+            vehicle[header] = priceValidation.cleanValue || '';
+            break;
           case 'interest_rate':
-            vehicle[header] = value ? parseFloat(value) : '';
+            const rateValidation = validateNumericField(value, header, 5, 2); // Taxa de juros até 999.99%
+            if (!rateValidation.isValid) {
+              vehicle[`${header}_error`] = rateValidation.error;
+            }
+            vehicle[header] = rateValidation.cleanValue || '';
             break;
           default:
             vehicle[header] = value;
@@ -225,6 +280,18 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
         try {
           const vehicle = vehicles[i];
           const lineNumber = i + 2; // +2 porque começamos na linha 1 e pulamos o header
+          
+          // Verificar se há erros de validação numérica
+          const fieldErrors = Object.keys(vehicle)
+            .filter(key => key.endsWith('_error'))
+            .map(key => vehicle[key]);
+          
+          if (fieldErrors.length > 0) {
+            const errorMsg = `Erros de validação: ${fieldErrors.join('; ')}`;
+            logError(lineNumber, errorMsg, vehicle);
+            errors.push(`Linha ${lineNumber}: ${errorMsg}`);
+            continue;
+          }
           
           // Validar campos obrigatórios
           if (!vehicle.name || !vehicle.vin || !vehicle.year || !vehicle.model || 
@@ -437,9 +504,10 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
               <ul className="mt-2 list-disc list-inside text-sm space-y-1">
                 <li>Baixe o template CSV para ver o formato correto</li>
                 <li>Preencha todos os campos obrigatórios: name, vin, year, model, internal_code, color, purchase_price, sale_price</li>
-                <li>Use valores numéricos para preços (ex: 18000.00)</li>
+                <li>Use valores numéricos para preços (ex: 18000.00) - máximo 8 dígitos antes da vírgula</li>
                 <li>Para category use: forSale, sold, rental, maintenance, consigned</li>
                 <li>Para financing_type use: comprou-direto ou assumiu-financiamento</li>
+                <li>Valores muito altos serão rejeitados - verifique os limites nos erros</li>
                 <li>Em caso de erros, você pode baixar um log detalhado para análise</li>
               </ul>
             </AlertDescription>
