@@ -1,62 +1,74 @@
 
 import React from 'react';
-import { useLanguage } from '../../../contexts/LanguageContext';
-import { useAuth } from '../../../contexts/AuthContext';
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
-import { getMenuItems } from './menuItems';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  useSidebar,
+} from '@/components/ui/sidebar';
+import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import AppSidebarHeader from './SidebarHeader';
+import SettingsMenu from './SettingsMenu';
 import FinancingMenu from './FinancingMenu';
 import LogisticsMenu from './LogisticsMenu';
-import SettingsMenu from './SettingsMenu';
+import { getMenuItems } from './menuItems';
 
-interface SidebarProps {
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
+interface AppSidebarProps {
+  onNavigate: (section: string) => void;
+  activeSection: string;
 }
 
-const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
+const AppSidebar = ({ onNavigate, activeSection }: AppSidebarProps) => {
   const { t } = useLanguage();
-  const {
-    canAccessDashboard,
-    canAccessAuctions,
-    isInternalSeller,
-    isAdmin
-  } = useAuth();
   const { state } = useSidebar();
-  
-  const menuItems = getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller);
+  const { 
+    canAccessDashboard, 
+    canAccessAuctions, 
+    isAdmin, 
+    isInternalSeller 
+  } = useAuth();
+
+  const menuItems = getMenuItems(
+    t, 
+    canAccessDashboard, 
+    canAccessAuctions, 
+    isAdmin, 
+    isInternalSeller
+  );
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar variant="sidebar" collapsible="icon">
       <AppSidebarHeader />
-      
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>Menu Principal</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map(item => {
-                const Icon = item.icon;
-                return (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton 
-                      isActive={activeTab === item.id} 
-                      onClick={() => setActiveTab(item.id)} 
-                      tooltip={state === "collapsed" ? item.label : undefined} 
-                      className={`w-full ${activeTab === item.id ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' : 'hover:bg-muted'}`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span className="text-sm px-0 mx-0">{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-              
-              <FinancingMenu activeTab={activeTab} setActiveTab={setActiveTab} />
+              {menuItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton
+                    tooltip={state === "collapsed" ? t(item.label as any) : undefined}
+                    onClick={() => onNavigate(item.id)}
+                    isActive={activeSection === item.id}
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <span>{typeof item.label === 'string' ? item.label : t(item.label)}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
               <LogisticsMenu />
-              <SettingsMenu activeTab={activeTab} setActiveTab={setActiveTab} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <FinancingMenu />
+        <SettingsMenu />
       </SidebarContent>
     </Sidebar>
   );

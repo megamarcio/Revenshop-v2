@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Loader2, Image, Star } from 'lucide-react';
 import { useNewVehiclePhotos } from '@/hooks/useNewVehiclePhotos';
+import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 import { toast } from '@/hooks/use-toast';
 import VehiclePhotoDisplay from '../../VehiclePhotoDisplay';
 
@@ -15,10 +16,11 @@ const NewPhotosSection = ({
   vehicleId, 
   readOnly = false 
 }: NewPhotosSectionProps) => {
-  const { photos, uploading, uploadPhoto, removePhoto, setMainPhoto } = useNewVehiclePhotos(vehicleId);
+  const { photos: newPhotos, uploading, uploadPhoto, removePhoto, setMainPhoto: setMainNewPhoto } = useNewVehiclePhotos(vehicleId);
+  const { setMainPhoto: setMainVehiclePhoto } = useVehiclePhotos(vehicleId);
 
   console.log('NewPhotosSection - vehicleId:', vehicleId);
-  console.log('NewPhotosSection - photos:', photos);
+  console.log('NewPhotosSection - newPhotos:', newPhotos);
 
   const canEdit = !readOnly;
 
@@ -26,9 +28,9 @@ const NewPhotosSection = ({
     if (!canEdit || !vehicleId) return;
     
     const files = event.target.files;
-    if (!files || photos.length >= 20) return;
+    if (!files || newPhotos.length >= 20) return;
 
-    const maxFiles = Math.min(files.length, 20 - photos.length);
+    const maxFiles = Math.min(files.length, 20 - newPhotos.length);
     const fileArray = Array.from(files).slice(0, maxFiles);
     
     console.log(`Processing ${fileArray.length} new photos for upload`);
@@ -74,7 +76,34 @@ const NewPhotosSection = ({
 
   const handleSetMainPhoto = async (photoName: string) => {
     if (!canEdit) return;
-    await setMainPhoto(photoName);
+    
+    console.log('Setting main photo in NewPhotosSection:', photoName);
+    
+    try {
+      // Primeiro, definir como principal nas fotos novas
+      await setMainNewPhoto(photoName);
+      
+      // Depois, garantir que seja a principal também nas fotos do veículo
+      // Isso irá forçar uma atualização na interface principal
+      if (vehicleId) {
+        // Disparar evento customizado para atualizar outras partes da interface
+        window.dispatchEvent(new CustomEvent('mainPhotoChanged', { 
+          detail: { vehicleId, photoName } 
+        }));
+      }
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Foto principal definida com sucesso.',
+      });
+    } catch (error) {
+      console.error('Error setting main photo:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao definir foto principal.',
+        variant: 'destructive',
+      });
+    }
   };
 
   const formatFileSize = (bytes: number): string => {
@@ -89,12 +118,12 @@ const NewPhotosSection = ({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold flex items-center space-x-2">
         <Image className="h-5 w-5" />
-        <span>Fotos Novas ({photos.length}/20) - Máx. 1MB cada</span>
+        <span>Fotos Novas ({newPhotos.length}/20) - Máx. 1MB cada</span>
         {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
       </h3>
       
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-        {photos.map((photo, index) => (
+        {newPhotos.map((photo, index) => (
           <div key={photo.id} className="relative group">
             <VehiclePhotoDisplay
               photoUrl={photo.url}
@@ -139,7 +168,7 @@ const NewPhotosSection = ({
           </div>
         ))}
         
-        {canEdit && photos.length < 20 && !uploading && vehicleId && (
+        {canEdit && newPhotos.length < 20 && !uploading && vehicleId && (
           <label className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex items-center justify-center cursor-pointer hover:border-revenshop-primary">
             <Plus className="h-6 w-6 text-gray-400" />
             <input
@@ -165,7 +194,7 @@ const NewPhotosSection = ({
         </p>
       )}
       
-      {photos.length >= 15 && (
+      {newPhotos.length >= 15 && (
         <p className="text-sm text-amber-600">
           Atenção: Muitas fotos podem tornar o carregamento mais lento
         </p>

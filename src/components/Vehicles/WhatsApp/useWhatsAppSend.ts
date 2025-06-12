@@ -88,18 +88,39 @@ export const useWhatsAppSend = () => {
             vehiclePhotos = photos.map(p => p.url);
             console.log('Fotos encontradas no banco:', vehiclePhotos.length);
           }
+
+          // Se não encontrou fotos no banco, buscar fotos novas do bucket
+          if (vehiclePhotos.length === 0) {
+            console.log('Tentando buscar fotos do bucket vehicles-photos-new');
+            
+            const { data: bucketFiles, error: bucketError } = await supabase.storage
+              .from('vehicles-photos-new')
+              .list(vehicleData.id);
+
+            if (!bucketError && bucketFiles && bucketFiles.length > 0) {
+              console.log('Arquivos encontrados no bucket:', bucketFiles.length);
+              
+              vehiclePhotos = bucketFiles.map(file => {
+                const { data } = supabase.storage
+                  .from('vehicles-photos-new')
+                  .getPublicUrl(`${vehicleData.id}/${file.name}`);
+                return data.publicUrl;
+              });
+            }
+          }
         } catch (error) {
           console.error('Erro ao buscar fotos do veículo:', error);
         }
       }
 
-      // Se não encontrou fotos no banco, usar as fotos do objeto vehicleData
+      // Se ainda não encontrou fotos, usar as fotos do objeto vehicleData
       if (vehiclePhotos.length === 0 && vehicleData.photos && vehicleData.photos.length > 0) {
         vehiclePhotos = vehicleData.photos;
         console.log('Usando fotos do vehicleData:', vehiclePhotos.length);
       }
 
-      console.log('Total de fotos para envio:', vehiclePhotos.length);
+      console.log('Total de fotos para envio via webhook:', vehiclePhotos.length);
+      console.log('URLs das fotos:', vehiclePhotos);
 
       const webhookData = {
         type: 'vehicle_share',
@@ -121,17 +142,18 @@ export const useWhatsAppSend = () => {
           vin: vehicleData.vin,
           salePrice: vehicleData.salePrice,
           description: vehicleData.description,
-          photos: vehiclePhotos, // Agora inclui todas as fotos encontradas
+          photos: vehiclePhotos, // URLs das fotos para o webhook
+          photoCount: vehiclePhotos.length,
           video: vehicleData.video
         },
         timestamp: new Date().toISOString()
       };
 
-      console.log('Dados do webhook com fotos:', {
+      console.log('Dados do webhook:', {
         ...webhookData,
         vehicle: {
           ...webhookData.vehicle,
-          photosCount: vehiclePhotos.length
+          photoUrls: vehiclePhotos.slice(0, 3) // Mostrar apenas as 3 primeiras URLs no log
         }
       });
 
