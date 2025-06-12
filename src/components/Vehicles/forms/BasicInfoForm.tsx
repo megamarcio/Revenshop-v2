@@ -24,16 +24,22 @@ const BasicInfoForm = ({
     // Remove caracteres não numéricos
     const numericValue = value.replace(/\D/g, '');
     
-    // Limitar a 3 dígitos
+    // Limitar a 999 (3 dígitos máximo)
     const limitedValue = numericValue.slice(0, 3);
     
-    // Se for um número válido, formatar com zeros à esquerda para exatamente 3 dígitos
-    if (limitedValue) {
-      const formattedCode = limitedValue.padStart(3, '0');
-      onInputChange('internalCode', formattedCode);
-    } else {
-      onInputChange('internalCode', '');
+    // Converter para número e validar se está entre 1 e 999
+    const numValue = parseInt(limitedValue, 10);
+    
+    if (limitedValue === '' || (numValue >= 1 && numValue <= 999)) {
+      // Se for um número válido entre 1-999, formatar com zeros à esquerda para exatamente 3 dígitos
+      if (limitedValue && numValue >= 1) {
+        const formattedCode = limitedValue.padStart(3, '0');
+        onInputChange('internalCode', formattedCode);
+      } else {
+        onInputChange('internalCode', limitedValue);
+      }
     }
+    // Se não for válido, não atualiza o campo
   };
 
   return (
@@ -114,10 +120,11 @@ const BasicInfoForm = ({
             onChange={e => handleInternalCodeChange(e.target.value)} 
             className={errors.internalCode ? "border-red-500" : ""} 
             placeholder="001" 
+            maxLength={3}
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
-            Digite um número e será formatado automaticamente (ex: 1 → 001)
+            Digite um número de 1 a 999 (será formatado automaticamente com zeros à esquerda)
           </p>
         </div>
 

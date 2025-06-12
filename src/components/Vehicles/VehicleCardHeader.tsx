@@ -75,30 +75,20 @@ const VehicleCardHeader = ({ vehicle, onDownloadSingle, onDownloadAll, downloadi
         photos={vehicle.photos}
         vehicleName={vehicle.name}
         onDownloadSingle={onDownloadSingle}
+        onDownloadAll={onDownloadAll}
         className="w-full"
+        showCarousel={true}
       />
       
       {/* Category Badge */}
-      <div className={`absolute top-2 left-2 px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(vehicle)} shadow-md`}>
+      <div className={`absolute top-2 left-2 px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(vehicle)} shadow-md z-10`}>
         {getCategoryLabel(vehicle)}
       </div>
       
-      {/* Download All Button */}
-      {vehicle.photos && vehicle.photos.length > 1 && (
-        <div className="absolute top-2 right-2">
-          <Button
-            variant="secondary" 
-            size="sm"
-            onClick={onDownloadAll}
-            disabled={downloading}
-            className="bg-white/90 hover:bg-white text-gray-700 shadow-md"
-          >
-            {downloading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <DownloadCloud className="h-4 w-4" />
-            )}
-          </Button>
+      {/* Loading indicator when downloading */}
+      {downloading && (
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
+          <Loader2 className="h-8 w-8 text-white animate-spin" />
         </div>
       )}
     </div>
