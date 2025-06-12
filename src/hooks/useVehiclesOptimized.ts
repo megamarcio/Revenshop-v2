@@ -119,8 +119,8 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
           `)
           .order('created_at', { ascending: false });
 
-        // Apply category filter
-        if (category) {
+        // Apply category filter with proper type checking
+        if (category && (category === 'forSale' || category === 'sold')) {
           query = query.eq('category', category);
         }
 
