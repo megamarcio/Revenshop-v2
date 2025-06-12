@@ -17,10 +17,7 @@ const VehicleInfo = ({ vehicle }: VehicleInfoProps) => {
   };
 
   const formatMiles = (miles: number) => {
-    return new Intl.NumberFormat('en-US', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    }).format(miles || 0);
+    return Math.floor(miles || 0).toString();
   };
 
   return (
