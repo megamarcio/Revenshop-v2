@@ -30,6 +30,7 @@ const VehicleSearch = ({
       vehicle.name?.toLowerCase().includes(searchLower) ||
       vehicle.model?.toLowerCase().includes(searchLower) ||
       vehicle.internal_code?.toLowerCase().includes(searchLower) ||
+      vehicle.internalCode?.toLowerCase().includes(searchLower) ||
       vehicle.vin?.toLowerCase().includes(searchLower) ||
       vehicle.year?.toString().includes(searchLower)
     );
@@ -76,7 +77,7 @@ const VehicleSearch = ({
               <div className="flex items-center gap-2">
                 <Car className="h-4 w-4" />
                 <span className="font-semibold text-blue-600">
-                  {selectedVehicle.internal_code}
+                  {selectedVehicle.internalCode || selectedVehicle.internal_code}
                 </span>
                 <span> - {selectedVehicle.name}</span>
               </div>
@@ -94,9 +95,9 @@ const VehicleSearch = ({
                 <div className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   <span className="font-semibold text-blue-600">
-                    {selectedVehicle.internal_code}
+                    {vehicle.internalCode || vehicle.internal_code}
                   </span>
-                  <span> - {selectedVehicle.name}</span>
+                  <span> - {vehicle.name}</span>
                 </div>
               </SelectItem>
             ))
