@@ -1,8 +1,11 @@
 
 import React, { useState, useMemo } from 'react';
 import VehicleGridView from './VehicleGridView';
+import VehicleListView from './VehicleListView';
 import VehicleForm from './VehicleForm';
 import VehicleListHeader from './VehicleListHeader';
+import VehicleSearchBar from './VehicleSearchBar';
+import VehicleControls from './VehicleControls';
 import EmptyVehicleState from './EmptyVehicleState';
 import { useVehicles } from '../../hooks/useVehicles';
 import { useVehiclesUltraMinimal } from '../../hooks/useVehiclesUltraMinimal';
@@ -21,6 +24,10 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
   const [editingVehicle, setEditingVehicle] = useState<VehicleCardType | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [sortBy, setSortBy] = useState('name');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [filterBy, setFilterBy] = useState('all');
 
   // Use ultra minimal hook for list display with automatic refresh
   const { 
@@ -46,7 +53,7 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
   const filteredVehicles = useMemo(() => {
     if (!convertedVehiclesForCards) return [];
     
-    return convertedVehiclesForCards.filter(vehicle => {
+    let filtered = convertedVehiclesForCards.filter(vehicle => {
       const matchesSearch = !searchTerm || 
         vehicle.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         vehicle.vin.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -54,10 +61,26 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
         vehicle.color.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesCategory = selectedCategory === 'all' || vehicle.category === selectedCategory;
+      const matchesFilter = filterBy === 'all' || vehicle.category === filterBy;
       
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesCategory && matchesFilter;
     });
-  }, [convertedVehiclesForCards, searchTerm, selectedCategory]);
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      let aValue = a[sortBy as keyof VehicleCardType];
+      let bValue = b[sortBy as keyof VehicleCardType];
+      
+      if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+      if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+      
+      if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
+      return 0;
+    });
+
+    return filtered;
+  }, [convertedVehiclesForCards, searchTerm, selectedCategory, filterBy, sortBy, sortOrder]);
 
   const handleAddVehicle = () => {
     setEditingVehicle(null);
@@ -120,6 +143,16 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     handleFormClose();
   };
 
+  const handleSortChange = (newSortBy: string, newSortOrder: 'asc' | 'desc') => {
+    setSortBy(newSortBy);
+    setSortOrder(newSortOrder);
+  };
+
+  const handleExport = (format: 'csv' | 'xls') => {
+    console.log(`Exporting vehicles as ${format}`);
+    // Export functionality to be implemented
+  };
+
   return (
     <div className="space-y-6">
       <VehicleListHeader onAddVehicle={handleAddVehicle} />
@@ -135,14 +168,40 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
         </Button>
       )}
 
+      {/* Search and Controls */}
+      <div className="space-y-4">
+        <VehicleSearchBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+        
+        <VehicleControls
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortChange={handleSortChange}
+          filterBy={filterBy}
+          onFilterChange={setFilterBy}
+          onExport={handleExport}
+        />
+      </div>
+
       {isLoadingList ? (
         <div className="text-center py-8">
           <p>Carregando veículos...</p>
         </div>
       ) : filteredVehicles.length === 0 ? (
         <EmptyVehicleState />
-      ) : (
+      ) : viewMode === 'grid' ? (
         <VehicleGridView
+          vehicles={filteredVehicles}
+          onEdit={handleEditVehicle}
+          onDuplicate={handleDuplicateVehicle}
+          onDelete={handleDeleteVehicle}
+        />
+      ) : (
+        <VehicleListView
           vehicles={filteredVehicles}
           onEdit={handleEditVehicle}
           onDuplicate={handleDuplicateVehicle}

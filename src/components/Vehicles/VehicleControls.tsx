@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Grid, List, Download, SortAsc, SortDesc, Filter } from 'lucide-react';
-import { useLanguage } from '../../contexts/LanguageContext';
 
 interface VehicleControlsProps {
   viewMode: 'grid' | 'list';
@@ -27,8 +26,6 @@ const VehicleControls = ({
   onFilterChange,
   onExport
 }: VehicleControlsProps) => {
-  const { t } = useLanguage();
-
   const sortOptions = [
     { value: 'name', label: 'Nome' },
     { value: 'year', label: 'Ano' },
