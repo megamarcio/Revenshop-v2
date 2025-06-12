@@ -29,9 +29,9 @@ const VehicleListView = ({
   };
 
   const formatInternalCode = (code: string) => {
-    // Se o código é numérico e tem menos de 3 dígitos, adicionar zeros à esquerda
-    if (code && /^\d+$/.test(code) && code.length < 3) {
-      return code.padStart(3, '0');
+    // Se o código é numérico e tem menos de 4 dígitos, adicionar zeros à esquerda
+    if (code && /^\d+$/.test(code) && code.length < 4) {
+      return code.padStart(4, '0');
     }
     return code;
   };
@@ -45,10 +45,7 @@ const VehicleListView = ({
         switch (extendedCategory) {
           case 'rental': return 'Aluguel';
           case 'maintenance': return 'Manutenção';
-          case 'consigned': 
-            // Verificar se há loja específica
-            const storeMatch = vehicle.description.match(/\[STORE:([^\]]+)\]/);
-            return storeMatch ? `Consignado - ${storeMatch[1]}` : 'Consignado';
+          case 'consigned': return 'Consignado';
           default: return 'À Venda';
         }
       }

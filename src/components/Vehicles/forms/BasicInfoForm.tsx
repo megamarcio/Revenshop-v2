@@ -24,22 +24,13 @@ const BasicInfoForm = ({
     // Remove caracteres não numéricos
     const numericValue = value.replace(/\D/g, '');
     
-    // Limitar a 999 (3 dígitos máximo)
-    const limitedValue = numericValue.slice(0, 3);
-    
-    // Converter para número e validar se está entre 1 e 999
-    const numValue = parseInt(limitedValue, 10);
-    
-    if (limitedValue === '' || (numValue >= 1 && numValue <= 999)) {
-      // Se for um número válido entre 1-999, formatar com zeros à esquerda para exatamente 3 dígitos
-      if (limitedValue && numValue >= 1) {
-        const formattedCode = limitedValue.padStart(3, '0');
-        onInputChange('internalCode', formattedCode);
-      } else {
-        onInputChange('internalCode', limitedValue);
-      }
+    // Se for um número de 1-9999, formatar com zeros à esquerda
+    if (numericValue && parseInt(numericValue) > 0) {
+      const formattedCode = numericValue.padStart(4, '0');
+      onInputChange('internalCode', formattedCode);
+    } else {
+      onInputChange('internalCode', numericValue);
     }
-    // Se não for válido, não atualiza o campo
   };
 
   return (
@@ -119,28 +110,27 @@ const BasicInfoForm = ({
             value={formData.internalCode} 
             onChange={e => handleInternalCodeChange(e.target.value)} 
             className={errors.internalCode ? "border-red-500" : ""} 
-            placeholder="001" 
-            maxLength={3}
+            placeholder="0001" 
+            maxLength={4}
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
-            Digite um número de 1 a 999 (será formatado automaticamente com zeros à esquerda)
+            Digite um número e será formatado automaticamente (ex: 1 → 0001)
           </p>
         </div>
 
-        {/* Categoria e Cor lado a lado */}
-        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="md:col-span-2">
           <VehicleCategorySelector 
             value={formData.category} 
             onChange={value => {
               console.log('BasicInfoForm - category onChange:', value);
               onInputChange('category', value);
-            }}
-            consignmentStore={formData.consignmentStore}
-            onConsignmentStoreChange={value => onInputChange('consignmentStore', value)}
+            }} 
             error={errors.category} 
           />
-          
+        </div>
+
+        <div className="md:col-span-2">
           <ColorSelector 
             value={formData.color} 
             onChange={value => onInputChange('color', value)} 

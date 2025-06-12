@@ -1,15 +1,12 @@
 
 import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 
 interface VehicleCategorySelectorProps {
   value: string;
   onChange: (value: string) => void;
-  consignmentStore?: string;
-  onConsignmentStoreChange?: (value: string) => void;
   error?: string;
 }
 
@@ -21,13 +18,7 @@ const categoryOptions = [
   { value: 'maintenance', label: 'Manutenção', description: 'Veículo em manutenção' }
 ];
 
-const VehicleCategorySelector = ({ 
-  value, 
-  onChange, 
-  consignmentStore, 
-  onConsignmentStoreChange, 
-  error 
-}: VehicleCategorySelectorProps) => {
+const VehicleCategorySelector = ({ value, onChange, error }: VehicleCategorySelectorProps) => {
   console.log('VehicleCategorySelector - current value:', value);
   
   return (
@@ -70,20 +61,6 @@ const VehicleCategorySelector = ({
           ))}
         </SelectContent>
       </Select>
-      
-      {/* Campo de loja de consignação aparece apenas quando categoria é 'consigned' */}
-      {value === 'consigned' && (
-        <div className="mt-2">
-          <label className="text-sm font-medium text-gray-600">Loja de Consignação</label>
-          <Input
-            type="text"
-            value={consignmentStore || ''}
-            onChange={(e) => onConsignmentStoreChange?.(e.target.value)}
-            placeholder="Nome da loja onde está consignado"
-            className="mt-1"
-          />
-        </div>
-      )}
       
       {error && (
         <p className="text-sm text-red-500">{error}</p>

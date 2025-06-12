@@ -5,7 +5,7 @@ export interface Vehicle {
   vin: string;
   year: number;
   model: string;
-  miles: number;
+  miles: number; // Corrigido: de string para number e mantido como miles
   internalCode: string;
   color: string;
   purchasePrice: number;

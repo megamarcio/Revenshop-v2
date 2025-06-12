@@ -1,97 +1,110 @@
 
 import React from 'react';
+import { Card, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Download, DownloadCloud, Loader2 } from 'lucide-react';
-import VehiclePhotoDisplay from './VehiclePhotoDisplay';
-import { Vehicle } from './VehicleCardTypes';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Download, Archive } from 'lucide-react';
+import VehicleStatusBadge from './VehicleStatusBadge';
+import VehicleMainPhoto from './VehicleMainPhoto';
+import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
+import { downloadSinglePhoto, downloadAllPhotosAsZip } from '@/utils/photoDownloader';
 
 interface VehicleCardHeaderProps {
-  vehicle: Vehicle;
-  onDownloadSingle: (photoUrl: string, index: number) => Promise<void>;
-  onDownloadAll: () => Promise<void>;
+  vehicle: {
+    id: string;
+    name: string;
+    photos: string[];
+    category: string;
+    extended_category?: string;
+    consignment_store?: string;
+    main_photo_url?: string;
+  };
+  onDownloadSingle: (photoUrl: string, index: number) => void;
+  onDownloadAll: () => void;
   downloading: boolean;
 }
 
-const VehicleCardHeader = ({ vehicle, onDownloadSingle, onDownloadAll, downloading }: VehicleCardHeaderProps) => {
+const VehicleCardHeader: React.FC<VehicleCardHeaderProps> = ({
+  vehicle,
+  onDownloadSingle,
+  onDownloadAll,
+  downloading
+}) => {
+  const { photos: vehiclePhotos, loading } = useVehiclePhotos(vehicle.id);
   
-  const getCategoryLabel = (vehicle: Vehicle) => {
-    // Verificar se há categoria estendida na descrição
-    if (vehicle.category === 'forSale' && vehicle.description) {
-      const match = vehicle.description.match(/\[CATEGORY:([^\]]+)\]/);
-      if (match) {
-        const extendedCategory = match[1];
-        switch (extendedCategory) {
-          case 'rental': return 'Aluguel';
-          case 'maintenance': return 'Manutenção';
-          case 'consigned': 
-            // Verificar se há loja específica
-            const storeMatch = vehicle.description.match(/\[STORE:([^\]]+)\]/);
-            return storeMatch ? `Consignado - ${storeMatch[1]}` : 'Consignado';
-          default: return 'À Venda';
-        }
-      }
-    }
-    
-    // Categoria padrão
-    switch (vehicle.category) {
-      case 'forSale': return 'À Venda';
-      case 'sold': return 'Vendido';
-      case 'maintenance': return 'Manutenção';
-      case 'rental': return 'Aluguel';
-      case 'consigned': return 'Consignado';
-      default: return vehicle.category;
-    }
-  };
+  // Use vehiclePhotos from database, fallback to vehicle.photos if needed
+  const hasPhotos = vehiclePhotos.length > 0 || (vehicle.photos && vehicle.photos.length > 0);
+  const allPhotos = vehiclePhotos.length > 0 ? vehiclePhotos.map(p => p.url) : vehicle.photos;
+  const mainPhoto = vehiclePhotos.find(p => p.is_main)?.url || vehiclePhotos[0]?.url || vehicle.photos[0];
 
-  const getCategoryColor = (vehicle: Vehicle) => {
-    // Verificar se há categoria estendida na descrição
-    if (vehicle.category === 'forSale' && vehicle.description) {
-      const match = vehicle.description.match(/\[CATEGORY:([^\]]+)\]/);
-      if (match) {
-        const extendedCategory = match[1];
-        switch (extendedCategory) {
-          case 'rental': return 'bg-purple-600 text-white';
-          case 'maintenance': return 'bg-yellow-600 text-white';
-          case 'consigned': return 'bg-orange-600 text-white';
-          default: return 'bg-green-600 text-white';
-        }
+  const handleDownloadAll = async () => {
+    if (allPhotos.length > 0) {
+      try {
+        await downloadAllPhotosAsZip(allPhotos, vehicle.name);
+      } catch (error) {
+        console.error('Error downloading photos:', error);
       }
-    }
-    
-    // Cores padrão
-    switch (vehicle.category) {
-      case 'forSale': return 'bg-green-600 text-white';
-      case 'sold': return 'bg-blue-600 text-white';
-      case 'maintenance': return 'bg-yellow-600 text-white';
-      case 'rental': return 'bg-purple-600 text-white';
-      case 'consigned': return 'bg-orange-600 text-white';
-      default: return 'bg-gray-600 text-white';
     }
   };
 
   return (
-    <div className="relative">
-      <VehiclePhotoDisplay
-        photos={vehicle.photos}
-        vehicleName={vehicle.name}
-        onDownloadSingle={onDownloadSingle}
-        onDownloadAll={onDownloadAll}
-        className="w-full"
-        showCarousel={true}
-      />
-      
-      {/* Category Badge */}
-      <div className={`absolute top-2 left-2 px-2 py-1 text-xs font-medium rounded-full ${getCategoryColor(vehicle)} shadow-md z-10`}>
-        {getCategoryLabel(vehicle)}
+    <CardHeader className="p-0 relative">
+      <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative overflow-hidden">
+        <VehicleMainPhoto
+          vehicleId={vehicle.id}
+          fallbackPhotos={vehicle.photos}
+          vehicleName={vehicle.name}
+          className="w-full h-full"
+          showLoader={loading}
+        />
+        
+        {/* Status Badge */}
+        <VehicleStatusBadge 
+          category={vehicle.category}
+          extended_category={vehicle.extended_category}
+          consignment_store={vehicle.consignment_store}
+        />
+        
+        {/* Download buttons - só mostrar se tiver fotos */}
+        {hasPhotos && (
+          <div className="absolute top-2 right-2 flex gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                  onClick={() => mainPhoto && onDownloadSingle(mainPhoto, 0)}
+                  disabled={downloading || !mainPhoto}
+                >
+                  <Download className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Baixar esta foto</p>
+              </TooltipContent>
+            </Tooltip>
+            
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                  onClick={handleDownloadAll}
+                  disabled={downloading}
+                >
+                  <Archive className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Baixar todas as fotos (ZIP)</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
       </div>
-      
-      {/* Loading indicator when downloading */}
-      {downloading && (
-        <div className="absolute inset-0 bg-black/50 flex items-center justify-center z-20">
-          <Loader2 className="h-8 w-8 text-white animate-spin" />
-        </div>
-      )}
-    </div>
+    </CardHeader>
   );
 };
 
