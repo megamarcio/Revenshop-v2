@@ -55,6 +55,21 @@ const VehicleClientSelector = ({
     return filtered;
   }, [vehicles]);
 
+  // Função para lidar com a seleção de veículo
+  const handleVehicleSelect = (vehicle: any) => {
+    console.log('VehicleClientSelector - vehicle selected:', vehicle);
+    onVehicleSelect(vehicle);
+    
+    // Automaticamente definir o preço do veículo com o valor de venda
+    if (vehicle && vehicle.salePrice) {
+      console.log('VehicleClientSelector - setting vehicle price to:', vehicle.salePrice);
+      onVehiclePriceChange(vehicle.salePrice);
+    } else if (vehicle && vehicle.sale_price) {
+      console.log('VehicleClientSelector - setting vehicle price to:', vehicle.sale_price);
+      onVehiclePriceChange(vehicle.sale_price);
+    }
+  };
+
   console.log('VehicleClientSelector - vehiclesLoading:', vehiclesLoading);
   console.log('VehicleClientSelector - vehiclesError:', vehiclesError);
   console.log('VehicleClientSelector - availableVehicles count:', availableVehicles.length);
@@ -79,7 +94,7 @@ const VehicleClientSelector = ({
         <VehicleSearch
           vehicles={availableVehicles}
           selectedVehicle={selectedVehicle}
-          onVehicleSelect={onVehicleSelect}
+          onVehicleSelect={handleVehicleSelect}
           vehicleSearch={vehicleSearch}
           setVehicleSearch={setVehicleSearch}
           isLoading={vehiclesLoading}
