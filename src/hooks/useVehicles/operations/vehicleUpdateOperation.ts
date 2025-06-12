@@ -17,11 +17,7 @@ export const updateVehicle = async (vehicleData: any) => {
   const dbVehicleData = mapFormToDbData(vehicleData);
   
   console.log('updateVehicle - mapped dbVehicleData:', dbVehicleData);
-  console.log('updateVehicle - title fields being sent:', {
-    title_type_id: dbVehicleData.title_type_id,
-    title_location_id: dbVehicleData.title_location_id,
-    title_location_custom: dbVehicleData.title_location_custom
-  });
+  console.log('updateVehicle - category field being sent:', dbVehicleData.category);
 
   const { data, error } = await supabase
     .from('vehicles')

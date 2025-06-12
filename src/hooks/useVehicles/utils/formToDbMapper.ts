@@ -40,7 +40,7 @@ export const mapFormToDbData = (vehicleData: any) => {
     custom_financing_bank: vehicleData.customFinancingBank || null,
   };
 
-  // Handle category mapping - CRITICAL FIX
+  // Handle category mapping - CRITICAL FIX: Sempre mapear a categoria
   console.log('mapFormToDbData - processing category:', vehicleData.category);
   
   if (vehicleData.category === 'sold') {
@@ -53,7 +53,7 @@ export const mapFormToDbData = (vehicleData: any) => {
     // Limpar informações de categoria estendida se estava à venda
     const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
     dbVehicleData.description = cleanDesc;
-  } else {
+  } else if (['rental', 'maintenance', 'consigned'].includes(vehicleData.category)) {
     // For rental, maintenance, consigned - store as forSale in DB and add extended category to description
     console.log('mapFormToDbData - mapping extended category to forSale:', vehicleData.category);
     dbVehicleData.category = 'forSale';
@@ -65,6 +65,11 @@ export const mapFormToDbData = (vehicleData: any) => {
     dbVehicleData.description = `[CATEGORY:${extendedCategory}]${cleanDesc ? ' ' + cleanDesc : ''}`;
     
     console.log('mapFormToDbData - final description with category tag:', dbVehicleData.description);
+  } else {
+    // Para qualquer outra categoria não reconhecida, usar forSale como padrão
+    console.log('mapFormToDbData - categoria não reconhecida, usando forSale como padrão:', vehicleData.category);
+    dbVehicleData.category = 'forSale';
+    dbVehicleData.description = vehicleData.description || '';
   }
 
   // Handle consignment store info
