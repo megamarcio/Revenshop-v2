@@ -1,30 +1,19 @@
 
 import React from 'react';
 
-// Definir o tipo Vehicle localmente para evitar conflitos de importação
-interface Vehicle {
-  id: string;
-  name: string;
-  vin: string;
-  year: number;
-  color: string;
-  sale_price: number;
-  photos?: string[];
-}
-
 interface VehicleInfoProps {
-  vehicle: Vehicle;
+  vehicle: any;
 }
 
 const VehicleInfo = ({ vehicle }: VehicleInfoProps) => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'USD'
-    }).format(value);
+      currency: 'BRL'
+    }).format(value || 0);
   };
 
-  // Get the first photo from the photos array
+  // Obter a primeira foto do array de fotos
   const mainPhoto = vehicle.photos && vehicle.photos.length > 0 ? vehicle.photos[0] : null;
 
   return (
@@ -47,8 +36,11 @@ const VehicleInfo = ({ vehicle }: VehicleInfoProps) => {
       
       <div className="text-xs sm:text-sm text-blue-700 space-y-1">
         <p><span className="font-medium">Nome:</span> {vehicle.name}</p>
+        <p><span className="font-medium">Modelo:</span> {vehicle.model}</p>
         <p><span className="font-medium">Ano:</span> {vehicle.year}</p>
         <p><span className="font-medium">Cor:</span> {vehicle.color}</p>
+        <p><span className="font-medium">Milhas:</span> {vehicle.miles?.toLocaleString()}</p>
+        <p><span className="font-medium">Código:</span> {vehicle.internal_code}</p>
         <p className="hidden sm:block"><span className="font-medium">VIN:</span> {vehicle.vin}</p>
         <p><span className="font-medium">Preço:</span> {formatCurrency(vehicle.sale_price)}</p>
       </div>

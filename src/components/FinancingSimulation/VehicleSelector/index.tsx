@@ -34,10 +34,10 @@ const VehicleClientSelector = ({
   const { user, isAdmin, isManager } = useAuth();
 
   // Usar hooks otimizados com filtros específicos
-  const { vehicles, loading: vehiclesLoading } = useVehiclesOptimized({ 
+  const { vehicles, loading: vehiclesLoading, error: vehiclesError } = useVehiclesOptimized({ 
     category: 'forSale',
-    searchTerm: vehicleSearch,
-    limit: 50
+    searchTerm: '', // Não usar searchTerm aqui, faremos a filtragem no componente
+    limit: 100
   });
 
   // Filtrar clientes baseado no vendedor (apenas se não for admin/manager)
@@ -48,9 +48,16 @@ const VehicleClientSelector = ({
   });
 
   // Memoizar veículos filtrados para melhor performance
-  const filteredVehicles = useMemo(() => {
-    return vehicles.filter(v => v.category === 'forSale');
+  const availableVehicles = useMemo(() => {
+    console.log('VehicleClientSelector - all vehicles:', vehicles);
+    const filtered = vehicles.filter(v => v.category === 'forSale');
+    console.log('VehicleClientSelector - filtered vehicles:', filtered);
+    return filtered;
   }, [vehicles]);
+
+  console.log('VehicleClientSelector - vehiclesLoading:', vehiclesLoading);
+  console.log('VehicleClientSelector - vehiclesError:', vehiclesError);
+  console.log('VehicleClientSelector - availableVehicles count:', availableVehicles.length);
 
   return (
     <Card>
@@ -61,9 +68,16 @@ const VehicleClientSelector = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Mostrar erro se houver */}
+        {vehiclesError && (
+          <div className="text-red-600 text-sm p-2 bg-red-50 rounded">
+            Erro ao carregar veículos: {vehiclesError}
+          </div>
+        )}
+
         {/* Vehicle Search Component */}
         <VehicleSearch
-          vehicles={filteredVehicles}
+          vehicles={availableVehicles}
           selectedVehicle={selectedVehicle}
           onVehicleSelect={onVehicleSelect}
           vehicleSearch={vehicleSearch}

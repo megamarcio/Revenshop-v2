@@ -1,39 +1,14 @@
 
 import React from 'react';
-import { Search } from 'lucide-react';
+import { Search, Car } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Car } from 'lucide-react';
-
-// Interface Vehicle corrigida para corresponder à tabela vehicles do Supabase
-interface Vehicle {
-  id: string;
-  name: string;
-  vin: string;
-  year: number;
-  model: string;
-  miles: number;
-  internal_code: string;
-  color: string;
-  purchase_price: number;
-  sale_price: number;
-  profit_margin: number;
-  min_negotiable: number;
-  carfax_price: number;
-  mmr_value: number;
-  description: string;
-  category: string;
-  created_at: string;
-  updated_at: string;
-  created_by: string;
-  photos?: any[];
-}
 
 interface VehicleSearchProps {
-  vehicles: Vehicle[];
-  selectedVehicle?: Vehicle;
-  onVehicleSelect: (vehicle: Vehicle | undefined) => void;
+  vehicles: any[];
+  selectedVehicle?: any;
+  onVehicleSelect: (vehicle: any | undefined) => void;
   vehicleSearch: string;
   setVehicleSearch: (search: string) => void;
   isLoading: boolean;
@@ -51,8 +26,25 @@ const VehicleSearch = ({
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-    }).format(value);
+    }).format(value || 0);
   };
+
+  // Filtrar veículos baseado na busca
+  const filteredVehicles = vehicles.filter(vehicle => {
+    if (!vehicleSearch) return true;
+    const searchLower = vehicleSearch.toLowerCase();
+    return (
+      vehicle.name?.toLowerCase().includes(searchLower) ||
+      vehicle.model?.toLowerCase().includes(searchLower) ||
+      vehicle.internal_code?.toLowerCase().includes(searchLower) ||
+      vehicle.vin?.toLowerCase().includes(searchLower) ||
+      vehicle.year?.toString().includes(searchLower)
+    );
+  });
+
+  console.log('VehicleSearch - vehicles:', vehicles);
+  console.log('VehicleSearch - filteredVehicles:', filteredVehicles);
+  console.log('VehicleSearch - selectedVehicle:', selectedVehicle);
 
   return (
     <div className="space-y-2">
@@ -65,7 +57,7 @@ const VehicleSearch = ({
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-3 w-3 sm:h-4 sm:w-4 text-gray-400" />
         <Input
-          placeholder="Buscar veículo..."
+          placeholder="Buscar veículo por nome, modelo, código..."
           value={vehicleSearch}
           onChange={(e) => setVehicleSearch(e.target.value)}
           className="pl-8 sm:pl-10 text-sm h-9 sm:h-10"
@@ -75,30 +67,48 @@ const VehicleSearch = ({
       <Select
         value={selectedVehicle?.id || ''}
         onValueChange={(value) => {
-          const vehicle = vehicles.find(v => v.id === value);
-          onVehicleSelect(vehicle);
+          if (value) {
+            const vehicle = vehicles.find(v => v.id === value);
+            console.log('VehicleSearch - selected vehicle:', vehicle);
+            onVehicleSelect(vehicle);
+          } else {
+            onVehicleSelect(undefined);
+          }
         }}
         disabled={isLoading}
       >
         <SelectTrigger className="h-9 sm:h-10 text-sm">
-          <SelectValue placeholder={isLoading ? "Carregando..." : "Selecione um veículo"} />
+          <SelectValue placeholder={isLoading ? "Carregando veículos..." : "Selecione um veículo"} />
         </SelectTrigger>
         <SelectContent className="max-h-48 sm:max-h-60">
-          {vehicles.map((vehicle) => (
-            <SelectItem key={vehicle.id} value={vehicle.id} className="text-sm">
-              <div className="flex flex-col">
-                <span>{vehicle.name} {vehicle.year}</span>
-                <span className="text-xs text-muted-foreground">
-                  {vehicle.model} - {formatCurrency(vehicle.sale_price)}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  Código: {vehicle.internal_code}
-                </span>
-              </div>
-            </SelectItem>
-          ))}
+          {filteredVehicles.length === 0 ? (
+            <div className="px-4 py-2 text-sm text-gray-500">
+              {isLoading ? 'Carregando...' : 'Nenhum veículo encontrado'}
+            </div>
+          ) : (
+            filteredVehicles.map((vehicle) => (
+              <SelectItem key={vehicle.id} value={vehicle.id} className="text-sm">
+                <div className="flex flex-col w-full">
+                  <div className="font-medium">
+                    {vehicle.name} {vehicle.year}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {vehicle.model} • {formatCurrency(vehicle.sale_price)}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    Código: {vehicle.internal_code} • {vehicle.miles?.toLocaleString()} milhas
+                  </div>
+                </div>
+              </SelectItem>
+            ))
+          )}
         </SelectContent>
       </Select>
+      
+      {/* Debug info - remover em produção */}
+      <div className="text-xs text-gray-500">
+        {vehicles.length} veículos carregados • {filteredVehicles.length} filtrados
+      </div>
     </div>
   );
 };
