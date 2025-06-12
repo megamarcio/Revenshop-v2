@@ -24,12 +24,15 @@ const BasicInfoForm = ({
     // Remove caracteres não numéricos
     const numericValue = value.replace(/\D/g, '');
     
-    // Se for um número de 1-999, formatar com zeros à esquerda para 3 dígitos
-    if (numericValue && parseInt(numericValue) > 0) {
-      const formattedCode = numericValue.padStart(3, '0');
+    // Limitar a 3 dígitos
+    const limitedValue = numericValue.slice(0, 3);
+    
+    // Se for um número válido, formatar com zeros à esquerda para exatamente 3 dígitos
+    if (limitedValue) {
+      const formattedCode = limitedValue.padStart(3, '0');
       onInputChange('internalCode', formattedCode);
     } else {
-      onInputChange('internalCode', numericValue);
+      onInputChange('internalCode', '');
     }
   };
 
@@ -111,7 +114,6 @@ const BasicInfoForm = ({
             onChange={e => handleInternalCodeChange(e.target.value)} 
             className={errors.internalCode ? "border-red-500" : ""} 
             placeholder="001" 
-            maxLength={3}
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
