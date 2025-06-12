@@ -40,40 +40,43 @@ export const mapFormToDbData = (vehicleData: any) => {
     custom_financing_bank: vehicleData.customFinancingBank || null,
   };
 
-  // Handle category mapping - CRITICAL FIX: Sempre mapear a categoria
+  // Handle category mapping - SEMPRE mapear a categoria
   console.log('mapFormToDbData - processing category:', vehicleData.category);
   
-  if (vehicleData.category === 'sold') {
+  // Garantir que sempre tenha uma categoria válida
+  const category = vehicleData.category || 'forSale';
+  
+  if (category === 'sold') {
     dbVehicleData.category = 'sold';
     // Limpar informações de categoria estendida se estava vendido
     const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
     dbVehicleData.description = cleanDesc;
-  } else if (vehicleData.category === 'forSale') {
+  } else if (category === 'forSale') {
     dbVehicleData.category = 'forSale';
     // Limpar informações de categoria estendida se estava à venda
     const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
     dbVehicleData.description = cleanDesc;
-  } else if (['rental', 'maintenance', 'consigned'].includes(vehicleData.category)) {
-    // For rental, maintenance, consigned - store as forSale in DB and add extended category to description
-    console.log('mapFormToDbData - mapping extended category to forSale:', vehicleData.category);
+  } else if (['rental', 'maintenance', 'consigned'].includes(category)) {
+    // Para rental, maintenance, consigned - armazenar como forSale no BD e adicionar categoria estendida na descrição
+    console.log('mapFormToDbData - mapping extended category to forSale:', category);
     dbVehicleData.category = 'forSale';
     
-    // Store extended category in description
-    const extendedCategory = vehicleData.category;
+    // Armazenar categoria estendida na descrição
+    const extendedCategory = category;
     const currentDesc = vehicleData.description || '';
     const cleanDesc = currentDesc.replace(/\[CATEGORY:[^\]]+\]\s*/, '');
     dbVehicleData.description = `[CATEGORY:${extendedCategory}]${cleanDesc ? ' ' + cleanDesc : ''}`;
     
     console.log('mapFormToDbData - final description with category tag:', dbVehicleData.description);
   } else {
-    // Para qualquer outra categoria não reconhecida, usar forSale como padrão
-    console.log('mapFormToDbData - categoria não reconhecida, usando forSale como padrão:', vehicleData.category);
+    // Para qualquer outra categoria, usar forSale como padrão
+    console.log('mapFormToDbData - categoria desconhecida, usando forSale como padrão:', category);
     dbVehicleData.category = 'forSale';
     dbVehicleData.description = vehicleData.description || '';
   }
 
   // Handle consignment store info
-  if (vehicleData.consignmentStore && vehicleData.category === 'consigned') {
+  if (vehicleData.consignmentStore && category === 'consigned') {
     const currentDesc = dbVehicleData.description || '';
     const cleanDesc = currentDesc.replace(/\[STORE:[^\]]+\]\s*/, '');
     dbVehicleData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;

@@ -11,8 +11,13 @@ export const useVehicleFormHandlers = (
   setErrors: React.Dispatch<React.SetStateAction<Partial<VehicleFormData>>>
 ) => {
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
-    console.log('useVehicleForm - handleInputChange:', field, value);
-    setFormData(prev => ({ ...prev, [field]: value }));
+    console.log('useVehicleFormHandlers - handleInputChange:', field, value);
+    
+    setFormData(prev => {
+      const updated = { ...prev, [field]: value };
+      console.log('useVehicleFormHandlers - updated formData:', updated);
+      return updated;
+    });
     
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: undefined }));
