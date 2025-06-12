@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -36,15 +35,15 @@ const VehicleListView = ({
 
                 {/* Vehicle Info */}
                 <div className="md:col-span-2">
-                  <h3 className="font-semibold text-lg">{vehicle.name}</h3>
-                  <p className="text-sm text-gray-600">Código: {vehicle.internalCode}</p>
+                  <h3 className="text-xs font-bold">{vehicle.name}</h3>
+                  <p className="text-xs text-[#fa002a] font-medium">Código: {vehicle.internalCode}</p>
                   
                   
                 </div>
 
                 {/* VIN and Category */}
                 <div className="md:col-span-1">
-                  <p className="text-sm text-gray-600">VIN: {vehicle.vin}</p>
+                  <p className="text-gray-600 text-xs text-center">VIN: {vehicle.vin}</p>
                   <span className={`inline-block px-2 py-1 text-xs rounded-full ${vehicle.category === 'forSale' ? 'bg-green-100 text-green-800' : vehicle.category === 'sold' ? 'bg-blue-100 text-blue-800' : vehicle.category === 'maintenance' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'}`}>
                     {vehicle.category === 'forSale' ? 'À Venda' : vehicle.category === 'sold' ? 'Vendido' : vehicle.category === 'maintenance' ? 'Manutenção' : vehicle.category}
                   </span>
@@ -53,7 +52,7 @@ const VehicleListView = ({
                 {/* Prices */}
                 <div className="md:col-span-1 my-0">
                   
-                  <p className="text-sm font-semibold text-green-600">Venda: {formatCurrency(vehicle.salePrice)}</p>
+                  <p className="font-semibold text-green-600 text-xs">Venda: {formatCurrency(vehicle.salePrice)}</p>
                   {vehicle.profitMargin}
                 </div>
 
