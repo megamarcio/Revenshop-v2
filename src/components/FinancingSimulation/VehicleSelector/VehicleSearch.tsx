@@ -22,13 +22,6 @@ const VehicleSearch = ({
   setVehicleSearch,
   isLoading
 }: VehicleSearchProps) => {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'BRL'
-    }).format(value || 0);
-  };
-
   // Filtrar veículos baseado na busca
   const filteredVehicles = vehicles.filter(vehicle => {
     if (!vehicleSearch) return true;
@@ -88,17 +81,7 @@ const VehicleSearch = ({
           ) : (
             filteredVehicles.map((vehicle) => (
               <SelectItem key={vehicle.id} value={vehicle.id} className="text-sm">
-                <div className="flex flex-col w-full">
-                  <div className="font-medium">
-                    {vehicle.name} {vehicle.year}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    {vehicle.model} • {formatCurrency(vehicle.sale_price)}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Código: {vehicle.internal_code} • {vehicle.miles?.toLocaleString()} milhas
-                  </div>
-                </div>
+                {vehicle.internal_code} - {vehicle.name}
               </SelectItem>
             ))
           )}
