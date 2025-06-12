@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { MessageCircle, Users, User, Send } from 'lucide-react';
+import { MessageCircle, Users, User, Send, AlertCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -81,6 +81,8 @@ const WhatsAppSendModal = ({ isOpen, onClose, vehicleData }: WhatsAppSendModalPr
         return;
       }
 
+      console.log('Tentando enviar para webhook:', webhookUrl);
+
       const selectedGroupData = sendType === 'group' 
         ? groups.find(g => g.id === selectedGroup)
         : null;
@@ -111,6 +113,8 @@ const WhatsAppSendModal = ({ isOpen, onClose, vehicleData }: WhatsAppSendModalPr
         timestamp: new Date().toISOString()
       };
 
+      console.log('Dados do webhook:', webhookData);
+
       const webhookSecret = localStorage.getItem('whatsapp_webhook_secret');
       const headers: Record<string, string> = {
         'Content-Type': 'application/json'
@@ -126,8 +130,31 @@ const WhatsAppSendModal = ({ isOpen, onClose, vehicleData }: WhatsAppSendModalPr
         body: JSON.stringify(webhookData)
       });
 
+      console.log('Resposta do webhook:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error(`Erro no webhook: ${response.status}`);
+        let errorMessage = `Erro ${response.status}: ${response.statusText}`;
+        
+        // Tentar obter detalhes do erro da resposta
+        try {
+          const errorText = await response.text();
+          if (errorText) {
+            errorMessage += ` - ${errorText}`;
+          }
+        } catch (e) {
+          // Ignorar erro ao ler resposta
+        }
+
+        // Mensagens específicas para códigos de erro comuns
+        if (response.status === 404) {
+          errorMessage = `Webhook não encontrado (404). Verifique se a URL está correta: ${webhookUrl}`;
+        } else if (response.status === 500) {
+          errorMessage = `Erro interno do servidor (500). Verifique se o serviço está funcionando corretamente.`;
+        } else if (response.status === 403) {
+          errorMessage = `Acesso negado (403). Verifique as credenciais ou chave secreta.`;
+        }
+
+        throw new Error(errorMessage);
       }
 
       toast({
@@ -142,8 +169,8 @@ const WhatsAppSendModal = ({ isOpen, onClose, vehicleData }: WhatsAppSendModalPr
     } catch (error) {
       console.error('Erro ao enviar via WhatsApp:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao enviar veículo via WhatsApp. Tente novamente.",
+        title: "Erro de Webhook",
+        description: error.message || "Erro ao enviar veículo via WhatsApp. Verifique a configuração do webhook.",
         variant: "destructive",
       });
     } finally {
@@ -165,6 +192,17 @@ const WhatsAppSendModal = ({ isOpen, onClose, vehicleData }: WhatsAppSendModalPr
         </DialogHeader>
 
         <div className="space-y-6">
+          {/* Aviso sobre configuração do webhook */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-start gap-2">
+              <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5" />
+              <div className="text-sm text-blue-800">
+                <p className="font-medium">Configuração necessária</p>
+                <p>Certifique-se de que o webhook esteja configurado corretamente em Configurações > WhatsApp</p>
+              </div>
+            </div>
+          </div>
+
           <div>
             <Label>Tipo de Envio</Label>
             <RadioGroup
