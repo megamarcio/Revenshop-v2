@@ -44,6 +44,10 @@ export interface Vehicle {
   interest_rate?: number;
   custom_financing_bank?: string;
   
+  // Additional fields for sale information
+  seller?: string;
+  final_sale_price?: number;
+  
   // Additional field to store extended category info
   extended_category?: 'rental' | 'maintenance' | 'consigned';
 }
