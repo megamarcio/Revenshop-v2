@@ -2,8 +2,10 @@
 import React from 'react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
-import { LayoutDashboard, Car, Users, Settings, User, CreditCard, UserCheck, Gavel, CheckSquare, Calculator, Wrench, Bot } from 'lucide-react';
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { LayoutDashboard, Car, Users, Settings, User, CreditCard, UserCheck, Gavel, CheckSquare, Calculator, Wrench, Bot, Truck } from 'lucide-react';
+import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarTrigger, useSidebar } from '@/components/ui/sidebar';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronRight } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -92,6 +94,11 @@ const AppSidebar = ({
     }
   ];
 
+  const handleLogisticaClick = (submenu: string) => {
+    // Placeholder para funcionalidade futura
+    console.log(`Logística ${submenu} - Em desenvolvimento`);
+  };
+
   return (
     <Sidebar collapsible="icon" className="border-r">
       <SidebarHeader className="p-4">
@@ -123,6 +130,44 @@ const AppSidebar = ({
                   </SidebarMenuItem>
                 );
               })}
+              
+              {/* Menu Logística Rental Car */}
+              <SidebarMenuItem>
+                <Collapsible className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      tooltip={state === "collapsed" ? "Logística Rental Car" : undefined}
+                      className="w-full hover:bg-muted data-[state=open]:bg-muted"
+                    >
+                      <Truck className="h-4 w-4" />
+                      <span className="text-sm px-0 mx-0">Logística Rental Car</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => handleLogisticaClick('Semana')}
+                          className="cursor-pointer opacity-60"
+                        >
+                          <span>Semana</span>
+                          <span className="ml-auto text-xs text-muted-foreground">(em breve)</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => handleLogisticaClick('Dia')}
+                          className="cursor-pointer opacity-60"
+                        >
+                          <span>Dia</span>
+                          <span className="ml-auto text-xs text-muted-foreground">(em breve)</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
