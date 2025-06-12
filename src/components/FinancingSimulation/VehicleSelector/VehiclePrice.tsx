@@ -13,7 +13,9 @@ const VehiclePrice = ({ vehiclePrice, onVehiclePriceChange }: VehiclePriceProps)
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(value);
   };
 
@@ -29,7 +31,7 @@ const VehiclePrice = ({ vehiclePrice, onVehiclePriceChange }: VehiclePriceProps)
         onChange={(e) => onVehiclePriceChange(parseFloat(e.target.value) || 0)}
         placeholder="Informe o valor"
         min="0"
-        step="100"
+        step="0.01"
         className="text-sm h-9 sm:h-10"
       />
       {vehiclePrice > 0 && (

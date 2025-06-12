@@ -18,7 +18,9 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     }).format(value);
   };
 
@@ -49,11 +51,11 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
             </Label>
             <Input
               type="number"
-              value={data.downPayment}
+              value={data.downPayment.toFixed(2)}
               onChange={(e) => onChange('downPayment', parseFloat(e.target.value) || 0)}
               placeholder={`Sugerido: ${formatCurrency(suggestedDownPayment)}`}
               min="0"
-              step="100"
+              step="0.01"
               className="text-sm h-9 sm:h-10"
             />
             {data.vehiclePrice > 0 && (
@@ -110,7 +112,7 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               onChange={(e) => onChange('dealerFee', parseFloat(e.target.value) || 0)}
               placeholder="499"
               min="0"
-              step="1"
+              step="0.01"
               className="text-sm h-9 sm:h-10"
             />
           </div>
@@ -151,7 +153,7 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               onChange={(e) => onChange('registrationFee', parseFloat(e.target.value) || 0)}
               placeholder="450"
               min="0"
-              step="1"
+              step="0.01"
               className="text-sm h-9 sm:h-10"
             />
           </div>
@@ -170,7 +172,7 @@ const FinancingCalculator = ({ data, onChange, onCalculate }: FinancingCalculato
               onChange={(e) => onChange('otherFees', parseFloat(e.target.value) || 0)}
               placeholder="0"
               min="0"
-              step="1"
+              step="0.01"
               className="text-sm h-9 sm:h-10"
             />
             <Textarea
