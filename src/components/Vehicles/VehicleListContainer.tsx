@@ -152,9 +152,17 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     // Export functionality to be implemented
   };
 
+  // Function to handle import completion
+  const handleImportComplete = async () => {
+    await refetchList();
+  };
+
   return (
     <div className="space-y-6">
-      <VehicleListHeader onAddVehicle={handleAddVehicle} />
+      <VehicleListHeader 
+        onAddVehicle={handleAddVehicle}
+        onImportComplete={handleImportComplete}
+      />
 
       {onNavigateToCustomers && (
         <Button 
