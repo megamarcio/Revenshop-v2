@@ -24,9 +24,9 @@ const BasicInfoForm = ({
     // Remove caracteres não numéricos
     const numericValue = value.replace(/\D/g, '');
     
-    // Se for um número de 1-9999, formatar com zeros à esquerda
+    // Se for um número de 1-999, formatar com zeros à esquerda para 3 dígitos
     if (numericValue && parseInt(numericValue) > 0) {
-      const formattedCode = numericValue.padStart(4, '0');
+      const formattedCode = numericValue.padStart(3, '0');
       onInputChange('internalCode', formattedCode);
     } else {
       onInputChange('internalCode', numericValue);
@@ -110,27 +110,28 @@ const BasicInfoForm = ({
             value={formData.internalCode} 
             onChange={e => handleInternalCodeChange(e.target.value)} 
             className={errors.internalCode ? "border-red-500" : ""} 
-            placeholder="0001" 
-            maxLength={4}
+            placeholder="001" 
+            maxLength={3}
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
-            Digite um número e será formatado automaticamente (ex: 1 → 0001)
+            Digite um número e será formatado automaticamente (ex: 1 → 001)
           </p>
         </div>
 
-        <div className="md:col-span-2">
+        {/* Categoria e Cor lado a lado */}
+        <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
           <VehicleCategorySelector 
             value={formData.category} 
             onChange={value => {
               console.log('BasicInfoForm - category onChange:', value);
               onInputChange('category', value);
-            }} 
+            }}
+            consignmentStore={formData.consignmentStore}
+            onConsignmentStoreChange={value => onInputChange('consignmentStore', value)}
             error={errors.category} 
           />
-        </div>
-
-        <div className="md:col-span-2">
+          
           <ColorSelector 
             value={formData.color} 
             onChange={value => onInputChange('color', value)} 

@@ -17,11 +17,20 @@ const VehicleCardContent = ({
   showMinNegotiable, 
   minNegotiable 
 }: VehicleCardContentProps) => {
+  
+  const formatInternalCode = (code: string) => {
+    // Se o código é numérico e tem menos de 3 dígitos, adicionar zeros à esquerda
+    if (code && /^\d+$/.test(code) && code.length < 3) {
+      return code.padStart(3, '0');
+    }
+    return code;
+  };
+
   return (
     <div className="space-y-2">
       <div className="text-center">
         <h3 className="text-[11px] font-bold text-gray-900 leading-tight mb-0.5">
-          {vehicle.internalCode} - {vehicle.name}
+          {formatInternalCode(vehicle.internalCode)} - {vehicle.name}
         </h3>
         <p className="text-xs text-gray-600">{vehicle.year} • {vehicle.color}</p>
       </div>
