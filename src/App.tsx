@@ -51,9 +51,7 @@ function App() {
                           <Routes>
                             <Route 
                               path="/" 
-                              element={
-                                <Index />
-                              } 
+                              element={<Index />} 
                             />
                             <Route path="*" element={<NotFound />} />
                           </Routes>
