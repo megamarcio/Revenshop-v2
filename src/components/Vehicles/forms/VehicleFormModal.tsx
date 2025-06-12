@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import VehicleFormHeader from './VehicleFormHeader';
@@ -32,6 +31,7 @@ interface VehicleFormModalProps {
   onNavigateToCustomers?: () => void;
   calculateProfitMargin: () => string;
   generateDescription: () => Promise<void>;
+  onWhatsAppSend?: () => void;
 }
 
 const VehicleFormModal = ({
@@ -59,7 +59,8 @@ const VehicleFormModal = ({
   onToggleFinancing,
   onNavigateToCustomers,
   calculateProfitMargin,
-  generateDescription
+  generateDescription,
+  onWhatsAppSend
 }: VehicleFormModalProps) => {
   // Close modal when clicking outside
   useEffect(() => {
@@ -92,6 +93,7 @@ const VehicleFormModal = ({
           onClose={onClose}
           onViewMaintenance={onViewMaintenance}
           onCarfaxClick={onCarfaxClick}
+          onWhatsAppSend={onWhatsAppSend}
         />
         
         <CardContent>

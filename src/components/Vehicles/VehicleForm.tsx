@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -7,6 +6,7 @@ import MaintenanceViewModal from '../Maintenance/MaintenanceViewModal';
 import VehicleFormModal from './forms/VehicleFormModal';
 import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
+import WhatsAppSendModal from './WhatsAppSendModal';
 
 interface ExtendedVehicleFormProps extends VehicleFormProps {
   onDelete?: (id: string) => Promise<void>;
@@ -17,6 +17,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   const { isAdmin, isInternalSeller, canEditVehicles } = useAuth();
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   const [showFinancingInfo, setShowFinancingInfo] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   
   const {
     formData,
@@ -46,6 +47,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
+  };
+
+  const handleWhatsAppSend = () => {
+    setShowWhatsAppModal(true);
   };
 
   const handleDelete = async () => {
@@ -178,6 +183,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         onNavigateToCustomers={onNavigateToCustomers}
         calculateProfitMargin={calculateProfitMargin}
         generateDescription={generateDescription}
+        onWhatsAppSend={isEditing ? handleWhatsAppSend : undefined}
       />
 
       {showMaintenanceModal && (
@@ -186,6 +192,17 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
           onClose={() => setShowMaintenanceModal(false)}
           vehicleId={editingVehicle?.id}
           vehicleName={formData.name}
+        />
+      )}
+
+      {showWhatsAppModal && editingVehicle && (
+        <WhatsAppSendModal
+          isOpen={showWhatsAppModal}
+          onClose={() => setShowWhatsAppModal(false)}
+          vehicleData={{
+            ...editingVehicle,
+            photos: photos
+          }}
         />
       )}
     </>

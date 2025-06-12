@@ -68,6 +68,9 @@ export const generatePDF = async (
       financedAmount: financingData.vehiclePrice - financingData.downPayment,
       monthlyPayment: ((financingData.vehiclePrice - financingData.downPayment) * (1 + financingData.interestRate / 100)) / financingData.installments,
       totalTaxes: financingData.vehiclePrice * (financingData.taxRate / 100),
+      totalFees: 0,
+      totalLoanAmount: financingData.vehiclePrice - financingData.downPayment,
+      totalAmount: financingData.vehiclePrice
     };
 
     if (returnBlob) {

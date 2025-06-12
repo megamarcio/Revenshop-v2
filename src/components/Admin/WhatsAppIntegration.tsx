@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import WhatsAppGroupCard from './WhatsAppGroupCard';
 import WhatsAppGroupForm from './WhatsAppGroupForm';
+import WhatsAppWebhookSettings from './WhatsAppWebhookSettings';
 
 interface WhatsAppGroup {
   id?: string;
@@ -185,7 +185,7 @@ const WhatsAppIntegration = () => {
           <CardTitle className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <MessageCircle className="h-5 w-5" />
-              <span>Integração WhatsApp</span>
+              <span>Grupos do WhatsApp</span>
             </div>
             <Button 
               onClick={() => setIsAddingGroup(true)}
@@ -237,6 +237,8 @@ const WhatsAppIntegration = () => {
           </div>
         </CardContent>
       </Card>
+
+      <WhatsAppWebhookSettings />
     </div>
   );
 };
