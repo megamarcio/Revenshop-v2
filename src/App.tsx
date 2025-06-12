@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from './contexts/AuthContext';
 import { LanguageProvider } from './contexts/LanguageContext';
 import { BHPHProvider } from './contexts/BHPHContext';
-import { ThemeProvider } from './components/Providers/ThemeProvider';
+import ThemeProvider from './components/Providers/ThemeProvider';
 import { Toaster } from '@/components/ui/toaster';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AuthWrapper from './components/Auth/AuthWrapper';
@@ -52,10 +52,7 @@ function App() {
                             <Route 
                               path="/" 
                               element={
-                                <Index 
-                                  activeSection={activeSection} 
-                                  setActiveSection={setActiveSection}
-                                />
+                                <Index />
                               } 
                             />
                             <Route path="*" element={<NotFound />} />
