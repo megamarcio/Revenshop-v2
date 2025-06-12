@@ -6,13 +6,28 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Car } from 'lucide-react';
 
-// Corrigir a importação do tipo Vehicle
+// Interface Vehicle corrigida para corresponder à tabela vehicles do Supabase
 interface Vehicle {
   id: string;
   name: string;
+  vin: string;
   year: number;
+  model: string;
+  miles: number;
+  internal_code: string;
+  color: string;
+  purchase_price: number;
   sale_price: number;
-  photos?: string[];
+  profit_margin: number;
+  min_negotiable: number;
+  carfax_price: number;
+  mmr_value: number;
+  description: string;
+  category: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  photos?: any[];
 }
 
 interface VehicleSearchProps {
@@ -33,9 +48,9 @@ const VehicleSearch = ({
   isLoading
 }: VehicleSearchProps) => {
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'USD'
+      currency: 'BRL'
     }).format(value);
   };
 
@@ -73,7 +88,12 @@ const VehicleSearch = ({
             <SelectItem key={vehicle.id} value={vehicle.id} className="text-sm">
               <div className="flex flex-col">
                 <span>{vehicle.name} {vehicle.year}</span>
-                <span className="text-xs text-muted-foreground">{formatCurrency(vehicle.sale_price)}</span>
+                <span className="text-xs text-muted-foreground">
+                  {vehicle.model} - {formatCurrency(vehicle.sale_price)}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Código: {vehicle.internal_code}
+                </span>
               </div>
             </SelectItem>
           ))}
