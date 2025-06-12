@@ -8,14 +8,14 @@ import { FileDown, Mail } from 'lucide-react';
 import { generatePDF } from './utils/pdfGenerator';
 import { sendFinancingEmail, createEmailMessage } from './utils/emailService';
 import { toast } from '@/hooks/use-toast';
+import { FinancingData, CalculationResults } from './types';
 
 interface FinancingActionsProps {
-  financingData: any;
-  customerData: any;
-  vehicleData: any;
+  financingData: FinancingData;
+  results: CalculationResults;
 }
 
-const FinancingActions = ({ financingData, customerData, vehicleData }: FinancingActionsProps) => {
+const FinancingActions = ({ financingData, results }: FinancingActionsProps) => {
   const [isEmailDialogOpen, setIsEmailDialogOpen] = useState(false);
   const [emailAddress, setEmailAddress] = useState('');
   const [isLoadingPDF, setIsLoadingPDF] = useState(false);
@@ -24,7 +24,7 @@ const FinancingActions = ({ financingData, customerData, vehicleData }: Financin
   const handleDownloadPDF = async () => {
     setIsLoadingPDF(true);
     try {
-      await generatePDF(financingData, customerData, vehicleData);
+      await generatePDF(financingData, financingData.customer, financingData.vehicle);
     } catch (error) {
       console.error('Error generating PDF:', error);
       toast({
@@ -38,7 +38,7 @@ const FinancingActions = ({ financingData, customerData, vehicleData }: Financin
   };
 
   const handleSendEmail = async () => {
-    if (!emailAddress || !customerData?.name) {
+    if (!emailAddress || !financingData.customer?.name) {
       toast({
         title: 'Erro',
         description: 'Por favor, preencha o email e certifique-se de que há um cliente selecionado.',
@@ -50,12 +50,12 @@ const FinancingActions = ({ financingData, customerData, vehicleData }: Financin
     setIsLoadingEmail(true);
     try {
       // Generate PDF blob for email attachment
-      const pdfBlob = await generatePDF(financingData, customerData, vehicleData, true);
+      const pdfBlob = await generatePDF(financingData, financingData.customer, financingData.vehicle, true);
       
       const emailData = {
         to: emailAddress,
-        subject: `Simulação de Financiamento - ${customerData.name}`,
-        customerName: customerData.name,
+        subject: `Simulação de Financiamento - ${financingData.customer.name}`,
+        customerName: financingData.customer.name,
         pdfBlob: pdfBlob as Blob,
       };
 
@@ -110,8 +110,8 @@ const FinancingActions = ({ financingData, customerData, vehicleData }: Financin
               />
             </div>
             <div className="text-sm text-gray-600">
-              <p><strong>Cliente:</strong> {customerData?.name || 'Não selecionado'}</p>
-              <p><strong>Veículo:</strong> {vehicleData?.name || 'Não selecionado'}</p>
+              <p><strong>Cliente:</strong> {financingData.customer?.name || 'Não selecionado'}</p>
+              <p><strong>Veículo:</strong> {financingData.vehicle?.name || 'Não selecionado'}</p>
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="outline" onClick={() => setIsEmailDialogOpen(false)}>

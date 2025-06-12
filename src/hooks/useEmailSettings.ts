@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -25,11 +25,11 @@ const defaultSettings: EmailSettings = {
 export const useEmailSettings = () => {
   const [settings, setSettings] = useState<EmailSettings>(defaultSettings);
   const [loading, setLoading] = useState(false);
+  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
   const loadSettings = async () => {
-    setLoading(true);
+    setIsLoadingSettings(true);
     try {
-      // For now, we'll use a simple table approach
       const { data, error } = await supabase
         .from('email_settings')
         .select('*')
@@ -55,18 +55,25 @@ export const useEmailSettings = () => {
     } catch (error) {
       console.error('Error loading email settings:', error);
     } finally {
-      setLoading(false);
+      setIsLoadingSettings(false);
     }
   };
 
-  const saveSettings = async (newSettings: EmailSettings) => {
+  const updateSetting = (key: keyof EmailSettings, value: any) => {
+    setSettings(prev => ({
+      ...prev,
+      [key]: value
+    }));
+  };
+
+  const saveSettings = async () => {
     setLoading(true);
     try {
       const { error } = await supabase
         .from('email_settings')
         .upsert({
-          id: 1, // Single row configuration
-          ...newSettings,
+          id: 1,
+          ...settings,
           updated_at: new Date().toISOString(),
         });
 
@@ -80,7 +87,6 @@ export const useEmailSettings = () => {
         return false;
       }
 
-      setSettings(newSettings);
       toast({
         title: 'Sucesso',
         description: 'Configurações de email salvas com sucesso!',
@@ -99,10 +105,16 @@ export const useEmailSettings = () => {
     }
   };
 
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
   return {
     settings,
     loading,
+    isLoadingSettings,
     loadSettings,
     saveSettings,
+    updateSetting,
   };
 };
