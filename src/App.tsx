@@ -49,18 +49,21 @@ const App: React.FC = () => {
     const handlePopState = (event: PopStateEvent) => {
       event.preventDefault();
       
-      if (navigationHistory.length > 1) {
-        // Se há histórico, voltar para a tela anterior
-        const newHistory = [...navigationHistory];
-        newHistory.pop(); // Remove a tela atual
-        const previousTab = newHistory[newHistory.length - 1];
-        
-        setNavigationHistory(newHistory);
-        setActiveTab(previousTab);
-      } else {
-        // Se está na primeira tela, bloquear a navegação
-        window.history.pushState(null, '', window.location.href);
-      }
+      setNavigationHistory(currentHistory => {
+        if (currentHistory.length > 1) {
+          // Se há histórico, voltar para a tela anterior
+          const newHistory = [...currentHistory];
+          newHistory.pop(); // Remove a tela atual
+          const previousTab = newHistory[newHistory.length - 1];
+          
+          setActiveTab(previousTab);
+          return newHistory;
+        } else {
+          // Se está na primeira tela, bloquear a navegação
+          window.history.pushState(null, '', window.location.href);
+          return currentHistory;
+        }
+      });
     };
 
     // Adicionar estado inicial ao histórico do browser
@@ -72,7 +75,7 @@ const App: React.FC = () => {
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
-  }, [navigationHistory]);
+  }, []); // Removendo navigationHistory das dependências para evitar loops
 
   // Função modificada para gerenciar mudanças de tab
   const handleTabChange = (newTab: string) => {
