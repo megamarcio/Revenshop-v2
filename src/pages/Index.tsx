@@ -19,6 +19,10 @@ const Index = () => {
   const { t } = useLanguage();
   const [activeSection, setActiveSection] = useState('vehicles');
 
+  const handleNavigateToUsers = () => {
+    setActiveSection('users');
+  };
+
   const renderMainContent = () => {
     switch (activeSection) {
       case 'dashboard':
@@ -40,7 +44,7 @@ const Index = () => {
       case 'users':
         return <UserManagement />;
       case 'admin':
-        return <AdminPanel />;
+        return <AdminPanel onNavigateToUsers={handleNavigateToUsers} />;
       case 'profile':
         return <ProfilePage />;
       default:
