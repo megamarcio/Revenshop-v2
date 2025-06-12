@@ -29,18 +29,61 @@ const LoadingFallback = () => (
 
 const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [navigationHistory, setNavigationHistory] = useState<string[]>(['dashboard']);
   const { canAccessAdmin, canManageUsers, canAccessDashboard, isAdmin, isInternalSeller } = useAuth();
 
   useEffect(() => {
     const storedTab = localStorage.getItem('activeTab');
     if (storedTab) {
       setActiveTab(storedTab);
+      setNavigationHistory([storedTab]);
     }
   }, []);
 
   useEffect(() => {
     localStorage.setItem('activeTab', activeTab);
   }, [activeTab]);
+
+  // Controle de navegação do browser
+  useEffect(() => {
+    const handlePopState = (event: PopStateEvent) => {
+      event.preventDefault();
+      
+      if (navigationHistory.length > 1) {
+        // Se há histórico, voltar para a tela anterior
+        const newHistory = [...navigationHistory];
+        newHistory.pop(); // Remove a tela atual
+        const previousTab = newHistory[newHistory.length - 1];
+        
+        setNavigationHistory(newHistory);
+        setActiveTab(previousTab);
+      } else {
+        // Se está na primeira tela, bloquear a navegação
+        window.history.pushState(null, '', window.location.href);
+      }
+    };
+
+    // Adicionar estado inicial ao histórico do browser
+    window.history.pushState(null, '', window.location.href);
+    
+    // Escutar evento de volta do browser
+    window.addEventListener('popstate', handlePopState);
+
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+    };
+  }, [navigationHistory]);
+
+  // Função modificada para gerenciar mudanças de tab
+  const handleTabChange = (newTab: string) => {
+    if (newTab !== activeTab) {
+      setNavigationHistory(prev => [...prev, newTab]);
+      setActiveTab(newTab);
+      
+      // Adicionar novo estado ao histórico do browser
+      window.history.pushState(null, '', window.location.href);
+    }
+  };
 
   const renderActiveComponent = () => {
     switch (activeTab) {
@@ -65,7 +108,7 @@ const App: React.FC = () => {
       case 'users':
         return canManageUsers ? <UserManagement /> : null;
       case 'admin':
-        return canAccessAdmin ? <AdminPanel onNavigateToUsers={() => setActiveTab('users')} /> : null;
+        return canAccessAdmin ? <AdminPanel onNavigateToUsers={() => handleTabChange('users')} /> : null;
       case 'profile':
         return <ProfilePage />;
       default:
@@ -76,7 +119,7 @@ const App: React.FC = () => {
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-background w-full overflow-hidden">
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+        <Sidebar activeTab={activeTab} setActiveTab={handleTabChange} />
 
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
           <Navbar />
