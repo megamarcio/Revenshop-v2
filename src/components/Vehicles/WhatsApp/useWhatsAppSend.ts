@@ -68,6 +68,54 @@ export const useWhatsAppSend = () => {
         ? groups.find(g => g.id === selectedGroup)
         : null;
 
+      // Buscar fotos do veículo no banco de dados
+      let vehiclePhotos: string[] = [];
+      
+      if (vehicleData.id) {
+        console.log('Buscando fotos para veículo ID:', vehicleData.id);
+        
+        try {
+          // Buscar fotos antigas do vehicle_photos
+          const { data: oldPhotos, error: oldPhotosError } = await supabase
+            .from('vehicle_photos')
+            .select('url')
+            .eq('vehicle_id', vehicleData.id)
+            .order('position', { ascending: true });
+
+          if (oldPhotosError) {
+            console.error('Erro ao buscar fotos antigas:', oldPhotosError);
+          } else if (oldPhotos && oldPhotos.length > 0) {
+            vehiclePhotos = oldPhotos.map(p => p.url);
+            console.log('Fotos antigas encontradas:', vehiclePhotos.length);
+          }
+
+          // Buscar fotos novas do vehicles_photos_new
+          const { data: newPhotos, error: newPhotosError } = await supabase
+            .from('vehicles_photos_new')
+            .select('url')
+            .eq('vehicle_id', vehicleData.id)
+            .order('created_at', { ascending: true });
+
+          if (newPhotosError) {
+            console.error('Erro ao buscar fotos novas:', newPhotosError);
+          } else if (newPhotos && newPhotos.length > 0) {
+            const newPhotoUrls = newPhotos.map(p => p.url);
+            vehiclePhotos = [...vehiclePhotos, ...newPhotoUrls];
+            console.log('Fotos novas encontradas:', newPhotoUrls.length);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar fotos do veículo:', error);
+        }
+      }
+
+      // Se não encontrou fotos no banco, usar as fotos do objeto vehicleData
+      if (vehiclePhotos.length === 0 && vehicleData.photos && vehicleData.photos.length > 0) {
+        vehiclePhotos = vehicleData.photos;
+        console.log('Usando fotos do vehicleData:', vehiclePhotos.length);
+      }
+
+      console.log('Total de fotos para envio:', vehiclePhotos.length);
+
       const webhookData = {
         type: 'vehicle_share',
         sendType,
@@ -88,13 +136,19 @@ export const useWhatsAppSend = () => {
           vin: vehicleData.vin,
           salePrice: vehicleData.salePrice,
           description: vehicleData.description,
-          photos: vehicleData.photos || [],
+          photos: vehiclePhotos, // Agora inclui todas as fotos encontradas
           video: vehicleData.video
         },
         timestamp: new Date().toISOString()
       };
 
-      console.log('Dados do webhook:', webhookData);
+      console.log('Dados do webhook com fotos:', {
+        ...webhookData,
+        vehicle: {
+          ...webhookData.vehicle,
+          photosCount: vehiclePhotos.length
+        }
+      });
 
       const webhookSecret = localStorage.getItem('whatsapp_webhook_secret');
       const headers: Record<string, string> = {
@@ -138,7 +192,7 @@ export const useWhatsAppSend = () => {
 
       toast({
         title: "Sucesso",
-        description: `Veículo enviado com sucesso ${sendType === 'client' ? 'para o cliente' : 'para o grupo'}!`,
+        description: `Veículo enviado com sucesso ${sendType === 'client' ? 'para o cliente' : 'para o grupo'} com ${vehiclePhotos.length} foto(s)!`,
       });
 
       onClose();
