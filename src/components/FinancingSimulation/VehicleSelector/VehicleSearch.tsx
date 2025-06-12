@@ -78,7 +78,7 @@ const VehicleSearch = ({
                 <span className="font-semibold text-blue-600">
                   {selectedVehicle.internal_code}
                 </span>
-                <span>- {selectedVehicle.name}</span>
+                <span> - {selectedVehicle.name}</span>
               </div>
             )}
           </SelectValue>
@@ -94,9 +94,9 @@ const VehicleSearch = ({
                 <div className="flex items-center gap-2">
                   <Car className="h-4 w-4" />
                   <span className="font-semibold text-blue-600">
-                    {vehicle.internal_code}
+                    {selectedVehicle.internal_code}
                   </span>
-                  <span>{vehicle.name}</span>
+                  <span> - {selectedVehicle.name}</span>
                 </div>
               </SelectItem>
             ))
