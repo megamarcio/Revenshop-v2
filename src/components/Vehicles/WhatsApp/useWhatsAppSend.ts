@@ -75,33 +75,18 @@ export const useWhatsAppSend = () => {
         console.log('Buscando fotos para veículo ID:', vehicleData.id);
         
         try {
-          // Buscar fotos antigas do vehicle_photos
-          const { data: oldPhotos, error: oldPhotosError } = await supabase
+          // Buscar fotos da tabela vehicle_photos
+          const { data: photos, error: photosError } = await supabase
             .from('vehicle_photos')
             .select('url')
             .eq('vehicle_id', vehicleData.id)
             .order('position', { ascending: true });
 
-          if (oldPhotosError) {
-            console.error('Erro ao buscar fotos antigas:', oldPhotosError);
-          } else if (oldPhotos && oldPhotos.length > 0) {
-            vehiclePhotos = oldPhotos.map(p => p.url);
-            console.log('Fotos antigas encontradas:', vehiclePhotos.length);
-          }
-
-          // Buscar fotos novas do vehicles_photos_new
-          const { data: newPhotos, error: newPhotosError } = await supabase
-            .from('vehicles_photos_new')
-            .select('url')
-            .eq('vehicle_id', vehicleData.id)
-            .order('created_at', { ascending: true });
-
-          if (newPhotosError) {
-            console.error('Erro ao buscar fotos novas:', newPhotosError);
-          } else if (newPhotos && newPhotos.length > 0) {
-            const newPhotoUrls = newPhotos.map(p => p.url);
-            vehiclePhotos = [...vehiclePhotos, ...newPhotoUrls];
-            console.log('Fotos novas encontradas:', newPhotoUrls.length);
+          if (photosError) {
+            console.error('Erro ao buscar fotos:', photosError);
+          } else if (photos && photos.length > 0) {
+            vehiclePhotos = photos.map(p => p.url);
+            console.log('Fotos encontradas no banco:', vehiclePhotos.length);
           }
         } catch (error) {
           console.error('Erro ao buscar fotos do veículo:', error);
