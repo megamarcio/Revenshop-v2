@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import VehicleGridView from './VehicleGridView';
 import VehicleListView from './VehicleListView';

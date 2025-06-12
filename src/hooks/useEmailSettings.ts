@@ -1,9 +1,9 @@
 
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
+import { supabase } from '../integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
-interface EmailSettings {
+export interface EmailSettings {
   smtp_host: string;
   smtp_port: number;
   smtp_user: string;
@@ -13,90 +13,96 @@ interface EmailSettings {
   company_logo?: string;
 }
 
-export const useEmailSettings = () => {
-  const [settings, setSettings] = useState<EmailSettings>({
-    smtp_host: '',
-    smtp_port: 587,
-    smtp_user: '',
-    smtp_password: '',
-    from_email: '',
-    from_name: 'RevenShop'
-  });
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingSettings, setIsLoadingSettings] = useState(true);
-  const { toast } = useToast();
+const defaultSettings: EmailSettings = {
+  smtp_host: '',
+  smtp_port: 587,
+  smtp_user: '',
+  smtp_password: '',
+  from_email: '',
+  from_name: 'Equipe de Vendas',
+};
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+export const useEmailSettings = () => {
+  const [settings, setSettings] = useState<EmailSettings>(defaultSettings);
+  const [loading, setLoading] = useState(false);
 
   const loadSettings = async () => {
+    setLoading(true);
     try {
-      setIsLoadingSettings(true);
-      
+      // For now, we'll use a simple table approach
       const { data, error } = await supabase
-        .rpc('get_email_settings');
+        .from('email_settings')
+        .select('*')
+        .limit(1)
+        .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao carregar configurações de email:', error);
+        console.error('Error loading email settings:', error);
+        return;
       }
 
-      if (data && data.length > 0) {
-        setSettings(data[0]);
+      if (data) {
+        setSettings({
+          smtp_host: data.smtp_host || '',
+          smtp_port: data.smtp_port || 587,
+          smtp_user: data.smtp_user || '',
+          smtp_password: data.smtp_password || '',
+          from_email: data.from_email || '',
+          from_name: data.from_name || 'Equipe de Vendas',
+          company_logo: data.company_logo || '',
+        });
       }
     } catch (error) {
-      console.error('Erro ao carregar configurações de email:', error);
+      console.error('Error loading email settings:', error);
     } finally {
-      setIsLoadingSettings(false);
+      setLoading(false);
     }
   };
 
-  const saveSettings = async () => {
-    setIsLoading(true);
+  const saveSettings = async (newSettings: EmailSettings) => {
+    setLoading(true);
     try {
       const { error } = await supabase
-        .rpc('save_email_settings', {
-          p_smtp_host: settings.smtp_host,
-          p_smtp_port: settings.smtp_port,
-          p_smtp_user: settings.smtp_user,
-          p_smtp_password: settings.smtp_password,
-          p_from_email: settings.from_email,
-          p_from_name: settings.from_name,
-          p_company_logo: settings.company_logo
+        .from('email_settings')
+        .upsert({
+          id: 1, // Single row configuration
+          ...newSettings,
+          updated_at: new Date().toISOString(),
         });
 
       if (error) {
-        throw error;
+        console.error('Error saving email settings:', error);
+        toast({
+          title: 'Erro',
+          description: 'Erro ao salvar configurações de email.',
+          variant: 'destructive',
+        });
+        return false;
       }
 
+      setSettings(newSettings);
       toast({
-        title: "Configurações salvas",
-        description: "As configurações de email foram salvas com sucesso.",
+        title: 'Sucesso',
+        description: 'Configurações de email salvas com sucesso!',
       });
+      return true;
     } catch (error) {
-      console.error('Erro ao salvar configurações de email:', error);
+      console.error('Error saving email settings:', error);
       toast({
-        title: "Erro",
-        description: "Erro ao salvar as configurações de email. Tente novamente.",
-        variant: "destructive",
+        title: 'Erro',
+        description: 'Erro ao salvar configurações de email.',
+        variant: 'destructive',
       });
+      return false;
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  };
-
-  const updateSetting = (key: keyof EmailSettings, value: any) => {
-    setSettings(prev => ({
-      ...prev,
-      [key]: value
-    }));
   };
 
   return {
     settings,
-    updateSetting,
-    isLoading,
-    isLoadingSettings,
-    saveSettings
+    loading,
+    loadSettings,
+    saveSettings,
   };
 };
