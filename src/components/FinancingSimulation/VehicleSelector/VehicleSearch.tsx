@@ -71,7 +71,17 @@ const VehicleSearch = ({
         disabled={isLoading}
       >
         <SelectTrigger className="h-9 sm:h-10 text-sm">
-          <SelectValue placeholder={isLoading ? "Carregando veículos..." : "Selecione um veículo"} />
+          <SelectValue placeholder={isLoading ? "Carregando veículos..." : "Selecione um veículo"}>
+            {selectedVehicle && (
+              <div className="flex items-center gap-2">
+                <Car className="h-4 w-4" />
+                <span className="font-semibold text-blue-600">
+                  {selectedVehicle.internal_code}
+                </span>
+                <span>- {selectedVehicle.name}</span>
+              </div>
+            )}
+          </SelectValue>
         </SelectTrigger>
         <SelectContent className="max-h-48 sm:max-h-60">
           {filteredVehicles.length === 0 ? (
@@ -81,7 +91,13 @@ const VehicleSearch = ({
           ) : (
             filteredVehicles.map((vehicle) => (
               <SelectItem key={vehicle.id} value={vehicle.id} className="text-sm">
-                {vehicle.internal_code} - {vehicle.name}
+                <div className="flex items-center gap-2">
+                  <Car className="h-4 w-4" />
+                  <span className="font-semibold text-blue-600">
+                    {vehicle.internal_code}
+                  </span>
+                  <span>- {vehicle.name}</span>
+                </div>
               </SelectItem>
             ))
           )}
