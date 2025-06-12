@@ -75,6 +75,7 @@ const VehicleCardHeader = ({ vehicle, onDownloadSingle, onDownloadAll, downloadi
         photos={vehicle.photos}
         vehicleName={vehicle.name}
         onDownloadSingle={onDownloadSingle}
+        className="w-full"
       />
       
       {/* Category Badge */}
