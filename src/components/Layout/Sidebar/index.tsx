@@ -57,7 +57,7 @@ const AppSidebar = ({ onNavigate, activeSection }: AppSidebarProps) => {
                     onClick={() => onNavigate(item.id)}
                     isActive={activeSection === item.id}
                   >
-                    <item.icon className="h-4 w-4" />
+                    <item.icon />
                     <span>{typeof item.label === 'string' ? item.label : t(item.label)}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

@@ -33,7 +33,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+      <ThemeProvider>
         <LanguageProvider>
           <BHPHProvider>
             <AuthProvider>
