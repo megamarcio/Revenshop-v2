@@ -198,7 +198,7 @@ const WhatsAppSendModal = ({ isOpen, onClose, vehicleData }: WhatsAppSendModalPr
               <AlertCircle className="h-4 w-4 text-blue-600 mt-0.5" />
               <div className="text-sm text-blue-800">
                 <p className="font-medium">Configuração necessária</p>
-                <p>Certifique-se de que o webhook esteja configurado corretamente em Configurações > WhatsApp</p>
+                <p>Certifique-se de que o webhook esteja configurado corretamente em Configurações WhatsApp</p>
               </div>
             </div>
           </div>
