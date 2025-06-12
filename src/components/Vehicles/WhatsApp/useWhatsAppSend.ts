@@ -68,38 +68,49 @@ export const useWhatsAppSend = () => {
         ? groups.find(g => g.id === selectedGroup)
         : null;
 
-      // Buscar fotos do veículo no banco de dados
+      // Buscar fotos do veículo no banco de dados com melhor tratamento de erros
       let vehiclePhotos: string[] = [];
       
       if (vehicleData.id) {
         console.log('Buscando fotos para veículo ID:', vehicleData.id);
         
         try {
-          // Buscar fotos da tabela vehicle_photos
+          // Buscar fotos da tabela vehicle_photos ordenadas por posição
           const { data: photos, error: photosError } = await supabase
             .from('vehicle_photos')
-            .select('url')
+            .select('url, is_main, position')
             .eq('vehicle_id', vehicleData.id)
+            .order('is_main', { ascending: false })
             .order('position', { ascending: true });
 
           if (photosError) {
-            console.error('Erro ao buscar fotos:', photosError);
+            console.error('Erro ao buscar fotos no banco:', photosError);
+            // Continue mesmo com erro nas fotos
           } else if (photos && photos.length > 0) {
-            vehiclePhotos = photos.map(p => p.url);
-            console.log('Fotos encontradas no banco:', vehiclePhotos.length);
+            vehiclePhotos = photos.map(p => p.url).filter(url => url && url.trim() !== '');
+            console.log('Fotos encontradas no banco de dados:', vehiclePhotos.length);
+            console.log('URLs das fotos:', vehiclePhotos);
+          } else {
+            console.log('Nenhuma foto encontrada no banco para o veículo:', vehicleData.id);
           }
         } catch (error) {
-          console.error('Erro ao buscar fotos do veículo:', error);
+          console.error('Erro na consulta de fotos:', error);
+          // Continue mesmo com erro
         }
       }
 
-      // Se não encontrou fotos no banco, usar as fotos do objeto vehicleData
-      if (vehiclePhotos.length === 0 && vehicleData.photos && vehicleData.photos.length > 0) {
-        vehiclePhotos = vehicleData.photos;
-        console.log('Usando fotos do vehicleData:', vehiclePhotos.length);
+      // Se não encontrou fotos no banco, tentar usar as fotos do objeto vehicleData
+      if (vehiclePhotos.length === 0) {
+        if (vehicleData.photos && Array.isArray(vehicleData.photos) && vehicleData.photos.length > 0) {
+          vehiclePhotos = vehicleData.photos.filter(url => url && url.trim() !== '');
+          console.log('Usando fotos do vehicleData:', vehiclePhotos.length);
+        } else if (vehicleData.photoUrl) {
+          vehiclePhotos = [vehicleData.photoUrl];
+          console.log('Usando photoUrl único do vehicleData');
+        }
       }
 
-      console.log('Total de fotos para envio:', vehiclePhotos.length);
+      console.log('Total de fotos para envio final:', vehiclePhotos.length);
 
       const webhookData = {
         type: 'vehicle_share',
@@ -121,17 +132,18 @@ export const useWhatsAppSend = () => {
           vin: vehicleData.vin,
           salePrice: vehicleData.salePrice,
           description: vehicleData.description,
-          photos: vehiclePhotos, // Agora inclui todas as fotos encontradas
+          photos: vehiclePhotos,
           video: vehicleData.video
         },
         timestamp: new Date().toISOString()
       };
 
-      console.log('Dados do webhook com fotos:', {
+      console.log('Dados do webhook preparados:', {
         ...webhookData,
         vehicle: {
           ...webhookData.vehicle,
-          photosCount: vehiclePhotos.length
+          photosCount: vehiclePhotos.length,
+          firstPhotoUrl: vehiclePhotos[0] ? vehiclePhotos[0].substring(0, 100) + '...' : 'Nenhuma'
         }
       });
 

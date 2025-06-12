@@ -27,7 +27,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const menuItems = getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller);
 
   return (
-    <Sidebar collapsible="icon" className="border-r">
+    <Sidebar collapsible="icon">
       <AppSidebarHeader />
       
       <SidebarContent>
@@ -41,8 +41,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                     <SidebarMenuButton 
                       isActive={activeTab === item.id} 
                       onClick={() => setActiveTab(item.id)} 
-                      tooltip={state === "collapsed" ? item.label : undefined} 
-                      className={`w-full ${activeTab === item.id ? 'bg-revenshop-primary text-white hover:bg-revenshop-primary/90' : 'hover:bg-muted'}`}
+                      tooltip={state === "collapsed" ? item.label : undefined}
                     >
                       <Icon className="h-4 w-4" />
                       <span className="text-sm px-0 mx-0">{item.label}</span>
