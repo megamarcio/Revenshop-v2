@@ -3,6 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, DollarSign, CreditCard, TrendingUp, Car } from 'lucide-react';
 import { FinancingData, CalculationResults } from './types';
+import VehicleMainPhoto from '../Vehicles/VehicleMainPhoto';
 
 interface FinancingResultsProps {
   data: FinancingData;
@@ -137,29 +138,21 @@ const FinancingResults = ({ data, results }: FinancingResultsProps) => {
                 <span className="font-medium">Observações:</span> {data.otherFeesDescription}
               </p>
             )}
-          </div>
-        )}
 
-        {/* Foto do Veículo */}
-        {data.vehicle && (
-          <div className="border-t pt-4">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-              <Car className="h-4 w-4 mr-2" />
-              Veículo
-            </h4>
-            {data.vehicle.image_url ? (
-              <div className="flex justify-center">
-                <img 
-                  src={data.vehicle.image_url} 
-                  alt={`${data.vehicle.name} ${data.vehicle.year}`}
-                  className="max-w-full h-48 object-cover rounded-lg border"
-                />
-              </div>
-            ) : (
-              <div className="h-48 bg-gray-100 rounded-lg border flex items-center justify-center">
-                <div className="text-center text-gray-500">
-                  <Car className="h-12 w-12 mx-auto mb-2" />
-                  <p className="text-sm">Imagem não disponível</p>
+            {/* Foto do Veículo */}
+            {data.vehicle && (
+              <div className="mt-4">
+                <h5 className="font-medium text-gray-900 mb-3 flex items-center">
+                  <Car className="h-4 w-4 mr-2" />
+                  Veículo
+                </h5>
+                <div className="flex justify-center">
+                  <VehicleMainPhoto
+                    vehicleId={data.vehicle.id}
+                    fallbackPhotos={data.vehicle.photos || []}
+                    vehicleName={`${data.vehicle.name} ${data.vehicle.year}`}
+                    className="max-w-full h-48 object-cover rounded-lg border"
+                  />
                 </div>
               </div>
             )}
