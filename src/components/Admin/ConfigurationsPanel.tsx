@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, MessageCircle, Users } from 'lucide-react';
+import { Bot, MessageCircle, Users, Mail } from 'lucide-react';
 import IASettings from './IASettings';
 import WhatsAppIntegration from './WhatsAppIntegration';
+import EmailSettings from './EmailSettings';
 
 interface ConfigurationsPanelProps {
   onNavigateToUsers: () => void;
@@ -35,7 +36,7 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Usuários
@@ -43,6 +44,10 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
           <TabsTrigger value="ia" className="flex items-center gap-2">
             <Bot className="h-4 w-4" />
             IA
+          </TabsTrigger>
+          <TabsTrigger value="email" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Email
           </TabsTrigger>
           <TabsTrigger value="whatsapp" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
@@ -77,6 +82,10 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
 
         <TabsContent value="ia" className="mt-6">
           <IASettings />
+        </TabsContent>
+
+        <TabsContent value="email" className="mt-6">
+          <EmailSettings />
         </TabsContent>
 
         <TabsContent value="whatsapp" className="mt-6">
