@@ -1,55 +1,81 @@
 
-import { VehicleFormData } from '@/components/Vehicles/types/vehicleFormTypes';
-
-export const mapFormToDbData = (formData: VehicleFormData & { id?: string }) => {
-  const dbData: any = {
-    name: formData.name,
-    vin: formData.vin,
-    year: parseInt(formData.year),
-    model: formData.model,
-    miles: parseInt(formData.miles),
-    internal_code: formData.internalCode,
-    color: formData.color,
-    title_type_id: formData.titleTypeId || null,
-    title_location_id: formData.titleLocationId || null,
-    title_location_custom: formData.titleLocationCustom || null,
-    purchase_price: parseFloat(formData.purchasePrice),
-    sale_price: parseFloat(formData.salePrice),
-    min_negotiable: formData.minNegotiable ? parseFloat(formData.minNegotiable) : null,
-    carfax_price: formData.carfaxPrice ? parseFloat(formData.carfaxPrice) : null,
-    mmr_value: formData.mmrValue ? parseFloat(formData.mmrValue) : null,
-    description: formData.description || null,
-    category: formData.category,
+export const mapFormToDbData = (vehicleData: any) => {
+  console.log('mapFormToDbData - input vehicleData:', vehicleData);
+  
+  const dbVehicleData: any = {
+    name: vehicleData.name,
+    vin: vehicleData.vin,
+    year: parseInt(vehicleData.year),
+    model: vehicleData.model,
+    miles: parseInt(vehicleData.miles) || 0,
+    internal_code: vehicleData.internalCode,
+    color: vehicleData.color,
+    purchase_price: parseFloat(vehicleData.purchasePrice),
+    sale_price: parseFloat(vehicleData.salePrice),
+    min_negotiable: vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null,
+    carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
+    mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
+    
+    // Campos de título
+    title_type_id: vehicleData.titleTypeId || null,
+    title_location_id: vehicleData.titleLocationId || null,
+    title_location_custom: vehicleData.titleLocationCustom || null,
     
     // Campos de financiamento
-    financing_bank: formData.financingBank || null,
-    financing_type: formData.financingType || null,
-    original_financed_name: formData.originalFinancedName || null,
-    purchase_date: formData.purchaseDate || null,
-    due_date: formData.dueDate || null,
-    installment_value: formData.installmentValue ? parseFloat(formData.installmentValue) : null,
-    down_payment: formData.downPayment ? parseFloat(formData.downPayment) : null,
-    financed_amount: formData.financedAmount ? parseFloat(formData.financedAmount) : null,
-    total_installments: formData.totalInstallments ? parseInt(formData.totalInstallments) : null,
-    paid_installments: formData.paidInstallments ? parseInt(formData.paidInstallments) : null,
-    remaining_installments: formData.remainingInstallments ? parseInt(formData.remainingInstallments) : null,
-    total_to_pay: formData.totalToPay ? parseFloat(formData.totalToPay) : null,
-    payoff_value: formData.payoffValue ? parseFloat(formData.payoffValue) : null,
-    payoff_date: formData.payoffDate || null,
-    interest_rate: formData.interestRate ? parseFloat(formData.interestRate) : null,
-    custom_financing_bank: formData.customFinancingBank || null,
+    financing_bank: vehicleData.financingBank || null,
+    financing_type: vehicleData.financingType || null,
+    original_financed_name: vehicleData.originalFinancedName || null,
+    purchase_date: vehicleData.purchaseDate || null,
+    due_date: vehicleData.dueDate || null,
+    installment_value: vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null,
+    down_payment: vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null,
+    financed_amount: vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null,
+    total_installments: vehicleData.totalInstallments ? parseInt(vehicleData.totalInstallments) : null,
+    paid_installments: vehicleData.paidInstallments ? parseInt(vehicleData.paidInstallments) : null,
+    remaining_installments: vehicleData.remainingInstallments ? parseInt(vehicleData.remainingInstallments) : null,
+    total_to_pay: vehicleData.totalToPay ? parseFloat(vehicleData.totalToPay) : null,
+    payoff_value: vehicleData.payoffValue ? parseFloat(vehicleData.payoffValue) : null,
+    payoff_date: vehicleData.payoffDate || null,
+    interest_rate: vehicleData.interestRate ? parseFloat(vehicleData.interestRate) : null,
+    custom_financing_bank: vehicleData.customFinancingBank || null,
   };
 
-  // Incluir ID se estiver editando
-  if (formData.id) {
-    dbData.id = formData.id;
+  // Handle category mapping - CRITICAL FIX
+  console.log('mapFormToDbData - processing category:', vehicleData.category);
+  
+  if (vehicleData.category === 'sold') {
+    dbVehicleData.category = 'sold';
+    // Limpar informações de categoria estendida se estava vendido
+    const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
+    dbVehicleData.description = cleanDesc;
+  } else if (vehicleData.category === 'forSale') {
+    dbVehicleData.category = 'forSale';
+    // Limpar informações de categoria estendida se estava à venda
+    const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
+    dbVehicleData.description = cleanDesc;
+  } else {
+    // For rental, maintenance, consigned - store as forSale in DB and add extended category to description
+    console.log('mapFormToDbData - mapping extended category to forSale:', vehicleData.category);
+    dbVehicleData.category = 'forSale';
+    
+    // Store extended category in description
+    const extendedCategory = vehicleData.category;
+    const currentDesc = vehicleData.description || '';
+    const cleanDesc = currentDesc.replace(/\[CATEGORY:[^\]]+\]\s*/, '');
+    dbVehicleData.description = `[CATEGORY:${extendedCategory}]${cleanDesc ? ' ' + cleanDesc : ''}`;
+    
+    console.log('mapFormToDbData - final description with category tag:', dbVehicleData.description);
   }
 
-  console.log('mapFormToDbData - title fields being mapped:', {
-    title_type_id: dbData.title_type_id,
-    title_location_id: dbData.title_location_id,
-    title_location_custom: dbData.title_location_custom
-  });
+  // Handle consignment store info
+  if (vehicleData.consignmentStore && vehicleData.category === 'consigned') {
+    const currentDesc = dbVehicleData.description || '';
+    const cleanDesc = currentDesc.replace(/\[STORE:[^\]]+\]\s*/, '');
+    dbVehicleData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
+  }
 
-  return dbData;
+  console.log('mapFormToDbData - final dbVehicleData:', dbVehicleData);
+  console.log('mapFormToDbData - final category being sent to DB:', dbVehicleData.category);
+  
+  return dbVehicleData;
 };
