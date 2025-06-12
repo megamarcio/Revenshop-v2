@@ -1,6 +1,16 @@
 
 import React from 'react';
-import { Vehicle } from '@/hooks/useVehiclesOptimized';
+
+// Definir o tipo Vehicle localmente para evitar conflitos de importação
+interface Vehicle {
+  id: string;
+  name: string;
+  vin: string;
+  year: number;
+  color: string;
+  sale_price: number;
+  photos?: string[];
+}
 
 interface VehicleInfoProps {
   vehicle: Vehicle;

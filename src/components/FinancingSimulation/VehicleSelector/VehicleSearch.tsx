@@ -5,7 +5,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Car } from 'lucide-react';
-import { Vehicle } from '@/hooks/useVehiclesOptimized';
+
+// Corrigir a importação do tipo Vehicle
+interface Vehicle {
+  id: string;
+  name: string;
+  year: number;
+  sale_price: number;
+  photos?: string[];
+}
 
 interface VehicleSearchProps {
   vehicles: Vehicle[];
