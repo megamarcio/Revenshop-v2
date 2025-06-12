@@ -67,21 +67,11 @@ const AppSidebar = ({
       label: 'IA (beta)',
       icon: Bot
     },
-    ...(canManageUsers ? [{
-      id: 'users',
-      label: t('users'),
-      icon: Users
-    }] : []), 
     ...(canAccessAdmin ? [{
       id: 'admin',
       label: 'Configurações',
       icon: Settings
-    }] : []), 
-    {
-      id: 'profile',
-      label: t('profile'),
-      icon: User
-    }
+    }] : [])
   ];
 
   const handleLogisticaClick = (submenu: string) => {
@@ -190,6 +180,46 @@ const AppSidebar = ({
                         >
                           <span>Dia</span>
                           <span className="ml-auto text-xs text-muted-foreground">(em breve)</span>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </Collapsible>
+              </SidebarMenuItem>
+
+              {/* Menu Configurações */}
+              <SidebarMenuItem>
+                <Collapsible className="group/collapsible">
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton 
+                      tooltip={state === "collapsed" ? "Configurações" : undefined}
+                      className="w-full hover:bg-muted data-[state=open]:bg-muted"
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span className="text-sm px-0 mx-0">Configurações</span>
+                      <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {canManageUsers && (
+                        <SidebarMenuSubItem>
+                          <SidebarMenuSubButton
+                            onClick={() => setActiveTab('users')}
+                            className={`cursor-pointer ${activeTab === 'users' ? 'bg-revenshop-primary text-white' : ''}`}
+                          >
+                            <Users className="h-4 w-4" />
+                            <span>{t('users')}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      )}
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          onClick={() => setActiveTab('profile')}
+                          className={`cursor-pointer ${activeTab === 'profile' ? 'bg-revenshop-primary text-white' : ''}`}
+                        >
+                          <User className="h-4 w-4" />
+                          <span>{t('profile')}</span>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
