@@ -42,8 +42,11 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
     // Log do valor original para debug
     console.log(`Validando campo ${fieldName}: valor original = "${value}"`);
 
+    // Converter para string se não for
+    const stringValue = String(value).trim();
+    
     // Remover espaços e caracteres especiais, mas manter pontos e vírgulas
-    const cleanedValue = value.toString().trim();
+    const cleanedValue = stringValue.replace(/[^\d.,\-]/g, '');
     
     // Converter vírgula para ponto se necessário
     const normalizedValue = cleanedValue.replace(',', '.');
@@ -264,13 +267,13 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
     const lines = text.split('\n').filter(line => line.trim());
     if (lines.length < 2) return [];
 
-    const headers = lines[0].split(',').map(h => h.trim());
+    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
     const vehicles = [];
 
     console.log('Cabeçalhos encontrados:', headers);
 
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim());
+      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
       const vehicle: any = {};
       const lineNumber = i + 1;
 
@@ -278,6 +281,8 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
 
       headers.forEach((header, index) => {
         const value = values[index] || '';
+        
+        console.log(`Linha ${lineNumber}, mapeando header "${header}" (index ${index}) para valor "${value}"`);
         
         // Mapear os campos para o formato correto com validação numérica detalhada
         switch (header) {
@@ -287,11 +292,11 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
           case 'paid_installments':
           case 'remaining_installments':
             const intValidation = validateNumericField(value, header, 10, 0);
-            if (!intValidation.isValid) {
+            if (!intValidation.isValid && value !== '') {
               vehicle[`${header}_error`] = intValidation.error;
               console.error(`Linha ${lineNumber}, campo ${header}:`, intValidation.error);
             }
-            vehicle[header] = intValidation.cleanValue !== null ? intValidation.cleanValue : value;
+            vehicle[header] = intValidation.cleanValue !== null ? intValidation.cleanValue : (value === '' ? '' : value);
             break;
           case 'purchase_price':
           case 'sale_price':
@@ -304,38 +309,42 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
           case 'total_to_pay':
           case 'payoff_value':
             const priceValidation = validateNumericField(value, header, 10, 2);
-            if (!priceValidation.isValid) {
+            if (!priceValidation.isValid && value !== '') {
               vehicle[`${header}_error`] = priceValidation.error;
               console.error(`Linha ${lineNumber}, campo ${header}:`, priceValidation.error);
             }
-            vehicle[header] = priceValidation.cleanValue !== null ? priceValidation.cleanValue : value;
+            vehicle[header] = priceValidation.cleanValue !== null ? priceValidation.cleanValue : (value === '' ? '' : value);
             break;
           case 'interest_rate':
             const rateValidation = validateNumericField(value, header, 5, 2);
-            if (!rateValidation.isValid) {
+            if (!rateValidation.isValid && value !== '') {
               vehicle[`${header}_error`] = rateValidation.error;
               console.error(`Linha ${lineNumber}, campo ${header}:`, rateValidation.error);
             }
-            vehicle[header] = rateValidation.cleanValue !== null ? rateValidation.cleanValue : value;
+            vehicle[header] = rateValidation.cleanValue !== null ? rateValidation.cleanValue : (value === '' ? '' : value);
             break;
           default:
             vehicle[header] = value;
         }
       });
 
+      console.log(`Veículo processado da linha ${lineNumber}:`, vehicle);
       vehicles.push(vehicle);
     }
 
-    console.log('Veículos processados:', vehicles);
+    console.log('Todos os veículos processados:', vehicles);
     return vehicles;
   };
 
   const logError = (linha: number, erro: string, campo?: string, valor?: any, dados?: any) => {
+    // Converter objetos para string legível para evitar [object Object]
+    const valorString = typeof valor === 'object' ? JSON.stringify(valor) : String(valor);
+    
     const errorLog: ImportError = {
       linha,
       erro,
       campo,
-      valor,
+      valor: valorString,
       dados,
       timestamp: new Date().toISOString()
     };
@@ -416,38 +425,38 @@ const VehicleImportModal = ({ isOpen, onClose, onImportComplete }: VehicleImport
             continue;
           }
 
-          // Mapear para o formato do formulário
+          // Mapear para o formato do formulário - garantindo que todos os valores sejam strings
           const formData = {
-            name: vehicle.name,
-            vin: vehicle.vin,
-            year: vehicle.year.toString(),
-            model: vehicle.model,
-            miles: vehicle.miles ? vehicle.miles.toString() : '0',
-            internalCode: vehicle.internal_code,
-            color: vehicle.color,
-            purchasePrice: vehicle.purchase_price.toString(),
-            salePrice: vehicle.sale_price.toString(),
-            minNegotiable: vehicle.min_negotiable ? vehicle.min_negotiable.toString() : '',
-            carfaxPrice: vehicle.carfax_price ? vehicle.carfax_price.toString() : '',
-            mmrValue: vehicle.mmr_value ? vehicle.mmr_value.toString() : '',
-            description: vehicle.description || '',
-            category: vehicle.category || 'forSale',
-            financingBank: vehicle.financing_bank || '',
-            financingType: vehicle.financing_type || '',
-            originalFinancedName: vehicle.original_financed_name || '',
-            purchaseDate: vehicle.purchase_date || '',
-            dueDate: vehicle.due_date || '',
-            installmentValue: vehicle.installment_value ? vehicle.installment_value.toString() : '',
-            downPayment: vehicle.down_payment ? vehicle.down_payment.toString() : '',
-            financedAmount: vehicle.financed_amount ? vehicle.financed_amount.toString() : '',
-            totalInstallments: vehicle.total_installments ? vehicle.total_installments.toString() : '',
-            paidInstallments: vehicle.paid_installments ? vehicle.paid_installments.toString() : '',
-            remainingInstallments: vehicle.remaining_installments ? vehicle.remaining_installments.toString() : '',
-            totalToPay: vehicle.total_to_pay ? vehicle.total_to_pay.toString() : '',
-            payoffValue: vehicle.payoff_value ? vehicle.payoff_value.toString() : '',
-            payoffDate: vehicle.payoff_date || '',
-            interestRate: vehicle.interest_rate ? vehicle.interest_rate.toString() : '',
-            customFinancingBank: vehicle.custom_financing_bank || '',
+            name: String(vehicle.name || ''),
+            vin: String(vehicle.vin || ''),
+            year: String(vehicle.year || ''),
+            model: String(vehicle.model || ''),
+            miles: String(vehicle.miles || '0'),
+            internalCode: String(vehicle.internal_code || ''),
+            color: String(vehicle.color || ''),
+            purchasePrice: String(vehicle.purchase_price || ''),
+            salePrice: String(vehicle.sale_price || ''),
+            minNegotiable: String(vehicle.min_negotiable || ''),
+            carfaxPrice: String(vehicle.carfax_price || ''),
+            mmrValue: String(vehicle.mmr_value || ''),
+            description: String(vehicle.description || ''),
+            category: String(vehicle.category || 'forSale'),
+            financingBank: String(vehicle.financing_bank || ''),
+            financingType: String(vehicle.financing_type || ''),
+            originalFinancedName: String(vehicle.original_financed_name || ''),
+            purchaseDate: String(vehicle.purchase_date || ''),
+            dueDate: String(vehicle.due_date || ''),
+            installmentValue: String(vehicle.installment_value || ''),
+            downPayment: String(vehicle.down_payment || ''),
+            financedAmount: String(vehicle.financed_amount || ''),
+            totalInstallments: String(vehicle.total_installments || ''),
+            paidInstallments: String(vehicle.paid_installments || ''),
+            remainingInstallments: String(vehicle.remaining_installments || ''),
+            totalToPay: String(vehicle.total_to_pay || ''),
+            payoffValue: String(vehicle.payoff_value || ''),
+            payoffDate: String(vehicle.payoff_date || ''),
+            interestRate: String(vehicle.interest_rate || ''),
+            customFinancingBank: String(vehicle.custom_financing_bank || ''),
             titleTypeId: '',
             titleLocationId: '',
             titleLocationCustom: ''
