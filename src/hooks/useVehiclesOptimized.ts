@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { mapDbDataToAppData } from './useVehicles/utils/dbToAppMapper';
@@ -151,8 +152,8 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
 
         console.log('Raw vehicles data from Supabase:', data);
 
-        // Map the data using the existing mapper
-        const mappedVehicles = data?.map(mapDbDataToAppData) || [];
+        // Map the data - handle the type issue by casting
+        const mappedVehicles = data?.map((vehicle: any) => mapDbDataToAppData(vehicle)) || [];
         
         console.log('Mapped vehicles:', mappedVehicles);
         
