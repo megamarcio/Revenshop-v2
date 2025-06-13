@@ -34,6 +34,7 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       titleLocationCustom: editingVehicle.titleLocationCustom || editingVehicle.title_location_custom || '',
       
       // Sale information
+      seller: editingVehicle.seller || '',
       finalSalePrice: editingVehicle.finalSalePrice?.toString() || editingVehicle.final_sale_price?.toString() || '',
       saleDate: editingVehicle.saleDate || editingVehicle.sale_date || '',
       saleNotes: editingVehicle.saleNotes || editingVehicle.sale_notes || '',
@@ -92,6 +93,7 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     titleLocationCustom: '',
     
     // Sale information
+    seller: '',
     finalSalePrice: '',
     saleDate: '',
     saleNotes: '',
