@@ -9,11 +9,6 @@ export const createVehicle = async (vehicleData: any) => {
   const dbVehicleData = mapFormToDbData(vehicleData);
   
   console.log('Mapped vehicle data for creation:', dbVehicleData);
-  console.log('Create - title fields being sent:', {
-    title_type_id: dbVehicleData.title_type_id,
-    title_location_id: dbVehicleData.title_location_id,
-    title_location_custom: dbVehicleData.title_location_custom
-  });
   
   const { data, error } = await supabase
     .from('vehicles')
