@@ -24,13 +24,13 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   const { photos: newPhotos, uploading: newPhotosUploading } = useNewVehiclePhotos(vehicleId);
   const { cardPhoto, loading: cardPhotoLoading } = useVehicleCardPhotos(vehicleId);
   
-  // Determine the main photo URL based on priority: card photo > new photos (main) > vehicle photos (main) > fallback
+  // PRIORIDADE MÁXIMA: Foto do card sempre será a foto principal nos cards
   let mainPhoto: string | undefined;
   
   if (vehicleId) {
-    // Priority 1: Card photo (if exists) - PRIORIDADE MÁXIMA
+    // Priority 1: Card photo (SEMPRE tem prioridade máxima)
     if (cardPhoto?.photo_url) {
-      console.log('Using card photo as main:', cardPhoto.photo_url);
+      console.log('Using card photo as main (PRIORITY):', cardPhoto.photo_url);
       mainPhoto = cardPhoto.photo_url;
     }
     // Priority 2: Check for main photo in new photos
@@ -40,7 +40,6 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
         console.log('Using main new photo:', mainNewPhoto.url);
         mainPhoto = mainNewPhoto.url;
       } else {
-        // Use first new photo if no main is set
         console.log('Using first new photo:', newPhotos[0].url);
         mainPhoto = newPhotos[0].url;
       }
@@ -60,7 +59,7 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   const isLoading = vehicleId ? (vehicleLoading || newPhotosUploading || cardPhotoLoading) : false;
   
   console.log('VehicleMainPhoto - vehicleId:', vehicleId);
-  console.log('VehicleMainPhoto - cardPhoto:', cardPhoto?.photo_url);
+  console.log('VehicleMainPhoto - cardPhoto (PRIORITY):', cardPhoto?.photo_url);
   console.log('VehicleMainPhoto - newPhotos count:', newPhotos.length);
   console.log('VehicleMainPhoto - vehiclePhotos count:', vehiclePhotos.length);
   console.log('VehicleMainPhoto - selected mainPhoto:', mainPhoto);

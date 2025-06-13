@@ -4,8 +4,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import VehicleCategorySelector from './VehicleCategorySelector';
 import VehicleUsageSelector from './VehicleUsageSelector';
-import TitleTypeSelector from './TitleTypeSelector';
-import TitleLocationSelector from './TitleLocationSelector';
 import ColorSelector from './ColorSelector';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
@@ -18,8 +16,6 @@ interface BasicInfoFormProps {
 const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) => {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Informações Básicas</h3>
-      
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="name">Nome do Veículo *</Label>
@@ -27,7 +23,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
             id="name"
             value={formData.name}
             onChange={(e) => onInputChange('name', e.target.value)}
-            placeholder="Ex: Honda Civic"
+            placeholder="Ex: Honda Civic 2020"
             className={errors.name ? "border-red-500" : ""}
           />
           {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
@@ -44,7 +40,9 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
           {errors.vin && <p className="text-sm text-red-500">{errors.vin}</p>}
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="space-y-2">
           <Label htmlFor="year">Ano *</Label>
           <Input
@@ -64,7 +62,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
             id="model"
             value={formData.model}
             onChange={(e) => onInputChange('model', e.target.value)}
-            placeholder="Ex: Civic LX"
+            placeholder="Ex: Civic, Corolla"
             className={errors.model ? "border-red-500" : ""}
           />
           {errors.model && <p className="text-sm text-red-500">{errors.model}</p>}
@@ -82,57 +80,43 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
           {errors.miles && <p className="text-sm text-red-500">{errors.miles}</p>}
         </div>
+      </div>
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="internalCode">Código Interno *</Label>
           <Input
             id="internalCode"
             value={formData.internalCode}
             onChange={(e) => onInputChange('internalCode', e.target.value)}
-            placeholder="Ex: A001"
+            placeholder="Ex: V001"
             className={errors.internalCode ? "border-red-500" : ""}
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
         </div>
-      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ColorSelector
           value={formData.color}
           onChange={(value) => onInputChange('color', value)}
           error={errors.color}
         />
-
-        <VehicleCategorySelector
-          value={formData.category}
-          onChange={(value) => onInputChange('category', value)}
-          error={errors.category}
-        />
       </div>
 
+      <VehicleCategorySelector
+        value={formData.category}
+        onChange={(value) => onInputChange('category', value)}
+        error={errors.category}
+      />
+
+      {/* Tipo e Uso do Veículo lado a lado */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <VehicleUsageSelector
           usage={formData.vehicleUsage}
           consignmentStore={formData.consignmentStore}
-          onUsageChange={(value) => onInputChange('vehicleUsage', value)}
-          onConsignmentStoreChange={(value) => onInputChange('consignmentStore', value)}
+          onUsageChange={(usage) => onInputChange('vehicleUsage', usage)}
+          onConsignmentStoreChange={(store) => onInputChange('consignmentStore', store)}
+          error={errors.vehicleUsage}
         />
-
-        <div className="space-y-4">
-          <TitleTypeSelector
-            value={formData.titleTypeId}
-            onChange={(value) => onInputChange('titleTypeId', value)}
-            error={errors.titleTypeId}
-          />
-
-          <TitleLocationSelector
-            value={formData.titleLocationId}
-            customValue={formData.titleLocationCustom}
-            onChange={(value) => onInputChange('titleLocationId', value)}
-            onCustomChange={(value) => onInputChange('titleLocationCustom', value)}
-            error={errors.titleLocationId}
-          />
-        </div>
       </div>
     </div>
   );
