@@ -23,10 +23,16 @@ export const fetchVideos = async (vehicleId?: string): Promise<VehicleVideo[]> =
   }
 };
 
+interface UploadResult {
+  publicUrl: string;
+  fileName: string;
+  fileSize: number;
+}
+
 export const uploadVideoToStorage = async (
   file: File,
   vehicleId: string
-): Promise<VehicleVideo | null> => {
+): Promise<UploadResult | null> => {
   if (file.size > 5 * 1024 * 1024) {
     toast({
       title: 'Arquivo muito grande',

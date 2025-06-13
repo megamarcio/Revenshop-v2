@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { mapDbDataToAppData } from './useVehicles/utils/dbToAppMapper';
@@ -120,7 +119,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
           .order('created_at', { ascending: false });
 
         // Apply category filter - incluir TODAS as categorias
-        if (category && ['forSale', 'sold', 'consigned', 'rental', 'maintenance'].includes(category)) {
+        if (category) {
           query = query.eq('category', category);
         }
 
