@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import type { VehicleCardPhoto } from './types';
@@ -9,7 +8,7 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
   }
 
   try {
-    console.log('Fetching card photo for vehicle:', vehicleId);
+    console.log('🔍 Buscando foto do card para o veículo:', vehicleId);
     const { data, error } = await supabase
       .from('vehicle_card_photos')
       .select('*')
@@ -17,24 +16,34 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
       .maybeSingle();
 
     if (error) {
-      console.error('Error fetching card photo:', error);
+      console.error('❌ Erro ao buscar foto do card:', error);
       throw error;
     }
     
-    console.log('Card photo data fetched:', data);
+    console.log('📸 Dados da foto do card encontrados:', data);
     
-    // Se temos dados, garantir que a URL está correta
-    if (data && data.photo_url) {
-      // Corrigir URL se necessário
-      if (data.photo_url.startsWith('vehicles-photos-new/') || data.photo_url.startsWith('vehicle-cards/')) {
-        data.photo_url = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${data.photo_url.replace('vehicles-photos-new/', '').replace('vehicle-cards/', '')}`;
+    if (data) {
+      console.log('🔗 URL original da foto:', data.photo_url);
+      
+      // Log detalhado da URL
+      if (data.photo_url) {
+        console.log('📊 Análise da URL:');
+        console.log('- URL completa:', data.photo_url);
+        console.log('- Contém "supabase"?', data.photo_url.includes('supabase'));
+        console.log('- Começa com "http"?', data.photo_url.startsWith('http'));
+        console.log('- Começa com "vehicles-photos-new/"?', data.photo_url.startsWith('vehicles-photos-new/'));
+        console.log('- Começa com "vehicle-cards/"?', data.photo_url.startsWith('vehicle-cards/'));
       }
-      console.log('Corrected card photo URL:', data.photo_url);
+      
+      // Não modificar a URL aqui, deixar para o componente fazer isso
+      console.log('✅ Retornando dados da foto do card sem modificação');
+    } else {
+      console.log('ℹ️ Nenhuma foto do card encontrada para este veículo');
     }
     
     return data;
   } catch (error) {
-    console.error('Error fetching card photo:', error);
+    console.error('❌ Erro ao buscar foto do card:', error);
     return null;
   }
 };

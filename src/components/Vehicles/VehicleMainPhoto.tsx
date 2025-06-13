@@ -27,30 +27,56 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   // PRIORIDADE MÁXIMA: Foto do card sempre será a foto principal nos cards
   let mainPhoto: string | undefined;
   
-  console.log('VehicleMainPhoto Debug - vehicleId:', vehicleId);
-  console.log('VehicleMainPhoto Debug - cardPhoto:', cardPhoto);
-  console.log('VehicleMainPhoto Debug - newPhotos:', newPhotos);
-  console.log('VehicleMainPhoto Debug - vehiclePhotos:', vehiclePhotos);
+  console.log('=== VEHICLE MAIN PHOTO DEBUG ===');
+  console.log('vehicleId:', vehicleId);
+  console.log('vehicleName:', vehicleName);
+  console.log('cardPhoto RAW:', cardPhoto);
+  console.log('cardPhoto?.photo_url:', cardPhoto?.photo_url);
+  console.log('newPhotos:', newPhotos);
+  console.log('vehiclePhotos:', vehiclePhotos);
+  console.log('fallbackPhotos:', fallbackPhotos);
   
   if (vehicleId) {
-    // Priority 1: Card photo (SEMPRE tem prioridade máxima) - CORRIGINDO URL
+    // Priority 1: Card photo (SEMPRE tem prioridade máxima)
     if (cardPhoto?.photo_url) {
-      console.log('Using card photo as main (PRIORITY):', cardPhoto.photo_url);
-      // Garantir que a URL está correta - remover qualquer duplicação de domínio
+      console.log('🎯 USANDO CARD PHOTO:', cardPhoto.photo_url);
+      
       let photoUrl = cardPhoto.photo_url;
-      if (photoUrl.includes('supabase') && !photoUrl.startsWith('http')) {
-        photoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/${photoUrl}`;
+      
+      // Debug da URL original
+      console.log('URL original:', photoUrl);
+      console.log('URL includes supabase?', photoUrl.includes('supabase'));
+      console.log('URL starts with http?', photoUrl.startsWith('http'));
+      
+      // Se a URL não começa com http, vamos construir a URL completa
+      if (!photoUrl.startsWith('http')) {
+        console.log('🔧 Construindo URL completa...');
+        
+        // Remover prefixos desnecessários se existirem
+        let cleanPath = photoUrl;
+        if (cleanPath.startsWith('vehicles-photos-new/')) {
+          cleanPath = cleanPath.replace('vehicles-photos-new/', '');
+        }
+        if (cleanPath.startsWith('vehicle-cards/')) {
+          cleanPath = cleanPath.replace('vehicle-cards/', '');
+        }
+        
+        // Construir URL completa
+        photoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${cleanPath}`;
+        console.log('🔧 URL construída:', photoUrl);
       }
+      
       mainPhoto = photoUrl;
+      console.log('✅ FOTO PRINCIPAL DEFINIDA (CARD):', mainPhoto);
     }
     // Priority 2: Check for main photo in new photos
     else if (newPhotos.length > 0) {
       const mainNewPhoto = newPhotos.find(p => p.is_main);
       if (mainNewPhoto) {
-        console.log('Using main new photo:', mainNewPhoto.url);
+        console.log('✅ USANDO NOVA FOTO PRINCIPAL:', mainNewPhoto.url);
         mainPhoto = mainNewPhoto.url;
       } else {
-        console.log('Using first new photo:', newPhotos[0].url);
+        console.log('✅ USANDO PRIMEIRA NOVA FOTO:', newPhotos[0].url);
         mainPhoto = newPhotos[0].url;
       }
     }
@@ -58,19 +84,20 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
     else if (vehiclePhotos.length > 0) {
       const mainPhotoObj = vehiclePhotos.find(p => p.is_main);
       mainPhoto = mainPhotoObj?.url || vehiclePhotos[0]?.url;
-      console.log('Using vehicle photo:', mainPhoto);
+      console.log('✅ USANDO FOTO DO VEÍCULO:', mainPhoto);
     }
   } else if (fallbackPhotos.length > 0) {
     // Use fallback photos (strings)
     mainPhoto = fallbackPhotos[0];
-    console.log('Using fallback photo:', mainPhoto);
+    console.log('✅ USANDO FOTO FALLBACK:', mainPhoto);
   }
   
-  // Se ainda não temos foto mas não estamos carregando, forçar uma nova busca
   const isLoading = vehicleId ? (vehicleLoading || newPhotosUploading || cardPhotoLoading) : false;
   
-  console.log('VehicleMainPhoto - Final selected mainPhoto:', mainPhoto);
-  console.log('VehicleMainPhoto - isLoading:', isLoading);
+  console.log('🏁 RESULTADO FINAL:');
+  console.log('mainPhoto:', mainPhoto);
+  console.log('isLoading:', isLoading);
+  console.log('=== FIM DEBUG ===');
   
   return (
     <VehiclePhotoDisplay

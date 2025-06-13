@@ -18,7 +18,17 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
+  console.log('🖼️ VehiclePhotoDisplay recebeu:', {
+    photoUrl,
+    alt,
+    className,
+    showLoader,
+    imageError,
+    imageLoading
+  });
+
   if (showLoader) {
+    console.log('⏳ Mostrando loader...');
     return (
       <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
         <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
@@ -27,6 +37,7 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   }
 
   if (!photoUrl || imageError) {
+    console.log('❌ Sem foto ou erro na imagem:', { photoUrl, imageError });
     return (
       <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
         <div className="text-center">
@@ -36,6 +47,8 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
       </div>
     );
   }
+
+  console.log('✅ Tentando carregar imagem:', photoUrl);
 
   return (
     <div className={`relative ${className}`}>
@@ -50,11 +63,12 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
         className={`object-cover w-full h-full ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
         loading="lazy"
         onLoad={() => {
-          console.log('Image loaded successfully:', photoUrl);
+          console.log('✅ Imagem carregada com sucesso:', photoUrl);
           setImageLoading(false);
         }}
         onError={(e) => {
-          console.error('Image failed to load:', photoUrl, e);
+          console.error('❌ Falha ao carregar imagem:', photoUrl, e);
+          console.log('🔍 Tentando acessar diretamente a URL:', photoUrl);
           setImageError(true);
           setImageLoading(false);
         }}
