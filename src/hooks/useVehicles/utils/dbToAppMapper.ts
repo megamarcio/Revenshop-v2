@@ -106,7 +106,7 @@ export const mapDbDataToAppData = (dbData: any) => {
     vehicleUsage: extractVehicleUsage(dbData),
     consignmentStore: extractConsignmentStore(dbData),
     
-    // Extended category for backward compatibility
+    // Extended category for backward compatibility - ensure it matches the union type
     extended_category: extractExtendedCategory(dbData),
     consignment_store: extractConsignmentStore(dbData),
   };
@@ -143,6 +143,26 @@ const extractConsignmentStore = (dbData: any): string => {
   return '';
 };
 
-const extractExtendedCategory = (dbData: any): string => {
-  return extractVehicleUsage(dbData);
+const extractExtendedCategory = (dbData: any): "rental" | "consigned" | "maintenance" | undefined => {
+  // Check for extended category in description
+  if (dbData.description) {
+    const match = dbData.description.match(/\[USAGE:([^\]]+)\]/);
+    if (match) {
+      const usage = match[1];
+      switch (usage) {
+        case 'rental': return 'rental';
+        case 'consigned': return 'consigned';
+        case 'personal': return 'maintenance';
+        default: return undefined;
+      }
+    }
+  }
+  
+  // Default mapping based on category
+  switch (dbData.category) {
+    case 'rental': return 'rental';
+    case 'consigned': return 'consigned';
+    case 'maintenance': return 'maintenance';
+    default: return undefined;
+  }
 };
