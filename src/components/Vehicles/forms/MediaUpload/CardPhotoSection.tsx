@@ -34,6 +34,7 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
 
   const handleGeneratePhoto = async () => {
     if (vehicleData && !readOnly) {
+      console.log('Gerando foto do card com dados do veículo:', vehicleData);
       await generateCardPhoto(vehicleData);
     }
   };

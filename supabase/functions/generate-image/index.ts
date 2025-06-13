@@ -15,7 +15,7 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json()
+    const { prompt, vehicleData } = await req.json()
 
     const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
     if (!OPENAI_API_KEY) {
@@ -23,8 +23,9 @@ serve(async (req) => {
     }
 
     console.log('Generating image with prompt:', prompt)
+    console.log('Vehicle data:', vehicleData)
 
-    // Gerar imagem com OpenAI
+    // Gerar imagem com OpenAI usando gpt-image-1
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -37,21 +38,29 @@ serve(async (req) => {
         n: 1,
         size: '1024x1024',
         quality: 'high',
-        response_format: 'b64_json'
+        output_format: 'webp'
       }),
     })
 
     if (!response.ok) {
+      const errorData = await response.text()
+      console.error('OpenAI API error:', response.status, errorData)
       throw new Error(`OpenAI API error: ${response.statusText}`)
     }
 
     const data = await response.json()
+    console.log('OpenAI response:', data)
     
     if (!data.data || data.data.length === 0) {
       throw new Error('No image generated')
     }
 
+    // Para gpt-image-1, a resposta já vem em base64
     const imageBase64 = data.data[0].b64_json
+    
+    if (!imageBase64) {
+      throw new Error('No base64 image data received')
+    }
     
     // Convert base64 to blob
     const imageBuffer = Uint8Array.from(atob(imageBase64), c => c.charCodeAt(0))
@@ -62,22 +71,23 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey)
     
-    const fileName = `generated-image-${Date.now()}.png`
-    const filePath = `${fileName}`
+    const fileName = `card-generated-${Date.now()}.webp`
+    const filePath = `vehicle-cards/${fileName}`
     
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('imagens-ia')
+      .from('vehicles-photos-new')
       .upload(filePath, imageBuffer, {
-        contentType: 'image/png'
+        contentType: 'image/webp'
       })
 
     if (uploadError) {
+      console.error('Storage upload error:', uploadError)
       throw uploadError
     }
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
-      .from('imagens-ia')
+      .from('vehicles-photos-new')
       .getPublicUrl(filePath)
 
     console.log('Image generated and uploaded:', publicUrl)
