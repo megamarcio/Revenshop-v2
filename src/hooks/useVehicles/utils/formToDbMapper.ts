@@ -1,89 +1,79 @@
 
-export const mapFormToDbData = (vehicleData: any) => {
-  console.log('mapFormToDbData - input vehicleData:', vehicleData);
+export const mapFormToDbData = (formData: any) => {
+  console.log('mapFormToDbData - input formData:', formData);
   
-  const dbVehicleData: any = {
-    name: vehicleData.name,
-    vin: vehicleData.vin,
-    year: parseInt(vehicleData.year),
-    model: vehicleData.model,
-    miles: parseInt(vehicleData.miles) || 0,
-    internal_code: vehicleData.internalCode,
-    color: vehicleData.color,
-    purchase_price: parseFloat(vehicleData.purchasePrice),
-    sale_price: parseFloat(vehicleData.salePrice),
-    min_negotiable: vehicleData.minNegotiable ? parseFloat(vehicleData.minNegotiable) : null,
-    carfax_price: vehicleData.carfaxPrice ? parseFloat(vehicleData.carfaxPrice) : null,
-    mmr_value: vehicleData.mmrValue ? parseFloat(vehicleData.mmrValue) : null,
+  // Prepare the description with vehicle usage and store info
+  let description = formData.description || '';
+  
+  // Add vehicle usage to description if not already present
+  if (formData.vehicleUsage && !description.includes('[USAGE:')) {
+    description += ` [USAGE:${formData.vehicleUsage}]`;
+  }
+  
+  // Add consignment store to description if consigned and store specified
+  if (formData.vehicleUsage === 'consigned' && formData.consignmentStore && !description.includes('[STORE:')) {
+    description += ` [STORE:${formData.consignmentStore}]`;
+  }
+  
+  const dbData = {
+    name: formData.name,
+    vin: formData.vin,
+    year: parseInt(formData.year) || 0,
+    model: formData.model,
+    miles: parseInt(formData.miles) || 0,
+    internal_code: formData.internalCode,
+    color: formData.color,
     
-    // Campos de título
-    title_type_id: vehicleData.titleTypeId || null,
-    title_location_id: vehicleData.titleLocationId || null,
-    title_location_custom: vehicleData.titleLocationCustom || null,
+    // Financial fields
+    purchase_price: parseFloat(formData.purchasePrice) || 0,
+    sale_price: parseFloat(formData.salePrice) || 0,
+    min_negotiable: formData.minNegotiable ? parseFloat(formData.minNegotiable) : null,
+    carfax_price: formData.carfaxPrice ? parseFloat(formData.carfaxPrice) : null,
+    mmr_value: formData.mmrValue ? parseFloat(formData.mmrValue) : null,
     
-    // Campos de financiamento
-    financing_bank: vehicleData.financingBank || null,
-    financing_type: vehicleData.financingType || null,
-    original_financed_name: vehicleData.originalFinancedName || null,
-    purchase_date: vehicleData.purchaseDate || null,
-    due_date: vehicleData.dueDate || null,
-    installment_value: vehicleData.installmentValue ? parseFloat(vehicleData.installmentValue) : null,
-    down_payment: vehicleData.downPayment ? parseFloat(vehicleData.downPayment) : null,
-    financed_amount: vehicleData.financedAmount ? parseFloat(vehicleData.financedAmount) : null,
-    total_installments: vehicleData.totalInstallments ? parseInt(vehicleData.totalInstallments) : null,
-    paid_installments: vehicleData.paidInstallments ? parseInt(vehicleData.paidInstallments) : null,
-    remaining_installments: vehicleData.remainingInstallments ? parseInt(vehicleData.remainingInstallments) : null,
-    total_to_pay: vehicleData.totalToPay ? parseFloat(vehicleData.totalToPay) : null,
-    payoff_value: vehicleData.payoffValue ? parseFloat(vehicleData.payoffValue) : null,
-    payoff_date: vehicleData.payoffDate || null,
-    interest_rate: vehicleData.interestRate ? parseFloat(vehicleData.interestRate) : null,
-    custom_financing_bank: vehicleData.customFinancingBank || null,
+    description: description.trim(),
+    category: formData.category,
+    
+    // Title fields
+    title_type_id: formData.titleTypeId || null,
+    title_location_id: formData.titleLocationId || null,
+    title_location_custom: formData.titleLocationCustom || null,
+    
+    // Sale information
+    created_by: formData.seller || null,
+    final_sale_price: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : null,
+    sale_date: formData.saleDate || null,
+    sale_notes: formData.saleNotes || null,
+    customer_name: formData.customerName || null,
+    customer_phone: formData.customerPhone || null,
+    payment_method: formData.paymentMethod || null,
+    financing_company: formData.financingCompany || null,
+    check_details: formData.checkDetails || null,
+    other_payment_details: formData.otherPaymentDetails || null,
+    seller_commission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : null,
+    
+    // Financing information
+    financing_bank: formData.financingBank || null,
+    financing_type: formData.financingType || null,
+    original_financed_name: formData.originalFinancedName || null,
+    purchase_date: formData.purchaseDate || null,
+    due_date: formData.dueDate || null,
+    installment_value: formData.installmentValue ? parseFloat(formData.installmentValue) : null,
+    down_payment: formData.downPayment ? parseFloat(formData.downPayment) : null,
+    financed_amount: formData.financedAmount ? parseFloat(formData.financedAmount) : null,
+    total_installments: formData.totalInstallments ? parseInt(formData.totalInstallments) : null,
+    paid_installments: formData.paidInstallments ? parseInt(formData.paidInstallments) : null,
+    remaining_installments: formData.remainingInstallments ? parseInt(formData.remainingInstallments) : null,
+    total_to_pay: formData.totalToPay ? parseFloat(formData.totalToPay) : null,
+    payoff_value: formData.payoffValue ? parseFloat(formData.payoffValue) : null,
+    payoff_date: formData.payoffDate || null,
+    interest_rate: formData.interestRate ? parseFloat(formData.interestRate) : null,
+    custom_financing_bank: formData.customFinancingBank || null,
+    
+    // Media
+    video: formData.video || null,
   };
-
-  // Handle category mapping - SEMPRE mapear a categoria
-  console.log('mapFormToDbData - processing category:', vehicleData.category);
   
-  // Garantir que sempre tenha uma categoria válida
-  const category = vehicleData.category || 'forSale';
-  
-  if (category === 'sold') {
-    dbVehicleData.category = 'sold';
-    // Limpar informações de categoria estendida se estava vendido
-    const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
-    dbVehicleData.description = cleanDesc;
-  } else if (category === 'forSale') {
-    dbVehicleData.category = 'forSale';
-    // Limpar informações de categoria estendida se estava à venda
-    const cleanDesc = (vehicleData.description || '').replace(/\[CATEGORY:[^\]]+\]\s*/, '');
-    dbVehicleData.description = cleanDesc;
-  } else if (['rental', 'maintenance', 'consigned'].includes(category)) {
-    // Para rental, maintenance, consigned - armazenar como forSale no BD e adicionar categoria estendida na descrição
-    console.log('mapFormToDbData - mapping extended category to forSale:', category);
-    dbVehicleData.category = 'forSale';
-    
-    // Armazenar categoria estendida na descrição
-    const extendedCategory = category;
-    const currentDesc = vehicleData.description || '';
-    const cleanDesc = currentDesc.replace(/\[CATEGORY:[^\]]+\]\s*/, '');
-    dbVehicleData.description = `[CATEGORY:${extendedCategory}]${cleanDesc ? ' ' + cleanDesc : ''}`;
-    
-    console.log('mapFormToDbData - final description with category tag:', dbVehicleData.description);
-  } else {
-    // Para qualquer outra categoria, usar forSale como padrão
-    console.log('mapFormToDbData - categoria desconhecida, usando forSale como padrão:', category);
-    dbVehicleData.category = 'forSale';
-    dbVehicleData.description = vehicleData.description || '';
-  }
-
-  // Handle consignment store info
-  if (vehicleData.consignmentStore && category === 'consigned') {
-    const currentDesc = dbVehicleData.description || '';
-    const cleanDesc = currentDesc.replace(/\[STORE:[^\]]+\]\s*/, '');
-    dbVehicleData.description = `[STORE:${vehicleData.consignmentStore}]${cleanDesc ? ' ' + cleanDesc : ''}`;
-  }
-
-  console.log('mapFormToDbData - final dbVehicleData:', dbVehicleData);
-  console.log('mapFormToDbData - final category being sent to DB:', dbVehicleData.category);
-  
-  return dbVehicleData;
+  console.log('mapFormToDbData - output dbData:', dbData);
+  return dbData;
 };
