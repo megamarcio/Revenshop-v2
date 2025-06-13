@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,27 +21,8 @@ const BasicInfoForm = ({
 }: BasicInfoFormProps) => {
   
   const handleInternalCodeChange = (value: string) => {
-    // Remove o # se já estiver presente
-    let cleanValue = value.replace('#', '');
-    
-    // Permite apenas números
-    const numeric = cleanValue.replace(/\D/g, '');
-    
-    if (!numeric) {
-      onInputChange('internalCode', '#000');
-      return;
-    }
-
-    const num = parseInt(numeric, 10);
-
-    // Limita entre 0 e 999
-    if (num > 999) {
-      onInputChange('internalCode', '#999');
-    } else {
-      // Formata sempre para 3 dígitos com # no início
-      const formatted = '#' + num.toString().padStart(3, '0');
-      onInputChange('internalCode', formatted);
-    }
+    // Permite qualquer número e letra sem formatação
+    onInputChange('internalCode', value);
   };
 
   return (
@@ -120,12 +102,11 @@ const BasicInfoForm = ({
             value={formData.internalCode} 
             onChange={e => handleInternalCodeChange(e.target.value)} 
             className={errors.internalCode ? "border-red-500" : ""} 
-            placeholder="#000" 
-            maxLength={4}
+            placeholder="Ex: A001, B25, 123"
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
-            Digite um número de 0 a 999. Será formatado automaticamente (ex: 1 → #001, 25 → #025)
+            Digite qualquer combinação de números e letras
           </p>
         </div>
 
