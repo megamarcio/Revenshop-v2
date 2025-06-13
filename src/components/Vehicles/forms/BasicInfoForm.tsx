@@ -2,11 +2,8 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import ColorSelector from './ColorSelector';
 import VehicleUsageSelector from './VehicleUsageSelector';
-import TitleTypeSelector from './TitleTypeSelector';
-import TitleLocationSelector from './TitleLocationSelector';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
 interface BasicInfoFormProps {
@@ -90,35 +87,10 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <VehicleUsageSelector
-          value={formData.usage || 'personal'}
-          onChange={(value) => onInputChange('usage', value)}
-        />
-
-        <TitleTypeSelector
-          value={formData.titleTypeId || ''}
-          onChange={(value) => onInputChange('titleTypeId', value)}
-        />
-      </div>
-
-      <TitleLocationSelector
-        titleLocationId={formData.titleLocationId || ''}
-        titleLocationCustom={formData.titleLocationCustom || ''}
-        onTitleLocationIdChange={(value) => onInputChange('titleLocationId', value)}
-        onTitleLocationCustomChange={(value) => onInputChange('titleLocationCustom', value)}
+      <VehicleUsageSelector
+        value={formData.vehicleUsage || 'personal'}
+        onChange={(value) => onInputChange('vehicleUsage', value)}
       />
-
-      <div>
-        <Label htmlFor="equipment">Equipamentos</Label>
-        <Textarea
-          id="equipment"
-          value={formData.equipment}
-          onChange={(e) => onInputChange('equipment', e.target.value)}
-          placeholder="Descreva os equipamentos do veículo"
-          rows={3}
-        />
-      </div>
     </div>
   );
 };

@@ -7,9 +7,6 @@ export interface VehicleFormData {
   miles: string;
   internalCode: string;
   color: string;
-  titleTypeId: string;
-  titleLocationId: string;
-  titleLocationCustom: string;
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;
