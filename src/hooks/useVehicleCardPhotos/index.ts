@@ -16,10 +16,16 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   const { cardImageInstructions } = useAISettings();
 
   const loadCardPhoto = async () => {
+    if (!vehicleId) return;
+    
     setLoading(true);
     try {
+      console.log('🔄 Carregando foto do card para veículo:', vehicleId);
       const data = await fetchCardPhoto(vehicleId);
+      console.log('📸 Foto do card carregada:', data);
       setCardPhoto(data);
+    } catch (error) {
+      console.error('❌ Erro ao carregar foto do card:', error);
     } finally {
       setLoading(false);
     }
@@ -30,6 +36,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
     
     try {
       setUploading(true);
+      console.log('📤 Iniciando upload da foto do card...');
       const photoData = await uploadCardPhotoToStorage(file, vehicleId);
 
       if (photoData) {
@@ -38,6 +45,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
           title: 'Sucesso',
           description: 'Foto do card enviada com sucesso.',
         });
+        console.log('✅ Upload da foto do card concluído com sucesso');
       }
 
       return photoData;
@@ -51,10 +59,12 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
 
     try {
       setGenerating(true);
+      console.log('🤖 Gerando foto do card com IA...');
       const photoData = await generateCardPhotoWithAI(vehicleId, vehicleData, cardImageInstructions);
       
       if (photoData) {
         setCardPhoto(photoData);
+        console.log('✅ Foto do card gerada com IA com sucesso');
       }
 
       return photoData;
@@ -66,6 +76,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   const removeCardPhoto = async () => {
     if (!vehicleId || !cardPhoto) return;
 
+    console.log('🗑️ Removendo foto do card...');
     const success = await removeCardPhotoFromDatabase(vehicleId);
     
     if (success) {
@@ -74,6 +85,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
         title: 'Sucesso',
         description: 'Foto do card removida.',
       });
+      console.log('✅ Foto do card removida com sucesso');
     } else {
       toast({
         title: 'Erro',

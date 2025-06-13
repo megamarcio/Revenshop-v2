@@ -18,7 +18,7 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  console.log('🖼️ VehiclePhotoDisplay recebeu photoUrl:', photoUrl);
+  console.log('🖼️ VehiclePhotoDisplay - URL recebida:', photoUrl);
 
   if (showLoader) {
     console.log('⏳ Mostrando loader...');
@@ -41,22 +41,8 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
     );
   }
 
-  // NOVA LÓGICA SIMPLIFICADA: Se já é URL completa, usar como está
-  let finalPhotoUrl = photoUrl;
-  
-  if (!photoUrl.startsWith('http')) {
-    console.log('🔧 URL não é completa, construindo...');
-    console.log('📋 URL original (não-http):', photoUrl);
-    
-    // Se não é uma URL completa, construir a URL do Supabase
-    // Não modificar o caminho, apenas adicionar o prefixo do Supabase
-    finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${photoUrl}`;
-    console.log('🎯 URL construída:', finalPhotoUrl);
-  } else {
-    console.log('✅ URL já completa, usando como está:', finalPhotoUrl);
-  }
-
-  console.log('🚀 Tentando carregar imagem final:', finalPhotoUrl);
+  // Usar a URL diretamente como está no banco
+  console.log('🚀 Carregando imagem com URL:', photoUrl);
 
   return (
     <div className={`relative ${className}`}>
@@ -66,16 +52,16 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
         </div>
       )}
       <img
-        src={finalPhotoUrl}
+        src={photoUrl}
         alt={alt}
         className={`object-cover w-full h-full ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
         loading="lazy"
         onLoad={() => {
-          console.log('✅ Imagem carregada com sucesso:', finalPhotoUrl);
+          console.log('✅ Imagem carregada com sucesso:', photoUrl);
           setImageLoading(false);
         }}
         onError={(e) => {
-          console.error('❌ FALHA ao carregar imagem:', finalPhotoUrl);
+          console.error('❌ FALHA ao carregar imagem:', photoUrl);
           console.log('🔍 Detalhes do erro:', e);
           console.log('🔍 Event target src:', (e.target as HTMLImageElement)?.src);
           setImageError(true);

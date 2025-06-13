@@ -29,41 +29,47 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   console.log('=== VEHICLE MAIN PHOTO DEBUG ===');
   console.log('vehicleId:', vehicleId);
   console.log('cardPhoto objeto completo:', cardPhoto);
+  console.log('cardPhoto.photo_url:', cardPhoto?.photo_url);
   
   if (vehicleId) {
-    // Priority 1: Card photo (SEMPRE tem prioridade máxima)
+    // PRIORIDADE ABSOLUTA: Card photo 
     if (cardPhoto?.photo_url) {
-      console.log('🎯 USANDO CARD PHOTO - URL original:', cardPhoto.photo_url);
+      console.log('🎯 USANDO CARD PHOTO - URL:', cardPhoto.photo_url);
       mainPhoto = cardPhoto.photo_url;
-      console.log('✅ FOTO PRINCIPAL DEFINIDA (CARD):', mainPhoto);
+      
+      // Validar se a URL está correta
+      if (cardPhoto.photo_url.includes('ctdajbfmgmkhqueskjvk.supabase.co')) {
+        console.log('✅ CARD PHOTO - URL completa válida');
+      } else {
+        console.log('⚠️ CARD PHOTO - URL pode estar incompleta');
+      }
     }
-    // Priority 2: Check for main photo in new photos
+    // Prioridade 2: Fotos novas
     else if (newPhotos.length > 0) {
       const mainNewPhoto = newPhotos.find(p => p.is_main);
       if (mainNewPhoto) {
-        console.log('✅ USANDO NOVA FOTO PRINCIPAL:', mainNewPhoto.url);
+        console.log('📷 USANDO NOVA FOTO PRINCIPAL:', mainNewPhoto.url);
         mainPhoto = mainNewPhoto.url;
       } else {
-        console.log('✅ USANDO PRIMEIRA NOVA FOTO:', newPhotos[0].url);
+        console.log('📷 USANDO PRIMEIRA NOVA FOTO:', newPhotos[0].url);
         mainPhoto = newPhotos[0].url;
       }
     }
-    // Priority 3: Fallback to vehicle photos
+    // Prioridade 3: Fotos do veículo
     else if (vehiclePhotos.length > 0) {
       const mainPhotoObj = vehiclePhotos.find(p => p.is_main);
       mainPhoto = mainPhotoObj?.url || vehiclePhotos[0]?.url;
-      console.log('✅ USANDO FOTO DO VEÍCULO:', mainPhoto);
+      console.log('📸 USANDO FOTO DO VEÍCULO:', mainPhoto);
     }
   } else if (fallbackPhotos.length > 0) {
-    // Use fallback photos (strings)
     mainPhoto = fallbackPhotos[0];
-    console.log('✅ USANDO FOTO FALLBACK:', mainPhoto);
+    console.log('🔄 USANDO FOTO FALLBACK:', mainPhoto);
   }
   
   const isLoading = vehicleId ? (vehicleLoading || newPhotosUploading || cardPhotoLoading) : false;
   
   console.log('🏁 RESULTADO FINAL:');
-  console.log('mainPhoto para VehiclePhotoDisplay:', mainPhoto);
+  console.log('mainPhoto final:', mainPhoto);
   console.log('isLoading:', isLoading);
   console.log('=== FIM DEBUG ===');
   

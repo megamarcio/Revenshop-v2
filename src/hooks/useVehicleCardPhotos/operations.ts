@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import type { VehicleCardPhoto } from './types';
@@ -21,31 +22,6 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
     }
     
     console.log('📸 Dados da foto do card encontrados:', data);
-    
-    if (data) {
-      console.log('🔗 URL original da foto (RAW do banco):', data.photo_url);
-      
-      // Log detalhado da URL
-      if (data.photo_url) {
-        console.log('📊 Análise detalhada da URL do banco:');
-        console.log('- URL completa:', data.photo_url);
-        console.log('- Length:', data.photo_url.length);
-        console.log('- Contém "supabase"?', data.photo_url.includes('supabase'));
-        console.log('- Começa com "http"?', data.photo_url.startsWith('http'));
-        console.log('- Começa com "vehicles-photos-new/"?', data.photo_url.startsWith('vehicles-photos-new/'));
-        console.log('- Começa com "vehicle-cards/"?', data.photo_url.startsWith('vehicle-cards/'));
-        console.log('- Contém "vehicle-cards/"?', data.photo_url.includes('vehicle-cards/'));
-        
-        // Verificar se é só o nome do arquivo
-        const isJustFilename = !data.photo_url.includes('/') && (data.photo_url.includes('.png') || data.photo_url.includes('.jpg') || data.photo_url.includes('.jpeg'));
-        console.log('- É só nome do arquivo?', isJustFilename);
-      }
-      
-      console.log('✅ Retornando dados da foto do card sem modificação');
-    } else {
-      console.log('ℹ️ Nenhuma foto do card encontrada para este veículo');
-    }
-    
     return data;
   } catch (error) {
     console.error('❌ Erro ao buscar foto do card:', error);
@@ -67,15 +43,15 @@ export const uploadCardPhotoToStorage = async (
   }
 
   try {
-    console.log('Uploader da foto do card para o veículo:', vehicleId);
+    console.log('📤 Fazendo upload da foto do card para o veículo:', vehicleId);
 
     const fileExt = file.name.split('.').pop();
     const fileName = `card-${vehicleId}-${Date.now()}.${fileExt}`;
     const filePath = `vehicle-cards/${fileName}`;
 
-    console.log('📁 Caminho do arquivo no storage:', filePath);
+    console.log('📁 Caminho completo no storage:', filePath);
 
-    // Upload to storage
+    // Upload para o storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('vehicles-photos-new')
       .upload(filePath, file);
@@ -87,9 +63,9 @@ export const uploadCardPhotoToStorage = async (
 
     console.log('✅ Arquivo enviado com sucesso:', uploadData);
 
-    // Construir URL pública - IMPORTANTE: salvar a URL COMPLETA no banco
+    // Construir URL completa
     const publicUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${filePath}`;
-    console.log('🔗 URL pública gerada para salvar no banco:', publicUrl);
+    console.log('🔗 URL completa construída:', publicUrl);
 
     return await saveCardPhotoToDatabase(vehicleId, publicUrl);
   } catch (error) {
@@ -111,18 +87,18 @@ export const saveCardPhotoToDatabase = async (
   try {
     console.log('💾 Salvando foto do card no banco:', { vehicleId, photoUrl, promptUsed });
     
-    // Remove existing card photo
+    // Remove foto do card existente
     await supabase
       .from('vehicle_card_photos')
       .delete()
       .eq('vehicle_id', vehicleId);
 
-    // Save to database - salvar a URL COMPLETA
+    // Salva nova foto no banco
     const { data: photoData, error: dbError } = await supabase
       .from('vehicle_card_photos')
       .insert({
         vehicle_id: vehicleId,
-        photo_url: photoUrl, // URL completa aqui
+        photo_url: photoUrl,
         prompt_used: promptUsed
       })
       .select()
@@ -133,7 +109,7 @@ export const saveCardPhotoToDatabase = async (
       throw dbError;
     }
     
-    console.log('✅ Foto do card salva no banco:', photoData);
+    console.log('✅ Foto do card salva no banco com sucesso:', photoData);
     return photoData;
   } catch (error) {
     console.error('❌ Erro ao salvar foto do card no banco:', error);
@@ -143,15 +119,22 @@ export const saveCardPhotoToDatabase = async (
 
 export const removeCardPhotoFromDatabase = async (vehicleId: string): Promise<boolean> => {
   try {
+    console.log('🗑️ Removendo foto do card do banco para veículo:', vehicleId);
+    
     const { error } = await supabase
       .from('vehicle_card_photos')
       .delete()
       .eq('vehicle_id', vehicleId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Erro ao remover foto do card:', error);
+      throw error;
+    }
+    
+    console.log('✅ Foto do card removida com sucesso');
     return true;
   } catch (error) {
-    console.error('Error removing card photo:', error);
+    console.error('❌ Erro ao remover foto do card:', error);
     return false;
   }
 };
