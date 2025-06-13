@@ -16,16 +16,20 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   const { cardImageInstructions } = useAISettings();
 
   const loadCardPhoto = async () => {
-    if (!vehicleId) return;
+    if (!vehicleId) {
+      setCardPhoto(null);
+      return;
+    }
     
     setLoading(true);
     try {
       console.log('🔄 Carregando foto do card para veículo:', vehicleId);
       const data = await fetchCardPhoto(vehicleId);
-      console.log('📸 Foto do card carregada:', data);
+      console.log('📸 Resultado da busca:', data);
       setCardPhoto(data);
     } catch (error) {
       console.error('❌ Erro ao carregar foto do card:', error);
+      setCardPhoto(null);
     } finally {
       setLoading(false);
     }
@@ -45,7 +49,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
           title: 'Sucesso',
           description: 'Foto do card enviada com sucesso.',
         });
-        console.log('✅ Upload da foto do card concluído com sucesso');
+        console.log('✅ Upload da foto do card concluído');
       }
 
       return photoData;
@@ -64,7 +68,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
       
       if (photoData) {
         setCardPhoto(photoData);
-        console.log('✅ Foto do card gerada com IA com sucesso');
+        console.log('✅ Foto do card gerada com IA');
       }
 
       return photoData;
@@ -85,7 +89,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
         title: 'Sucesso',
         description: 'Foto do card removida.',
       });
-      console.log('✅ Foto do card removida com sucesso');
+      console.log('✅ Foto do card removida');
     } else {
       toast({
         title: 'Erro',

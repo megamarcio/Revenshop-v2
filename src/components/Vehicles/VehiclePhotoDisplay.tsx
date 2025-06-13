@@ -18,7 +18,7 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  console.log('🖼️ VehiclePhotoDisplay - URL recebida:', photoUrl);
+  console.log('🖼️ VehiclePhotoDisplay - photoUrl:', photoUrl);
 
   if (showLoader) {
     console.log('⏳ Mostrando loader...');
@@ -41,8 +41,7 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
     );
   }
 
-  // Usar a URL diretamente como está no banco
-  console.log('🚀 Carregando imagem com URL:', photoUrl);
+  console.log('🚀 Renderizando imagem com URL:', photoUrl);
 
   return (
     <div className={`relative ${className}`}>
@@ -59,11 +58,11 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
         onLoad={() => {
           console.log('✅ Imagem carregada com sucesso:', photoUrl);
           setImageLoading(false);
+          setImageError(false);
         }}
         onError={(e) => {
-          console.error('❌ FALHA ao carregar imagem:', photoUrl);
-          console.log('🔍 Detalhes do erro:', e);
-          console.log('🔍 Event target src:', (e.target as HTMLImageElement)?.src);
+          console.error('❌ ERRO ao carregar imagem:', photoUrl);
+          console.error('📝 Detalhes do erro:', e);
           setImageError(true);
           setImageLoading(false);
         }}

@@ -4,9 +4,7 @@ import { toast } from '@/hooks/use-toast';
 import type { VehicleCardPhoto } from './types';
 
 export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPhoto | null> => {
-  if (!vehicleId) {
-    return null;
-  }
+  if (!vehicleId) return null;
 
   try {
     console.log('🔍 Buscando foto do card para o veículo:', vehicleId);
@@ -14,14 +12,14 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
       .from('vehicle_card_photos')
       .select('*')
       .eq('vehicle_id', vehicleId)
-      .maybeSingle();
+      .single();
 
     if (error) {
-      console.error('❌ Erro ao buscar foto do card:', error);
-      throw error;
+      console.log('❌ Nenhuma foto do card encontrada para:', vehicleId);
+      return null;
     }
     
-    console.log('📸 Dados da foto do card encontrados:', data);
+    console.log('✅ Foto do card encontrada:', data);
     return data;
   } catch (error) {
     console.error('❌ Erro ao buscar foto do card:', error);
@@ -49,8 +47,6 @@ export const uploadCardPhotoToStorage = async (
     const fileName = `card-${vehicleId}-${Date.now()}.${fileExt}`;
     const filePath = `vehicle-cards/${fileName}`;
 
-    console.log('📁 Caminho completo no storage:', filePath);
-
     // Upload para o storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('vehicles-photos-new')
@@ -63,9 +59,12 @@ export const uploadCardPhotoToStorage = async (
 
     console.log('✅ Arquivo enviado com sucesso:', uploadData);
 
-    // Construir URL completa
-    const publicUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${filePath}`;
-    console.log('🔗 URL completa construída:', publicUrl);
+    // Pegar URL pública usando o método correto do Supabase
+    const { data: { publicUrl } } = supabase.storage
+      .from('vehicles-photos-new')
+      .getPublicUrl(filePath);
+
+    console.log('🔗 URL pública gerada:', publicUrl);
 
     return await saveCardPhotoToDatabase(vehicleId, publicUrl);
   } catch (error) {
@@ -85,9 +84,9 @@ export const saveCardPhotoToDatabase = async (
   promptUsed?: string
 ): Promise<VehicleCardPhoto | null> => {
   try {
-    console.log('💾 Salvando foto do card no banco:', { vehicleId, photoUrl, promptUsed });
+    console.log('💾 Salvando foto do card no banco:', { vehicleId, photoUrl });
     
-    // Remove foto do card existente
+    // Remove foto do card existente primeiro
     await supabase
       .from('vehicle_card_photos')
       .delete()
