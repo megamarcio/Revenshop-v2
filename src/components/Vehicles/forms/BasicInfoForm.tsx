@@ -24,12 +24,23 @@ const BasicInfoForm = ({
     // Remove caracteres não numéricos
     const numericValue = value.replace(/\D/g, '');
     
-    // Se for um número de 1-9999, formatar com zeros à esquerda
-    if (numericValue && parseInt(numericValue) > 0) {
-      const formattedCode = numericValue.padStart(4, '0');
-      onInputChange('internalCode', formattedCode);
+    // Validar se está dentro do range de 1-9999
+    if (numericValue) {
+      const numValue = parseInt(numericValue);
+      if (numValue >= 1 && numValue <= 9999) {
+        // Se for um número de 1-999, formatar com zeros à esquerda para 4 dígitos
+        // Se for 1000-9999, manter como está
+        const formattedCode = numValue <= 999 ? numericValue.padStart(4, '0') : numericValue;
+        onInputChange('internalCode', formattedCode);
+      } else if (numValue === 0) {
+        // Se for 0, limpar o campo
+        onInputChange('internalCode', '');
+      } else if (numValue > 9999) {
+        // Se for maior que 9999, limitar a 9999
+        onInputChange('internalCode', '9999');
+      }
     } else {
-      onInputChange('internalCode', numericValue);
+      onInputChange('internalCode', '');
     }
   };
 
@@ -115,7 +126,7 @@ const BasicInfoForm = ({
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
-            Digite um número e será formatado automaticamente (ex: 1 → 0001)
+            Digite um número de 1 a 9999. Números de 1-999 serão formatados com zeros à esquerda (ex: 1 → 0001)
           </p>
         </div>
 
