@@ -11,8 +11,8 @@ const VehicleUsageBadge: React.FC<VehicleUsageBadgeProps> = ({
   usage,
   consignmentStore 
 }) => {
-  console.log('VehicleUsageBadge Debug - usage:', usage);
-  console.log('VehicleUsageBadge Debug - consignmentStore:', consignmentStore);
+  console.log('VehicleUsageBadge - Received usage:', usage);
+  console.log('VehicleUsageBadge - Received consignmentStore:', consignmentStore);
 
   // Get badge color and text based on usage
   const getBadgeProps = (usageType: string) => {
@@ -51,6 +51,8 @@ const VehicleUsageBadge: React.FC<VehicleUsageBadgeProps> = ({
   };
 
   const badgeProps = getBadgeProps(usage || 'sale');
+  
+  console.log('VehicleUsageBadge - Final badge text:', badgeProps.text);
 
   return (
     <Badge 

@@ -7,6 +7,13 @@ export const mapDbDataToAppData = (dbData: any) => {
     ? ((dbData.sale_price - dbData.purchase_price) / dbData.purchase_price * 100)
     : 0;
   
+  // Extract vehicle usage and consignment store from description
+  const vehicleUsage = extractVehicleUsage(dbData);
+  const consignmentStore = extractConsignmentStore(dbData);
+  
+  console.log('mapDbDataToAppData - extracted vehicleUsage:', vehicleUsage);
+  console.log('mapDbDataToAppData - extracted consignmentStore:', consignmentStore);
+  
   const mappedData = {
     id: dbData.id,
     name: dbData.name,
@@ -102,27 +109,29 @@ export const mapDbDataToAppData = (dbData: any) => {
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at,
     
-    // Vehicle usage information - CORRIGIDO para preservar dados corretamente
-    vehicleUsage: extractVehicleUsage(dbData),
-    consignmentStore: extractConsignmentStore(dbData),
+    // Vehicle usage information - GARANTIR que sejam definidos corretamente
+    vehicleUsage: vehicleUsage,
+    consignmentStore: consignmentStore,
     
     // Extended category for backward compatibility - ensure it matches the union type
     extended_category: extractExtendedCategory(dbData),
-    consignment_store: extractConsignmentStore(dbData),
+    consignment_store: consignmentStore,
   };
   
-  console.log('mapDbDataToAppData - output vehicleUsage:', mappedData.vehicleUsage);
-  console.log('mapDbDataToAppData - output consignmentStore:', mappedData.consignmentStore);
-  console.log('mapDbDataToAppData - output:', mappedData);
+  console.log('mapDbDataToAppData - final output vehicleUsage:', mappedData.vehicleUsage);
+  console.log('mapDbDataToAppData - final output consignmentStore:', mappedData.consignmentStore);
+  console.log('mapDbDataToAppData - final output:', mappedData);
   return mappedData;
 };
 
 const extractVehicleUsage = (dbData: any): string => {
+  console.log('extractVehicleUsage - input dbData.description:', dbData.description);
+  
   // Check if there's specific usage info in description
   if (dbData.description) {
     const match = dbData.description.match(/\[USAGE:([^\]]+)\]/);
     if (match) {
-      console.log('Found usage in description:', match[1]);
+      console.log('extractVehicleUsage - Found usage in description:', match[1]);
       return match[1];
     }
   }
@@ -137,18 +146,21 @@ const extractVehicleUsage = (dbData: any): string => {
     }
   })();
   
-  console.log('Using default mapping for category', dbData.category, ':', defaultMapping);
+  console.log('extractVehicleUsage - Using default mapping for category', dbData.category, ':', defaultMapping);
   return defaultMapping;
 };
 
 const extractConsignmentStore = (dbData: any): string => {
+  console.log('extractConsignmentStore - input dbData.description:', dbData.description);
+  
   if (dbData.description) {
     const match = dbData.description.match(/\[STORE:([^\]]+)\]/);
     if (match) {
-      console.log('Found store in description:', match[1]);
+      console.log('extractConsignmentStore - Found store in description:', match[1]);
       return match[1];
     }
   }
+  console.log('extractConsignmentStore - No store found, returning empty string');
   return '';
 };
 

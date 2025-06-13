@@ -17,41 +17,60 @@ interface VehicleCardHeaderProps {
 
 // Helper function to determine vehicle usage from vehicle data
 const getVehicleUsage = (vehicle: Vehicle): string => {
-  // Check if there's specific usage info in description
-  if (vehicle.description) {
-    const match = vehicle.description.match(/\[USAGE:([^\]]+)\]/);
-    if (match) {
-      return match[1];
-    }
-  }
+  console.log('getVehicleUsage - vehicle received:', vehicle);
+  console.log('getVehicleUsage - vehicle.vehicleUsage:', (vehicle as any).vehicleUsage);
+  console.log('getVehicleUsage - vehicle.description:', vehicle.description);
   
-  // Check vehicleUsage field directly if available
+  // Priority 1: Check vehicleUsage field directly if available
   if ((vehicle as any).vehicleUsage) {
+    console.log('getVehicleUsage - returning vehicleUsage field:', (vehicle as any).vehicleUsage);
     return (vehicle as any).vehicleUsage;
   }
   
-  // Default mapping based on category
-  switch (vehicle.category) {
-    case 'rental': return 'rental';
-    case 'consigned': return 'consigned';
-    case 'maintenance': return 'personal';
-    default: return 'sale';
-  }
-};
-
-const getConsignmentStore = (vehicle: Vehicle): string => {
+  // Priority 2: Check if there's specific usage info in description
   if (vehicle.description) {
-    const match = vehicle.description.match(/\[STORE:([^\]]+)\]/);
+    const match = vehicle.description.match(/\[USAGE:([^\]]+)\]/);
     if (match) {
+      console.log('getVehicleUsage - found usage in description:', match[1]);
       return match[1];
     }
   }
   
-  // Check consignmentStore field directly if available
+  // Priority 3: Default mapping based on category
+  const defaultMapping = (() => {
+    switch (vehicle.category) {
+      case 'rental': return 'rental';
+      case 'consigned': return 'consigned';
+      case 'maintenance': return 'personal';
+      default: return 'sale';
+    }
+  })();
+  
+  console.log('getVehicleUsage - using default mapping:', defaultMapping);
+  return defaultMapping;
+};
+
+const getConsignmentStore = (vehicle: Vehicle): string => {
+  console.log('getConsignmentStore - vehicle received:', vehicle);
+  console.log('getConsignmentStore - vehicle.consignmentStore:', (vehicle as any).consignmentStore);
+  console.log('getConsignmentStore - vehicle.description:', vehicle.description);
+  
+  // Priority 1: Check consignmentStore field directly if available
   if ((vehicle as any).consignmentStore) {
+    console.log('getConsignmentStore - returning consignmentStore field:', (vehicle as any).consignmentStore);
     return (vehicle as any).consignmentStore;
   }
   
+  // Priority 2: Check if there's store info in description
+  if (vehicle.description) {
+    const match = vehicle.description.match(/\[STORE:([^\]]+)\]/);
+    if (match) {
+      console.log('getConsignmentStore - found store in description:', match[1]);
+      return match[1];
+    }
+  }
+  
+  console.log('getConsignmentStore - no store found, returning empty string');
   return vehicle.consignmentStore || '';
 };
 
@@ -71,13 +90,12 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
   const vehicleUsage = getVehicleUsage(vehicle);
   const consignmentStore = getConsignmentStore(vehicle);
 
-  console.log('VehicleCardHeader Debug - vehicle:', vehicle);
-  console.log('VehicleCardHeader Debug - vehicleUsage:', vehicleUsage);
-  console.log('VehicleCardHeader Debug - consignmentStore:', consignmentStore);
+  console.log('VehicleCardHeader - Final vehicleUsage:', vehicleUsage);
+  console.log('VehicleCardHeader - Final consignmentStore:', consignmentStore);
 
   return (
     <div className="relative">
-      {/* Vehicle Usage Badge - Removido o badge "À Venda" */}
+      {/* Vehicle Usage Badge - Não mostrar badge "À Venda" padrão */}
       <div className="absolute top-2 left-2 z-10">
         <VehicleUsageBadge 
           usage={vehicleUsage} 

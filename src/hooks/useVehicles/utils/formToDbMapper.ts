@@ -5,15 +5,20 @@ export const mapFormToDbData = (formData: any) => {
   // Prepare the description with vehicle usage and store info
   let description = formData.description || '';
   
-  // Add vehicle usage to description if not already present
-  if (formData.vehicleUsage && !description.includes('[USAGE:')) {
+  // Remove existing usage and store info from description to avoid duplicates
+  description = description.replace(/\[USAGE:[^\]]+\]/g, '').replace(/\[STORE:[^\]]+\]/g, '').trim();
+  
+  // Add vehicle usage to description
+  if (formData.vehicleUsage) {
     description += ` [USAGE:${formData.vehicleUsage}]`;
   }
   
   // Add consignment store to description if consigned and store specified
-  if (formData.vehicleUsage === 'consigned' && formData.consignmentStore && !description.includes('[STORE:')) {
+  if (formData.vehicleUsage === 'consigned' && formData.consignmentStore) {
     description += ` [STORE:${formData.consignmentStore}]`;
   }
+  
+  console.log('mapFormToDbData - final description with usage/store:', description);
   
   const dbData = {
     name: formData.name,
@@ -33,14 +38,6 @@ export const mapFormToDbData = (formData: any) => {
     
     description: description.trim(),
     category: formData.category,
-    
-    // Title fields
-    title_type_id: formData.titleTypeId || null,
-    title_location_id: formData.titleLocationId || null,
-    title_location_custom: formData.titleLocationCustom || null,
-    
-    // Basic vehicle information - only fields that exist in vehicles table
-    created_by: formData.seller || null,
     
     // Financing information - these exist in vehicles table
     financing_bank: formData.financingBank || null,
@@ -64,6 +61,6 @@ export const mapFormToDbData = (formData: any) => {
     video: formData.video || null,
   };
   
-  console.log('mapFormToDbData - output dbData:', dbData);
+  console.log('mapFormToDbData - output dbData with encoded usage/store:', dbData);
   return dbData;
 };
