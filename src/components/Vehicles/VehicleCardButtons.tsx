@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   Edit, 
@@ -119,15 +118,6 @@ const VehicleCardButtons = ({
           <TooltipContent>Ver Carfax</TooltipContent>
         </Tooltip>
       </div>
-
-      {/* Badge de valor mínimo negociável */}
-      {showMinNegotiable && vehicle.minNegotiable && (
-        <div className="pt-2">
-          <Badge variant="secondary" className="w-full justify-center text-xs">
-            Mín: {formatCurrency(parseFloat(vehicle.minNegotiable.toString()))}
-          </Badge>
-        </div>
-      )}
     </div>
   );
 };

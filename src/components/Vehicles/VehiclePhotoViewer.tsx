@@ -115,25 +115,25 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
         )}
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Botões menores */}
       {hasMultiplePhotos && (
         <>
           <Button
             variant="secondary"
             size="sm"
             onClick={handlePrevious}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white border-0 p-2 h-10 w-10 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+            className="absolute left-1 top-1/2 transform -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white border-0 p-1 h-8 w-8 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </Button>
           
           <Button
             variant="secondary"
             size="sm"
             onClick={handleNext}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white border-0 p-2 h-10 w-10 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
+            className="absolute right-1 top-1/2 transform -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white border-0 p-1 h-8 w-8 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4" />
           </Button>
         </>
       )}

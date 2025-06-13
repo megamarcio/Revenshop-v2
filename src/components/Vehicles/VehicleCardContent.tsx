@@ -53,20 +53,21 @@ const VehicleCardContent = ({
           </span>
         </div>
         
-        {isInternalSeller && vehicle.profitMargin && (
-          <div className="flex justify-between items-center">
-            <span className="text-xs text-gray-600">Margem:</span>
-            <span className="text-xs font-medium text-blue-600">
-              {vehicle.profitMargin.toFixed(1)}%
-            </span>
-          </div>
-        )}
-
+        {/* Mostrar mínimo negociável embaixo do preço de venda quando showMinNegotiable é true */}
         {showMinNegotiable && minNegotiable && (
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-600">Mín. Negociável:</span>
             <span className="text-xs font-medium text-orange-600">
               {formatCurrency(minNegotiable)}
+            </span>
+          </div>
+        )}
+        
+        {isInternalSeller && vehicle.profitMargin && (
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">Margem:</span>
+            <span className="text-xs font-medium text-blue-600">
+              {vehicle.profitMargin.toFixed(1)}%
             </span>
           </div>
         )}

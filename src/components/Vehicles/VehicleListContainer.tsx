@@ -24,8 +24,8 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sortBy, setSortBy] = useState('name');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [sortBy, setSortBy] = useState('internalCode');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [filterBy, setFilterBy] = useState('all');
 
   // Use ultra minimal hook for list display with automatic refresh
@@ -69,6 +69,13 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     filtered.sort((a, b) => {
       let aValue = a[sortBy as keyof VehicleCardType];
       let bValue = b[sortBy as keyof VehicleCardType];
+      
+      // Tratamento especial para código interno (remover # se existir e converter para número)
+      if (sortBy === 'internalCode') {
+        const aCode = typeof aValue === 'string' ? parseInt(aValue.replace('#', '')) || 0 : 0;
+        const bCode = typeof bValue === 'string' ? parseInt(bValue.replace('#', '')) || 0 : 0;
+        return sortOrder === 'asc' ? aCode - bCode : bCode - aCode;
+      }
       
       if (typeof aValue === 'string') aValue = aValue.toLowerCase();
       if (typeof bValue === 'string') bValue = bValue.toLowerCase();
