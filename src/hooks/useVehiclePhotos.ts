@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -56,8 +55,8 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         throw new Error('Apenas arquivos de imagem são permitidos.');
       }
 
-      if (file.size > 5 * 1024 * 1024) {
-        throw new Error('A imagem deve ter no máximo 5MB.');
+      if (file.size > 3 * 1024 * 1024) {
+        throw new Error('A imagem deve ter no máximo 3MB.');
       }
 
       // Gerar nome único para o arquivo

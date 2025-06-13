@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Loader2, Image, Star } from 'lucide-react';
@@ -35,11 +34,11 @@ const NewPhotosSection = ({
     
     try {
       for (const file of fileArray) {
-        if (file.size > 1048576) { // 1MB
+        if (file.size > 3 * 1024 * 1024) { // 3MB
           console.warn(`File ${file.name} is too large. Skipping.`);
           toast({
             title: 'Arquivo muito grande',
-            description: `${file.name} tem mais de 1MB e foi ignorado.`,
+            description: `${file.name} tem mais de 3MB e foi ignorado.`,
             variant: 'destructive',
           });
           continue;
@@ -89,7 +88,7 @@ const NewPhotosSection = ({
     <div className="space-y-4">
       <h3 className="text-lg font-semibold flex items-center space-x-2">
         <Image className="h-5 w-5" />
-        <span>Fotos Novas ({photos.length}/20) - Máx. 1MB cada</span>
+        <span>Fotos Novas ({photos.length}/20) - Máx. 3MB cada</span>
         {uploading && <Loader2 className="h-4 w-4 animate-spin" />}
       </h3>
       
