@@ -1,9 +1,11 @@
 
 import React from 'react';
 import NewPhotosSection from './NewPhotosSection';
+import CardPhotoSection from './CardPhotoSection';
 
 interface MediaUploadFormProps {
   vehicleId?: string;
+  vehicleData?: any;
   photos: string[];
   videos: string[];
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
@@ -13,6 +15,7 @@ interface MediaUploadFormProps {
 
 const MediaUploadForm = ({ 
   vehicleId, 
+  vehicleData,
   photos, 
   videos, 
   setPhotos, 
@@ -20,12 +23,18 @@ const MediaUploadForm = ({
   readOnly = false 
 }: MediaUploadFormProps) => {
   return (
-    <>
+    <div className="space-y-8">
+      <CardPhotoSection
+        vehicleId={vehicleId}
+        vehicleData={vehicleData}
+        readOnly={readOnly}
+      />
+      
       <NewPhotosSection
         vehicleId={vehicleId}
         readOnly={readOnly}
       />
-    </>
+    </div>
   );
 };
 

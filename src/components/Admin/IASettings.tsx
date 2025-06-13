@@ -6,6 +6,7 @@ import { useAISettings } from '@/hooks/useAISettings';
 import OpenAIKeyForm from './OpenAIKeyForm';
 import ImageInstructionsForm from './ImageInstructionsForm';
 import DescriptionInstructionsForm from './DescriptionInstructionsForm';
+import CardImageInstructionsForm from './CardImageInstructionsForm';
 
 const IASettings = () => {
   const {
@@ -13,6 +14,8 @@ const IASettings = () => {
     setImageInstructions,
     descriptionInstructions,
     setDescriptionInstructions,
+    cardImageInstructions,
+    setCardImageInstructions,
     isLoading,
     isLoadingSettings,
     saveSettings
@@ -38,6 +41,11 @@ const IASettings = () => {
       <DescriptionInstructionsForm 
         instructions={descriptionInstructions}
         onInstructionsChange={setDescriptionInstructions}
+      />
+
+      <CardImageInstructionsForm 
+        instructions={cardImageInstructions}
+        onInstructionsChange={setCardImageInstructions}
       />
 
       <div className="flex justify-end">
