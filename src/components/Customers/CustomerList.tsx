@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Search, FileText, DollarSign, Edit } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { Search, FileText, DollarSign, Edit, Trash2, Loader2 } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import CustomerForm from './CustomerForm';
 import QuoteGenerator from './QuoteGenerator';
 import DealDetails from './DealDetails';
@@ -43,12 +45,14 @@ interface CustomerListProps {
 const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
   const { t } = useLanguage();
   const { user, isAdmin, isManager } = useAuth();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showForm, setShowForm] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [showQuoteGenerator, setShowQuoteGenerator] = useState(false);
   const [showDealDetails, setShowDealDetails] = useState(false);
+  const [deletingCustomerId, setDeletingCustomerId] = useState<string | null>(null);
 
   const { data: customers = [], isLoading } = useQuery({
     queryKey: ['customers', searchTerm, statusFilter, user?.id],
@@ -80,6 +84,39 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
       return data as Customer[];
     },
   });
+
+  const handleDeleteCustomer = async (customerId: string) => {
+    try {
+      setDeletingCustomerId(customerId);
+      
+      const { error } = await supabase
+        .from('bhph_customers')
+        .delete()
+        .eq('id', customerId);
+
+      if (error) {
+        console.error('Error deleting customer:', error);
+        throw error;
+      }
+
+      // Invalidate and refetch the customers query
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Cliente excluído com sucesso!',
+      });
+    } catch (error: any) {
+      console.error('Error deleting customer:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao excluir cliente. Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeletingCustomerId(null);
+    }
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -191,7 +228,7 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
                   <TableHead className="text-xs font-medium w-24">Preço</TableHead>
                   <TableHead className="text-xs font-medium w-32">Vendedor</TableHead>
                   <TableHead className="text-xs font-medium w-20">Status</TableHead>
-                  <TableHead className="text-xs font-medium text-right w-24">Ações</TableHead>
+                  <TableHead className="text-xs font-medium text-right w-32">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -267,6 +304,41 @@ const CustomerList = ({ onCustomerSelect }: CustomerListProps) => {
                         >
                           <FileText className="h-3 w-3" />
                         </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                              disabled={deletingCustomerId === customer.id}
+                            >
+                              {deletingCustomerId === customer.id ? (
+                                <Loader2 className="h-3 w-3 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3 w-3" />
+                              )}
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Confirmar Exclusão</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Tem certeza que deseja excluir o cliente <strong>{customer.name}</strong>?
+                                <br />
+                                Esta ação não pode ser desfeita.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteCustomer(customer.id)}
+                                className="bg-red-600 hover:bg-red-700"
+                              >
+                                Excluir Cliente
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </TableCell>
                   </TableRow>
