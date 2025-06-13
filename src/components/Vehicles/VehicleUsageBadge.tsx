@@ -41,6 +41,12 @@ const VehicleUsageBadge: React.FC<VehicleUsageBadgeProps> = ({
           text: consignmentStore || 'Consignado', 
           className: 'bg-orange-600 text-white border-orange-600' 
         };
+      case 'maintenance':
+        return { 
+          variant: 'outline' as const, 
+          text: 'Em Manutenção', 
+          className: 'bg-red-600 text-white border-red-600' 
+        };
       default:
         return { 
           variant: 'default' as const, 

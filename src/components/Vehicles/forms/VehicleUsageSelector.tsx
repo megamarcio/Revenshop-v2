@@ -16,7 +16,8 @@ const usageOptions = [
   { value: 'rental', label: 'Aluguel' },
   { value: 'personal', label: 'Uso próprio' },
   { value: 'sale', label: 'Venda' },
-  { value: 'consigned', label: 'Consignado' }
+  { value: 'consigned', label: 'Consignado' },
+  { value: 'maintenance', label: 'Em Manutenção' }
 ];
 
 const VehicleUsageSelector = ({ 
