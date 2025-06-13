@@ -4,20 +4,24 @@ export interface VehicleFormData {
   vin: string;
   year: string;
   model: string;
-  miles: string; // CONFIRMADO: campo miles está definido
+  miles: string;
   internalCode: string;
   color: string;
-  titleTypeId: string; // Campo para tipo de título
-  titleLocationId: string; // Novo campo para local do título
-  titleLocationCustom: string; // Novo campo para local customizado
+  titleTypeId: string;
+  titleLocationId: string;
+  titleLocationCustom: string;
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;
   carfaxPrice: string;
   mmrValue: string;
   description: string;
-  category: "forSale" | "sold" | "consigned" | "rental" | "maintenance";
+  category: "forSale" | "sold";
+  
+  // Novo campo para uso do veículo
+  vehicleUsage: "rental" | "personal" | "sale" | "consigned" | "";
   consignmentStore: string;
+  
   seller: string;
   finalSalePrice: string;
   saleDate: string;
@@ -30,7 +34,7 @@ export interface VehicleFormData {
   otherPaymentDetails: string;
   sellerCommission: string;
   
-  // Novos campos de financiamento
+  // Campos de financiamento
   financingBank: string;
   financingType: 'comprou-direto' | 'assumiu-financiamento' | '';
   originalFinancedName: string;

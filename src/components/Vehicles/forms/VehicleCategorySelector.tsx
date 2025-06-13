@@ -12,10 +12,7 @@ interface VehicleCategorySelectorProps {
 
 const categoryOptions = [
   { value: 'forSale', label: 'À Venda', description: 'Veículo disponível para venda' },
-  { value: 'sold', label: 'Vendido', description: 'Veículo já foi vendido' },
-  { value: 'consigned', label: 'Consignado', description: 'Veículo em consignação' },
-  { value: 'rental', label: 'Aluguel', description: 'Veículo para locação' },
-  { value: 'maintenance', label: 'Manutenção', description: 'Veículo em manutenção' }
+  { value: 'sold', label: 'Vendido', description: 'Veículo já foi vendido' }
 ];
 
 const VehicleCategorySelector = ({ value, onChange, error }: VehicleCategorySelectorProps) => {
@@ -24,14 +21,14 @@ const VehicleCategorySelector = ({ value, onChange, error }: VehicleCategorySele
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <label className="text-sm font-medium">Categoria do Veículo *</label>
+        <label className="text-sm font-medium">Status do Veículo *</label>
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Info className="h-4 w-4 text-gray-400" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>Selecione a categoria atual do veículo</p>
+              <p>Selecione o status atual do veículo</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -42,7 +39,7 @@ const VehicleCategorySelector = ({ value, onChange, error }: VehicleCategorySele
         onChange(newValue);
       }}>
         <SelectTrigger className={error ? "border-red-500" : ""}>
-          <SelectValue placeholder="Selecione a categoria" />
+          <SelectValue placeholder="Selecione o status" />
         </SelectTrigger>
         <SelectContent>
           {categoryOptions.map((option) => (
