@@ -15,6 +15,35 @@ interface VehicleCardHeaderProps {
   downloading?: boolean;
 }
 
+// Helper function to determine vehicle usage from vehicle data
+const getVehicleUsage = (vehicle: Vehicle): string => {
+  // Check if there's specific usage info in description
+  if (vehicle.description) {
+    const match = vehicle.description.match(/\[USAGE:([^\]]+)\]/);
+    if (match) {
+      return match[1];
+    }
+  }
+  
+  // Default mapping based on category
+  switch (vehicle.category) {
+    case 'rental': return 'rental';
+    case 'consigned': return 'consigned';
+    case 'maintenance': return 'personal';
+    default: return 'sale';
+  }
+};
+
+const getConsignmentStore = (vehicle: Vehicle): string => {
+  if (vehicle.description) {
+    const match = vehicle.description.match(/\[STORE:([^\]]+)\]/);
+    if (match) {
+      return match[1];
+    }
+  }
+  return vehicle.consignmentStore || '';
+};
+
 const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderProps) => {
   const { downloadSinglePhoto, downloadPhotosZip, downloading: isDownloading } = usePhotoDownload();
 
@@ -28,13 +57,16 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
     downloadSinglePhoto(photoUrl, vehicle.name, index + 1);
   };
 
+  const vehicleUsage = getVehicleUsage(vehicle);
+  const consignmentStore = getConsignmentStore(vehicle);
+
   return (
     <div className="relative">
       {/* Vehicle Usage Badge */}
       <div className="absolute top-2 left-2 z-10">
         <VehicleUsageBadge 
-          usage={vehicle.extended_category} 
-          consignmentStore={vehicle.consignmentStore}
+          usage={vehicleUsage} 
+          consignmentStore={consignmentStore}
         />
       </div>
 
