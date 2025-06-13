@@ -20,24 +20,25 @@ const BasicInfoForm = ({
 }: BasicInfoFormProps) => {
   
   const handleInternalCodeChange = (value: string) => {
-    // só números
-    const numeric = value.replace(/\D/g, '');
+    // Remove o # se já estiver presente
+    let cleanValue = value.replace('#', '');
+    
+    // Permite apenas números
+    const numeric = cleanValue.replace(/\D/g, '');
+    
     if (!numeric) {
-      onInputChange('internalCode', '');
+      onInputChange('internalCode', '#000');
       return;
     }
 
     const num = parseInt(numeric, 10);
 
-    if (num < 1) {
-      // abaixo de 1 limpa o campo
-      onInputChange('internalCode', '');
-    } else if (num > 9999) {
-      // acima de 9999 força 9999
-      onInputChange('internalCode', '9999');
+    // Limita entre 0 e 999
+    if (num > 999) {
+      onInputChange('internalCode', '#999');
     } else {
-      // formata sempre para 4 dígitos
-      const formatted = num.toString().padStart(4, '0');
+      // Formata sempre para 3 dígitos com # no início
+      const formatted = '#' + num.toString().padStart(3, '0');
       onInputChange('internalCode', formatted);
     }
   };
@@ -119,12 +120,12 @@ const BasicInfoForm = ({
             value={formData.internalCode} 
             onChange={e => handleInternalCodeChange(e.target.value)} 
             className={errors.internalCode ? "border-red-500" : ""} 
-            placeholder="0001" 
+            placeholder="#000" 
             maxLength={4}
           />
           {errors.internalCode && <p className="text-sm text-red-500">{errors.internalCode}</p>}
           <p className="text-xs text-gray-500">
-            Digite um número de 1 a 9999. Todos os números serão formatados para 4 dígitos (ex: 1 → 0001)
+            Digite um número de 0 a 999. Será formatado automaticamente (ex: 1 → #001, 25 → #025)
           </p>
         </div>
 
