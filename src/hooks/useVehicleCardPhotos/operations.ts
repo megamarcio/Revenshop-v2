@@ -9,13 +9,19 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
   }
 
   try {
+    console.log('Fetching card photo for vehicle:', vehicleId);
     const { data, error } = await supabase
       .from('vehicle_card_photos')
       .select('*')
       .eq('vehicle_id', vehicleId)
       .maybeSingle();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error fetching card photo:', error);
+      throw error;
+    }
+    
+    console.log('Card photo data fetched:', data);
     return data;
   } catch (error) {
     console.error('Error fetching card photo:', error);
@@ -48,12 +54,19 @@ export const uploadCardPhotoToStorage = async (
       .from('vehicles-photos-new')
       .upload(filePath, file);
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw uploadError;
+    }
+
+    console.log('File uploaded successfully:', uploadData);
 
     // Get public URL
     const { data: { publicUrl } } = supabase.storage
       .from('vehicles-photos-new')
       .getPublicUrl(filePath);
+
+    console.log('Public URL generated:', publicUrl);
 
     return await saveCardPhotoToDatabase(vehicleId, publicUrl);
   } catch (error) {
@@ -73,6 +86,8 @@ export const saveCardPhotoToDatabase = async (
   promptUsed?: string
 ): Promise<VehicleCardPhoto | null> => {
   try {
+    console.log('Saving card photo to database:', { vehicleId, photoUrl, promptUsed });
+    
     // Remove existing card photo
     await supabase
       .from('vehicle_card_photos')
@@ -90,7 +105,12 @@ export const saveCardPhotoToDatabase = async (
       .select()
       .single();
 
-    if (dbError) throw dbError;
+    if (dbError) {
+      console.error('Database error:', dbError);
+      throw dbError;
+    }
+    
+    console.log('Card photo saved to database:', photoData);
     return photoData;
   } catch (error) {
     console.error('Error saving card photo to database:', error);

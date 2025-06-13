@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Badge } from '@/components/ui/badge';
 import { Vehicle } from './VehicleCardTypes';
 
 interface VehicleCardContentProps {
@@ -18,37 +17,13 @@ const VehicleCardContent = ({
   showMinNegotiable,
   minNegotiable
 }: VehicleCardContentProps) => {
-  const getCategoryLabel = (category: string) => {
-    switch (category) {
-      case 'forSale': return 'À Venda';
-      case 'sold': return 'Vendido';
-      case 'rental': return 'Aluguel';
-      case 'maintenance': return 'Manutenção';
-      case 'consigned': return 'Consignado';
-      default: return category;
-    }
-  };
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case 'forSale': return 'bg-green-100 text-green-800';
-      case 'sold': return 'bg-blue-100 text-blue-800';
-      case 'rental': return 'bg-purple-100 text-purple-800';
-      case 'maintenance': return 'bg-orange-100 text-orange-800';
-      case 'consigned': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
   return (
     <>
       <div className="flex justify-between items-start mb-2">
         <h3 className="font-bold text-sm text-gray-900 leading-tight truncate flex-1 mr-2">
           {vehicle.name}
         </h3>
-        <Badge className={`text-xs px-2 py-1 ${getCategoryColor(vehicle.category)}`}>
-          {getCategoryLabel(vehicle.category)}
-        </Badge>
+        {/* Removido o Badge de categoria conforme solicitado */}
       </div>
 
       <div className="space-y-1 text-xs text-gray-600">
