@@ -45,6 +45,14 @@ const VehicleFormContent = ({
   calculateProfitMargin,
   generateDescription
 }: VehicleFormContentProps) => {
+  // Criar dados do veículo para o MediaUploadForm
+  const vehicleDataForMedia = isEditing && editingVehicle ? {
+    name: formData.name || editingVehicle.name || '',
+    year: parseInt(formData.year) || editingVehicle.year || new Date().getFullYear(),
+    color: formData.color || editingVehicle.color || '',
+    category: formData.category || editingVehicle.category || 'forSale'
+  } : undefined;
+
   return (
     <div className="space-y-6">
       <BasicInfoForm

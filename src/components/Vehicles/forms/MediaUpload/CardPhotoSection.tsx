@@ -33,11 +33,41 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
   };
 
   const handleGeneratePhoto = async () => {
-    if (vehicleData && !readOnly) {
-      console.log('Gerando foto do card com dados do veículo:', vehicleData);
+    console.log('🎯 CardPhotoSection - handleGeneratePhoto called');
+    console.log('🔍 vehicleData:', vehicleData);
+    console.log('🆔 vehicleId:', vehicleId);
+    console.log('🚫 readOnly:', readOnly);
+    
+    if (!vehicleData) {
+      console.warn('⚠️ vehicleData não está disponível');
+      alert('Dados do veículo são necessários para gerar a imagem. Preencha os campos básicos primeiro.');
+      return;
+    }
+
+    if (!vehicleId) {
+      console.warn('⚠️ vehicleId não está disponível');
+      alert('ID do veículo é necessário. Salve o veículo primeiro.');
+      return;
+    }
+
+    if (readOnly) {
+      console.warn('⚠️ Componente está em modo readOnly');
+      return;
+    }
+
+    console.log('🚀 Iniciando geração de foto do card...');
+    try {
       await generateCardPhoto(vehicleData);
+      console.log('✅ Geração de foto concluída');
+    } catch (error) {
+      console.error('❌ Erro na geração:', error);
     }
   };
+
+  // Log para debug
+  console.log('🔍 CardPhotoSection render - vehicleId:', vehicleId);
+  console.log('🔍 CardPhotoSection render - vehicleData:', vehicleData);
+  console.log('🔍 CardPhotoSection render - readOnly:', readOnly);
 
   if (readOnly && !cardPhoto) {
     return null;
@@ -79,8 +109,9 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
                   variant="outline"
                   size="sm"
                   onClick={handleGeneratePhoto}
-                  disabled={generating || !vehicleData}
+                  disabled={generating || !vehicleData || !vehicleId}
                   className="flex items-center gap-2 text-xs"
+                  title={!vehicleData ? 'Preencha os dados básicos do veículo primeiro' : !vehicleId ? 'Salve o veículo primeiro' : 'Gerar foto com IA'}
                 >
                   <Sparkles className="h-3 w-3" />
                   {generating ? 'Gerando...' : 'Gerar IA'}

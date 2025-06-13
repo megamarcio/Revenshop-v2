@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '../../contexts/LanguageContext';
@@ -39,11 +40,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
   console.log('VehicleForm - editingVehicle:', editingVehicle);
   console.log('VehicleForm - isEditing:', isEditing);
-  console.log('VehicleForm - formData title fields:', {
-    titleTypeId: formData.titleTypeId,
-    titleLocationId: formData.titleLocationId,
-    titleLocationCustom: formData.titleLocationCustom
-  });
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
@@ -98,11 +94,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         finalSalePrice: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : undefined,
         sellerCommission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : undefined,
         
-        // Campos de título - GARANTIR que sejam incluídos
-        titleTypeId: formData.titleTypeId,
-        titleLocationId: formData.titleLocationId,
-        titleLocationCustom: formData.titleLocationCustom,
-        
         // Campos de financiamento - garantir que todos sejam enviados
         financingBank: formData.financingBank,
         financingType: formData.financingType,
@@ -133,11 +124,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       }
 
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
-      console.log('VehicleForm - title fields being submitted:', {
-        titleTypeId: vehicleData.titleTypeId,
-        titleLocationId: vehicleData.titleLocationId,
-        titleLocationCustom: vehicleData.titleLocationCustom
-      });
 
       await onSave(vehicleData);
       

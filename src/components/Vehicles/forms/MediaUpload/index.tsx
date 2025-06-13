@@ -6,7 +6,6 @@ import VideoSection from './VideoSection';
 
 interface MediaUploadFormProps {
   vehicleId?: string;
-  vehicleData?: any;
   photos: string[];
   videos: string[];
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
@@ -16,13 +15,20 @@ interface MediaUploadFormProps {
 
 const MediaUploadForm = ({ 
   vehicleId, 
-  vehicleData,
   photos, 
   videos, 
   setPhotos, 
   setVideos,
   readOnly = false 
 }: MediaUploadFormProps) => {
+  // Criar objeto com dados do veículo para o CardPhotoSection
+  const vehicleData = vehicleId ? {
+    name: 'Veículo', // Placeholder - será substituído por dados reais se disponível
+    year: new Date().getFullYear(),
+    color: '',
+    category: 'forSale'
+  } : undefined;
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
