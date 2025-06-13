@@ -1,8 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
+import { useNewVehiclePhotos } from '@/hooks/useNewVehiclePhotos';
+import { useVehicleCardPhotos } from '@/hooks/useVehicleCardPhotos';
 import VehicleMainPhoto from './VehicleMainPhoto';
 import VehiclePhotoThumbnails from './VehiclePhotoThumbnails';
 
@@ -22,28 +25,59 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
   onDownloadSingle
 }) => {
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
+  const { photos: vehiclePhotos } = useVehiclePhotos(vehicleId);
+  const { photos: newPhotos } = useNewVehiclePhotos(vehicleId);
+  const { cardPhoto } = useVehicleCardPhotos(vehicleId);
 
-  console.log('🎯 VEHICLE PHOTO VIEWER DEBUG - Props recebidas:');
-  console.log('- vehicleId:', vehicleId);
-  console.log('- fallbackPhotos:', fallbackPhotos);
-  console.log('- vehicleName:', vehicleName);
-  console.log('- className:', className);
+  // Compilar todas as fotos disponíveis
+  const allPhotos = React.useMemo(() => {
+    const photos: string[] = [];
+    
+    // Adicionar foto do card se existir
+    if (cardPhoto?.photo_url) {
+      photos.push(cardPhoto.photo_url);
+    }
+    
+    // Adicionar novas fotos
+    newPhotos.forEach(photo => {
+      if (photo.url && !photos.includes(photo.url)) {
+        photos.push(photo.url);
+      }
+    });
+    
+    // Adicionar fotos do veículo
+    vehiclePhotos.forEach(photo => {
+      if (photo.url && !photos.includes(photo.url)) {
+        photos.push(photo.url);
+      }
+    });
+    
+    // Adicionar fotos fallback
+    fallbackPhotos.forEach(photo => {
+      if (photo && !photos.includes(photo)) {
+        photos.push(photo);
+      }
+    });
+    
+    return photos;
+  }, [cardPhoto, newPhotos, vehiclePhotos, fallbackPhotos]);
 
-  // Determinar fotos disponíveis
-  const availablePhotos = fallbackPhotos || [];
-  console.log('🎯 VEHICLE PHOTO VIEWER DEBUG - Fotos disponíveis:', availablePhotos);
+  console.log('🎯 VEHICLE PHOTO VIEWER - Todas as fotos compiladas:', allPhotos);
 
-  const hasMultiplePhotos = availablePhotos.length > 1;
-  const currentPhoto = availablePhotos[currentPhotoIndex];
+  const hasMultiplePhotos = allPhotos.length > 1;
+  const currentPhoto = allPhotos[currentPhotoIndex];
 
-  console.log('🎯 VEHICLE PHOTO VIEWER DEBUG - Tem múltiplas fotos:', hasMultiplePhotos);
-  console.log('🎯 VEHICLE PHOTO VIEWER DEBUG - Foto atual:', currentPhoto);
-  console.log('🎯 VEHICLE PHOTO VIEWER DEBUG - Índice atual:', currentPhotoIndex);
+  // Reset index when photos change
+  useEffect(() => {
+    if (currentPhotoIndex >= allPhotos.length) {
+      setCurrentPhotoIndex(0);
+    }
+  }, [allPhotos.length, currentPhotoIndex]);
 
   const handlePrevious = () => {
     if (hasMultiplePhotos) {
       setCurrentPhotoIndex((prev) => 
-        prev === 0 ? availablePhotos.length - 1 : prev - 1
+        prev === 0 ? allPhotos.length - 1 : prev - 1
       );
     }
   };
@@ -51,7 +85,7 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
   const handleNext = () => {
     if (hasMultiplePhotos) {
       setCurrentPhotoIndex((prev) => 
-        prev === availablePhotos.length - 1 ? 0 : prev + 1
+        prev === allPhotos.length - 1 ? 0 : prev + 1
       );
     }
   };
@@ -69,15 +103,25 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
   return (
     <div className={`relative group ${className}`}>
       {/* Foto Principal */}
-      <VehicleMainPhoto
-        vehicleId={vehicleId}
-        fallbackPhotos={[currentPhoto].filter(Boolean)}
-        vehicleName={vehicleName}
-        className="w-full h-full"
-        showLoader={false}
-      />
+      <div className="w-full h-full bg-gray-200 rounded overflow-hidden">
+        {currentPhoto ? (
+          <img
+            src={currentPhoto}
+            alt={`${vehicleName} - Foto ${currentPhotoIndex + 1}`}
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-500">
+            <div className="text-center">
+              <div className="text-2xl mb-2">📷</div>
+              <p className="text-sm">Sem foto</p>
+            </div>
+          </div>
+        )}
+      </div>
 
-      {/* Navigation Arrows - Sempre visíveis quando há múltiplas fotos */}
+      {/* Navigation Arrows */}
       {hasMultiplePhotos && (
         <>
           <Button
@@ -100,7 +144,7 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
         </>
       )}
 
-      {/* Download Button - Sempre visível quando há foto */}
+      {/* Download Button */}
       {currentPhoto && onDownloadSingle && (
         <div className="absolute top-2 right-2">
           <Tooltip>
@@ -121,18 +165,18 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
         </div>
       )}
 
-      {/* Photo Counter - Sempre visível quando há múltiplas fotos */}
+      {/* Photo Counter */}
       {hasMultiplePhotos && (
         <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full shadow-lg">
-          {currentPhotoIndex + 1} / {availablePhotos.length}
+          {currentPhotoIndex + 1} / {allPhotos.length}
         </div>
       )}
 
-      {/* Thumbnails - Sempre visíveis quando há múltiplas fotos */}
+      {/* Thumbnails */}
       {hasMultiplePhotos && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
           <VehiclePhotoThumbnails
-            photos={availablePhotos}
+            photos={allPhotos}
             vehicleName={vehicleName}
             onPhotoSelect={handleThumbnailClick}
             selectedIndex={currentPhotoIndex}
