@@ -25,6 +25,11 @@ const getVehicleUsage = (vehicle: Vehicle): string => {
     }
   }
   
+  // Check vehicleUsage field directly if available
+  if ((vehicle as any).vehicleUsage) {
+    return (vehicle as any).vehicleUsage;
+  }
+  
   // Default mapping based on category
   switch (vehicle.category) {
     case 'rental': return 'rental';
@@ -41,6 +46,12 @@ const getConsignmentStore = (vehicle: Vehicle): string => {
       return match[1];
     }
   }
+  
+  // Check consignmentStore field directly if available
+  if ((vehicle as any).consignmentStore) {
+    return (vehicle as any).consignmentStore;
+  }
+  
   return vehicle.consignmentStore || '';
 };
 
@@ -60,9 +71,13 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
   const vehicleUsage = getVehicleUsage(vehicle);
   const consignmentStore = getConsignmentStore(vehicle);
 
+  console.log('VehicleCardHeader Debug - vehicle:', vehicle);
+  console.log('VehicleCardHeader Debug - vehicleUsage:', vehicleUsage);
+  console.log('VehicleCardHeader Debug - consignmentStore:', consignmentStore);
+
   return (
     <div className="relative">
-      {/* Vehicle Usage Badge */}
+      {/* Vehicle Usage Badge - Removido o badge "À Venda" */}
       <div className="absolute top-2 left-2 z-10">
         <VehicleUsageBadge 
           usage={vehicleUsage} 

@@ -27,6 +27,11 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   // PRIORIDADE MÁXIMA: Foto do card sempre será a foto principal nos cards
   let mainPhoto: string | undefined;
   
+  console.log('VehicleMainPhoto Debug - vehicleId:', vehicleId);
+  console.log('VehicleMainPhoto Debug - cardPhoto:', cardPhoto);
+  console.log('VehicleMainPhoto Debug - newPhotos:', newPhotos);
+  console.log('VehicleMainPhoto Debug - vehiclePhotos:', vehiclePhotos);
+  
   if (vehicleId) {
     // Priority 1: Card photo (SEMPRE tem prioridade máxima)
     if (cardPhoto?.photo_url) {
@@ -58,11 +63,7 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   
   const isLoading = vehicleId ? (vehicleLoading || newPhotosUploading || cardPhotoLoading) : false;
   
-  console.log('VehicleMainPhoto - vehicleId:', vehicleId);
-  console.log('VehicleMainPhoto - cardPhoto (PRIORITY):', cardPhoto?.photo_url);
-  console.log('VehicleMainPhoto - newPhotos count:', newPhotos.length);
-  console.log('VehicleMainPhoto - vehiclePhotos count:', vehiclePhotos.length);
-  console.log('VehicleMainPhoto - selected mainPhoto:', mainPhoto);
+  console.log('VehicleMainPhoto - Final selected mainPhoto:', mainPhoto);
   
   return (
     <VehiclePhotoDisplay

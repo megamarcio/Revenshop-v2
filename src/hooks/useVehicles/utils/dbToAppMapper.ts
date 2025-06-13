@@ -102,7 +102,7 @@ export const mapDbDataToAppData = (dbData: any) => {
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at,
     
-    // Vehicle usage information
+    // Vehicle usage information - CORRIGIDO para preservar dados corretamente
     vehicleUsage: extractVehicleUsage(dbData),
     consignmentStore: extractConsignmentStore(dbData),
     
@@ -111,6 +111,8 @@ export const mapDbDataToAppData = (dbData: any) => {
     consignment_store: extractConsignmentStore(dbData),
   };
   
+  console.log('mapDbDataToAppData - output vehicleUsage:', mappedData.vehicleUsage);
+  console.log('mapDbDataToAppData - output consignmentStore:', mappedData.consignmentStore);
   console.log('mapDbDataToAppData - output:', mappedData);
   return mappedData;
 };
@@ -120,23 +122,30 @@ const extractVehicleUsage = (dbData: any): string => {
   if (dbData.description) {
     const match = dbData.description.match(/\[USAGE:([^\]]+)\]/);
     if (match) {
+      console.log('Found usage in description:', match[1]);
       return match[1];
     }
   }
   
   // Default mapping based on category
-  switch (dbData.category) {
-    case 'rental': return 'rental';
-    case 'consigned': return 'consigned';
-    case 'maintenance': return 'personal';
-    default: return 'sale';
-  }
+  const defaultMapping = (() => {
+    switch (dbData.category) {
+      case 'rental': return 'rental';
+      case 'consigned': return 'consigned';
+      case 'maintenance': return 'personal';
+      default: return 'sale';
+    }
+  })();
+  
+  console.log('Using default mapping for category', dbData.category, ':', defaultMapping);
+  return defaultMapping;
 };
 
 const extractConsignmentStore = (dbData: any): string => {
   if (dbData.description) {
     const match = dbData.description.match(/\[STORE:([^\]]+)\]/);
     if (match) {
+      console.log('Found store in description:', match[1]);
       return match[1];
     }
   }
