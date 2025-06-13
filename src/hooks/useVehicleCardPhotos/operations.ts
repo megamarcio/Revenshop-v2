@@ -23,19 +23,24 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
     console.log('📸 Dados da foto do card encontrados:', data);
     
     if (data) {
-      console.log('🔗 URL original da foto:', data.photo_url);
+      console.log('🔗 URL original da foto (RAW do banco):', data.photo_url);
       
       // Log detalhado da URL
       if (data.photo_url) {
-        console.log('📊 Análise da URL:');
+        console.log('📊 Análise detalhada da URL do banco:');
         console.log('- URL completa:', data.photo_url);
+        console.log('- Length:', data.photo_url.length);
         console.log('- Contém "supabase"?', data.photo_url.includes('supabase'));
         console.log('- Começa com "http"?', data.photo_url.startsWith('http'));
         console.log('- Começa com "vehicles-photos-new/"?', data.photo_url.startsWith('vehicles-photos-new/'));
         console.log('- Começa com "vehicle-cards/"?', data.photo_url.startsWith('vehicle-cards/'));
+        console.log('- Contém "vehicle-cards/"?', data.photo_url.includes('vehicle-cards/'));
+        
+        // Verificar se é só o nome do arquivo
+        const isJustFilename = !data.photo_url.includes('/') && (data.photo_url.includes('.png') || data.photo_url.includes('.jpg') || data.photo_url.includes('.jpeg'));
+        console.log('- É só nome do arquivo?', isJustFilename);
       }
       
-      // Não modificar a URL aqui, deixar para o componente fazer isso
       console.log('✅ Retornando dados da foto do card sem modificação');
     } else {
       console.log('ℹ️ Nenhuma foto do card encontrada para este veículo');
@@ -62,31 +67,33 @@ export const uploadCardPhotoToStorage = async (
   }
 
   try {
-    console.log('Uploading card photo for vehicle:', vehicleId);
+    console.log('Uploader da foto do card para o veículo:', vehicleId);
 
     const fileExt = file.name.split('.').pop();
     const fileName = `card-${vehicleId}-${Date.now()}.${fileExt}`;
     const filePath = `vehicle-cards/${fileName}`;
 
-    // Upload to storage - CORRIGIDO: usando vehicles-photos-new (com S)
+    console.log('📁 Caminho do arquivo no storage:', filePath);
+
+    // Upload to storage
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('vehicles-photos-new')
       .upload(filePath, file);
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
+      console.error('❌ Erro no upload:', uploadError);
       throw uploadError;
     }
 
-    console.log('File uploaded successfully:', uploadData);
+    console.log('✅ Arquivo enviado com sucesso:', uploadData);
 
-    // Get public URL - CORRIGIDO: usando vehicles-photos-new (com S)
+    // Construir URL pública - IMPORTANTE: salvar a URL COMPLETA no banco
     const publicUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${filePath}`;
-    console.log('Public URL generated:', publicUrl);
+    console.log('🔗 URL pública gerada para salvar no banco:', publicUrl);
 
     return await saveCardPhotoToDatabase(vehicleId, publicUrl);
   } catch (error) {
-    console.error('Error uploading card photo:', error);
+    console.error('❌ Erro ao fazer upload da foto do card:', error);
     toast({
       title: 'Erro',
       description: 'Erro ao fazer upload da foto do card.',
@@ -102,7 +109,7 @@ export const saveCardPhotoToDatabase = async (
   promptUsed?: string
 ): Promise<VehicleCardPhoto | null> => {
   try {
-    console.log('Saving card photo to database:', { vehicleId, photoUrl, promptUsed });
+    console.log('💾 Salvando foto do card no banco:', { vehicleId, photoUrl, promptUsed });
     
     // Remove existing card photo
     await supabase
@@ -110,26 +117,26 @@ export const saveCardPhotoToDatabase = async (
       .delete()
       .eq('vehicle_id', vehicleId);
 
-    // Save to database
+    // Save to database - salvar a URL COMPLETA
     const { data: photoData, error: dbError } = await supabase
       .from('vehicle_card_photos')
       .insert({
         vehicle_id: vehicleId,
-        photo_url: photoUrl,
+        photo_url: photoUrl, // URL completa aqui
         prompt_used: promptUsed
       })
       .select()
       .single();
 
     if (dbError) {
-      console.error('Database error:', dbError);
+      console.error('❌ Erro no banco de dados:', dbError);
       throw dbError;
     }
     
-    console.log('Card photo saved to database:', photoData);
+    console.log('✅ Foto do card salva no banco:', photoData);
     return photoData;
   } catch (error) {
-    console.error('Error saving card photo to database:', error);
+    console.error('❌ Erro ao salvar foto do card no banco:', error);
     return null;
   }
 };

@@ -41,25 +41,22 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
     );
   }
 
-  // Se a URL já é completa (tem http), usar como está
+  // NOVA LÓGICA SIMPLIFICADA: Se já é URL completa, usar como está
   let finalPhotoUrl = photoUrl;
   
   if (!photoUrl.startsWith('http')) {
-    // Para fotos de card que começam com "vehicle-cards/", manter o caminho completo
-    if (photoUrl.startsWith('vehicle-cards/')) {
-      finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${photoUrl}`;
-      console.log('🎯 URL de card construída:', finalPhotoUrl);
-    } else {
-      // Para outras fotos, remover prefixos desnecessários
-      const cleanPath = photoUrl.replace(/^vehicles-photos-new\//, '');
-      finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${cleanPath}`;
-      console.log('🔧 URL construída de:', photoUrl, 'para:', finalPhotoUrl);
-    }
+    console.log('🔧 URL não é completa, construindo...');
+    console.log('📋 URL original (não-http):', photoUrl);
+    
+    // Se não é uma URL completa, construir a URL do Supabase
+    // Não modificar o caminho, apenas adicionar o prefixo do Supabase
+    finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${photoUrl}`;
+    console.log('🎯 URL construída:', finalPhotoUrl);
   } else {
     console.log('✅ URL já completa, usando como está:', finalPhotoUrl);
   }
 
-  console.log('✅ Tentando carregar imagem final:', finalPhotoUrl);
+  console.log('🚀 Tentando carregar imagem final:', finalPhotoUrl);
 
   return (
     <div className={`relative ${className}`}>
@@ -78,8 +75,9 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
           setImageLoading(false);
         }}
         onError={(e) => {
-          console.error('❌ Falha ao carregar imagem:', finalPhotoUrl);
-          console.log('🔍 Erro completo:', e);
+          console.error('❌ FALHA ao carregar imagem:', finalPhotoUrl);
+          console.log('🔍 Detalhes do erro:', e);
+          console.log('🔍 Event target src:', (e.target as HTMLImageElement)?.src);
           setImageError(true);
           setImageLoading(false);
         }}
