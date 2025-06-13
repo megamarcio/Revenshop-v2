@@ -45,10 +45,16 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   let finalPhotoUrl = photoUrl;
   
   if (!photoUrl.startsWith('http')) {
-    // Se não tem http, construir URL completa
-    const cleanPath = photoUrl.replace(/^(vehicles-photos-new\/|vehicle-cards\/)/, '');
-    finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${cleanPath}`;
-    console.log('🔧 URL construída de:', photoUrl, 'para:', finalPhotoUrl);
+    // Para fotos de card que começam com "vehicle-cards/", manter o caminho completo
+    if (photoUrl.startsWith('vehicle-cards/')) {
+      finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${photoUrl}`;
+      console.log('🎯 URL de card construída:', finalPhotoUrl);
+    } else {
+      // Para outras fotos, remover prefixos desnecessários
+      const cleanPath = photoUrl.replace(/^vehicles-photos-new\//, '');
+      finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${cleanPath}`;
+      console.log('🔧 URL construída de:', photoUrl, 'para:', finalPhotoUrl);
+    }
   } else {
     console.log('✅ URL já completa, usando como está:', finalPhotoUrl);
   }
