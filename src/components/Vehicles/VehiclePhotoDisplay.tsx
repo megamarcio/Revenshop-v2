@@ -18,14 +18,7 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   const [imageError, setImageError] = useState(false);
   const [imageLoading, setImageLoading] = useState(true);
 
-  console.log('🖼️ VehiclePhotoDisplay recebeu:', {
-    photoUrl,
-    alt,
-    className,
-    showLoader,
-    imageError,
-    imageLoading
-  });
+  console.log('🖼️ VehiclePhotoDisplay recebeu photoUrl:', photoUrl);
 
   if (showLoader) {
     console.log('⏳ Mostrando loader...');
@@ -48,7 +41,18 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
     );
   }
 
-  console.log('✅ Tentando carregar imagem:', photoUrl);
+  // Garantir que a URL esteja correta
+  let finalPhotoUrl = photoUrl;
+  
+  // Se a URL já está completa, usar como está
+  if (!photoUrl.startsWith('http')) {
+    // Se não tem http, construir URL completa
+    const cleanPath = photoUrl.replace(/^(vehicles-photos-new\/|vehicle-cards\/)/, '');
+    finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${cleanPath}`;
+    console.log('🔧 URL corrigida de:', photoUrl, 'para:', finalPhotoUrl);
+  }
+
+  console.log('✅ Tentando carregar imagem final:', finalPhotoUrl);
 
   return (
     <div className={`relative ${className}`}>
@@ -58,17 +62,17 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
         </div>
       )}
       <img
-        src={photoUrl}
+        src={finalPhotoUrl}
         alt={alt}
         className={`object-cover w-full h-full ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
         loading="lazy"
         onLoad={() => {
-          console.log('✅ Imagem carregada com sucesso:', photoUrl);
+          console.log('✅ Imagem carregada com sucesso:', finalPhotoUrl);
           setImageLoading(false);
         }}
         onError={(e) => {
-          console.error('❌ Falha ao carregar imagem:', photoUrl, e);
-          console.log('🔍 Tentando acessar diretamente a URL:', photoUrl);
+          console.error('❌ Falha ao carregar imagem:', finalPhotoUrl);
+          console.log('🔍 Erro completo:', e);
           setImageError(true);
           setImageLoading(false);
         }}
