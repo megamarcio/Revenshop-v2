@@ -22,6 +22,16 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
     }
     
     console.log('Card photo data fetched:', data);
+    
+    // Se temos dados, garantir que a URL está correta
+    if (data && data.photo_url) {
+      // Corrigir URL se necessário
+      if (data.photo_url.startsWith('vehicles-photos-new/') || data.photo_url.startsWith('vehicle-cards/')) {
+        data.photo_url = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${data.photo_url.replace('vehicles-photos-new/', '').replace('vehicle-cards/', '')}`;
+      }
+      console.log('Corrected card photo URL:', data.photo_url);
+    }
+    
     return data;
   } catch (error) {
     console.error('Error fetching card photo:', error);
@@ -61,11 +71,8 @@ export const uploadCardPhotoToStorage = async (
 
     console.log('File uploaded successfully:', uploadData);
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
-      .from('vehicles-photos-new')
-      .getPublicUrl(filePath);
-
+    // Get public URL - usando a estrutura correta
+    const publicUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${filePath}`;
     console.log('Public URL generated:', publicUrl);
 
     return await saveCardPhotoToDatabase(vehicleId, publicUrl);

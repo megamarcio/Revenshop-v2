@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Image as ImageIcon, Loader2 } from 'lucide-react';
 
 interface VehiclePhotoDisplayProps {
@@ -15,6 +15,9 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   className = '',
   showLoader = false
 }) => {
+  const [imageError, setImageError] = useState(false);
+  const [imageLoading, setImageLoading] = useState(true);
+
   if (showLoader) {
     return (
       <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
@@ -23,7 +26,7 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
     );
   }
 
-  if (!photoUrl) {
+  if (!photoUrl || imageError) {
     return (
       <div className={`bg-gray-200 flex items-center justify-center ${className}`}>
         <div className="text-center">
@@ -35,12 +38,28 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
   }
 
   return (
-    <img
-      src={photoUrl}
-      alt={alt}
-      className={`object-cover ${className}`}
-      loading="lazy"
-    />
+    <div className={`relative ${className}`}>
+      {imageLoading && (
+        <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 text-gray-400 animate-spin" />
+        </div>
+      )}
+      <img
+        src={photoUrl}
+        alt={alt}
+        className={`object-cover w-full h-full ${imageLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+        loading="lazy"
+        onLoad={() => {
+          console.log('Image loaded successfully:', photoUrl);
+          setImageLoading(false);
+        }}
+        onError={(e) => {
+          console.error('Image failed to load:', photoUrl, e);
+          setImageError(true);
+          setImageLoading(false);
+        }}
+      />
+    </div>
   );
 };
 

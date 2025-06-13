@@ -33,10 +33,15 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   console.log('VehicleMainPhoto Debug - vehiclePhotos:', vehiclePhotos);
   
   if (vehicleId) {
-    // Priority 1: Card photo (SEMPRE tem prioridade máxima)
+    // Priority 1: Card photo (SEMPRE tem prioridade máxima) - CORRIGINDO URL
     if (cardPhoto?.photo_url) {
       console.log('Using card photo as main (PRIORITY):', cardPhoto.photo_url);
-      mainPhoto = cardPhoto.photo_url;
+      // Garantir que a URL está correta - remover qualquer duplicação de domínio
+      let photoUrl = cardPhoto.photo_url;
+      if (photoUrl.includes('supabase') && !photoUrl.startsWith('http')) {
+        photoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/${photoUrl}`;
+      }
+      mainPhoto = photoUrl;
     }
     // Priority 2: Check for main photo in new photos
     else if (newPhotos.length > 0) {
@@ -61,9 +66,11 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
     console.log('Using fallback photo:', mainPhoto);
   }
   
+  // Se ainda não temos foto mas não estamos carregando, forçar uma nova busca
   const isLoading = vehicleId ? (vehicleLoading || newPhotosUploading || cardPhotoLoading) : false;
   
   console.log('VehicleMainPhoto - Final selected mainPhoto:', mainPhoto);
+  console.log('VehicleMainPhoto - isLoading:', isLoading);
   
   return (
     <VehiclePhotoDisplay
