@@ -39,20 +39,10 @@ export const mapFormToDbData = (formData: any) => {
     title_location_id: formData.titleLocationId || null,
     title_location_custom: formData.titleLocationCustom || null,
     
-    // Sale information
+    // Basic vehicle information - only fields that exist in vehicles table
     created_by: formData.seller || null,
-    final_sale_price: formData.finalSalePrice ? parseFloat(formData.finalSalePrice) : null,
-    sale_date: formData.saleDate || null,
-    sale_notes: formData.saleNotes || null,
-    customer_name: formData.customerName || null,
-    customer_phone: formData.customerPhone || null,
-    payment_method: formData.paymentMethod || null,
-    financing_company: formData.financingCompany || null,
-    check_details: formData.checkDetails || null,
-    other_payment_details: formData.otherPaymentDetails || null,
-    seller_commission: formData.sellerCommission ? parseFloat(formData.sellerCommission) : null,
     
-    // Financing information
+    // Financing information - these exist in vehicles table
     financing_bank: formData.financingBank || null,
     financing_type: formData.financingType || null,
     original_financed_name: formData.originalFinancedName || null,
