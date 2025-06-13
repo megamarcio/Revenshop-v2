@@ -68,7 +68,7 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
 
   return (
     <div className={`relative group ${className}`}>
-      {/* Foto Principal - AQUI ESTÁ O COMPONENTE QUE DEVE MOSTRAR A FOTO! */}
+      {/* Foto Principal */}
       <VehicleMainPhoto
         vehicleId={vehicleId}
         fallbackPhotos={[currentPhoto].filter(Boolean)}
@@ -77,41 +77,41 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
         showLoader={false}
       />
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Sempre visíveis quando há múltiplas fotos */}
       {hasMultiplePhotos && (
         <>
           <Button
             variant="secondary"
             size="sm"
             onClick={handlePrevious}
-            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 p-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white border-0 p-2 h-10 w-10 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
           >
-            <ChevronLeft className="h-4 w-4" />
+            <ChevronLeft className="h-5 w-5" />
           </Button>
           
           <Button
             variant="secondary"
             size="sm"
             onClick={handleNext}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white border-0 p-1 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-black/70 hover:bg-black/90 text-white border-0 p-2 h-10 w-10 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
           >
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-5 w-5" />
           </Button>
         </>
       )}
 
-      {/* Download Button */}
+      {/* Download Button - Sempre visível quando há foto */}
       {currentPhoto && onDownloadSingle && (
-        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={handleDownload}
-                className="bg-black/50 hover:bg-black/70 text-white border-0 p-1 h-7 w-7"
+                className="bg-blue-600 hover:bg-blue-700 text-white border-0 p-2 h-9 w-9 rounded-full shadow-lg transition-all duration-200 hover:scale-110"
               >
-                <Download className="h-3 w-3" />
+                <Download className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -121,23 +121,23 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
         </div>
       )}
 
-      {/* Photo Counter */}
+      {/* Photo Counter - Sempre visível quando há múltiplas fotos */}
       {hasMultiplePhotos && (
-        <div className="absolute bottom-2 left-2 bg-black/50 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full shadow-lg">
           {currentPhotoIndex + 1} / {availablePhotos.length}
         </div>
       )}
 
-      {/* Thumbnails */}
+      {/* Thumbnails - Sempre visíveis quando há múltiplas fotos */}
       {hasMultiplePhotos && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
           <VehiclePhotoThumbnails
             photos={availablePhotos}
             vehicleName={vehicleName}
             onPhotoSelect={handleThumbnailClick}
             selectedIndex={currentPhotoIndex}
             maxThumbnails={5}
-            className="bg-black/20 p-2 rounded"
+            className="bg-black/50 p-3 rounded-xl backdrop-blur-sm shadow-lg"
           />
         </div>
       )}
