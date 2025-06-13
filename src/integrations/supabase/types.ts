@@ -847,6 +847,41 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicle_card_photos: {
+        Row: {
+          created_at: string | null
+          id: string
+          photo_url: string
+          prompt_used: string | null
+          updated_at: string | null
+          vehicle_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          photo_url: string
+          prompt_used?: string | null
+          updated_at?: string | null
+          vehicle_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          photo_url?: string
+          prompt_used?: string | null
+          updated_at?: string | null
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_card_photos_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicle_photos: {
         Row: {
           id: string

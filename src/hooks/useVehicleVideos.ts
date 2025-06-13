@@ -124,7 +124,7 @@ export const useVehicleVideos = (vehicleId?: string) => {
             .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
             .replace(/\[COR\]/g, vehicleData.color || '')
             .replace(/\[CATEGORIA\]/g, vehicleData.category || '')
-        : `Criar um vídeo promocional profissional para o veículo ${vehicleData.name} ${vehicleData.model} ${vehicleData.year} ${vehicleData.color}. Mostrar o veículo em movimento, destacando suas características principais.`;
+        : `Criar um vídeo promocional profissional para o veículo ${vehicleData.name} ${vehicleData.model || ''} ${vehicleData.year || ''} ${vehicleData.color || ''}. Mostrar o veículo em movimento, destacando suas características principais.`;
 
       console.log('Generating video with Gemini Veo3, prompt:', prompt);
 

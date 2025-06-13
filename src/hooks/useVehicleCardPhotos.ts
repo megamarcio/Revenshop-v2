@@ -28,9 +28,14 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
 
     setLoading(true);
     try {
-      // Por enquanto simular uma foto do card
-      console.log('Card photo fetch for vehicle:', vehicleId);
-      setCardPhoto(null);
+      const { data, error } = await supabase
+        .from('vehicle_card_photos')
+        .select('*')
+        .eq('vehicle_id', vehicleId)
+        .maybeSingle();
+
+      if (error) throw error;
+      setCardPhoto(data);
     } catch (error) {
       console.error('Error fetching card photo:', error);
       setCardPhoto(null);
@@ -71,22 +76,34 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
         .from('vehicles-photos-new')
         .getPublicUrl(filePath);
 
-      const mockPhoto: VehicleCardPhoto = {
-        id: `card-${Date.now()}`,
-        vehicle_id: vehicleId,
-        photo_url: publicUrl,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
+      // Remove existing card photo
+      if (cardPhoto) {
+        await supabase
+          .from('vehicle_card_photos')
+          .delete()
+          .eq('vehicle_id', vehicleId);
+      }
 
-      setCardPhoto(mockPhoto);
+      // Save to database
+      const { data: photoData, error: dbError } = await supabase
+        .from('vehicle_card_photos')
+        .insert({
+          vehicle_id: vehicleId,
+          photo_url: publicUrl
+        })
+        .select()
+        .single();
+
+      if (dbError) throw dbError;
+
+      setCardPhoto(photoData);
 
       toast({
         title: 'Sucesso',
         description: 'Foto do card enviada com sucesso.',
       });
 
-      return mockPhoto;
+      return photoData;
     } catch (error) {
       console.error('Error uploading card photo:', error);
       toast({
@@ -114,7 +131,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
             .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
             .replace(/\[COR\]/g, vehicleData.color || '')
             .replace(/\[CATEGORIA\]/g, vehicleData.category || '')
-        : `Criar uma imagem profissional e atrativa para o card de um veículo ${vehicleData.name} ${vehicleData.model} ${vehicleData.year} ${vehicleData.color}. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo.`;
+        : `Criar uma imagem profissional e atrativa para o card de um veículo ${vehicleData.name} ${vehicleData.model || ''} ${vehicleData.year || ''} ${vehicleData.color || ''}. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo.`;
 
       console.log('Final prompt for card photo:', prompt);
 
@@ -129,28 +146,40 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
       if (error) throw error;
 
       if (data?.imageUrl) {
-        const mockPhoto: VehicleCardPhoto = {
-          id: `generated-card-${Date.now()}`,
-          vehicle_id: vehicleId,
-          photo_url: data.imageUrl,
-          prompt_used: prompt,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+        // Remove existing card photo
+        if (cardPhoto) {
+          await supabase
+            .from('vehicle_card_photos')
+            .delete()
+            .eq('vehicle_id', vehicleId);
+        }
 
-        setCardPhoto(mockPhoto);
+        // Save to database
+        const { data: photoData, error: dbError } = await supabase
+          .from('vehicle_card_photos')
+          .insert({
+            vehicle_id: vehicleId,
+            photo_url: data.imageUrl,
+            prompt_used: prompt
+          })
+          .select()
+          .single();
+
+        if (dbError) throw dbError;
+
+        setCardPhoto(photoData);
 
         toast({
           title: 'Sucesso',
           description: 'Foto do card gerada com IA com sucesso.',
         });
 
-        return mockPhoto;
+        return photoData;
       }
 
       toast({
         title: 'Info',
-        description: 'Geração de imagem do card será implementada em breve.',
+        description: 'Geração de imagem do card iniciada. Aguarde alguns momentos.',
       });
 
       return null;
@@ -168,11 +197,29 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   };
 
   const removeCardPhoto = async () => {
-    setCardPhoto(null);
-    toast({
-      title: 'Sucesso',
-      description: 'Foto do card removida.',
-    });
+    if (!vehicleId || !cardPhoto) return;
+
+    try {
+      const { error } = await supabase
+        .from('vehicle_card_photos')
+        .delete()
+        .eq('vehicle_id', vehicleId);
+
+      if (error) throw error;
+
+      setCardPhoto(null);
+      toast({
+        title: 'Sucesso',
+        description: 'Foto do card removida.',
+      });
+    } catch (error) {
+      console.error('Error removing card photo:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao remover foto do card.',
+        variant: 'destructive',
+      });
+    }
   };
 
   useEffect(() => {
