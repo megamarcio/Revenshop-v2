@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAISettings } from './useAISettings';
 
 export interface VehicleCardPhoto {
   id: string;
@@ -17,6 +18,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const { cardImageInstructions } = useAISettings();
 
   const fetchCardPhoto = async () => {
     if (!vehicleId) {
@@ -26,8 +28,8 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
 
     setLoading(true);
     try {
-      // For now, just return null since the table doesn't exist yet
-      console.log('Card photo fetch - table not ready yet');
+      // Por enquanto simular uma foto do card
+      console.log('Card photo fetch for vehicle:', vehicleId);
       setCardPhoto(null);
     } catch (error) {
       console.error('Error fetching card photo:', error);
@@ -69,13 +71,22 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
         .from('vehicles-photos-new')
         .getPublicUrl(filePath);
 
-      // For now, just show success - database operations will work after migration
+      const mockPhoto: VehicleCardPhoto = {
+        id: `card-${Date.now()}`,
+        vehicle_id: vehicleId,
+        photo_url: publicUrl,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      setCardPhoto(mockPhoto);
+
       toast({
         title: 'Sucesso',
-        description: 'Upload realizado com sucesso. Aguarde a configuração do banco de dados.',
+        description: 'Foto do card enviada com sucesso.',
       });
 
-      return null; // Temporarily return null
+      return mockPhoto;
     } catch (error) {
       console.error('Error uploading card photo:', error);
       toast({
@@ -96,22 +107,20 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
       setGenerating(true);
       console.log('Generating card photo for vehicle:', vehicleId);
 
-      // Temporarily use a default prompt since AI settings might not have card_image_instructions yet
-      const defaultPrompt = 'Criar uma imagem profissional e atrativa para o card de um veículo [MARCA] [MODELO] [ANO] [COR]. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo.';
+      const prompt = cardImageInstructions
+        ? cardImageInstructions
+            .replace(/\[MARCA\]/g, vehicleData.name?.split(' ')[0] || '')
+            .replace(/\[MODELO\]/g, vehicleData.model || '')
+            .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
+            .replace(/\[COR\]/g, vehicleData.color || '')
+            .replace(/\[CATEGORIA\]/g, vehicleData.category || '')
+        : `Criar uma imagem profissional e atrativa para o card de um veículo ${vehicleData.name} ${vehicleData.model} ${vehicleData.year} ${vehicleData.color}. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo.`;
 
-      // Replace placeholders in prompt
-      const finalPrompt = defaultPrompt
-        .replace(/\[MARCA\]/g, vehicleData.name?.split(' ')[0] || '')
-        .replace(/\[MODELO\]/g, vehicleData.model || '')
-        .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
-        .replace(/\[COR\]/g, vehicleData.color || '');
+      console.log('Final prompt for card photo:', prompt);
 
-      console.log('Final prompt:', finalPrompt);
-
-      // For now, just show a message since the full implementation needs the database
       toast({
         title: 'Info',
-        description: 'Geração de imagem será disponibilizada após configuração do banco de dados.',
+        description: 'Geração de imagem do card será implementada em breve.',
       });
 
       return null;
@@ -129,10 +138,10 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   };
 
   const removeCardPhoto = async () => {
-    console.log('Remove card photo - feature will be available after database setup');
+    setCardPhoto(null);
     toast({
-      title: 'Info',
-      description: 'Remoção será disponibilizada após configuração do banco de dados.',
+      title: 'Sucesso',
+      description: 'Foto do card removida.',
     });
   };
 

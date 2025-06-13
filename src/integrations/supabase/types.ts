@@ -11,6 +11,7 @@ export type Database = {
     Tables: {
       ai_settings: {
         Row: {
+          card_image_instructions: string | null
           created_at: string
           description_instructions: string | null
           gemini_key: string | null
@@ -20,6 +21,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          card_image_instructions?: string | null
           created_at?: string
           description_instructions?: string | null
           gemini_key?: string | null
@@ -29,6 +31,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          card_image_instructions?: string | null
           created_at?: string
           description_instructions?: string | null
           gemini_key?: string | null
@@ -873,6 +876,50 @@ export type Database = {
           },
         ]
       }
+      vehicle_videos: {
+        Row: {
+          created_at: string
+          file_name: string | null
+          file_size: number | null
+          id: string
+          is_main: boolean | null
+          prompt_used: string | null
+          updated_at: string
+          vehicle_id: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          is_main?: boolean | null
+          prompt_used?: string | null
+          updated_at?: string
+          vehicle_id: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          is_main?: boolean | null
+          prompt_used?: string | null
+          updated_at?: string
+          vehicle_id?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_videos_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vehicles: {
         Row: {
           carfax_price: number | null
@@ -1058,6 +1105,7 @@ export type Database = {
         Returns: {
           image_instructions: string
           description_instructions: string
+          card_image_instructions: string
           openai_key: string
           gemini_key: string
         }[]
@@ -1074,6 +1122,7 @@ export type Database = {
         Args: {
           p_image_instructions: string
           p_description_instructions: string
+          p_card_image_instructions?: string
           p_openai_key?: string
           p_gemini_key?: string
         }

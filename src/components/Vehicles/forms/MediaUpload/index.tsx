@@ -2,6 +2,7 @@
 import React from 'react';
 import NewPhotosSection from './NewPhotosSection';
 import CardPhotoSection from './CardPhotoSection';
+import VideoSection from './VideoSection';
 
 interface MediaUploadFormProps {
   vehicleId?: string;
@@ -23,12 +24,20 @@ const MediaUploadForm = ({
   readOnly = false 
 }: MediaUploadFormProps) => {
   return (
-    <div className="space-y-8">
-      <CardPhotoSection
-        vehicleId={vehicleId}
-        vehicleData={vehicleData}
-        readOnly={readOnly}
-      />
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <CardPhotoSection
+          vehicleId={vehicleId}
+          vehicleData={vehicleData}
+          readOnly={readOnly}
+        />
+        
+        <VideoSection
+          vehicleId={vehicleId}
+          vehicleData={vehicleData}
+          readOnly={readOnly}
+        />
+      </div>
       
       <NewPhotosSection
         vehicleId={vehicleId}

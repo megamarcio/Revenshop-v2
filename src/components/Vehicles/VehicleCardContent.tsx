@@ -1,65 +1,102 @@
 
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Vehicle } from './VehicleCardTypes';
 
 interface VehicleCardContentProps {
   vehicle: Vehicle;
-  formatCurrency: (value: number) => string;
+  formatCurrency: (amount: number) => string;
   isInternalSeller: boolean;
   showMinNegotiable: boolean;
-  minNegotiable: number;
+  minNegotiable?: number;
 }
 
-const VehicleCardContent = ({ 
-  vehicle, 
-  formatCurrency, 
-  isInternalSeller, 
-  showMinNegotiable, 
-  minNegotiable 
+const VehicleCardContent = ({
+  vehicle,
+  formatCurrency,
+  isInternalSeller,
+  showMinNegotiable,
+  minNegotiable
 }: VehicleCardContentProps) => {
+  const getCategoryLabel = (category: string) => {
+    switch (category) {
+      case 'forSale': return 'À Venda';
+      case 'sold': return 'Vendido';
+      case 'rental': return 'Aluguel';
+      case 'maintenance': return 'Manutenção';
+      case 'consigned': return 'Consignado';
+      default: return category;
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'forSale': return 'bg-green-100 text-green-800';
+      case 'sold': return 'bg-blue-100 text-blue-800';
+      case 'rental': return 'bg-purple-100 text-purple-800';
+      case 'maintenance': return 'bg-orange-100 text-orange-800';
+      case 'consigned': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   return (
-    <div className="space-y-2">
-      <div className="text-center">
-        <h3 className="text-[11px] font-bold text-gray-900 leading-tight mb-0.5">
-          {vehicle.internalCode} - {vehicle.name}
+    <>
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="font-bold text-sm text-gray-900 leading-tight truncate flex-1 mr-2">
+          {vehicle.name}
         </h3>
-        <p className="text-xs text-gray-600">{vehicle.year} • {vehicle.color}</p>
+        <Badge className={`text-xs px-2 py-1 ${getCategoryColor(vehicle.category)}`}>
+          {getCategoryLabel(vehicle.category)}
+        </Badge>
       </div>
 
-      <div className="bg-gray-50 p-1.5 rounded text-center">
-        <span className="text-[11px] text-gray-500 font-bold tracking-wide block">
-          VIN: {vehicle.vin}
-        </span>
-        <span className="text-[11px] text-gray-600 mt-1 block font-bold">
-          Milhas: {vehicle.miles?.toLocaleString() || 'N/A'}
-        </span>
-      </div>
-
-      <div className="bg-green-50 p-2 rounded border border-green-200">
-        <span className="text-xs text-green-600 block text-center">Preço de Venda:</span>
-        <p className="text-sm font-bold text-green-700 text-center">{formatCurrency(vehicle.salePrice)}</p>
-      </div>
-
-      {isInternalSeller && showMinNegotiable && (
-        <div className="bg-yellow-50 p-2 rounded border border-yellow-200">
-          <p className="text-sm font-bold text-yellow-700 text-center">
-            {formatCurrency(minNegotiable)}
-          </p>
+      <div className="space-y-1 text-xs text-gray-600">
+        <div className="flex justify-between">
+          <span>Ano:</span>
+          <span className="font-medium">{vehicle.year}</span>
         </div>
-      )}
-
-      {vehicle.category === 'sold' && vehicle.seller && (
-        <div className="bg-gray-50 p-2 rounded text-center border-t">
-          <div className="text-xs text-gray-500 mb-1">Vendido por:</div>
-          <div className="text-xs font-medium text-gray-700">{vehicle.seller}</div>
-          {vehicle.finalSalePrice && (
-            <div className="text-xs font-semibold text-green-600 mt-1">
-              {formatCurrency(vehicle.finalSalePrice)}
-            </div>
-          )}
+        <div className="flex justify-between">
+          <span>Milhas:</span>
+          <span className="font-medium">{Math.floor(vehicle.miles || 0).toLocaleString()}</span>
         </div>
-      )}
-    </div>
+        <div className="flex justify-between">
+          <span>Código:</span>
+          <span className="font-medium">{vehicle.internalCode}</span>
+        </div>
+        <div className="flex justify-between">
+          <span>Cor:</span>
+          <span className="font-medium">{vehicle.color}</span>
+        </div>
+      </div>
+
+      <div className="pt-2 border-t space-y-1">
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-600">Preço de Venda:</span>
+          <span className="font-bold text-sm text-green-600">
+            {formatCurrency(vehicle.salePrice)}
+          </span>
+        </div>
+        
+        {isInternalSeller && vehicle.profitMargin && (
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">Margem:</span>
+            <span className="text-xs font-medium text-blue-600">
+              {vehicle.profitMargin.toFixed(1)}%
+            </span>
+          </div>
+        )}
+
+        {showMinNegotiable && minNegotiable && (
+          <div className="flex justify-between items-center">
+            <span className="text-xs text-gray-600">Mín. Negociável:</span>
+            <span className="text-xs font-medium text-orange-600">
+              {formatCurrency(minNegotiable)}
+            </span>
+          </div>
+        )}
+      </div>
+    </>
   );
 };
 

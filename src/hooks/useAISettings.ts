@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -22,9 +23,7 @@ export const useAISettings = () => {
         const settings = data[0];
         setImageInstructions(settings.image_instructions || '');
         setDescriptionInstructions(settings.description_instructions || '');
-        // Keep commented out until database migration is applied
-        // setCardImageInstructions(settings.card_image_instructions || '');
-        setCardImageInstructions('');
+        setCardImageInstructions(settings.card_image_instructions || '');
       }
     } catch (error) {
       console.error('Error loading AI settings:', error);
@@ -40,8 +39,7 @@ export const useAISettings = () => {
       const { error } = await supabase.rpc('save_ai_settings', {
         p_image_instructions: imageInstructions,
         p_description_instructions: descriptionInstructions,
-        // Keep commented out until database migration is applied
-        // p_card_image_instructions: cardImageInstructions,
+        p_card_image_instructions: cardImageInstructions,
       });
 
       if (error) {
