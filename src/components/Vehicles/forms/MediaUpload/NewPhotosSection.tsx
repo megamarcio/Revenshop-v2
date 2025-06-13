@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, X, Loader2, Image, Star } from 'lucide-react';
@@ -73,6 +74,7 @@ const NewPhotosSection = ({
 
   const handleSetMainPhoto = async (photoName: string) => {
     if (!canEdit) return;
+    console.log('Setting main photo:', photoName);
     await setMainPhoto(photoName);
   };
 
@@ -113,7 +115,7 @@ const NewPhotosSection = ({
                   onClick={() => handleSetMainPhoto(photo.name)}
                   className={`rounded-full p-1 transition-all ${
                     photo.is_main 
-                      ? 'bg-yellow-500 text-white' 
+                      ? 'bg-yellow-500 text-white shadow-lg' 
                       : 'bg-black/50 text-white hover:bg-yellow-500'
                   }`}
                   title={photo.is_main ? 'Foto principal' : 'Marcar como principal'}
@@ -129,7 +131,7 @@ const NewPhotosSection = ({
                 <button
                   type="button"
                   onClick={() => removePhotoHandler(photo.name)}
-                  className="bg-red-500 text-white rounded-full p-1"
+                  className="bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
                 >
                   <X className="h-3 w-3" />
                 </button>

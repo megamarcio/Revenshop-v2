@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -104,6 +105,11 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
 
       setPhotos(prev => [...prev, newPhoto]);
       
+      // Trigger update event for other components
+      window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+        detail: { vehicleId, type: 'new' } 
+      }));
+      
       toast({
         title: 'Sucesso',
         description: 'Foto adicionada com sucesso.',
@@ -137,6 +143,11 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
 
       setPhotos(prev => prev.filter(photo => photo.name !== photoName));
       
+      // Trigger update event for other components
+      window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+        detail: { vehicleId, type: 'new' } 
+      }));
+      
       toast({
         title: 'Sucesso',
         description: 'Foto removida com sucesso.',
@@ -157,6 +168,11 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
       is_main: photo.name === photoName
     })));
     
+    // Trigger update event for other components
+    window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
+      detail: { vehicleId, type: 'new' } 
+    }));
+    
     toast({
       title: 'Sucesso',
       description: 'Foto principal definida.',
@@ -165,6 +181,18 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
 
   useEffect(() => {
     fetchPhotos();
+  }, [vehicleId]);
+
+  // Listen for photo updates
+  useEffect(() => {
+    const handlePhotosUpdate = (event: any) => {
+      if (event.detail.vehicleId === vehicleId) {
+        fetchPhotos();
+      }
+    };
+
+    window.addEventListener('vehiclePhotosUpdated', handlePhotosUpdate);
+    return () => window.removeEventListener('vehiclePhotosUpdated', handlePhotosUpdate);
   }, [vehicleId]);
 
   return {
