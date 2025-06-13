@@ -31,7 +31,7 @@ export const fetchCardPhoto = async (vehicleId?: string): Promise<VehicleCardPho
         console.log('- URL completa:', data.photo_url);
         console.log('- Contém "supabase"?', data.photo_url.includes('supabase'));
         console.log('- Começa com "http"?', data.photo_url.startsWith('http'));
-        console.log('- Começa com "vehicles-photos-new/"?', data.photo_url.startsWith('vehicles-photos-new/'));
+        console.log('- Começa com "vehicle-photos-new/"?', data.photo_url.startsWith('vehicle-photos-new/'));
         console.log('- Começa com "vehicle-cards/"?', data.photo_url.startsWith('vehicle-cards/'));
       }
       
@@ -68,9 +68,9 @@ export const uploadCardPhotoToStorage = async (
     const fileName = `card-${vehicleId}-${Date.now()}.${fileExt}`;
     const filePath = `vehicle-cards/${fileName}`;
 
-    // Upload to storage
+    // Upload to storage - CORRIGIDO: usando vehicle-photos-new
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('vehicles-photos-new')
+      .from('vehicle-photos-new')
       .upload(filePath, file);
 
     if (uploadError) {
@@ -80,8 +80,8 @@ export const uploadCardPhotoToStorage = async (
 
     console.log('File uploaded successfully:', uploadData);
 
-    // Get public URL - usando a estrutura correta
-    const publicUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${filePath}`;
+    // Get public URL - CORRIGIDO: usando vehicle-photos-new
+    const publicUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicle-photos-new/${filePath}`;
     console.log('Public URL generated:', publicUrl);
 
     return await saveCardPhotoToDatabase(vehicleId, publicUrl);
