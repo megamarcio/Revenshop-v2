@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { NewVehiclePhoto } from './useNewVehiclePhotos/types';
+import { type NewVehiclePhoto } from './useNewVehiclePhotos/types';
 import { 
   fetchNewVehiclePhotos, 
   uploadNewVehiclePhoto, 
@@ -14,7 +13,7 @@ import {
   triggerPhotoUpdateEvent 
 } from './useNewVehiclePhotos/utils';
 
-export { NewVehiclePhoto };
+export type { NewVehiclePhoto };
 
 export const useNewVehiclePhotos = (vehicleId?: string) => {
   const [photos, setPhotos] = useState<NewVehiclePhoto[]>([]);

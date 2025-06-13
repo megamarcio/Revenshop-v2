@@ -26,18 +26,9 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
 
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('vehicle_card_photos')
-        .select('*')
-        .eq('vehicle_id', vehicleId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching card photo:', error);
-        setCardPhoto(null);
-      } else {
-        setCardPhoto(data || null);
-      }
+      // For now, just return null since the table doesn't exist yet
+      console.log('Card photo fetch - table not ready yet');
+      setCardPhoto(null);
     } catch (error) {
       console.error('Error fetching card photo:', error);
       setCardPhoto(null);
@@ -78,31 +69,13 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
         .from('vehicles-photos-new')
         .getPublicUrl(filePath);
 
-      // Remove existing card photo if any
-      if (cardPhoto) {
-        await removeCardPhoto();
-      }
-
-      // Save to database
-      const { data: photoData, error: dbError } = await supabase
-        .from('vehicle_card_photos')
-        .insert({
-          vehicle_id: vehicleId,
-          photo_url: publicUrl
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      setCardPhoto(photoData);
-      
+      // For now, just show success - database operations will work after migration
       toast({
         title: 'Sucesso',
-        description: 'Foto do card atualizada com sucesso.',
+        description: 'Upload realizado com sucesso. Aguarde a configuração do banco de dados.',
       });
 
-      return photoData;
+      return null; // Temporarily return null
     } catch (error) {
       console.error('Error uploading card photo:', error);
       toast({
@@ -123,80 +96,25 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
       setGenerating(true);
       console.log('Generating card photo for vehicle:', vehicleId);
 
-      // Get AI settings for card prompt
-      const { data: aiSettings } = await supabase.rpc('get_ai_settings');
-      const cardPrompt = aiSettings?.[0]?.card_image_instructions || 
-        'Criar uma imagem profissional e atrativa para o card de um veículo [MARCA] [MODELO] [ANO] [COR]. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo.';
+      // Temporarily use a default prompt since AI settings might not have card_image_instructions yet
+      const defaultPrompt = 'Criar uma imagem profissional e atrativa para o card de um veículo [MARCA] [MODELO] [ANO] [COR]. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo.';
 
       // Replace placeholders in prompt
-      const finalPrompt = cardPrompt
+      const finalPrompt = defaultPrompt
         .replace(/\[MARCA\]/g, vehicleData.name?.split(' ')[0] || '')
         .replace(/\[MODELO\]/g, vehicleData.model || '')
         .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
         .replace(/\[COR\]/g, vehicleData.color || '');
 
-      // Call edge function to generate image
-      const { data: imageData, error: imageError } = await supabase.functions.invoke('generate-image', {
-        body: { 
-          prompt: finalPrompt,
-          vehicleData,
-          imageSize: '1024x1024'
-        }
-      });
+      console.log('Final prompt:', finalPrompt);
 
-      if (imageError) throw imageError;
-
-      // Convert base64 to blob and upload
-      const base64Data = imageData.imageUrl.split(',')[1];
-      const byteCharacters = atob(base64Data);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'image/png' });
-
-      const fileName = `card-ai-${vehicleId}-${Date.now()}.png`;
-      const filePath = `vehicle-cards/${fileName}`;
-
-      // Upload generated image
-      const { error: uploadError } = await supabase.storage
-        .from('vehicles-photos-new')
-        .upload(filePath, blob);
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('vehicles-photos-new')
-        .getPublicUrl(filePath);
-
-      // Remove existing card photo if any
-      if (cardPhoto) {
-        await removeCardPhoto();
-      }
-
-      // Save to database
-      const { data: photoData, error: dbError } = await supabase
-        .from('vehicle_card_photos')
-        .insert({
-          vehicle_id: vehicleId,
-          photo_url: publicUrl,
-          prompt_used: finalPrompt
-        })
-        .select()
-        .single();
-
-      if (dbError) throw dbError;
-
-      setCardPhoto(photoData);
-      
+      // For now, just show a message since the full implementation needs the database
       toast({
-        title: 'Sucesso',
-        description: 'Foto do card gerada com sucesso pela IA.',
+        title: 'Info',
+        description: 'Geração de imagem será disponibilizada após configuração do banco de dados.',
       });
 
-      return photoData;
+      return null;
     } catch (error) {
       console.error('Error generating card photo:', error);
       toast({
@@ -211,45 +129,11 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
   };
 
   const removeCardPhoto = async () => {
-    if (!cardPhoto) return;
-
-    try {
-      // Extract file path from URL for storage deletion
-      const url = new URL(cardPhoto.photo_url);
-      const pathSegments = url.pathname.split('/');
-      const bucketIndex = pathSegments.findIndex(segment => segment === 'vehicles-photos-new');
-      
-      if (bucketIndex !== -1 && bucketIndex < pathSegments.length - 1) {
-        const storagePath = pathSegments.slice(bucketIndex + 1).join('/');
-        
-        // Remove from storage
-        await supabase.storage
-          .from('vehicles-photos-new')
-          .remove([storagePath]);
-      }
-
-      // Remove from database
-      const { error } = await supabase
-        .from('vehicle_card_photos')
-        .delete()
-        .eq('id', cardPhoto.id);
-
-      if (error) throw error;
-
-      setCardPhoto(null);
-      
-      toast({
-        title: 'Sucesso',
-        description: 'Foto do card removida com sucesso.',
-      });
-    } catch (error) {
-      console.error('Error removing card photo:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao remover foto do card.',
-        variant: 'destructive',
-      });
-    }
+    console.log('Remove card photo - feature will be available after database setup');
+    toast({
+      title: 'Info',
+      description: 'Remoção será disponibilizada após configuração do banco de dados.',
+    });
   };
 
   useEffect(() => {
