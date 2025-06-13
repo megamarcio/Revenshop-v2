@@ -6,8 +6,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 import { useNewVehiclePhotos } from '@/hooks/useNewVehiclePhotos';
 import { useVehicleCardPhotos } from '@/hooks/useVehicleCardPhotos';
-import VehicleMainPhoto from './VehicleMainPhoto';
-import VehiclePhotoThumbnails from './VehiclePhotoThumbnails';
 
 interface VehiclePhotoViewerProps {
   vehicleId?: string;
@@ -90,10 +88,6 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
     }
   };
 
-  const handleThumbnailClick = (index: number) => {
-    setCurrentPhotoIndex(index);
-  };
-
   const handleDownload = () => {
     if (currentPhoto && onDownloadSingle) {
       onDownloadSingle(currentPhoto, currentPhotoIndex);
@@ -169,20 +163,6 @@ const VehiclePhotoViewer: React.FC<VehiclePhotoViewerProps> = ({
       {hasMultiplePhotos && (
         <div className="absolute bottom-2 left-2 bg-black/70 text-white text-sm px-3 py-1 rounded-full shadow-lg">
           {currentPhotoIndex + 1} / {allPhotos.length}
-        </div>
-      )}
-
-      {/* Thumbnails */}
-      {hasMultiplePhotos && (
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
-          <VehiclePhotoThumbnails
-            photos={allPhotos}
-            vehicleName={vehicleName}
-            onPhotoSelect={handleThumbnailClick}
-            selectedIndex={currentPhotoIndex}
-            maxThumbnails={5}
-            className="bg-black/50 p-3 rounded-xl backdrop-blur-sm shadow-lg"
-          />
         </div>
       )}
     </div>
