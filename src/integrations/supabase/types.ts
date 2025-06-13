@@ -19,6 +19,7 @@ export type Database = {
           image_instructions: string | null
           openai_key: string | null
           updated_at: string
+          video_instructions: string | null
         }
         Insert: {
           card_image_instructions?: string | null
@@ -29,6 +30,7 @@ export type Database = {
           image_instructions?: string | null
           openai_key?: string | null
           updated_at?: string
+          video_instructions?: string | null
         }
         Update: {
           card_image_instructions?: string | null
@@ -39,6 +41,7 @@ export type Database = {
           image_instructions?: string | null
           openai_key?: string | null
           updated_at?: string
+          video_instructions?: string | null
         }
         Relationships: []
       }
@@ -1106,6 +1109,7 @@ export type Database = {
           image_instructions: string
           description_instructions: string
           card_image_instructions: string
+          video_instructions: string
           openai_key: string
           gemini_key: string
         }[]
@@ -1123,6 +1127,7 @@ export type Database = {
           p_image_instructions: string
           p_description_instructions: string
           p_card_image_instructions?: string
+          p_video_instructions?: string
           p_openai_key?: string
           p_gemini_key?: string
         }

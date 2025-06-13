@@ -7,6 +7,7 @@ import OpenAIKeyForm from './OpenAIKeyForm';
 import ImageInstructionsForm from './ImageInstructionsForm';
 import DescriptionInstructionsForm from './DescriptionInstructionsForm';
 import CardImageInstructionsForm from './CardImageInstructionsForm';
+import VideoInstructionsForm from './VideoInstructionsForm';
 
 const IASettings = () => {
   const {
@@ -16,6 +17,8 @@ const IASettings = () => {
     setDescriptionInstructions,
     cardImageInstructions,
     setCardImageInstructions,
+    videoInstructions,
+    setVideoInstructions,
     isLoading,
     isLoadingSettings,
     saveSettings
@@ -46,6 +49,11 @@ const IASettings = () => {
       <CardImageInstructionsForm 
         instructions={cardImageInstructions}
         onInstructionsChange={setCardImageInstructions}
+      />
+
+      <VideoInstructionsForm 
+        instructions={videoInstructions}
+        onInstructionsChange={setVideoInstructions}
       />
 
       <div className="flex justify-end">
