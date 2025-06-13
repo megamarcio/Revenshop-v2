@@ -121,7 +121,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
 
         // Apply category filter - incluir TODAS as categorias
         if (category) {
-          query = query.eq('category', category);
+          query = query.eq('category', category as any);
         }
 
         // Apply seller filter for non-admin users
