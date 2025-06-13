@@ -40,6 +40,9 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
         return;
       }
 
+      // Get main photo preference from local storage or metadata
+      const mainPhotoPreference = localStorage.getItem(`mainPhoto_${vehicleId}`);
+
       const photosData = storageFiles
         .filter(file => file.name && !file.name.includes('.emptyFolderPlaceholder'))
         .map(file => {
@@ -53,9 +56,15 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
             name: file.name,
             url: publicUrl,
             size: file.metadata?.size || 0,
-            is_main: file.name.includes('main') || false
+            is_main: file.name === mainPhotoPreference || (file.name.includes('main') && !mainPhotoPreference) || false
           };
         });
+
+      // If no main photo is set and we have photos, set the first one as main
+      if (photosData.length > 0 && !photosData.some(p => p.is_main)) {
+        photosData[0].is_main = true;
+        localStorage.setItem(`mainPhoto_${vehicleId}`, photosData[0].name);
+      }
 
       console.log('New vehicle photos fetched:', photosData);
       setPhotos(photosData);
@@ -103,6 +112,11 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
         is_main: photos.length === 0
       };
 
+      // If this is the first photo, set it as main in localStorage
+      if (photos.length === 0) {
+        localStorage.setItem(`mainPhoto_${vehicleId}`, fileName);
+      }
+
       setPhotos(prev => [...prev, newPhoto]);
       
       // Trigger update event for other components
@@ -141,7 +155,19 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
 
       if (error) throw error;
 
-      setPhotos(prev => prev.filter(photo => photo.name !== photoName));
+      // If removing the main photo, set a new main photo
+      const photoToRemove = photos.find(p => p.name === photoName);
+      const remainingPhotos = photos.filter(photo => photo.name !== photoName);
+      
+      if (photoToRemove?.is_main && remainingPhotos.length > 0) {
+        // Set first remaining photo as main
+        localStorage.setItem(`mainPhoto_${vehicleId}`, remainingPhotos[0].name);
+      } else if (photoToRemove?.is_main) {
+        // No photos left, remove main photo preference
+        localStorage.removeItem(`mainPhoto_${vehicleId}`);
+      }
+
+      setPhotos(remainingPhotos);
       
       // Trigger update event for other components
       window.dispatchEvent(new CustomEvent('vehiclePhotosUpdated', { 
@@ -163,6 +189,12 @@ export const useNewVehiclePhotos = (vehicleId?: string) => {
   };
 
   const setMainPhoto = async (photoName: string) => {
+    console.log('Setting main photo:', photoName);
+    
+    // Save to localStorage for persistence
+    localStorage.setItem(`mainPhoto_${vehicleId}`, photoName);
+    
+    // Update local state
     setPhotos(prev => prev.map(photo => ({
       ...photo,
       is_main: photo.name === photoName
