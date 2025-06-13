@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useAISettings } from './useAISettings';
 
 export interface VehicleVideo {
   id: string;
@@ -19,6 +20,7 @@ export const useVehicleVideos = (vehicleId?: string) => {
   const [videos, setVideos] = useState<VehicleVideo[]>([]);
   const [uploading, setUploading] = useState(false);
   const [generating, setGenerating] = useState(false);
+  const { videoInstructions } = useAISettings();
 
   const fetchVideos = async () => {
     if (!vehicleId) {
@@ -114,11 +116,57 @@ export const useVehicleVideos = (vehicleId?: string) => {
     try {
       setGenerating(true);
       
-      // TODO: Implementar geração de vídeo com IA
-      // Por enquanto, apenas mostra mensagem
+      // Preparar prompt personalizado
+      const prompt = videoInstructions
+        ? videoInstructions
+            .replace(/\[MARCA\]/g, vehicleData.name?.split(' ')[0] || '')
+            .replace(/\[MODELO\]/g, vehicleData.model || '')
+            .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
+            .replace(/\[COR\]/g, vehicleData.color || '')
+            .replace(/\[CATEGORIA\]/g, vehicleData.category || '')
+        : `Criar um vídeo promocional profissional para o veículo ${vehicleData.name} ${vehicleData.model} ${vehicleData.year} ${vehicleData.color}. Mostrar o veículo em movimento, destacando suas características principais.`;
+
+      console.log('Generating video with Gemini Veo3, prompt:', prompt);
+
+      // Chamar função edge para gerar vídeo com Gemini Veo3
+      const { data, error } = await supabase.functions.invoke('generate-video-gemini', {
+        body: {
+          prompt,
+          vehicleData
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.video_url) {
+        // Salvar vídeo gerado no banco
+        const { data: videoData, error: dbError } = await supabase
+          .from('vehicle_videos')
+          .insert({
+            vehicle_id: vehicleId,
+            video_url: data.video_url,
+            prompt_used: prompt,
+            file_name: `generated-video-${Date.now()}.mp4`,
+            is_main: videos.length === 0
+          })
+          .select()
+          .single();
+
+        if (dbError) throw dbError;
+
+        setVideos(prev => [videoData, ...prev]);
+        
+        toast({
+          title: 'Sucesso',
+          description: 'Vídeo gerado com IA com sucesso.',
+        });
+
+        return videoData;
+      }
+
       toast({
-        title: 'Em desenvolvimento',
-        description: 'Geração de vídeo com IA será implementada em breve.',
+        title: 'Info',
+        description: 'Geração de vídeo com IA iniciada. Aguarde alguns minutos.',
       });
 
       return null;

@@ -7,6 +7,7 @@ export const useAISettings = () => {
   const [imageInstructions, setImageInstructions] = useState('');
   const [descriptionInstructions, setDescriptionInstructions] = useState('');
   const [cardImageInstructions, setCardImageInstructions] = useState('');
+  const [videoInstructions, setVideoInstructions] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingSettings, setIsLoadingSettings] = useState(true);
 
@@ -24,6 +25,7 @@ export const useAISettings = () => {
         setImageInstructions(settings.image_instructions || '');
         setDescriptionInstructions(settings.description_instructions || '');
         setCardImageInstructions(settings.card_image_instructions || '');
+        setVideoInstructions(settings.video_instructions || '');
       }
     } catch (error) {
       console.error('Error loading AI settings:', error);
@@ -40,6 +42,7 @@ export const useAISettings = () => {
         p_image_instructions: imageInstructions,
         p_description_instructions: descriptionInstructions,
         p_card_image_instructions: cardImageInstructions,
+        p_video_instructions: videoInstructions,
       });
 
       if (error) {
@@ -79,6 +82,8 @@ export const useAISettings = () => {
     setDescriptionInstructions,
     cardImageInstructions,
     setCardImageInstructions,
+    videoInstructions,
+    setVideoInstructions,
     isLoading,
     isLoadingSettings,
     saveSettings,

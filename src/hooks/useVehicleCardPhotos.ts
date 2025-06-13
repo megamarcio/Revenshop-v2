@@ -118,6 +118,36 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
 
       console.log('Final prompt for card photo:', prompt);
 
+      // Chamar função edge para gerar imagem
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: {
+          prompt,
+          vehicleData
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.imageUrl) {
+        const mockPhoto: VehicleCardPhoto = {
+          id: `generated-card-${Date.now()}`,
+          vehicle_id: vehicleId,
+          photo_url: data.imageUrl,
+          prompt_used: prompt,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        setCardPhoto(mockPhoto);
+
+        toast({
+          title: 'Sucesso',
+          description: 'Foto do card gerada com IA com sucesso.',
+        });
+
+        return mockPhoto;
+      }
+
       toast({
         title: 'Info',
         description: 'Geração de imagem do card será implementada em breve.',

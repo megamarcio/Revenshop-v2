@@ -28,9 +28,9 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   let mainPhoto: string | undefined;
   
   if (vehicleId) {
-    // Priority 1: Card photo (if exists)
+    // Priority 1: Card photo (if exists) - PRIORIDADE MÁXIMA
     if (cardPhoto?.photo_url) {
-      console.log('Using card photo:', cardPhoto.photo_url);
+      console.log('Using card photo as main:', cardPhoto.photo_url);
       mainPhoto = cardPhoto.photo_url;
     }
     // Priority 2: Check for main photo in new photos

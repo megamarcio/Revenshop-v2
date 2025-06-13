@@ -28,7 +28,7 @@ export const fetchVehicles = async () => {
           allows_custom
         )
       `)
-      .order('created_at', { ascending: false });
+      .order('internal_code', { ascending: true }); // Ordenação padrão por código interno (menor para maior)
 
     if (vehiclesError) {
       console.error('Error fetching vehicles:', vehiclesError);
