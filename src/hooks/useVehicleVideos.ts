@@ -46,10 +46,10 @@ export const useVehicleVideos = (vehicleId?: string) => {
   const uploadVideo = async (file: File): Promise<VehicleVideo | null> => {
     if (!vehicleId) return null;
     
-    if (file.size > 50 * 1024 * 1024) { // 50MB limit
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
       toast({
         title: 'Arquivo muito grande',
-        description: 'O vídeo deve ter no máximo 50MB.',
+        description: 'O vídeo deve ter no máximo 5MB.',
         variant: 'destructive',
       });
       return null;
