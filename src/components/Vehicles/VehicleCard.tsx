@@ -14,6 +14,11 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
   const [showMinNegotiable, setShowMinNegotiable] = useState(false);
   const [downloading, setDownloading] = useState(false);
   
+  console.log('🎯 VEHICLE CARD DEBUG - Vehicle recebido:', vehicle);
+  console.log('🎯 VEHICLE CARD DEBUG - Vehicle ID:', vehicle.id);
+  console.log('🎯 VEHICLE CARD DEBUG - Vehicle name:', vehicle.name);
+  console.log('🎯 VEHICLE CARD DEBUG - Vehicle photos:', vehicle.photos);
+  
   const {
     formatCurrency,
     handleCarfaxLookup,

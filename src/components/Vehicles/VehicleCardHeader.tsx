@@ -77,6 +77,11 @@ const getConsignmentStore = (vehicle: Vehicle): string => {
 const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderProps) => {
   const { downloadSinglePhoto, downloadPhotosZip, downloading: isDownloading } = usePhotoDownload();
 
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle recebido:', vehicle);
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle ID:', vehicle.id);
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle name:', vehicle.name);
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle photos:', vehicle.photos);
+
   const handleDownloadAllPhotos = () => {
     if (vehicle.photos && vehicle.photos.length > 0) {
       downloadPhotosZip(vehicle.photos, vehicle.name);
@@ -129,7 +134,7 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
         </div>
       )}
 
-      {/* Vehicle Photo Viewer */}
+      {/* Vehicle Photo Viewer - AQUI ESTÁ O PROBLEMA! */}
       <VehiclePhotoViewer
         vehicleId={vehicle.id}
         fallbackPhotos={vehicle.photos}
