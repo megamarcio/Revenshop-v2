@@ -41,15 +41,16 @@ const VehiclePhotoDisplay: React.FC<VehiclePhotoDisplayProps> = ({
     );
   }
 
-  // Garantir que a URL esteja correta - CORRIGIDO: vehicles-photos-new (com S)
+  // Se a URL já é completa (tem http), usar como está
   let finalPhotoUrl = photoUrl;
   
-  // Se a URL já está completa, usar como está
   if (!photoUrl.startsWith('http')) {
-    // Se não tem http, construir URL completa com o nome correto do bucket
+    // Se não tem http, construir URL completa
     const cleanPath = photoUrl.replace(/^(vehicles-photos-new\/|vehicle-cards\/)/, '');
     finalPhotoUrl = `https://ctdajbfmgmkhqueskjvk.supabase.co/storage/v1/object/public/vehicles-photos-new/${cleanPath}`;
-    console.log('🔧 URL corrigida de:', photoUrl, 'para:', finalPhotoUrl);
+    console.log('🔧 URL construída de:', photoUrl, 'para:', finalPhotoUrl);
+  } else {
+    console.log('✅ URL já completa, usando como está:', finalPhotoUrl);
   }
 
   console.log('✅ Tentando carregar imagem final:', finalPhotoUrl);
