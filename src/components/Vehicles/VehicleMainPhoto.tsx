@@ -20,7 +20,7 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   showLoader = false
 }) => {
   const { photos: vehiclePhotos, loading: vehicleLoading } = useVehiclePhotos(vehicleId);
-  const { photos: newPhotos, loading: newPhotosLoading } = useNewVehiclePhotos(vehicleId);
+  const { photos: newPhotos, uploading: newPhotosUploading } = useNewVehiclePhotos(vehicleId);
   
   // Determine the main photo URL based on priority: new photos (main) > vehicle photos (main) > fallback
   let mainPhoto: string | undefined;
@@ -43,7 +43,7 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
     mainPhoto = fallbackPhotos[0];
   }
   
-  const isLoading = vehicleId ? (vehicleLoading || newPhotosLoading) : false;
+  const isLoading = vehicleId ? (vehicleLoading || newPhotosUploading) : false;
   
   return (
     <VehiclePhotoDisplay
