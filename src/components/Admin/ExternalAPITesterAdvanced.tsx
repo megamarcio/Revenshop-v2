@@ -258,6 +258,7 @@ const ExternalAPITesterAdvanced: React.FC = () => {
             <b>Agora também é possível importar comandos cURL!</b>
           </span>
         </CardDescription>
+
         {/* Botão Importar cURL */}
         <div className="mt-3 flex">
           <Dialog open={importCurlOpen} onOpenChange={setImportCurlOpen}>
@@ -279,7 +280,7 @@ const ExternalAPITesterAdvanced: React.FC = () => {
                   value={curlInput}
                   onChange={e => setCurlInput(e.target.value)}
                   rows={4}
-                  placeholder="curl -X POST https://api.exemplo.com -H 'Authorization: Bearer ...' -d '{\"key\":\"value\"}'"
+                  placeholder={`curl -X POST https://api.exemplo.com -H 'Authorization: Bearer ...' -d '{"key":"value"}'`}
                   className="font-mono text-xs mt-2"
                 />
               </div>
