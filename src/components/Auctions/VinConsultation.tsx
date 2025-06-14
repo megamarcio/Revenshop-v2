@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Camera } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { toast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
 
 const VinConsultation = () => {
   const [vin, setVin] = useState("");
