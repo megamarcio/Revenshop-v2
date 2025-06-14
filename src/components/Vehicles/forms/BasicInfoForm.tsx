@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -44,26 +43,20 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
       // extração dos campos
       const make = (result.Make || '').toUpperCase();
       const model = (result.Model || '').toUpperCase();
-      const modelYear = result.ModelYear || '';
-      const vehicleName = (make && model) 
-        ? `${make} ${model}`.trim() 
-        : (make || model);
-      // Caso precise de mais info, pode adaptar aqui para concatenar outros campos
+      const apiModelYear = result.ModelYear || '';
       const cor = (result.Color || result.ExteriorColor || '').toUpperCase();
 
       // montar campo nome com marca, nome do veículo e modelo, tudo em MAIÚSCULO
-      // obs: geralmente Make é marca e Model é modelo/versão, sem campo separado explicitamente para "nome do veículo"
-      // logo, usamos MAKE + MODEL para o nome:
       const nomeVeiculoMaiusculo = [make, model].filter(Boolean).join(' ');
 
       if (nomeVeiculoMaiusculo) onInputChange('name', nomeVeiculoMaiusculo);
-      if (modelYear) onInputChange('year', String(modelYear));
+      if (apiModelYear) onInputChange('year', String(apiModelYear));
       if (cor) onInputChange('color', cor);
 
-      if (nomeVeiculoMaiusculo || modelYear || cor) {
+      if (nomeVeiculoMaiusculo || apiModelYear || cor) {
         toast({
           title: "Dados do veículo encontrados",
-          description: `${nomeVeiculoMaiusculo ? `Nome: ${nomeVeiculoMaiusculo}` : ''} ${modelYear ? `Ano: ${modelYear}` : ''} ${cor ? `Cor: ${cor}` : ''}`,
+          description: `${nomeVeiculoMaiusculo ? `Nome: ${nomeVeiculoMaiusculo}` : ''} ${apiModelYear ? `Ano: ${apiModelYear}` : ''} ${cor ? `Cor: ${cor}` : ''}`,
         });
       } else {
         toast({
