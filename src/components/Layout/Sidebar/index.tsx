@@ -22,9 +22,17 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     isInternalSeller,
     isAdmin
   } = useAuth();
-  const { state } = useSidebar();
+  const { state, collapse } = useSidebar(); // Adicione a função collapse aqui
   
   const menuItems = getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller);
+
+  const handleMenuItemClick = (itemId: string) => {
+    setActiveTab(itemId);
+    // Após seleção, colapsa o menu automaticamente
+    if (state !== "collapsed") {
+      collapse();
+    }
+  };
 
   return (
     <Sidebar collapsible="icon">
@@ -40,7 +48,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton 
                       isActive={activeTab === item.id} 
-                      onClick={() => setActiveTab(item.id)} 
+                      onClick={() => handleMenuItemClick(item.id)} 
                       tooltip={state === "collapsed" ? item.label : undefined}
                     >
                       <Icon />
@@ -50,9 +58,16 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 );
               })}
               
-              <FinancingMenu activeTab={activeTab} setActiveTab={setActiveTab} />
+              {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
+              <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
+                setActiveTab(tab);
+                if (state !== "collapsed") collapse();
+              }} />
               <LogisticsMenu />
-              <SettingsMenu activeTab={activeTab} setActiveTab={setActiveTab} />
+              <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
+                setActiveTab(tab);
+                if (state !== "collapsed") collapse();
+              }} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -62,3 +77,4 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 };
 
 export default AppSidebar;
+
