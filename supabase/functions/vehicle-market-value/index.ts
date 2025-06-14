@@ -1,27 +1,20 @@
 
-// Supabase Edge Function: Consulta valor de mercado de veículo via RapidAPI
 import { serve } from "https://deno.land/std@0.202.0/http/server.ts";
 
-// CORS headers obrigatórios para Edge Functions públicas
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Função utilitária para buscar o RapidAPI Key do secret
 function getRapidAPIKey() {
   const key = Deno.env.get("RAPIDAPI_KEY");
-  if (!key) {
-    throw new Error("RapidAPI Key não configurada nas secrets do projeto Supabase.");
-  }
+  if (!key) throw new Error("RapidAPI Key não configurada nas secrets do projeto Supabase.");
   return key;
 }
 
 serve(async (req) => {
-  // Log para debug no painel Supabase
   console.log("[vehicle-market-value] Edge Function chamada! Método:", req.method);
 
-  // OPTIONS para CORS
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -35,9 +28,9 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const vin = body.vin || body.VIN;
-    const mileage = body.mileage || body.miles;
-    const period = body.period;
+    const vin = (body.vin || body.VIN || "").toString().trim();
+    const mileage = (body.mileage || body.miles || "").toString().trim();
+    const period = (body.period || "").toString().trim();
 
     if (!vin) {
       return new Response(JSON.stringify({ error: "O campo 'vin' é obrigatório no corpo da requisição." }), {
@@ -46,16 +39,22 @@ serve(async (req) => {
       });
     }
 
-    // Monta a URL da API externa
-    const search = [`vin=${encodeURIComponent(vin)}`];
-    if (mileage) search.push(`mileage=${encodeURIComponent(mileage)}`);
-    if (period) search.push(`period=${encodeURIComponent(period)}`);
-    const rapidapiUrl = `https://vehicle-market-value.p.rapidapi.com/vmv?${search.join("&")}`;
+    if (vin.length !== 17) {
+      return new Response(JSON.stringify({ error: "O VIN precisa ter 17 caracteres." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
 
-    // Pega key das secrets
+    const params: string[] = [`vin=${encodeURIComponent(vin)}`];
+    if (mileage) params.push(`mileage=${encodeURIComponent(mileage)}`);
+    if (period) params.push(`period=${encodeURIComponent(period)}`);
+    const rapidapiUrl = `https://vehicle-market-value.p.rapidapi.com/vmv?${params.join("&")}`;
+
+    console.log("[vehicle-market-value] Fetching:", rapidapiUrl);
+
     const RAPIDAPI_KEY = getRapidAPIKey();
 
-    // Chama a API de valor de mercado
     const vmvResp = await fetch(rapidapiUrl, {
       method: "GET",
       headers: {
@@ -66,19 +65,17 @@ serve(async (req) => {
     });
 
     const data = await vmvResp.json();
-
-    // Logging para debug Supabase
     console.log("[vehicle-market-value] resposta RapidAPI:", JSON.stringify(data));
 
-    // Se resposta não for sucesso, repassar erro apropriado
-    if (!vmvResp.ok || (data && data.status !== 'SUCCESS')) {
-      return new Response(JSON.stringify({ error: data?.error || "Erro consultando valor de mercado.", details: data }), {
+    // Corrigido: sucesso é pelo campo `success: true`
+    if (!vmvResp.ok || data?.success !== true) {
+      const errorMsg = data?.message || data?.error || "Erro consultando valor de mercado.";
+      return new Response(JSON.stringify({ error: errorMsg, details: data }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
     }
 
-    // Sucesso! Retorna a resposta da API externa
     return new Response(JSON.stringify(data), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
