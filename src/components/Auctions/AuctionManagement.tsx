@@ -2,31 +2,36 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
+import { Plus, Search } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import AuctionList from './AuctionList';
 import AuctionForm from './AuctionForm';
+import VinConsultation from './VinConsultation';
 
 const AuctionManagement = () => {
   const { t } = useLanguage();
   const { canEditVehicles } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [editingAuction, setEditingAuction] = useState(null);
+  const [submenu, setSubmenu] = useState<'none'|'vinConsult' >('none');
 
   const handleAddAuction = () => {
     setEditingAuction(null);
     setShowForm(true);
+    setSubmenu('none');
   };
 
   const handleEditAuction = (auction: any) => {
     setEditingAuction(auction);
     setShowForm(true);
+    setSubmenu('none');
   };
 
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingAuction(null);
+    setSubmenu('none');
   };
 
   if (showForm) {
@@ -36,6 +41,21 @@ const AuctionManagement = () => {
         onSave={handleCloseForm}
         onCancel={handleCloseForm}
       />
+    );
+  }
+
+  if (submenu === 'vinConsult') {
+    return (
+      <div className="p-6">
+        <Button
+          onClick={() => setSubmenu('none')}
+          variant="outline"
+          className="mb-4"
+        >
+          Voltar
+        </Button>
+        <VinConsultation />
+      </div>
     );
   }
 
@@ -50,15 +70,26 @@ const AuctionManagement = () => {
               </CardTitle>
               <p className="text-gray-600">Gerenciar leilões de veículos</p>
             </div>
-            {canEditVehicles && (
-              <Button 
-                onClick={handleAddAuction}
-                className="bg-revenshop-primary hover:bg-revenshop-primary/90"
+            <div className="flex flex-row gap-2">
+              <Button
+                onClick={() => setSubmenu('vinConsult')}
+                variant="secondary"
+                className="flex items-center"
+                title="Abrir consulta de VIN"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Adicionar Leilão
+                <Search className="w-4 h-4 mr-2" />
+                Consulta VIN
               </Button>
-            )}
+              {canEditVehicles && (
+                <Button 
+                  onClick={handleAddAuction}
+                  className="bg-revenshop-primary hover:bg-revenshop-primary/90"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Adicionar Leilão
+                </Button>
+              )}
+            </div>
           </div>
         </CardHeader>
         <CardContent>
