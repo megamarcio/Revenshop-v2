@@ -38,12 +38,12 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'RapidAPI key não configurada.' }), { status: 500, headers: corsHeaders });
     }
 
-    // Consulta na API (agora inclui milhas no query param)
-    const url = `https://us-market-value-by-vin.p.rapidapi.com/value?vin=${encodeURIComponent(vin)}&mileage=${encodeURIComponent(miles)}`;
+    // Corrigido: Usa o endpoint correto da RapidAPI e header correto
+    const url = `https://vehicle-market-value.p.rapidapi.com/vmv?vin=${encodeURIComponent(vin)}&mileage=${encodeURIComponent(miles)}`;
     const rapidResp = await fetch(url, {
       headers: {
         'X-RapidAPI-Key': rapidapi_key,
-        'X-RapidAPI-Host': 'us-market-value-by-vin.p.rapidapi.com',
+        'X-RapidAPI-Host': 'vehicle-market-value.p.rapidapi.com',
         'Accept': 'application/json',
       }
     });
