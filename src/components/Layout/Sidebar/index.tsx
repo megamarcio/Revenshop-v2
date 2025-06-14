@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
@@ -17,6 +17,7 @@ import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
 import LogisticsMenu from './LogisticsMenu';
 import SettingsMenu from './SettingsMenu';
+import { Menu } from "lucide-react";
 
 interface SidebarProps {
   activeTab: string;
@@ -36,27 +37,41 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   // Track if the sidebar was collapsed before hover (only on desktop)
   const wasCollapsedOnHover = useRef(false);
 
+  // Estado para fixar o menu expandido
+  const [isPinned, setIsPinned] = useState(false);
+
   const handleMenuItemClick = (itemId: string) => {
     setActiveTab(itemId);
-    // Após seleção, colapsa o menu automaticamente
-    if (state !== "collapsed") {
+    // Após seleção, colapsa o menu automaticamente se não está fixado
+    if (state !== "collapsed" && !isPinned) {
       setOpen(false);
     }
   };
 
   // Handlers to expand/collapse on mouse hover
   const handleMouseEnter = () => {
-    if (!isMobile && state === "collapsed") {
+    if (!isMobile && state === "collapsed" && !isPinned) {
       wasCollapsedOnHover.current = true;
       setOpen(true);
     }
   };
 
   const handleMouseLeave = () => {
-    if (!isMobile && wasCollapsedOnHover.current) {
+    if (!isMobile && wasCollapsedOnHover.current && !isPinned) {
       setOpen(false);
       wasCollapsedOnHover.current = false;
     }
+  };
+
+  // Click do botão para manter menu expandido (fixar/desfixar)
+  const togglePin = () => {
+    setIsPinned((prev) => {
+      const newPinned = !prev;
+      if (newPinned) {
+        setOpen(true); // mantém expandido ao fixar
+      }
+      return newPinned;
+    });
   };
 
   return (
@@ -65,7 +80,23 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <AppSidebarHeader />
+      <div className="flex items-center gap-2 px-4 py-2">
+        <AppSidebarHeader />
+        <button
+          title={isPinned ? "Desafixar menu" : "Fixar menu aberto"}
+          className={`ml-auto rounded p-1 ${
+            isPinned
+              ? "bg-blue-500 text-white shadow"
+              : "bg-gray-200 text-gray-700 hover:bg-blue-200"
+          } transition`}
+          onClick={togglePin}
+          tabIndex={0}
+          aria-label={isPinned ? "Desafixar menu" : "Fixar menu"}
+          style={{ fontSize: 20 }}
+        >
+          <Menu className={isPinned ? "rotate-90" : ""} size={18} />
+        </button>
+      </div>
 
       <SidebarContent>
         <SidebarGroup>
@@ -90,12 +121,12 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
               {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
               <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (state !== "collapsed") setOpen(false);
+                if (state !== "collapsed" && !isPinned) setOpen(false);
               }} />
               <LogisticsMenu />
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (state !== "collapsed") setOpen(false);
+                if (state !== "collapsed" && !isPinned) setOpen(false);
               }} />
             </SidebarMenu>
           </SidebarGroupContent>
@@ -106,3 +137,4 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 };
 
 export default AppSidebar;
+
