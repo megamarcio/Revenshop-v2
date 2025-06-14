@@ -8,7 +8,10 @@ const corsHeaders = {
 
 function getRapidAPIKey() {
   const key = Deno.env.get("RAPIDAPI_KEY");
-  if (!key) throw new Error("RapidAPI Key não configurada nas secrets do projeto Supabase.");
+  if (!key) {
+    console.error("[vehicle-market-value] RAPIDAPI_KEY NOT SET in Supabase secrets!");
+    throw new Error("RapidAPI Key não configurada nas secrets do projeto Supabase. Acesse /settings/functions e configure RAPIDAPI_KEY.");
+  }
   return key;
 }
 
@@ -53,23 +56,39 @@ serve(async (req) => {
 
     console.log("[vehicle-market-value] Fetching:", rapidapiUrl);
 
-    const RAPIDAPI_KEY = getRapidAPIKey();
+    let RAPIDAPI_KEY: string;
+    try {
+      RAPIDAPI_KEY = getRapidAPIKey();
+      console.log("[vehicle-market-value] RAPIDAPI_KEY found and will be used (not printing the key itself for security).");
+    } catch (err) {
+      return new Response(JSON.stringify({ error: "RapidAPI Key não configurada no projeto Supabase.", details: String(err) }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    const requestHeaders = {
+      "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
+      "x-rapidapi-key": RAPIDAPI_KEY,
+      "Accept": "application/json"
+    };
+
+    console.log("[vehicle-market-value] Enviando headers para RapidAPI:", Object.keys(requestHeaders));
 
     const vmvResp = await fetch(rapidapiUrl, {
       method: "GET",
-      headers: {
-        "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
-        "x-rapidapi-key": RAPIDAPI_KEY,
-        "Accept": "application/json"
-      }
+      headers: requestHeaders
     });
+
+    // Para debug, logar status recebido e parte da resposta
+    console.log("[vehicle-market-value] Status recebido da RapidAPI:", vmvResp.status);
 
     const data = await vmvResp.json();
     console.log("[vehicle-market-value] resposta RapidAPI:", JSON.stringify(data));
 
-    // Corrigido: sucesso é pelo campo `success: true`
-    if (!vmvResp.ok || data?.success !== true) {
-      const errorMsg = data?.message || data?.error || "Erro consultando valor de mercado.";
+    // Validação pelo padrão status === "SUCCESS"
+    if (!vmvResp.ok || data?.status !== "SUCCESS") {
+      const errorMsg = data?.message || data?.error || "Erro consultando valor de mercado (RapidAPI).";
       return new Response(JSON.stringify({ error: errorMsg, details: data }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
