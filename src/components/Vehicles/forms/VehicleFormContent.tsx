@@ -1,4 +1,3 @@
-
 import React from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import FinancialInfoForm from './FinancialInfoForm';
@@ -106,6 +105,8 @@ const VehicleFormContent = ({
         onInputChange={onInputChange}
       />
 
+      {/* SEÇÃO: INFORMAÇÕES FINANCEIRAS OCULTADA */}
+      {/* 
       <FinancialInfoForm
         formData={formData}
         errors={errors}
@@ -114,7 +115,10 @@ const VehicleFormContent = ({
         vehicleId={isEditing ? editingVehicle?.id : undefined}
         onViewMaintenance={onViewMaintenance}
       />
+      */}
 
+      {/* SEÇÃO: INFORMAÇÕES DE FINANCIAMENTO OCULTADA */}
+      {/* 
       <FinancingInfoForm
         formData={formData}
         errors={errors}
@@ -122,6 +126,7 @@ const VehicleFormContent = ({
         isOpen={showFinancingInfo}
         onToggle={onToggleFinancing}
       />
+      */}
 
       <SaleInfoForm
         formData={formData}

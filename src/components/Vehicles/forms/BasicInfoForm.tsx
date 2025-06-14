@@ -12,6 +12,14 @@ interface BasicInfoFormProps {
   onInputChange: (field: keyof VehicleFormData, value: string) => void;
 }
 
+const categoryOptions = [
+  { value: 'forSale', label: 'Venda' },
+  { value: 'rental', label: 'Aluguel' },
+  { value: 'consigned', label: 'Consignado' },
+  { value: 'testDrive', label: 'Test Drive' },
+  { value: 'other', label: 'Outro' },
+];
+
 const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) => {
   return (
     <div className="space-y-4">
@@ -29,7 +37,6 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
           {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
         </div>
-
         <div>
           <Label htmlFor="year">Ano *</Label>
           <Input
@@ -56,7 +63,6 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
           {errors.vin && <p className="text-red-500 text-sm mt-1">{errors.vin}</p>}
         </div>
-
         <div>
           <Label htmlFor="internalCode">Código Interno</Label>
           <Input
@@ -74,7 +80,6 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           onChange={(value) => onInputChange('color', value)}
           error={errors.color}
         />
-
         <div>
           <Label htmlFor="miles">Milhas</Label>
           <Input
@@ -86,13 +91,30 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
         </div>
       </div>
-
-      <VehicleUsageSelector
-        value={formData.vehicleUsage || 'personal'}
-        onChange={(value) => onInputChange('vehicleUsage', value)}
-      />
+      
+      {/* LINHA: Tipo de Veículo + Uso do Veículo lado a lado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="category">Tipo de Veículo</Label>
+          <select
+            id="category"
+            className="border rounded-md px-3 py-2 w-full"
+            value={formData.category || 'forSale'}
+            onChange={(e) => onInputChange('category', e.target.value)}
+          >
+            {categoryOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+        <VehicleUsageSelector
+          value={formData.vehicleUsage || 'personal'}
+          onChange={(value) => onInputChange('vehicleUsage', value)}
+        />
+      </div>
     </div>
   );
 };
 
 export default BasicInfoForm;
+
