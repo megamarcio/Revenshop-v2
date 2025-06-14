@@ -195,6 +195,9 @@ const VinConsultation = () => {
   const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
   const [loadingMarket, setLoadingMarket] = useState(false);
 
+  // Adicionado: state para resposta bruta do valor de mercado
+  const [marketValueRaw, setMarketValueRaw] = useState<string>("");
+
   // Corrigido conforme parâmetros do "Vehicle Market Value" do Admin Panel
   const fetchMarketValue = async () => {
     if (!vin) {
@@ -215,6 +218,7 @@ const VinConsultation = () => {
     }
     setLoadingMarket(true);
     setMarketValue(null);
+    setMarketValueRaw(""); // Limpa campo ao iniciar nova consulta
     try {
       // Pegando parâmetros e endpoint exatamente igual ao testado e que funcionou no Admin
       const url = "https://ctdajbfmgmkhqueskjvk.functions.supabase.co/vehicle-market-value";
@@ -237,7 +241,9 @@ const VinConsultation = () => {
       });
       const data = await resp.json();
 
-      // Ajuda no diagnóstico: logar resposta bruta também como faz o Admin
+      // Salvar resultado bruto como string bonitinha
+      setMarketValueRaw(JSON.stringify(data, null, 2));
+
       console.log("[VinConsultation] Resposta valor de mercado (igual Admin):", data);
 
       if (data?.status !== "SUCCESS") {
@@ -357,6 +363,17 @@ const VinConsultation = () => {
           rows={16}
           className="w-full font-mono text-xs h-52"
           placeholder="O resultado bruto da API aparecerá aqui para copiar e colar."
+          readOnly
+        />
+      </div>
+      {/* NOVO: Resultado completo do Valor de Mercado */}
+      <div>
+        <Label className="mb-1">Resultado completo do Valor de Mercado:</Label>
+        <Textarea
+          value={marketValueRaw}
+          rows={12}
+          className="w-full font-mono text-xs h-44"
+          placeholder="A resposta bruta da API de Valor de Mercado aparecerá aqui para copiar e colar."
           readOnly
         />
       </div>
