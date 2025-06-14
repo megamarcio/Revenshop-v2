@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
@@ -28,7 +27,7 @@ serve(async (req) => {
     let imageResponse;
     let imageData;
     
-    // **Novo: usar sempre o modelo enviado, padrão 'gpt-image-1'**
+    // Novo: usar sempre o modelo enviado, padrão 'gpt-image-1'
     const chosenModel = model || 'gpt-image-1';
 
     // Tenta o modelo escolhido, mostra erro se falhar (sem fallback)
@@ -49,8 +48,26 @@ serve(async (req) => {
     });
 
     if (!imageResponse.ok) {
-      const errorData = await imageResponse.text();
-      console.error('OpenAI API error:', imageResponse.status, errorData);
+      const errorDataStr = await imageResponse.text();
+      console.error('OpenAI API error:', imageResponse.status, errorDataStr);
+
+      // Tratamento personalizado para GPT-Image-1 "Forbidden"
+      if (
+        chosenModel === 'gpt-image-1' &&
+        imageResponse.status === 403 &&
+        errorDataStr.includes('Your organization must be verified')
+      ) {
+        return new Response(
+          JSON.stringify({
+            error: "Sua organização OpenAI precisa ser verificada para usar o modelo GPT-Image-1. Verifique em https://platform.openai.com/settings/organization/general"
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 403
+          }
+        )
+      }
+
       throw new Error(`OpenAI API error (${chosenModel}): ${imageResponse.statusText}`);
     }
 
