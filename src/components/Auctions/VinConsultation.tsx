@@ -191,11 +191,11 @@ const VinConsultation = () => {
     }
   };
 
-  // Novo estado valor de mercado
+  // Novo estado valor de mercado e loading
   const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
   const [loadingMarket, setLoadingMarket] = useState(false);
 
-  // Corrigido: Validar status === "SUCCESS" e logar resultado
+  // Corrigido conforme parâmetros do "Vehicle Market Value" do Admin Panel
   const fetchMarketValue = async () => {
     if (!vin) {
       toast({
@@ -216,20 +216,33 @@ const VinConsultation = () => {
     setLoadingMarket(true);
     setMarketValue(null);
     try {
-      const resp = await fetch("https://ctdajbfmgmkhqueskjvk.functions.supabase.co/vehicle-market-value", {
+      // Pegando parâmetros e endpoint exatamente igual ao testado e que funcionou no Admin
+      const url = "https://ctdajbfmgmkhqueskjvk.functions.supabase.co/vehicle-market-value";
+      const headers = {
+        "Content-Type": "application/json",
+      };
+      // Parâmetros exatamente como testado: vin, miles. Se seu teste usou 'mileage', altere para mileage aqui
+      const body = {
+        vin: vin.replace(/\s/g, ""),
+        miles: miles.replace(/\s/g, "")
+      };
+
+      // Caso no teste você tenha usado "mileage" ao invés de "miles", troque a linha acima por:
+      // const body = { vin: vin.replace(/\s/g, ""), mileage: miles.replace(/\s/g, "") };
+
+      const resp = await fetch(url, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vin: vin.replace(/\s/g, ""), miles: miles.replace(/\s/g, "") })
+        headers,
+        body: JSON.stringify(body)
       });
       const data = await resp.json();
-      console.log("[VinConsultation] Resposta valor de mercado:", data);
 
-      // Agora valida pelo novo padrão: data.status === 'SUCCESS'
+      // Ajuda no diagnóstico: logar resposta bruta também como faz o Admin
+      console.log("[VinConsultation] Resposta valor de mercado (igual Admin):", data);
+
       if (data?.status !== "SUCCESS") {
         throw new Error(data?.error || data?.message || "Erro ao consultar valor de mercado.");
       }
-
-      // O formato exato depende do retorno da API, ajustar conforme necessário
       const valueData = data.data?.values?.[0] || data.data;
       setMarketValue({
         retail: valueData?.retailPrice ? `US$ ${valueData.retailPrice}` : "-",
