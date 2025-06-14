@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,12 +8,73 @@ import Tesseract from "tesseract.js";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 
+type VinResultFields = {
+  Make: string;
+  Model: string;
+  Trim: string;
+  ModelYear: string;
+  Seats: string;
+  BasePrice: string;
+  ABS: string;
+  DisplacementL: string;
+  EngineCylinders: string;
+  EngineHP: string;
+  DriveType: string;
+  FuelTypePrimary: string;
+  WheelSizeFront: string;
+  Turbo: string;
+};
+
+const FIELD_MAP: { label: string; field: keyof VinResultFields; placeholder?: string }[] = [
+  { label: "Marca", field: "Make" },
+  { label: "Modelo", field: "Model" },
+  { label: "Trim", field: "Trim" },
+  { label: "Ano", field: "ModelYear" },
+  { label: "Lugares", field: "Seats" },
+  { label: "Preço Base", field: "BasePrice" },
+  { label: "Freio ABS", field: "ABS" },
+  { label: "Motorização", field: "DisplacementL" },
+  { label: "Cilindros", field: "EngineCylinders" },
+  { label: "HP's (cavalos)", field: "EngineHP" },
+  { label: "Tração", field: "DriveType" },
+  { label: "Combustível", field: "FuelTypePrimary" },
+  { label: "Roda Aro", field: "WheelSizeFront" },
+  { label: "Turbo", field: "Turbo" },
+];
+
+const extractField = (data: any, field: string) =>
+  (data?.[field] ?? "").toString();
+
 const VinConsultation = () => {
   const [vin, setVin] = useState("");
   const [loading, setLoading] = useState(false);
   const [apiResult, setApiResult] = useState<string>("");
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [fields, setFields] = useState<VinResultFields>({
+    Make: "",
+    Model: "",
+    Trim: "",
+    ModelYear: "",
+    Seats: "",
+    BasePrice: "",
+    ABS: "",
+    DisplacementL: "",
+    EngineCylinders: "",
+    EngineHP: "",
+    DriveType: "",
+    FuelTypePrimary: "",
+    WheelSizeFront: "",
+    Turbo: ""
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const syncFieldsFromResult = (result: any) => {
+    const dataFields: Partial<VinResultFields> = {};
+    FIELD_MAP.forEach(({ field }) => {
+      dataFields[field] = extractField(result, field);
+    });
+    setFields(old => ({ ...old, ...dataFields }));
+  };
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -26,10 +88,30 @@ const VinConsultation = () => {
     }
     setLoading(true);
     setApiResult("");
+    setFields({
+      Make: "",
+      Model: "",
+      Trim: "",
+      ModelYear: "",
+      Seats: "",
+      BasePrice: "",
+      ABS: "",
+      DisplacementL: "",
+      EngineCylinders: "",
+      EngineHP: "",
+      DriveType: "",
+      FuelTypePrimary: "",
+      WheelSizeFront: "",
+      Turbo: ""
+    });
     try {
       const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
       const data = await response.json();
       setApiResult(JSON.stringify(data, null, 2));
+      // Extrair dados para campos separados
+      if (Array.isArray(data.Results) && data.Results[0]) {
+        syncFieldsFromResult(data.Results[0]);
+      }
     } catch (error: any) {
       toast({
         title: "Erro na consulta",
@@ -53,8 +135,7 @@ const VinConsultation = () => {
     if (!file) return;
     setOcrLoading(true);
     try {
-      const { data: { text } } = await Tesseract.recognize(file, "eng", { logger: m => {} });
-      // Remove tudo que não é letra/número e pega uma possível string de 17 caract.
+      const { data: { text } } = await Tesseract.recognize(file, "eng", { logger: () => {} });
       const vinExtracted = (text.match(/([A-HJ-NPR-Z0-9]{17})/gi) || [])[0]?.toUpperCase() || "";
       if (!vinExtracted) {
         toast({
@@ -69,6 +150,10 @@ const VinConsultation = () => {
           title: "VIN detectado",
           description: vinExtracted,
         });
+        // Dispara a busca automática ao detectar VIN pela foto
+        setTimeout(() => {
+          handleSubmit();
+        }, 200); // delay leve para atualizaçao do input antes da consulta
       }
     } catch (err: any) {
       toast({
@@ -116,6 +201,21 @@ const VinConsultation = () => {
         </div>
       </form>
 
+      {/* Campos sincronizados */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {FIELD_MAP.map(({ label, field }) => (
+          <div key={field}>
+            <Label className="mb-1">{label}</Label>
+            <Input
+              value={fields[field] || ""}
+              readOnly
+              className="font-mono"
+              placeholder={`-`}
+            />
+          </div>
+        ))}
+      </div>
+
       <div>
         <Label className="mb-1">Resultado completo do VIN:</Label>
         <Textarea
@@ -131,3 +231,4 @@ const VinConsultation = () => {
 };
 
 export default VinConsultation;
+
