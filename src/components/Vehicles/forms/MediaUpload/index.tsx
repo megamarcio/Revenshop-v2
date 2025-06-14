@@ -11,6 +11,7 @@ interface MediaUploadFormProps {
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
   setVideos: React.Dispatch<React.SetStateAction<string[]>>;
   readOnly?: boolean;
+  vehicleData?: any; // Dados do formulário para os placeholders
 }
 
 const MediaUploadForm = ({ 
@@ -19,16 +20,9 @@ const MediaUploadForm = ({
   videos, 
   setPhotos, 
   setVideos,
-  readOnly = false 
+  readOnly = false,
+  vehicleData
 }: MediaUploadFormProps) => {
-  // Criar objeto com dados do veículo para o CardPhotoSection
-  const vehicleData = vehicleId ? {
-    name: 'Veículo', // Placeholder - será substituído por dados reais se disponível
-    year: new Date().getFullYear(),
-    color: '',
-    category: 'forSale'
-  } : undefined;
-
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

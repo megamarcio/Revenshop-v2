@@ -45,13 +45,58 @@ const VehicleFormContent = ({
   calculateProfitMargin,
   generateDescription
 }: VehicleFormContentProps) => {
-  // Criar dados do veículo para o MediaUploadForm
-  const vehicleDataForMedia = isEditing && editingVehicle ? {
-    name: formData.name || editingVehicle.name || '',
-    year: parseInt(formData.year) || editingVehicle.year || new Date().getFullYear(),
-    color: formData.color || editingVehicle.color || '',
-    category: formData.category || editingVehicle.category || 'forSale'
-  } : undefined;
+  // Criar dados completos do veículo para os placeholders usando dados do formulário atual
+  const vehicleDataForPlaceholders = {
+    name: formData.name || '',
+    year: parseInt(formData.year) || new Date().getFullYear(),
+    color: formData.color || '',
+    category: formData.category || 'forSale',
+    vin: formData.vin || '',
+    miles: parseInt(formData.miles) || 0,
+    internalCode: formData.internalCode || '',
+    model: formData.model || '',
+    purchasePrice: parseFloat(formData.purchasePrice) || 0,
+    salePrice: parseFloat(formData.salePrice) || 0,
+    minNegotiable: parseFloat(formData.minNegotiable) || 0,
+    carfaxPrice: parseFloat(formData.carfaxPrice) || 0,
+    mmrValue: parseFloat(formData.mmrValue) || 0,
+    description: formData.description || '',
+    
+    // Dados de financiamento
+    financingBank: formData.financingBank || '',
+    financingType: formData.financingType || '',
+    originalFinancedName: formData.originalFinancedName || '',
+    purchaseDate: formData.purchaseDate || '',
+    dueDate: formData.dueDate || '',
+    installmentValue: parseFloat(formData.installmentValue) || 0,
+    downPayment: parseFloat(formData.downPayment) || 0,
+    financedAmount: parseFloat(formData.financedAmount) || 0,
+    totalInstallments: parseInt(formData.totalInstallments) || 0,
+    paidInstallments: parseInt(formData.paidInstallments) || 0,
+    remainingInstallments: parseInt(formData.remainingInstallments) || 0,
+    totalToPay: parseFloat(formData.totalToPay) || 0,
+    payoffValue: parseFloat(formData.payoffValue) || 0,
+    payoffDate: formData.payoffDate || '',
+    interestRate: parseFloat(formData.interestRate) || 0,
+    customFinancingBank: formData.customFinancingBank || '',
+    
+    // Dados de venda
+    seller: formData.seller || '',
+    finalSalePrice: parseFloat(formData.finalSalePrice) || 0,
+    saleDate: formData.saleDate || '',
+    saleNotes: formData.saleNotes || '',
+    customerName: formData.customerName || '',
+    customerPhone: formData.customerPhone || '',
+    paymentMethod: formData.paymentMethod || '',
+    financingCompany: formData.financingCompany || '',
+    checkDetails: formData.checkDetails || '',
+    otherPaymentDetails: formData.otherPaymentDetails || '',
+    sellerCommission: parseFloat(formData.sellerCommission) || 0,
+    
+    // Dados de consignação
+    vehicleUsage: formData.vehicleUsage || '',
+    consignmentStore: formData.consignmentStore || ''
+  };
 
   return (
     <div className="space-y-6">
@@ -91,6 +136,7 @@ const VehicleFormContent = ({
         videos={videos}
         setPhotos={setPhotos}
         setVideos={setVideos}
+        vehicleData={vehicleDataForPlaceholders}
       />
 
       <DescriptionForm
