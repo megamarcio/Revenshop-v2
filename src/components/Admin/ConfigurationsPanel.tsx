@@ -7,6 +7,7 @@ import IASettings from './IASettings';
 import WhatsAppIntegration from './WhatsAppIntegration';
 import EmailSettings from './EmailSettings';
 import ExternalAPITester from './ExternalAPITester';
+import ExternalAPITesterAdvanced from "./ExternalAPITesterAdvanced";
 
 interface ConfigurationsPanelProps {
   onNavigateToUsers: () => void;
@@ -97,7 +98,7 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
         </TabsContent>
 
         <TabsContent value="external-api" className="mt-6">
-          <ExternalAPITester />
+          <ExternalAPITesterAdvanced />
         </TabsContent>
       </Tabs>
     </div>
