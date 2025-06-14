@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Car } from "lucide-react";
 import { Eye, Barcode, Image as ImageIcon } from "lucide-react";
+import MarketSummaryResult from "./MarketSummaryResult";
 
 type VinResultFields = {
   Make: string;
@@ -295,7 +296,7 @@ const VinConsultation = () => {
   };
 
   // handler do olhinho (exibir/ocultar valor leilao)
-  const toggleAuctionValue = () => setShowAuctionValue(v => !v);
+  const toggleAuctionValue = () => setShowAuctionValue((v) => !v);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white shadow rounded-lg border animate-fade-in">
@@ -346,64 +347,19 @@ const VinConsultation = () => {
         </div>
       </form>
 
-      {/* RESUMO BONITO */}
+      {/* RESULTADO BONITO */}
       {marketSummary && (
-        <div className="rounded-lg border p-5 bg-gradient-to-b from-blue-50 to-white shadow-lg space-y-2 animate-fade-in">
-          <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-1 mb-1">
-            <span className="font-bold text-lg flex gap-1 items-center">
-              <Car className="w-6 h-6" />
-              {marketSummary.mainInfo}
-            </span>
-            {marketSummary.salesPeriod?.length === 2 && (
-              <span className="text-xs ml-2 text-gray-500">
-                Período de vendas: {marketSummary.salesPeriod[0]} &rarr; {marketSummary.salesPeriod[1]}
-              </span>
-            )}
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-1">
-            <div>
-              <div className="text-xs text-gray-500">Milhas médias para ano:</div>
-              <div className="font-mono text-blue-600 text-lg">{marketSummary.averageMiles ?? "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Milhas atuais:</div>
-              <div className="font-mono text-blue-600 text-lg">{marketSummary.currentMiles ?? "-"}</div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Valor de venda recomendado:</div>
-              <div className="font-mono text-green-700 text-lg">
-                {marketSummary.recommendedValue ? `US$ ${marketSummary.recommendedValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "-"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500">Valor máximo de venda:</div>
-              <div className="font-mono text-green-700 text-lg">
-                {marketSummary.maxValue ? `US$ ${marketSummary.maxValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "-"}
-              </div>
-            </div>
-            <div>
-              <div className="text-xs text-gray-500 flex items-center gap-2">
-                Valor leilão:
-                <button
-                  className="ml-1 rounded p-1 text-blue-700/60 hover:text-blue-800"
-                  type="button"
-                  onClick={toggleAuctionValue}
-                  title="Mostrar valor de leilão"
-                >
-                  <Eye className="w-5 h-5" />
-                </button>
-              </div>
-              <div className="font-mono text-blue-700 text-lg">
-                {showAuctionValue && marketSummary.auctionValue
-                  ? `US$ ${marketSummary.auctionValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}`
-                  : "•••••"}
-              </div>
-            </div>
-            <div>
-              {/* Espaço ou outros campos futuros */}
-            </div>
-          </div>
-        </div>
+        <MarketSummaryResult
+          mainInfo={marketSummary.mainInfo}
+          averageMiles={marketSummary.averageMiles}
+          currentMiles={marketSummary.currentMiles}
+          recommendedValue={marketSummary.recommendedValue}
+          maxValue={marketSummary.maxValue}
+          auctionValue={marketSummary.auctionValue}
+          salesPeriod={marketSummary.salesPeriod}
+          showAuctionValue={showAuctionValue}
+          onToggleAuctionValue={toggleAuctionValue}
+        />
       )}
 
       {/* Campos sincronizados */}
