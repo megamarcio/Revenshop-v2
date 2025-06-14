@@ -346,20 +346,29 @@ const VinConsultation = () => {
           </Button>
         </div>
       </form>
-
-      {/* RESULTADO BONITO */}
+      
+      {/* RESULTADO BONITO VISUAL - sempre logo após o formulário, destaque e divisória */}
       {marketSummary && (
-        <MarketSummaryResult
-          mainInfo={marketSummary.mainInfo}
-          averageMiles={marketSummary.averageMiles}
-          currentMiles={marketSummary.currentMiles}
-          recommendedValue={marketSummary.recommendedValue}
-          maxValue={marketSummary.maxValue}
-          auctionValue={marketSummary.auctionValue}
-          salesPeriod={marketSummary.salesPeriod}
-          showAuctionValue={showAuctionValue}
-          onToggleAuctionValue={toggleAuctionValue}
-        />
+        <>
+          <div className="my-6">
+            <hr className="mb-3 border-blue-200" />
+            <h3 className="text-lg font-semibold mb-2 text-blue-900 flex items-center gap-2">
+              <Car className="w-5 h-5" />
+              Resumo do Valor de Mercado
+            </h3>
+            <MarketSummaryResult
+              mainInfo={marketSummary.mainInfo}
+              averageMiles={marketSummary.averageMiles}
+              currentMiles={marketSummary.currentMiles}
+              recommendedValue={marketSummary.recommendedValue}
+              maxValue={marketSummary.maxValue}
+              auctionValue={marketSummary.auctionValue}
+              salesPeriod={marketSummary.salesPeriod}
+              showAuctionValue={showAuctionValue}
+              onToggleAuctionValue={toggleAuctionValue}
+            />
+          </div>
+        </>
       )}
 
       {/* Campos sincronizados */}
