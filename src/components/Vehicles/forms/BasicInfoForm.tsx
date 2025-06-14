@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -91,7 +92,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
       </div>
       
-      {/* LINHA: Tipo de Veículo + Uso do Veículo lado a lado */}
+      {/* LINHA: Tipo de Veículo + Uso do Veículo lado a lado, sem duplicidade */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="category">Tipo de Veículo</Label>
