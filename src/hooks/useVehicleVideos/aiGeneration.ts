@@ -32,8 +32,8 @@ export const generateVideoWithAI = async (
     const marca = vehicleParts[0] || '';
     const modelo = vehicleParts.slice(1).join(' ') || vehicleData.model || '';
     
-    // Criar prompt personalizado usando as instruções das configurações ou usar padrão
-    let prompt = videoInstructions || 'Criar um vídeo promocional profissional para o veículo [MARCA] [MODELO] [ANO] na cor [COR]. Mostrar o veículo em movimento, destacando suas características principais, com boa iluminação e ângulos dinâmicos.';
+    // Usar prompt padrão melhorado se não houver instruções customizadas
+    let prompt = videoInstructions || 'Criar um vídeo promocional profissional de 10-15 segundos para o veículo [MARCA] [MODELO] [ANO] na cor [COR]. O vídeo deve mostrar o veículo em movimento em um ambiente elegante, com rotação de 360 graus destacando todos os ângulos, boa iluminação cinematográfica, fundo moderno de showroom, qualidade 4K, movimentos suaves da câmera, transições elegantes, e foco nas características distintivas do veículo. Estilo: profissional, moderno, premium.';
     
     // Substituir placeholders com dados do formulário atual
     prompt = prompt
