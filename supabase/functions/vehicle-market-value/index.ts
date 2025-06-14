@@ -19,6 +19,7 @@ serve(async (req) => {
   console.log("[vehicle-market-value] Edge Function chamada! Método:", req.method);
 
   if (req.method === "OPTIONS") {
+    // Preflight CORS
     return new Response(null, { headers: corsHeaders });
   }
 
@@ -49,17 +50,26 @@ serve(async (req) => {
       });
     }
 
+    // mileage é obrigatório para consulta de valor de mercado
+    if (!mileage) {
+      return new Response(JSON.stringify({ error: "O campo 'mileage' (milhas do veículo) é obrigatório para consulta de valor de mercado." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    // Montar query string
     const params: string[] = [`vin=${encodeURIComponent(vin)}`];
     if (mileage) params.push(`mileage=${encodeURIComponent(mileage)}`);
     if (period) params.push(`period=${encodeURIComponent(period)}`);
     const rapidapiUrl = `https://vehicle-market-value.p.rapidapi.com/vmv?${params.join("&")}`;
 
-    console.log("[vehicle-market-value] Fetching:", rapidapiUrl);
+    console.log("[vehicle-market-value] URL Final:", rapidapiUrl);
 
     let RAPIDAPI_KEY: string;
     try {
       RAPIDAPI_KEY = getRapidAPIKey();
-      console.log("[vehicle-market-value] RAPIDAPI_KEY found and will be used (not printing the key itself for security).");
+      console.log("[vehicle-market-value] RAPIDAPI_KEY found (not printing value for security).");
     } catch (err) {
       return new Response(JSON.stringify({ error: "RapidAPI Key não configurada no projeto Supabase.", details: String(err) }), {
         status: 500,
@@ -67,26 +77,34 @@ serve(async (req) => {
       });
     }
 
+    // Enviar headers exatos conforme documentação RapidAPI
     const requestHeaders = {
-      "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
       "x-rapidapi-key": RAPIDAPI_KEY,
-      "Accept": "application/json"
+      "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
+      "accept": "application/json"
     };
+    console.log("[vehicle-market-value] Headers enviados:", Object.keys(requestHeaders));
 
-    console.log("[vehicle-market-value] Enviando headers para RapidAPI:", Object.keys(requestHeaders));
-
+    // Chamada ao endpoint externo
     const vmvResp = await fetch(rapidapiUrl, {
       method: "GET",
       headers: requestHeaders
     });
 
-    // Para debug, logar status recebido e parte da resposta
     console.log("[vehicle-market-value] Status recebido da RapidAPI:", vmvResp.status);
 
-    const data = await vmvResp.json();
-    console.log("[vehicle-market-value] resposta RapidAPI:", JSON.stringify(data));
+    let data: any;
+    try {
+      data = await vmvResp.json();
+    } catch (e) {
+      return new Response(JSON.stringify({ error: "Erro ao processar resposta da RapidAPI.", details: String(e) }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+    console.log("[vehicle-market-value] Resposta RapidAPI:", JSON.stringify(data));
 
-    // Validação pelo padrão status === "SUCCESS"
+    // Validação do padrão esperado pela RapidAPI
     if (!vmvResp.ok || data?.status !== "SUCCESS") {
       const errorMsg = data?.message || data?.error || "Erro consultando valor de mercado (RapidAPI).";
       return new Response(JSON.stringify({ error: errorMsg, details: data }), {
