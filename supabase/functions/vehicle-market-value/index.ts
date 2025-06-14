@@ -1,6 +1,6 @@
 
 // Supabase Edge Function Hello World mínimo
-import { serve } from "std/server";
+import { serve } from "https://deno.land/std@0.202.0/http/server.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
