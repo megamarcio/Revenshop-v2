@@ -195,7 +195,7 @@ const VinConsultation = () => {
   const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
   const [loadingMarket, setLoadingMarket] = useState(false);
 
-  // Atualizado para enviar também as milhas
+  // Corrigido: Validar status === "SUCCESS" e logar resultado
   const fetchMarketValue = async () => {
     if (!vin) {
       toast({
@@ -222,9 +222,13 @@ const VinConsultation = () => {
         body: JSON.stringify({ vin: vin.replace(/\s/g, ""), miles: miles.replace(/\s/g, "") })
       });
       const data = await resp.json();
-      if (!data.success) {
-        throw new Error(data.error || "Erro ao consultar valor de mercado.");
+      console.log("[VinConsultation] Resposta valor de mercado:", data);
+
+      // Agora valida pelo novo padrão: data.status === 'SUCCESS'
+      if (data?.status !== "SUCCESS") {
+        throw new Error(data?.error || data?.message || "Erro ao consultar valor de mercado.");
       }
+
       // O formato exato depende do retorno da API, ajustar conforme necessário
       const valueData = data.data?.values?.[0] || data.data;
       setMarketValue({
