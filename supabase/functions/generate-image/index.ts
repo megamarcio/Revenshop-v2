@@ -27,10 +27,8 @@ serve(async (req) => {
     let imageResponse;
     let imageData;
     
-    // Novo: usar sempre o modelo enviado, padrão 'gpt-image-1'
     const chosenModel = model || 'gpt-image-1';
 
-    // Tenta o modelo escolhido, mostra erro se falhar (sem fallback)
     imageResponse = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -47,15 +45,40 @@ serve(async (req) => {
       }),
     });
 
+    // :: MELHORIA DE LOG ::
     if (!imageResponse.ok) {
-      const errorDataStr = await imageResponse.text();
-      console.error('OpenAI API error:', imageResponse.status, errorDataStr);
+      const errorContentType = imageResponse.headers.get('content-type');
+      let errorData: any;
+      let errorRaw: string | undefined = undefined;
 
-      // Tratamento personalizado para GPT-Image-1 "Forbidden"
+      if (errorContentType && errorContentType.includes('application/json')) {
+        try {
+          errorData = await imageResponse.json();
+        } catch (jsonErr) {
+          errorRaw = await imageResponse.text();
+        }
+      } else {
+        errorRaw = await imageResponse.text();
+      }
+
+      console.error(
+        '[OpenAI API ERROR]',
+        '\nModel:', chosenModel,
+        '\nStatus:', imageResponse.status,
+        imageResponse.statusText,
+        '\nHeaders:', JSON.stringify([...imageResponse.headers], null, 2),
+        '\nBody:', errorData ? JSON.stringify(errorData, null, 2) : errorRaw
+      );
+
+      // Mensagem especial para GPT-Image-1 não verificado
+      const errorStr = errorData
+        ? JSON.stringify(errorData)
+        : errorRaw || '';
+
       if (
         chosenModel === 'gpt-image-1' &&
         imageResponse.status === 403 &&
-        errorDataStr.includes('Your organization must be verified')
+        errorStr.includes('Your organization must be verified')
       ) {
         return new Response(
           JSON.stringify({
@@ -68,7 +91,17 @@ serve(async (req) => {
         )
       }
 
-      throw new Error(`OpenAI API error (${chosenModel}): ${imageResponse.statusText}`);
+      // Devolve resposta mais detalhada para o frontend
+      return new Response(
+        JSON.stringify({
+          error: `OpenAI API error (${chosenModel}): Status ${imageResponse.status} ${imageResponse.statusText}`,
+          openai_response: errorData || errorRaw || null
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: imageResponse.status
+        }
+      );
     }
 
     imageData = await imageResponse.json();
