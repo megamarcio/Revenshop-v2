@@ -222,7 +222,7 @@ const VinConsultation = () => {
   };
 
   // Novo estado valor de mercado e loading
-  const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
+  const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }>(null);
   const [loadingMarket, setLoadingMarket] = useState(false);
   const [marketValueRaw, setMarketValueRaw] = useState<string>("");
 
@@ -304,30 +304,25 @@ const VinConsultation = () => {
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white shadow rounded-lg border animate-fade-in">
       <h2 className="text-xl font-bold mb-1">Consulta de VIN (Leilões)</h2>
 
-      {/* Novo formulário isolado em componente */}
-      <VinConsultationForm
-        vin={vin}
-        setVin={setVin}
-        miles={miles}
-        setMiles={setMiles}
-        handlePhotoVin={handlePhotoVin}
-        fileInputRef={fileInputRef}
-        handleFileChange={handleFileChange}
-        handleSubmit={handleSubmit}
-        loading={loading}
-        ocrLoading={ocrLoading}
-        summaryLoading={summaryLoading}
-      />
+      {/* Formulário e resumo ficam juntos para destacar! */}
+      <div>
+        <VinConsultationForm
+          vin={vin}
+          setVin={setVin}
+          miles={miles}
+          setMiles={setMiles}
+          handlePhotoVin={handlePhotoVin}
+          fileInputRef={fileInputRef}
+          handleFileChange={handleFileChange}
+          handleSubmit={handleSubmit}
+          loading={loading}
+          ocrLoading={ocrLoading}
+          summaryLoading={summaryLoading}
+        />
 
-      {/* Market summary bonito, permanece igual */}
-      {marketSummary && (
-        <>
-          <div className="my-6">
-            <hr className="mb-3 border-blue-200" />
-            <h3 className="text-lg font-semibold mb-2 text-blue-900 flex items-center gap-2">
-              <Car className="w-5 h-5" />
-              Resumo do Valor de Mercado
-            </h3>
+        {/* Resumão destacado vem IMEDIATAMENTE após o botão Consultar */}
+        {marketSummary && (
+          <div className="mt-4">
             <MarketSummaryResult
               mainInfo={marketSummary.mainInfo}
               averageMiles={marketSummary.averageMiles}
@@ -340,14 +335,15 @@ const VinConsultation = () => {
               onToggleAuctionValue={toggleAuctionValue}
             />
           </div>
-        </>
-      )}
+        )}
+      </div>
 
-      {/* Grid dos campos sincronizados isolado em componente */}
+      {/* Grid dos campos sincronizados - detalhes do VIN */}
       <VinConsultationFieldsGrid fields={fields} />
 
+      {/* Valor de mercado detalhado, logo abaixo do grid dos campos */}
       {marketValue && (
-        <div className="bg-blue-50 p-4 rounded mt-2 border">
+        <div className="bg-blue-50 p-4 rounded mt-2 border border-blue-200 shadow">
           <div className="font-semibold mb-2 flex items-center gap-2">
             <Car className="w-4 h-4" /> Valor de Mercado:
           </div>
@@ -363,6 +359,7 @@ const VinConsultation = () => {
         </div>
       )}
 
+      {/* Resultado bruto VIN */}
       <div>
         <Label className="mb-1">Resultado completo do VIN:</Label>
         <Textarea
@@ -373,6 +370,8 @@ const VinConsultation = () => {
           readOnly
         />
       </div>
+
+      {/* Resultado bruto valor de mercado */}
       <div>
         <Label className="mb-1">Resultado completo do Valor de Mercado:</Label>
         <Textarea
