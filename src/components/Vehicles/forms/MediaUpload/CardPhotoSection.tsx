@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,6 +6,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ImageIcon, Upload, Sparkles, Trash2, ChevronDown, Info } from 'lucide-react';
 import { useVehicleCardPhotos } from '@/hooks/useVehicleCardPhotos';
+
+const IMAGE_MODELS = [
+  { value: 'gpt-image-1', label: 'GPT-Image-1 (OpenAI)' },
+  { value: 'dall-e-3', label: 'DALL-E 3 (OpenAI)' },
+];
 
 interface CardPhotoSectionProps {
   vehicleId?: string;
@@ -15,12 +21,13 @@ interface CardPhotoSectionProps {
 const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhotoSectionProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const [aiModel, setAiModel] = useState<'gpt-image-1' | 'dall-e-3'>('gpt-image-1');
+  const [seedInput, setSeedInput] = useState<string>('');
   const { cardPhoto, uploading, generating, uploadCardPhoto, generateCardPhoto, removeCardPhoto } = useVehicleCardPhotos(vehicleId);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && !readOnly) {
-      // Verificar limite de 3MB
       if (file.size > 3 * 1024 * 1024) {
         alert('A foto deve ter no máximo 3MB.');
         return;
@@ -33,41 +40,22 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
   };
 
   const handleGeneratePhoto = async () => {
-    console.log('🎯 CardPhotoSection - handleGeneratePhoto called');
-    console.log('🔍 vehicleData:', vehicleData);
-    console.log('🆔 vehicleId:', vehicleId);
-    console.log('🚫 readOnly:', readOnly);
-    
     if (!vehicleData) {
-      console.warn('⚠️ vehicleData não está disponível');
       alert('Dados do veículo são necessários para gerar a imagem. Preencha os campos básicos primeiro.');
       return;
     }
 
     if (!vehicleId) {
-      console.warn('⚠️ vehicleId não está disponível');
       alert('ID do veículo é necessário. Salve o veículo primeiro.');
       return;
     }
 
     if (readOnly) {
-      console.warn('⚠️ Componente está em modo readOnly');
       return;
     }
 
-    console.log('🚀 Iniciando geração de foto do card...');
-    try {
-      await generateCardPhoto(vehicleData);
-      console.log('✅ Geração de foto concluída');
-    } catch (error) {
-      console.error('❌ Erro na geração:', error);
-    }
+    await generateCardPhoto(vehicleData, { aiModel, seed: seedInput });
   };
-
-  // Log para debug
-  console.log('🔍 CardPhotoSection render - vehicleId:', vehicleId);
-  console.log('🔍 CardPhotoSection render - vehicleData:', vehicleData);
-  console.log('🔍 CardPhotoSection render - readOnly:', readOnly);
 
   if (readOnly && !cardPhoto) {
     return null;
@@ -92,7 +80,7 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
           <CollapsibleContent>
             <CardContent className="space-y-3 pt-0">
               {!readOnly && (
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                   <Button
                     type="button"
                     variant="outline"
@@ -105,6 +93,32 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
                     {uploading ? 'Enviando...' : 'Upload'}
                   </Button>
                   
+                  {/* Modelo IA */}
+                  <select
+                    className="rounded-md border px-2 py-1 text-xs"
+                    style={{ minWidth: 120 }}
+                    value={aiModel}
+                    onChange={(e) => setAiModel(e.target.value as any)}
+                    disabled={generating}
+                    title="Escolha o modelo de IA para gerar a imagem"
+                  >
+                    {IMAGE_MODELS.map((m) => (
+                      <option key={m.value} value={m.value}>{m.label}</option>
+                    ))}
+                  </select>
+
+                  {/* Seed/Referencia visual (texto) */}
+                  <input
+                    type="text"
+                    placeholder="Texto referência/seed (opcional)"
+                    className="border rounded-md px-2 py-1 text-xs"
+                    value={seedInput}
+                    onChange={(e) => setSeedInput(e.target.value)}
+                    maxLength={96}
+                    style={{ width: 180 }}
+                    disabled={generating}
+                  />
+
                   <Button
                     type="button"
                     variant="outline"

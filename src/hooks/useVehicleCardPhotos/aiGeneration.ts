@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { saveCardPhotoToDatabase } from './operations';
@@ -7,7 +6,8 @@ import type { VehicleCardPhoto } from './types';
 export const generateCardPhotoWithAI = async (
   vehicleId: string,
   vehicleData: any,
-  cardImageInstructions?: string
+  cardImageInstructions?: string,
+  options?: { aiModel?: string; seed?: string }
 ): Promise<VehicleCardPhoto | null> => {
   try {
     console.log('🚀 Iniciando geração de foto do card com IA...');
@@ -91,12 +91,19 @@ export const generateCardPhotoWithAI = async (
 
     console.log('📝 Final prompt for card photo:', prompt);
 
-    // Chamar função edge para gerar imagem
+    // Juntar seed/texto referência se informado
+    let finalPrompt = prompt;
+    if (options?.seed) {
+      finalPrompt += `\nReferência/base: ${options.seed}`;
+    }
+
+    // Chamar edge function, agora incluindo modelo
     console.log('🌐 Chamando edge function generate-image...');
     const { data, error } = await supabase.functions.invoke('generate-image', {
       body: {
-        prompt,
-        vehicleData
+        prompt: finalPrompt,
+        vehicleData,
+        model: options?.aiModel || 'gpt-image-1'
       }
     });
 
