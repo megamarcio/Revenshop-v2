@@ -1,12 +1,12 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bot, MessageCircle, Users, Mail } from 'lucide-react';
+import { Bot, MessageCircle, Users, Mail, ExternalLink } from 'lucide-react';
 import IASettings from './IASettings';
 import WhatsAppIntegration from './WhatsAppIntegration';
 import EmailSettings from './EmailSettings';
+import ExternalAPITester from './ExternalAPITester';
 
 interface ConfigurationsPanelProps {
   onNavigateToUsers: () => void;
@@ -36,7 +36,7 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
       </div>
 
       <Tabs defaultValue="users" className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="users" className="flex items-center gap-2">
             <Users className="h-4 w-4" />
             Usuários
@@ -52,6 +52,10 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
           <TabsTrigger value="whatsapp" className="flex items-center gap-2">
             <MessageCircle className="h-4 w-4" />
             WhatsApp
+          </TabsTrigger>
+          <TabsTrigger value="external-api" className="flex items-center gap-2">
+            <ExternalLink className="h-4 w-4" />
+            APIs Externas
           </TabsTrigger>
         </TabsList>
 
@@ -90,6 +94,10 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
 
         <TabsContent value="whatsapp" className="mt-6">
           <WhatsAppIntegration />
+        </TabsContent>
+
+        <TabsContent value="external-api" className="mt-6">
+          <ExternalAPITester />
         </TabsContent>
       </Tabs>
     </div>
