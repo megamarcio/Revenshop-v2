@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useAISettings } from '../useAISettings';
@@ -58,14 +57,19 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
     }
   };
 
-  const generateCardPhoto = async (vehicleData: any): Promise<VehicleCardPhoto | null> => {
+  // Update signature to accept second argument (options)
+  const generateCardPhoto = async (
+    vehicleData: any,
+    options?: { aiModel?: string; seed?: string }
+  ): Promise<VehicleCardPhoto | null> => {
     if (!vehicleId) return null;
 
     try {
       setGenerating(true);
       console.log('🤖 Gerando foto do card com IA...');
-      const photoData = await generateCardPhotoWithAI(vehicleId, vehicleData, cardImageInstructions);
-      
+      // Pass options to generateCardPhotoWithAI
+      const photoData = await generateCardPhotoWithAI(vehicleId, vehicleData, cardImageInstructions, options);
+
       if (photoData) {
         setCardPhoto(photoData);
         console.log('✅ Foto do card gerada com IA');
@@ -109,7 +113,7 @@ export const useVehicleCardPhotos = (vehicleId?: string) => {
     uploading,
     generating,
     uploadCardPhoto,
-    generateCardPhoto,
+    generateCardPhoto,  // Now receives two arguments as needed
     removeCardPhoto,
     refetch: loadCardPhoto
   };
