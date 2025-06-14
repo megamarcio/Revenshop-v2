@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.202.0/http/server.ts";
 
 const corsHeaders = {
@@ -8,11 +7,11 @@ const corsHeaders = {
 
 function getRapidAPIKey() {
   const key = Deno.env.get("RAPIDAPI_KEY");
-  if (!key) {
-    console.error("[vehicle-market-value] RAPIDAPI_KEY NOT SET in Supabase secrets!");
+  if (!key || typeof key !== "string" || !key.trim()) {
+    console.error("[vehicle-market-value] RAPIDAPI_KEY NOT SET or empty in Supabase secrets!");
     throw new Error("RapidAPI Key não configurada nas secrets do projeto Supabase. Acesse /settings/functions e configure RAPIDAPI_KEY.");
   }
-  return key;
+  return key.trim();
 }
 
 serve(async (req) => {
@@ -50,7 +49,6 @@ serve(async (req) => {
       });
     }
 
-    // mileage é obrigatório para consulta de valor de mercado
     if (!mileage) {
       return new Response(JSON.stringify({ error: "O campo 'mileage' (milhas do veículo) é obrigatório para consulta de valor de mercado." }), {
         status: 400,
@@ -69,7 +67,7 @@ serve(async (req) => {
     let RAPIDAPI_KEY: string;
     try {
       RAPIDAPI_KEY = getRapidAPIKey();
-      console.log("[vehicle-market-value] RAPIDAPI_KEY found (not printing value for security).");
+      console.log("[vehicle-market-value] RAPIDAPI_KEY lido. Tamanho:", RAPIDAPI_KEY.length);
     } catch (err) {
       return new Response(JSON.stringify({ error: "RapidAPI Key não configurada no projeto Supabase.", details: String(err) }), {
         status: 500,
@@ -77,15 +75,22 @@ serve(async (req) => {
       });
     }
 
-    // Enviar headers exatos conforme documentação RapidAPI
+    if (!RAPIDAPI_KEY) {
+      return new Response(JSON.stringify({ error: "RapidAPI Key está vazia, checar secrets." }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
     const requestHeaders = {
       "x-rapidapi-key": RAPIDAPI_KEY,
       "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
       "accept": "application/json"
     };
-    console.log("[vehicle-market-value] Headers enviados:", Object.keys(requestHeaders));
+    // LOG headers finais ANTES da requisição!
+    console.log("[vehicle-market-value] Headers para RapidAPI:", JSON.stringify(requestHeaders));
 
-    // Chamada ao endpoint externo
+    // Chamada ao endpoint externo com headers explícitos
     const vmvResp = await fetch(rapidapiUrl, {
       method: "GET",
       headers: requestHeaders
