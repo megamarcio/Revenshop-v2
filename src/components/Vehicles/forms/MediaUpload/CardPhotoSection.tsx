@@ -138,7 +138,7 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
                   />
                   
                   <div className="absolute top-1 left-1 flex gap-1">
-                    {cardPhoto.generation_prompt && (
+                    {cardPhoto.prompt_used && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <div className="bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-help">
@@ -147,7 +147,7 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
                         </TooltipTrigger>
                         <TooltipContent className="max-w-xs">
                           <p className="text-xs"><strong>Prompt usado:</strong></p>
-                          <p className="text-xs mt-1">{cardPhoto.generation_prompt}</p>
+                          <p className="text-xs mt-1">{cardPhoto.prompt_used}</p>
                         </TooltipContent>
                       </Tooltip>
                     )}

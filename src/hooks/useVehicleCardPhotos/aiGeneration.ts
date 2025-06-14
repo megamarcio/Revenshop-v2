@@ -32,15 +32,20 @@ export const generateCardPhotoWithAI = async (
     const marca = vehicleParts[0] || '';
     const modelo = vehicleParts.slice(1).join(' ') || '';
     
-    // Criar prompt personalizado ou usar padrão
-    const prompt = cardImageInstructions
-      ? cardImageInstructions
-          .replace(/\[MARCA\]/g, marca)
-          .replace(/\[MODELO\]/g, modelo)
-          .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
-          .replace(/\[COR\]/g, vehicleData.color || '')
-          .replace(/\[CATEGORIA\]/g, vehicleData.category || '')
-      : `Criar uma imagem profissional e atrativa para o card de um veículo ${vehicleName} ${vehicleData.year || ''} ${vehicleData.color || ''}. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo, alta qualidade, realista.`;
+    // Criar prompt personalizado usando as instruções das configurações ou usar padrão
+    let prompt = cardImageInstructions || 'Criar uma imagem profissional e atrativa para o card de um veículo [NOME_COMPLETO] [ANO] na cor [COR]. Estilo: foto de showroom, bem iluminada, fundo neutro, destaque para o veículo, alta qualidade, realista.';
+    
+    // Substituir todos os placeholders disponíveis
+    prompt = prompt
+      .replace(/\[MARCA\]/g, marca)
+      .replace(/\[MODELO\]/g, modelo)
+      .replace(/\[ANO\]/g, vehicleData.year?.toString() || '')
+      .replace(/\[COR\]/g, vehicleData.color || '')
+      .replace(/\[NOME_COMPLETO\]/g, vehicleName)
+      .replace(/\[QUILOMETRAGEM\]/g, vehicleData.miles?.toString() || '')
+      .replace(/\[VIN\]/g, vehicleData.vin || '')
+      .replace(/\[CATEGORIA\]/g, vehicleData.category || '')
+      .replace(/\[PRECO_VENDA\]/g, vehicleData.salePrice?.toString() || '');
 
     console.log('📝 Final prompt for card photo:', prompt);
 
