@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,9 +22,15 @@ type VinResultFields = {
   FuelTypePrimary: string;
   WheelSizeFront: string;
   Turbo: string;
+  BodyClass: string;
+  TransmissionStyle: string;
+  TransmissionSpeeds: string;
+  DriveDistribution: string;
+  Manufacturer: string;
+  Note: string;
 };
 
-const FIELD_MAP: { label: string; field: keyof VinResultFields; placeholder?: string }[] = [
+const FIELD_MAP: { label: string; field: keyof VinResultFields; sourceField?: string; placeholder?: string }[] = [
   { label: "Marca", field: "Make" },
   { label: "Modelo", field: "Model" },
   { label: "Trim", field: "Trim" },
@@ -36,14 +41,20 @@ const FIELD_MAP: { label: string; field: keyof VinResultFields; placeholder?: st
   { label: "Motorização", field: "DisplacementL" },
   { label: "Cilindros", field: "EngineCylinders" },
   { label: "HP's (cavalos)", field: "EngineHP" },
-  { label: "Tração", field: "DriveType" },
+  { label: "Tração", field: "DriveType", sourceField: "DriveType" },
   { label: "Combustível", field: "FuelTypePrimary" },
   { label: "Roda Aro", field: "WheelSizeFront" },
   { label: "Turbo", field: "Turbo" },
+  { label: "Class", field: "BodyClass" },
+  { label: "Transmissão", field: "TransmissionStyle" },
+  { label: "Qtde de Marchas", field: "TransmissionSpeeds" },
+  { label: "Distribuição de Potencia", field: "DriveDistribution", sourceField: "DriveType" },
+  { label: "Fabricante", field: "Manufacturer" },
+  { label: "Nota", field: "Note" },
 ];
 
-const extractField = (data: any, field: string) =>
-  (data?.[field] ?? "").toString();
+const extractField = (data: any, field: string, sourceField?: string) =>
+  (data?.[sourceField ?? field] ?? "").toString();
 
 const VinConsultation = () => {
   const [vin, setVin] = useState("");
@@ -64,16 +75,22 @@ const VinConsultation = () => {
     DriveType: "",
     FuelTypePrimary: "",
     WheelSizeFront: "",
-    Turbo: ""
+    Turbo: "",
+    BodyClass: "",
+    TransmissionStyle: "",
+    TransmissionSpeeds: "",
+    DriveDistribution: "",
+    Manufacturer: "",
+    Note: "",
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const syncFieldsFromResult = (result: any) => {
     const dataFields: Partial<VinResultFields> = {};
-    FIELD_MAP.forEach(({ field }) => {
-      dataFields[field] = extractField(result, field);
+    FIELD_MAP.forEach(({ field, sourceField }) => {
+      dataFields[field] = extractField(result, field, sourceField);
     });
-    setFields(old => ({ ...old, ...dataFields }));
+    setFields((old) => ({ ...old, ...dataFields }));
   };
 
   const handleSubmit = async (e?: React.FormEvent) => {
@@ -102,7 +119,13 @@ const VinConsultation = () => {
       DriveType: "",
       FuelTypePrimary: "",
       WheelSizeFront: "",
-      Turbo: ""
+      Turbo: "",
+      BodyClass: "",
+      TransmissionStyle: "",
+      TransmissionSpeeds: "",
+      DriveDistribution: "",
+      Manufacturer: "",
+      Note: "",
     });
     try {
       const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
@@ -231,4 +254,3 @@ const VinConsultation = () => {
 };
 
 export default VinConsultation;
-
