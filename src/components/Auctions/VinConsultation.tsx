@@ -9,6 +9,8 @@ import { Label } from "@/components/ui/label";
 import { Car } from "lucide-react";
 import { Eye, Barcode, Image as ImageIcon } from "lucide-react";
 import MarketSummaryResult from "./MarketSummaryResult";
+import VinConsultationForm from "./VinConsultationForm";
+import VinConsultationFieldsGrid from "./VinConsultationFieldsGrid";
 
 type VinResultFields = {
   Make: string;
@@ -301,53 +303,23 @@ const VinConsultation = () => {
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white shadow rounded-lg border animate-fade-in">
       <h2 className="text-xl font-bold mb-1">Consulta de VIN (Leilões)</h2>
-      <form className="space-y-2" onSubmit={handleSubmit}>
-        <div className="flex flex-wrap gap-2 items-center">
-          <Input
-            value={vin}
-            onChange={e => setVin(e.target.value.toUpperCase())}
-            placeholder="Digite ou escaneie o VIN"
-            className="font-mono uppercase w-60"
-            maxLength={17}
-          />
-          <Input
-            value={miles}
-            onChange={e => setMiles(e.target.value.replace(/\D/g, ""))}
-            placeholder="Milhas (ex: 55000)"
-            className="font-mono w-36"
-            maxLength={7}
-            inputMode="numeric"
-            pattern="\d*"
-            title="Milhas do veículo"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            onChange={handleFileChange}
-          />
-          <Button
-            type="button"
-            onClick={handlePhotoVin}
-            variant="secondary"
-            title="Escanear VIN com Câmera"
-            disabled={ocrLoading || loading}
-            className="flex items-center justify-center gap-0 px-2"
-          >
-            <Barcode className="w-5 h-5" />
-            <ImageIcon className="w-5 h-5" />
-          </Button>
-          <Button
-            type="submit"
-            disabled={loading || ocrLoading || summaryLoading}
-          >
-            {loading || summaryLoading ? "Consultando..." : "Consultar"}
-          </Button>
-        </div>
-      </form>
-      
-      {/* RESULTADO BONITO VISUAL - sempre logo após o formulário, destaque e divisória */}
+
+      {/* Novo formulário isolado em componente */}
+      <VinConsultationForm
+        vin={vin}
+        setVin={setVin}
+        miles={miles}
+        setMiles={setMiles}
+        handlePhotoVin={handlePhotoVin}
+        fileInputRef={fileInputRef}
+        handleFileChange={handleFileChange}
+        handleSubmit={handleSubmit}
+        loading={loading}
+        ocrLoading={ocrLoading}
+        summaryLoading={summaryLoading}
+      />
+
+      {/* Market summary bonito, permanece igual */}
       {marketSummary && (
         <>
           <div className="my-6">
@@ -371,20 +343,8 @@ const VinConsultation = () => {
         </>
       )}
 
-      {/* Campos sincronizados */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {FIELD_MAP.map(({ label, field }) => (
-          <div key={field}>
-            <Label className="mb-1">{label}</Label>
-            <Input
-              value={fields[field] || ""}
-              readOnly
-              className="font-mono"
-              placeholder={`-`}
-            />
-          </div>
-        ))}
-      </div>
+      {/* Grid dos campos sincronizados isolado em componente */}
+      <VinConsultationFieldsGrid fields={fields} />
 
       {marketValue && (
         <div className="bg-blue-50 p-4 rounded mt-2 border">
@@ -413,7 +373,6 @@ const VinConsultation = () => {
           readOnly
         />
       </div>
-      {/* NOVO: Resultado completo do Valor de Mercado */}
       <div>
         <Label className="mb-1">Resultado completo do Valor de Mercado:</Label>
         <Textarea
