@@ -194,11 +194,9 @@ const VinConsultation = () => {
   // Novo estado valor de mercado e loading
   const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
   const [loadingMarket, setLoadingMarket] = useState(false);
-
-  // Adicionado: state para resposta bruta do valor de mercado
   const [marketValueRaw, setMarketValueRaw] = useState<string>("");
 
-  // Corrigido conforme parâmetros do "Vehicle Market Value" do Admin Panel
+  // ATUALIZAÇÃO: Agora busca do valor de mercado usa o mesmo formato do Admin -> API Externas
   const fetchMarketValue = async () => {
     if (!vin) {
       toast({
@@ -218,45 +216,35 @@ const VinConsultation = () => {
     }
     setLoadingMarket(true);
     setMarketValue(null);
-    setMarketValueRaw(""); // Limpa campo ao iniciar nova consulta
+    setMarketValueRaw("");
     try {
-      // Pegando parâmetros e endpoint exatamente igual ao testado e que funcionou no Admin
-      const url = "https://ctdajbfmgmkhqueskjvk.functions.supabase.co/vehicle-market-value";
-      const headers = {
-        "Content-Type": "application/json",
-      };
-      // Parâmetros exatamente como testado: vin, miles. Se seu teste usou 'mileage', altere para mileage aqui
-      const body = {
-        vin: vin.replace(/\s/g, ""),
-        miles: miles.replace(/\s/g, "")
-      };
+      // Monta URL com queries
+      const url = `https://vehicle-market-value.p.rapidapi.com/vmv?vin=${encodeURIComponent(vin)}&mileage=${encodeURIComponent(miles)}&period=180`;
 
-      // Caso no teste você tenha usado "mileage" ao invés de "miles", troque a linha acima por:
-      // const body = { vin: vin.replace(/\s/g, ""), mileage: miles.replace(/\s/g, "") };
+      const headers = {
+        "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
+        "x-rapidapi-key": "09e8d21b70msh49da81e6613134ap11ca1djsn116d32450e77"
+      };
 
       const resp = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(body)
+        method: "GET",
+        headers
       });
       const data = await resp.json();
 
-      // Salvar resultado bruto como string bonitinha
+      // Salvar resposta bruta no campo de resposta bruta
       setMarketValueRaw(JSON.stringify(data, null, 2));
 
-      console.log("[VinConsultation] Resposta valor de mercado (igual Admin):", data);
-
-      if (data?.status !== "SUCCESS") {
-        throw new Error(data?.error || data?.message || "Erro ao consultar valor de mercado.");
-      }
+      // Adaptação: pega informações principais se existirem
+      // O formato pode variar conforme resposta da RapidAPI
       const valueData = data.data?.values?.[0] || data.data;
       setMarketValue({
         retail: valueData?.retailPrice ? `US$ ${valueData.retailPrice}` : "-",
         trade: valueData?.tradeInFair ? `US$ ${valueData.tradeInFair}` : "-",
         msrp: valueData?.msrp ? `US$ ${valueData.msrp}` : "-",
-        year: valueData?.year,
-        make: valueData?.make,
-        model: valueData?.model,
+        year: valueData?.year ?? "-",
+        make: valueData?.make ?? "-",
+        model: valueData?.model ?? "-",
       });
     } catch (err: any) {
       toast({
