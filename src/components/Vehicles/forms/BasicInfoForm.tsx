@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -117,4 +116,3 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
 };
 
 export default BasicInfoForm;
-
