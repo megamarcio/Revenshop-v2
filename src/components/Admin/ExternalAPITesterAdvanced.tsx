@@ -271,7 +271,9 @@ const ExternalAPITesterAdvanced: React.FC = () => {
                 <DialogTitle>Importar comando cURL</DialogTitle>
               </DialogHeader>
               <div className="mt-2">
-                <Label htmlFor="curl-input" className="mb-2">Cole aqui o comando cURL</Label>
+                <Label htmlFor="curl-input" className="mb-2">
+                  Cole aqui o comando cURL
+                </Label>
                 <Textarea
                   id="curl-input"
                   value={curlInput}
