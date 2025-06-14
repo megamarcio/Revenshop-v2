@@ -270,7 +270,7 @@ const ExternalAPITesterAdvanced: React.FC = () => {
               <DialogHeader>
                 <DialogTitle>Importar comando cURL</DialogTitle>
               </DialogHeader>
-              <div>
+              <div className="mt-2">
                 <Label htmlFor="curl-input" className="mb-2">Cole aqui o comando cURL</Label>
                 <Textarea
                   id="curl-input"
@@ -282,7 +282,9 @@ const ExternalAPITesterAdvanced: React.FC = () => {
                 />
               </div>
               <DialogFooter className="mt-2">
-                <Button type="button" onClick={handleImportCurl}>Importar</Button>
+                <Button type="button" onClick={handleImportCurl}>
+                  Importar
+                </Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
