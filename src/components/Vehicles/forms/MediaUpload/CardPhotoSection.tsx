@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -130,11 +129,12 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
               />
 
               {cardPhoto ? (
-                <div className="relative group border rounded-lg overflow-hidden">
+                <div className="relative group border rounded-lg overflow-hidden w-[228px] h-[228px] mx-auto">
                   <img
                     src={cardPhoto.photo_url}
                     alt="Foto do Card"
-                    className="w-full h-32 object-cover"
+                    className="w-full h-full object-cover"
+                    style={{ width: "6cm", height: "6cm" }}
                   />
                   
                   <div className="absolute top-1 left-1 flex gap-1">
@@ -168,7 +168,7 @@ const CardPhotoSection = ({ vehicleId, vehicleData, readOnly = false }: CardPhot
                   )}
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center w-[228px] h-[228px] mx-auto flex flex-col items-center justify-center">
                   <ImageIcon className="h-8 w-8 mx-auto mb-1 text-gray-400" />
                   <p className="text-gray-500 text-xs">Nenhuma foto do card</p>
                 </div>
