@@ -6,6 +6,7 @@ import { Camera } from "lucide-react";
 import Tesseract from "tesseract.js";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
+import { Car } from "lucide-react";
 
 type VinResultFields = {
   Make: string;
@@ -189,6 +190,52 @@ const VinConsultation = () => {
     }
   };
 
+  // Novo estado valor de mercado
+  const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
+  const [loadingMarket, setLoadingMarket] = useState(false);
+
+  const fetchMarketValue = async () => {
+    if (!vin) {
+      toast({
+        title: "Erro",
+        description: "Informe o VIN antes de consultar valor de mercado.",
+        variant: "destructive"
+      });
+      return;
+    }
+    setLoadingMarket(true);
+    setMarketValue(null);
+    try {
+      const resp = await fetch("https://ctdajbfmgmkhqueskjvk.functions.supabase.co/vehicle-market-value", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ vin: vin.replace(/\s/g, "") })
+      });
+      const data = await resp.json();
+      if (!data.success) {
+        throw new Error(data.error || "Erro ao consultar valor de mercado.");
+      }
+      // O formato exato depende do retorno da API, ajustar conforme necessário
+      const valueData = data.data?.values?.[0] || data.data;
+      setMarketValue({
+        retail: valueData?.retailPrice ? `US$ ${valueData.retailPrice}` : "-",
+        trade: valueData?.tradeInFair ? `US$ ${valueData.tradeInFair}` : "-",
+        msrp: valueData?.msrp ? `US$ ${valueData.msrp}` : "-",
+        year: valueData?.year,
+        make: valueData?.make,
+        model: valueData?.model,
+      });
+    } catch (err: any) {
+      toast({
+        title: "Valor de Mercado",
+        description: err?.message || "Erro ao consultar valor de mercado.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoadingMarket(false);
+    }
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white shadow rounded-lg border animate-fade-in">
       <h2 className="text-xl font-bold mb-1">Consulta de VIN (Leilões)</h2>
@@ -218,6 +265,16 @@ const VinConsultation = () => {
             <Camera className="w-5 h-5 mr-2" />
             {ocrLoading ? "Processando..." : "Escanear/Fotografar"}
           </Button>
+          <Button
+            type="button"
+            onClick={fetchMarketValue}
+            variant="outline"
+            disabled={loadingMarket || !vin}
+            title="Consultar valor de mercado do veículo"
+          >
+            <Car className="w-5 h-5 mr-2" />
+            {loadingMarket ? "Buscando valor..." : "Valor de Mercado"}
+          </Button>
           <Button type="submit" disabled={loading || ocrLoading}>
             {loading ? "Consultando..." : "Consultar"}
           </Button>
@@ -238,6 +295,23 @@ const VinConsultation = () => {
           </div>
         ))}
       </div>
+
+      {marketValue && (
+        <div className="bg-blue-50 p-4 rounded mt-2 border">
+          <div className="font-semibold mb-2 flex items-center gap-2">
+            <Car className="w-4 h-4" /> Valor de Mercado:
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div><span className="font-semibold">Retail:</span> {marketValue.retail}</div>
+            <div><span className="font-semibold">Trade-in:</span> {marketValue.trade}</div>
+            <div><span className="font-semibold">MSRP:</span> {marketValue.msrp}</div>
+            <div>
+              <span className="font-semibold">Ano/Marca/Modelo:</span>{" "}
+              {marketValue.year || "-"} / {marketValue.make || "-"} / {marketValue.model || "-"}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div>
         <Label className="mb-1">Resultado completo do VIN:</Label>

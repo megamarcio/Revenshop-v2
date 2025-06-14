@@ -18,6 +18,7 @@ export type Database = {
           id: string
           image_instructions: string | null
           openai_key: string | null
+          rapidapi_key: string | null
           updated_at: string
           video_instructions: string | null
         }
@@ -29,6 +30,7 @@ export type Database = {
           id?: string
           image_instructions?: string | null
           openai_key?: string | null
+          rapidapi_key?: string | null
           updated_at?: string
           video_instructions?: string | null
         }
@@ -40,6 +42,7 @@ export type Database = {
           id?: string
           image_instructions?: string | null
           openai_key?: string | null
+          rapidapi_key?: string | null
           updated_at?: string
           video_instructions?: string | null
         }
@@ -1147,6 +1150,7 @@ export type Database = {
           video_instructions: string
           openai_key: string
           gemini_key: string
+          rapidapi_key: string
         }[]
       }
       get_current_user_role: {
@@ -1158,14 +1162,24 @@ export type Database = {
         Returns: boolean
       }
       save_ai_settings: {
-        Args: {
-          p_image_instructions: string
-          p_description_instructions: string
-          p_card_image_instructions?: string
-          p_video_instructions?: string
-          p_openai_key?: string
-          p_gemini_key?: string
-        }
+        Args:
+          | {
+              p_image_instructions: string
+              p_description_instructions: string
+              p_card_image_instructions?: string
+              p_video_instructions?: string
+              p_openai_key?: string
+              p_gemini_key?: string
+            }
+          | {
+              p_image_instructions: string
+              p_description_instructions: string
+              p_card_image_instructions?: string
+              p_video_instructions?: string
+              p_openai_key?: string
+              p_gemini_key?: string
+              p_rapidapi_key?: string
+            }
         Returns: undefined
       }
     }

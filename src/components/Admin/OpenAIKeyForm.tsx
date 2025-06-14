@@ -4,15 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Bot, Eye, EyeOff, Save } from 'lucide-react';
+import { Bot, Eye, EyeOff, Save, Car } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
 const OpenAIKeyForm = () => {
   const [openAIKey, setOpenAIKey] = useState('');
   const [geminiKey, setGeminiKey] = useState('');
+  const [rapidApiKey, setRapidApiKey] = useState('');
   const [showOpenAIKey, setShowOpenAIKey] = useState(false);
   const [showGeminiKey, setShowGeminiKey] = useState(false);
+  const [showRapidApiKey, setShowRapidApiKey] = useState(false);
   const [loading, setLoading] = useState(false);
   const [loadingKeys, setLoadingKeys] = useState(true);
 
@@ -24,15 +26,14 @@ const OpenAIKeyForm = () => {
     try {
       setLoadingKeys(true);
       const { data, error } = await supabase.rpc('get_ai_settings');
-      
       if (error) {
         console.error('Erro ao carregar chaves:', error);
         return;
       }
-
       if (data && data.length > 0) {
         setOpenAIKey(data[0].openai_key || '');
         setGeminiKey(data[0].gemini_key || '');
+        setRapidApiKey(data[0].rapidapi_key || '');
       }
     } catch (error) {
       console.error('Erro ao carregar chaves:', error);
@@ -44,18 +45,20 @@ const OpenAIKeyForm = () => {
   const handleSaveKeys = async () => {
     try {
       setLoading(true);
-      
+
       const { error } = await supabase.rpc('save_ai_settings', {
-        p_image_instructions: '', // Manteremos vazios para não sobrescrever
+        p_image_instructions: '', // Não sobrescreve instruções
         p_description_instructions: '',
+        p_card_image_instructions: '',
+        p_video_instructions: '',
         p_openai_key: openAIKey || null,
-        p_gemini_key: geminiKey || null
+        p_gemini_key: geminiKey || null,
+        p_rapidapi_key: rapidApiKey || null
       });
 
       if (error) {
         throw error;
       }
-
       toast({
         title: 'Sucesso',
         description: 'Chaves de API salvas com sucesso!',
@@ -96,6 +99,7 @@ const OpenAIKeyForm = () => {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {/* OpenAI */}
         <div className="space-y-2">
           <Label htmlFor="openai-key">Chave da API OpenAI</Label>
           <div className="relative">
@@ -126,6 +130,7 @@ const OpenAIKeyForm = () => {
           </p>
         </div>
 
+        {/* Gemini */}
         <div className="space-y-2">
           <Label htmlFor="gemini-key">Chave da API Gemini</Label>
           <div className="relative">
@@ -153,6 +158,37 @@ const OpenAIKeyForm = () => {
           </div>
           <p className="text-xs text-muted-foreground">
             Esta chave será armazenada de forma segura no banco de dados
+          </p>
+        </div>
+
+        {/* RapidAPI (Valor de Mercado) */}
+        <div className="space-y-2">
+          <Label htmlFor="rapidapi-key">Chave da RapidAPI (Valor de Mercado)</Label>
+          <div className="relative">
+            <Input
+              id="rapidapi-key"
+              type={showRapidApiKey ? "text" : "password"}
+              placeholder="X-RapidAPI-Key..."
+              value={rapidApiKey}
+              onChange={(e) => setRapidApiKey(e.target.value)}
+              className="pr-10"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+              onClick={() => setShowRapidApiKey(!showRapidApiKey)}
+            >
+              {showRapidApiKey ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Chave usada para consultar valor de mercado pela RapidAPI Vehicle Market Value.
           </p>
         </div>
 
