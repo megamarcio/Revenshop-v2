@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -61,6 +61,19 @@ const FIELD_MAP: { label: string; field: keyof VinResultFields; sourceField?: st
 const extractField = (data: any, field: string, sourceField?: string) =>
   (data?.[sourceField ?? field] ?? "").toString();
 
+type VinCachedResult = {
+  vin: string;
+  fields: VinResultFields;
+  apiResult: string;
+  date: number;
+  miles: string;
+  marketValueRaw: string;
+  marketSummary: any;
+  marketValue: any;
+};
+
+const LOCAL_STORAGE_KEY = "vinConsultationHistoryV2"; // Versão para reset futuro
+
 const VinConsultation = () => {
   const [vin, setVin] = useState("");
   const [loading, setLoading] = useState(false);
@@ -101,6 +114,34 @@ const VinConsultation = () => {
     auctionValue: number | null;
     salesPeriod?: string[] | null;
   }>(null);
+  const [vinHistory, setVinHistory] = useState<VinCachedResult[]>([]);
+
+  // Carrega histórico ao montar componente
+  useEffect(() => {
+    const item = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (item) {
+      setVinHistory(JSON.parse(item));
+    }
+  }, []);
+
+  // Função para salvar novo resultado no histórico
+  const saveVinToHistory = (vinData: VinCachedResult) => {
+    let history = [vinData, ...vinHistory.filter(h => h.vin !== vinData.vin)];
+    history = history.slice(0, 10);
+    setVinHistory(history);
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(history));
+  };
+
+  // Novo: restaurar dados de um histórico salvo
+  const restoreVinFromHistory = (vinCached: VinCachedResult) => {
+    setVin(vinCached.vin);
+    setFields(vinCached.fields);
+    setApiResult(vinCached.apiResult);
+    setMiles(vinCached.miles);
+    setMarketValueRaw(vinCached.marketValueRaw);
+    setMarketValue(vinCached.marketValue);
+    setMarketSummary(vinCached.marketSummary);
+  };
 
   const syncFieldsFromResult = (result: any) => {
     const dataFields: Partial<VinResultFields> = {};
@@ -127,6 +168,19 @@ const VinConsultation = () => {
       setSummaryLoading(false);
       return;
     }
+
+    // Novo: Checar histórico antes de chamar API!
+    const cached = vinHistory.find(h => h.vin === vin && h.miles === miles);
+    if (cached) {
+      restoreVinFromHistory(cached);
+      toast({
+        title: "Consulta rápida!",
+        description: "Resultado carregado do histórico local.",
+      });
+      setSummaryLoading(false);
+      return;
+    }
+
     setLoading(true);
     setFields({
       Make: "",
@@ -150,13 +204,18 @@ const VinConsultation = () => {
       Manufacturer: "",
       Note: "",
     });
+    let apiData = "";
+    let vinApiFields: any = null;
+
     try {
       // VIN API
       const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
       const data = await response.json();
-      setApiResult(JSON.stringify(data, null, 2));
-      if (Array.isArray(data.Results) && data.Results[0]) {
-        syncFieldsFromResult(data.Results[0]);
+      apiData = JSON.stringify(data, null, 2);
+      vinApiFields = data?.Results?.[0];
+      setApiResult(apiData);
+      if (vinApiFields) {
+        syncFieldsFromResult(vinApiFields);
       }
     } catch (error: any) {
       toast({
@@ -169,13 +228,97 @@ const VinConsultation = () => {
       return;
     }
     setLoading(false);
+    let mktSummary = null;
+    let mktValue = null;
+    let mktValueRaw = "";
+
     // Só consulta valor de mercado se milhas preenchidas
     if (!miles) {
       setSummaryLoading(false);
+      // Salva no histórico já (com market vazio)
+      saveVinToHistory({
+        vin,
+        fields: { ...fields, ...(vinApiFields ? FIELD_MAP.reduce((acc, { field, sourceField }) => ({ ...acc, [field]: extractField(vinApiFields, field, sourceField) }), {}) : {}) },
+        apiResult: apiData,
+        date: Date.now(),
+        miles,
+        marketValueRaw: "",
+        marketSummary: null,
+        marketValue: null,
+      });
       return;
     }
-    await fetchMarketValueSummary();
-    setSummaryLoading(false);
+
+    // Market value
+    try {
+      const url = `https://vehicle-market-value.p.rapidapi.com/vmv?vin=${encodeURIComponent(vin)}&mileage=${encodeURIComponent(miles)}&period=180`;
+      const headers = {
+        "x-rapidapi-host": "vehicle-market-value.p.rapidapi.com",
+        "x-rapidapi-key": "09e8d21b70msh49da81e6613134ap11ca1djsn116d32450e77"
+      };
+      const resp = await fetch(url, {
+        method: "GET",
+        headers
+      });
+      const data = await resp.json();
+
+      mktValueRaw = JSON.stringify(data, null, 2);
+      // Adaptação: pega informações principais se existirem
+      const valueData = data.data?.values?.[0] || data.data;
+      mktValue = {
+        retail: valueData?.retailPrice ? `US$ ${valueData.retailPrice}` : "-",
+        trade: valueData?.tradeInFair ? `US$ ${valueData.tradeInFair}` : "-",
+        msrp: valueData?.msrp ? `US$ ${valueData.msrp}` : "-",
+        year: valueData?.year ?? "-",
+        make: valueData?.make ?? "-",
+        model: valueData?.model ?? "-",
+      };
+      if (
+        typeof valueData === "object" &&
+        valueData !== null &&
+        (valueData?.average || valueData?.input)
+      ) {
+        mktSummary = {
+          mainInfo: [
+            valueData?.make || fields.Make,
+            valueData?.model || fields.Model,
+            valueData?.trim || fields.Trim,
+            valueData?.year || fields.ModelYear
+          ].filter(Boolean).join(" "),
+          averageMiles: valueData?.average ?? null,
+          currentMiles: valueData?.input ?? (miles ? +miles : null),
+          recommendedValue: valueData?.average ?? null,
+          maxValue: valueData?.above ?? null,
+          auctionValue: valueData?.below ?? null,
+          salesPeriod: valueData?.sales_period ?? null
+        };
+      } else {
+        mktSummary = null;
+      }
+      setMarketValueRaw(mktValueRaw);
+      setMarketValue(mktValue);
+      setMarketSummary(mktSummary);
+    } catch (err: any) {
+      toast({
+        title: "Valor de Mercado",
+        description: err?.message || "Erro ao consultar valor de mercado.",
+        variant: "destructive"
+      });
+      setMarketSummary(null);
+    } finally {
+      setSummaryLoading(false);
+      // Salva histórico completo (vin + miles + market)
+      saveVinToHistory({
+        vin,
+        fields: { ...fields, ...(vinApiFields ? FIELD_MAP.reduce((acc, { field, sourceField }) => ({ ...acc, [field]: extractField(vinApiFields, field, sourceField) }), {}) : {}) },
+        apiResult: apiData,
+        date: Date.now(),
+        miles,
+        marketValueRaw: mktValueRaw,
+        marketSummary: mktSummary,
+        marketValue: mktValue,
+      });
+    }
   };
 
   const handlePhotoVin = () => {
@@ -319,6 +462,28 @@ const VinConsultation = () => {
           ocrLoading={ocrLoading}
           summaryLoading={summaryLoading}
         />
+
+        {/* Histórico VINs */}
+        {vinHistory.length > 0 && (
+          <div className="mt-3">
+            <div className="text-xs mb-1 font-semibold text-gray-600">
+              Últimos VINs pesquisados:
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {vinHistory.map(hist => (
+                <button
+                  key={`${hist.vin}-${hist.miles}`}
+                  className="px-2 py-1 rounded bg-blue-100 hover:bg-blue-300 transition text-xs font-mono border border-blue-300"
+                  onClick={() => restoreVinFromHistory(hist)}
+                  title={`Ver dados deste VIN (${hist.vin}${hist.miles ? " - " + hist.miles + " mi" : ""})`}
+                  type="button"
+                >
+                  {hist.vin}{hist.miles ? ` (${hist.miles} mi)` : ""}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Resumão destacado vem IMEDIATAMENTE após o botão Consultar */}
         {marketSummary && (
