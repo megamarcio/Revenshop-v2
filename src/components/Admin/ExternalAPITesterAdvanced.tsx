@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +6,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { ExternalLink, Download, Plus, Trash, Save } from "lucide-react";
+import { parseCurlCommand } from "./useCurlParser";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 type KV = { name: string; value: string };
 
@@ -65,6 +66,8 @@ const ExternalAPITesterAdvanced: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState<SavedAPIRequest[]>(loadFromLocal());
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [importCurlOpen, setImportCurlOpen] = useState(false);
+  const [curlInput, setCurlInput] = useState("");
 
   function handleAddRow(setter: React.Dispatch<React.SetStateAction<KV[]>>) {
     setter(arr => [...arr, { name: "", value: "" }]);
@@ -194,6 +197,53 @@ const ExternalAPITesterAdvanced: React.FC = () => {
     }
   }
 
+  function handleImportCurl() {
+    if (!curlInput.trim()) {
+      toast({ title: "Cole um comando cURL!", variant: "destructive" });
+      return;
+    }
+    const parsed = parseCurlCommand(curlInput);
+    if (!parsed) {
+      toast({ title: "Comando cURL inválido", description: "Verifique o comando informado.", variant: "destructive" });
+      return;
+    }
+    setUrl(parsed.url || "");
+    setMethod(parsed.method || "GET");
+    setHeaders(parsed.headers.length ? parsed.headers : [{ name: "", value: "" }]);
+    // Faz parsing de query se houver na url
+    const qParams: KV[] = [];
+    if (parsed.url.includes("?")) {
+      const qStr = parsed.url.split("?")[1].split("#")[0];
+      qStr.split("&").forEach(pair => {
+        const [k, v] = pair.split("=");
+        if (k) qParams.push({ name: decodeURIComponent(k), value: decodeURIComponent(v || "") });
+      });
+      setQueryParams(qParams.length ? qParams : [{ name: "", value: "" }]);
+    }
+    // Tenta identificar formato do body
+    if (parsed.body) {
+      setBodyRaw(parsed.body);
+      try {
+        JSON.parse(parsed.body);
+        setBodyMode("json");
+        // Extraia campos para o modo json (Name/Value)
+        const obj = JSON.parse(parsed.body);
+        if (typeof obj === "object" && obj !== null && !Array.isArray(obj)) {
+          setBodyParams(
+            Object.entries(obj).map(([name, value]) => ({
+              name: String(name),
+              value: typeof value === "string" ? value : JSON.stringify(value),
+            }))
+          );
+        }
+      } catch {
+        setBodyMode("raw");
+      }
+    }
+    setImportCurlOpen(false);
+    toast({ title: "Comando cURL importado com sucesso!" });
+  }
+
   return (
     <Card>
       <CardHeader>
@@ -204,9 +254,39 @@ const ExternalAPITesterAdvanced: React.FC = () => {
         <CardDescription>
           Monte requisições HTTP customizadas, com Headers, Query/Body Parameters, método e nome da API.<br />
           <span className="text-xs text-muted-foreground">
-            Adapte cada requisição conforme sua necessidade, salve e recarregue facilmente.
+            Adapte cada requisição conforme sua necessidade, salve e recarregue facilmente.<br />
+            <b>Agora também é possível importar comandos cURL!</b>
           </span>
         </CardDescription>
+        {/* Botão Importar cURL */}
+        <div className="mt-3 flex">
+          <Dialog open={importCurlOpen} onOpenChange={setImportCurlOpen}>
+            <DialogTrigger asChild>
+              <Button type="button" variant="outline" size="sm">
+                Importar cURL
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Importar comando cURL</DialogTitle>
+              </DialogHeader>
+              <div>
+                <Label htmlFor="curl-input" className="mb-2">Cole aqui o comando cURL</Label>
+                <Textarea
+                  id="curl-input"
+                  value={curlInput}
+                  onChange={e => setCurlInput(e.target.value)}
+                  rows={4}
+                  placeholder="curl -X POST https://api.exemplo.com -H 'Authorization: Bearer ...' -d '{\"key\":\"value\"}'"
+                  className="font-mono text-xs mt-2"
+                />
+              </div>
+              <DialogFooter className="mt-2">
+                <Button type="button" onClick={handleImportCurl}>Importar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </CardHeader>
       <CardContent>
         {/* Salvos */}
