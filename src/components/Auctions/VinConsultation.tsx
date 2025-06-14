@@ -7,6 +7,7 @@ import Tesseract from "tesseract.js";
 import { toast } from "@/hooks/use-toast";
 import { Label } from "@/components/ui/label";
 import { Car } from "lucide-react";
+import { Eye, Barcode, Image as ImageIcon } from "lucide-react";
 
 type VinResultFields = {
   Make: string;
@@ -86,6 +87,17 @@ const VinConsultation = () => {
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [miles, setMiles] = useState("");
+  const [showAuctionValue, setShowAuctionValue] = useState(false);
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [marketSummary, setMarketSummary] = useState<null | {
+    mainInfo: string;
+    averageMiles: number | null;
+    currentMiles: number | null;
+    recommendedValue: number | null;
+    maxValue: number | null;
+    auctionValue: number | null;
+    salesPeriod?: string[] | null;
+  }>(null);
 
   const syncFieldsFromResult = (result: any) => {
     const dataFields: Partial<VinResultFields> = {};
@@ -97,16 +109,22 @@ const VinConsultation = () => {
 
   const handleSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
+    setSummaryLoading(true);
+    setApiResult("");
+    setMarketValueRaw("");
+    setMarketSummary(null);
+    setMarketValue(null);
+
     if (!vin) {
       toast({
         title: "Erro",
         description: "Por favor, insira o VIN para consultar.",
         variant: "destructive"
       });
+      setSummaryLoading(false);
       return;
     }
     setLoading(true);
-    setApiResult("");
     setFields({
       Make: "",
       Model: "",
@@ -130,10 +148,10 @@ const VinConsultation = () => {
       Note: "",
     });
     try {
+      // VIN API
       const response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/DecodeVinValuesExtended/${vin}?format=json`);
       const data = await response.json();
       setApiResult(JSON.stringify(data, null, 2));
-      // Extrair dados para campos separados
       if (Array.isArray(data.Results) && data.Results[0]) {
         syncFieldsFromResult(data.Results[0]);
       }
@@ -143,9 +161,18 @@ const VinConsultation = () => {
         description: error?.message || "Erro desconhecido na API",
         variant: "destructive"
       });
-    } finally {
       setLoading(false);
+      setSummaryLoading(false);
+      return;
     }
+    setLoading(false);
+    // Só consulta valor de mercado se milhas preenchidas
+    if (!miles) {
+      setSummaryLoading(false);
+      return;
+    }
+    await fetchMarketValueSummary();
+    setSummaryLoading(false);
   };
 
   const handlePhotoVin = () => {
@@ -197,26 +224,11 @@ const VinConsultation = () => {
   const [marketValueRaw, setMarketValueRaw] = useState<string>("");
 
   // ATUALIZAÇÃO: Agora busca do valor de mercado usa o mesmo formato do Admin -> API Externas
-  const fetchMarketValue = async () => {
-    if (!vin) {
-      toast({
-        title: "Erro",
-        description: "Informe o VIN antes de consultar valor de mercado.",
-        variant: "destructive"
-      });
-      return;
-    }
-    if (!miles) {
-      toast({
-        title: "Erro",
-        description: "Informe a quilometragem (milhas) do veículo para calcular o valor de mercado.",
-        variant: "destructive"
-      });
-      return;
-    }
+  const fetchMarketValueSummary = async () => {
+    if (!vin || !miles) return;
     setLoadingMarket(true);
-    setMarketValue(null);
     setMarketValueRaw("");
+    setMarketSummary(null);
     try {
       // Monta URL com queries
       const url = `https://vehicle-market-value.p.rapidapi.com/vmv?vin=${encodeURIComponent(vin)}&mileage=${encodeURIComponent(miles)}&period=180`;
@@ -246,16 +258,44 @@ const VinConsultation = () => {
         make: valueData?.make ?? "-",
         model: valueData?.model ?? "-",
       });
+
+      if (
+        typeof valueData === "object" &&
+        valueData !== null &&
+        (valueData?.average || valueData?.input)
+      ) {
+        // Extrai campos para o resumo: médias e valores
+        setMarketSummary({
+          mainInfo: [
+            valueData?.make || fields.Make,
+            valueData?.model || fields.Model,
+            valueData?.trim || fields.Trim,
+            valueData?.year || fields.ModelYear
+          ].filter(Boolean).join(" "),
+          averageMiles: valueData?.average ?? null,
+          currentMiles: valueData?.input ?? (miles ? +miles : null),
+          recommendedValue: valueData?.average ?? null,
+          maxValue: valueData?.above ?? null,
+          auctionValue: valueData?.below ?? null,
+          salesPeriod: valueData?.sales_period ?? null
+        });
+      } else {
+        setMarketSummary(null);
+      }
     } catch (err: any) {
       toast({
         title: "Valor de Mercado",
         description: err?.message || "Erro ao consultar valor de mercado.",
         variant: "destructive"
       });
+      setMarketSummary(null);
     } finally {
       setLoadingMarket(false);
     }
   };
+
+  // handler do olhinho (exibir/ocultar valor leilao)
+  const toggleAuctionValue = () => setShowAuctionValue(v => !v);
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white shadow rounded-lg border animate-fade-in">
@@ -292,25 +332,79 @@ const VinConsultation = () => {
             variant="secondary"
             title="Escanear VIN com Câmera"
             disabled={ocrLoading || loading}
+            className="flex items-center justify-center gap-0 px-2"
           >
-            <Camera className="w-5 h-5 mr-2" />
-            {ocrLoading ? "Processando..." : "Escanear/Fotografar"}
+            <Barcode className="w-5 h-5" />
+            <ImageIcon className="w-5 h-5" />
           </Button>
           <Button
-            type="button"
-            onClick={fetchMarketValue}
-            variant="outline"
-            disabled={loadingMarket || !vin || !miles}
-            title="Consultar valor de mercado do veículo"
+            type="submit"
+            disabled={loading || ocrLoading || summaryLoading}
           >
-            <Car className="w-5 h-5 mr-2" />
-            {loadingMarket ? "Buscando valor..." : "Valor de Mercado"}
-          </Button>
-          <Button type="submit" disabled={loading || ocrLoading}>
-            {loading ? "Consultando..." : "Consultar"}
+            {loading || summaryLoading ? "Consultando..." : "Consultar"}
           </Button>
         </div>
       </form>
+
+      {/* RESUMO BONITO */}
+      {marketSummary && (
+        <div className="rounded-lg border p-5 bg-gradient-to-b from-blue-50 to-white shadow-lg space-y-2 animate-fade-in">
+          <div className="flex flex-col md:flex-row md:items-center md:gap-8 gap-1 mb-1">
+            <span className="font-bold text-lg flex gap-1 items-center">
+              <Car className="w-6 h-6" />
+              {marketSummary.mainInfo}
+            </span>
+            {marketSummary.salesPeriod?.length === 2 && (
+              <span className="text-xs ml-2 text-gray-500">
+                Período de vendas: {marketSummary.salesPeriod[0]} &rarr; {marketSummary.salesPeriod[1]}
+              </span>
+            )}
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-1">
+            <div>
+              <div className="text-xs text-gray-500">Milhas médias para ano:</div>
+              <div className="font-mono text-blue-600 text-lg">{marketSummary.averageMiles ?? "-"}</div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Milhas atuais:</div>
+              <div className="font-mono text-blue-600 text-lg">{marketSummary.currentMiles ?? "-"}</div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Valor de venda recomendado:</div>
+              <div className="font-mono text-green-700 text-lg">
+                {marketSummary.recommendedValue ? `US$ ${marketSummary.recommendedValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "-"}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500">Valor máximo de venda:</div>
+              <div className="font-mono text-green-700 text-lg">
+                {marketSummary.maxValue ? `US$ ${marketSummary.maxValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}` : "-"}
+              </div>
+            </div>
+            <div>
+              <div className="text-xs text-gray-500 flex items-center gap-2">
+                Valor leilão:
+                <button
+                  className="ml-1 rounded p-1 text-blue-700/60 hover:text-blue-800"
+                  type="button"
+                  onClick={toggleAuctionValue}
+                  title="Mostrar valor de leilão"
+                >
+                  <Eye className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="font-mono text-blue-700 text-lg">
+                {showAuctionValue && marketSummary.auctionValue
+                  ? `US$ ${marketSummary.auctionValue.toLocaleString("en-US", { maximumFractionDigits: 2 })}`
+                  : "•••••"}
+              </div>
+            </div>
+            <div>
+              {/* Espaço ou outros campos futuros */}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Campos sincronizados */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
