@@ -85,6 +85,7 @@ const VinConsultation = () => {
     Note: "",
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [miles, setMiles] = useState("");
 
   const syncFieldsFromResult = (result: any) => {
     const dataFields: Partial<VinResultFields> = {};
@@ -194,11 +195,20 @@ const VinConsultation = () => {
   const [marketValue, setMarketValue] = useState<null | { retail: string; trade: string; msrp: string; year: any; make: any; model: any; }> (null);
   const [loadingMarket, setLoadingMarket] = useState(false);
 
+  // Atualizado para enviar também as milhas
   const fetchMarketValue = async () => {
     if (!vin) {
       toast({
         title: "Erro",
         description: "Informe o VIN antes de consultar valor de mercado.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (!miles) {
+      toast({
+        title: "Erro",
+        description: "Informe a quilometragem (milhas) do veículo para calcular o valor de mercado.",
         variant: "destructive"
       });
       return;
@@ -209,7 +219,7 @@ const VinConsultation = () => {
       const resp = await fetch("https://ctdajbfmgmkhqueskjvk.functions.supabase.co/vehicle-market-value", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ vin: vin.replace(/\s/g, "") })
+        body: JSON.stringify({ vin: vin.replace(/\s/g, ""), miles: miles.replace(/\s/g, "") })
       });
       const data = await resp.json();
       if (!data.success) {
@@ -240,13 +250,23 @@ const VinConsultation = () => {
     <div className="max-w-2xl mx-auto space-y-6 p-6 bg-white shadow rounded-lg border animate-fade-in">
       <h2 className="text-xl font-bold mb-1">Consulta de VIN (Leilões)</h2>
       <form className="space-y-2" onSubmit={handleSubmit}>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           <Input
             value={vin}
             onChange={e => setVin(e.target.value.toUpperCase())}
             placeholder="Digite ou escaneie o VIN"
-            className="font-mono uppercase"
+            className="font-mono uppercase w-60"
             maxLength={17}
+          />
+          <Input
+            value={miles}
+            onChange={e => setMiles(e.target.value.replace(/\D/g, ""))}
+            placeholder="Milhas (ex: 55000)"
+            className="font-mono w-36"
+            maxLength={7}
+            inputMode="numeric"
+            pattern="\d*"
+            title="Milhas do veículo"
           />
           <input
             type="file"
@@ -269,7 +289,7 @@ const VinConsultation = () => {
             type="button"
             onClick={fetchMarketValue}
             variant="outline"
-            disabled={loadingMarket || !vin}
+            disabled={loadingMarket || !vin || !miles}
             title="Consultar valor de mercado do veículo"
           >
             <Car className="w-5 h-5 mr-2" />

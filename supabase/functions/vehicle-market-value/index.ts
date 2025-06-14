@@ -2,6 +2,7 @@
 /**
  * Edge Function para consultar o valor de mercado de veículos pela RapidAPI;
  * Usa a chave salva em ai_settings (coluna rapidapi_key).
+ * Agora aceita parâmetro "miles" (obrigatório).
  */
 import { serve } from 'std/server';
 import { createClient } from '@supabase/supabase-js';
@@ -22,11 +23,13 @@ serve(async (req) => {
   }
 
   try {
-    const { vin } = await req.json();
+    const { vin, miles } = await req.json();
     if (!vin || typeof vin !== 'string') {
-      return new Response(JSON.stringify({ error: 'VIN inválido' }), { status: 400, headers: corsHeaders });
+      return new Response(JSON.stringify({ error: 'VIN inválido.' }), { status: 400, headers: corsHeaders });
     }
-
+    if (!miles || (typeof miles !== 'string' && typeof miles !== 'number')) {
+      return new Response(JSON.stringify({ error: 'Milhas (miles) obrigatórias.' }), { status: 400, headers: corsHeaders });
+    }
     // Busca a rapidapi_key do banco
     const { data, error } = await supabase.rpc('get_ai_settings');
     const rapidapi_key = data?.[0]?.rapidapi_key;
@@ -35,8 +38,8 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'RapidAPI key não configurada.' }), { status: 500, headers: corsHeaders });
     }
 
-    // Consulta na API (VEHICLE-MARKET-VALUE, exemplo: "us-market-value-by-vin" endpoint da RapidAPI)
-    const url = `https://us-market-value-by-vin.p.rapidapi.com/value?vin=${encodeURIComponent(vin)}`;
+    // Consulta na API (agora inclui milhas no query param)
+    const url = `https://us-market-value-by-vin.p.rapidapi.com/value?vin=${encodeURIComponent(vin)}&mileage=${encodeURIComponent(miles)}`;
     const rapidResp = await fetch(url, {
       headers: {
         'X-RapidAPI-Key': rapidapi_key,
