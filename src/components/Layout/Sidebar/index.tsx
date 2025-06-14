@@ -1,8 +1,17 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
-import { Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from '@/components/ui/sidebar';
 import { getMenuItems } from './menuItems';
 import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
@@ -22,9 +31,10 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     isInternalSeller,
     isAdmin
   } = useAuth();
-  const { state, setOpen } = useSidebar();
-  
-  const menuItems = getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller);
+  const { state, setOpen, isMobile } = useSidebar();
+
+  // Track if the sidebar was collapsed before hover (only on desktop)
+  const wasCollapsedOnHover = useRef(false);
 
   const handleMenuItemClick = (itemId: string) => {
     setActiveTab(itemId);
@@ -34,21 +44,40 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     }
   };
 
+  // Handlers to expand/collapse on mouse hover
+  const handleMouseEnter = () => {
+    if (!isMobile && state === "collapsed") {
+      wasCollapsedOnHover.current = true;
+      setOpen(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!isMobile && wasCollapsedOnHover.current) {
+      setOpen(false);
+      wasCollapsedOnHover.current = false;
+    }
+  };
+
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       <AppSidebarHeader />
-      
+
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map(item => {
+              {getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller).map(item => {
                 const Icon = item.icon;
                 return (
                   <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton 
-                      isActive={activeTab === item.id} 
-                      onClick={() => handleMenuItemClick(item.id)} 
+                    <SidebarMenuButton
+                      isActive={activeTab === item.id}
+                      onClick={() => handleMenuItemClick(item.id)}
                       tooltip={state === "collapsed" ? item.label : undefined}
                     >
                       <Icon />
@@ -57,7 +86,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                   </SidebarMenuItem>
                 );
               })}
-              
+
               {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
               <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
@@ -77,4 +106,3 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 };
 
 export default AppSidebar;
-
