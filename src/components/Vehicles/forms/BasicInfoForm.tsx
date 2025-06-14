@@ -2,6 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import ColorSelector from './ColorSelector';
 import VehicleUsageSelector from './VehicleUsageSelector';
 import { VehicleFormData } from '../types/vehicleFormTypes';
@@ -16,7 +17,7 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Informações Básicas</h3>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="name">Nome do Veículo *</Label>
@@ -68,6 +69,36 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
       </div>
 
+      {/* Tipo do Veículo e Uso do Veículo lado a lado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="category">Tipo do Veículo</Label>
+          <Select
+            value={formData.category || ''}
+            onValueChange={(value) => onInputChange('category', value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Selecione o tipo do veículo" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="forSale">Pronto para venda</SelectItem>
+              <SelectItem value="reserved">Reservado</SelectItem>
+              <SelectItem value="sold">Vendido</SelectItem>
+              <SelectItem value="consigned">Consignado</SelectItem>
+              <SelectItem value="bhph">BHPH</SelectItem>
+              <SelectItem value="rentalFleet">Frota de Aluguel</SelectItem>
+              <SelectItem value="auction">Leilão</SelectItem>
+              <SelectItem value="logistics">Logística/Transportadora</SelectItem>
+              <SelectItem value="other">Outro</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <VehicleUsageSelector
+          value={formData.vehicleUsage || 'personal'}
+          onChange={(value) => onInputChange('vehicleUsage', value)}
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ColorSelector
           value={formData.color}
@@ -86,13 +117,9 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
           />
         </div>
       </div>
-
-      <VehicleUsageSelector
-        value={formData.vehicleUsage || 'personal'}
-        onChange={(value) => onInputChange('vehicleUsage', value)}
-      />
     </div>
   );
 };
 
 export default BasicInfoForm;
+
