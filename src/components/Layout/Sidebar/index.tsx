@@ -22,7 +22,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     isInternalSeller,
     isAdmin
   } = useAuth();
-  const { state, collapse } = useSidebar(); // Adicione a função collapse aqui
+  const { state, setOpen } = useSidebar();
   
   const menuItems = getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller);
 
@@ -30,7 +30,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     setActiveTab(itemId);
     // Após seleção, colapsa o menu automaticamente
     if (state !== "collapsed") {
-      collapse();
+      setOpen(false);
     }
   };
 
@@ -61,12 +61,12 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
               {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
               <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (state !== "collapsed") collapse();
+                if (state !== "collapsed") setOpen(false);
               }} />
               <LogisticsMenu />
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (state !== "collapsed") collapse();
+                if (state !== "collapsed") setOpen(false);
               }} />
             </SidebarMenu>
           </SidebarGroupContent>
