@@ -41,20 +41,29 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
       }
 
       const result = data.Results[0];
-      // Parse model year, make, model, color (color pode não existir direto na API, buscar 'Color' ou 'ExteriorColor')
-      const nomeVeiculo = [result.Make, result.Model, result.ModelYear].filter(Boolean).join(' ') || '';
-      const ano = result.ModelYear || '';
-      const cor = result.Color || result.ExteriorColor || '';
+      // extração dos campos
+      const make = (result.Make || '').toUpperCase();
+      const model = (result.Model || '').toUpperCase();
+      const modelYear = result.ModelYear || '';
+      const vehicleName = (make && model) 
+        ? `${make} ${model}`.trim() 
+        : (make || model);
+      // Caso precise de mais info, pode adaptar aqui para concatenar outros campos
+      const cor = (result.Color || result.ExteriorColor || '').toUpperCase();
 
-      // Preencher campos do formulário, se vierem dados
-      if (nomeVeiculo) onInputChange('name', nomeVeiculo);
-      if (ano) onInputChange('year', String(ano));
+      // montar campo nome com marca, nome do veículo e modelo, tudo em MAIÚSCULO
+      // obs: geralmente Make é marca e Model é modelo/versão, sem campo separado explicitamente para "nome do veículo"
+      // logo, usamos MAKE + MODEL para o nome:
+      const nomeVeiculoMaiusculo = [make, model].filter(Boolean).join(' ');
+
+      if (nomeVeiculoMaiusculo) onInputChange('name', nomeVeiculoMaiusculo);
+      if (modelYear) onInputChange('year', String(modelYear));
       if (cor) onInputChange('color', cor);
 
-      if (nomeVeiculo || ano || cor) {
+      if (nomeVeiculoMaiusculo || modelYear || cor) {
         toast({
           title: "Dados do veículo encontrados",
-          description: `${nomeVeiculo ? `Nome: ${nomeVeiculo}` : ''} ${ano ? `Ano: ${ano}` : ''} ${cor ? `Cor: ${cor}` : ''}`,
+          description: `${nomeVeiculoMaiusculo ? `Nome: ${nomeVeiculoMaiusculo}` : ''} ${modelYear ? `Ano: ${modelYear}` : ''} ${cor ? `Cor: ${cor}` : ''}`,
         });
       } else {
         toast({
@@ -194,4 +203,3 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
 };
 
 export default BasicInfoForm;
-
