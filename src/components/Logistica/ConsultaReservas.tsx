@@ -2,9 +2,10 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { Download, ExternalLink, Phone } from "lucide-react";
+import { Download, ExternalLink, Phone, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { LocationBadge } from "./LocationBadge";
+import ReservationWhatsAppModal from "./ReservationWhatsAppModal";
 
 // Novo tipo, representando exatamente os campos desejados
 interface Reservation {
@@ -489,12 +490,13 @@ const ConsultaReservas: React.FC = () => {
                   <th className="px-2 py-2"></th>
                   <th className="px-2 py-2"></th>
                   <th className="px-2 py-2"></th>
+                  <th className="px-2 py-2"></th>
                 </tr>
               </thead>
               <tbody>
                 {orderedReservations.length === 0 && !loading
                   ? <tr>
-                      <td colSpan={8} className="px-4 py-3 text-center text-muted-foreground">
+                      <td colSpan={9} className="px-4 py-3 text-center text-muted-foreground">
                         Nenhum resultado.
                       </td>
                     </tr>
@@ -620,6 +622,20 @@ const ConsultaReservas: React.FC = () => {
                               </Button>
                             )}
                           </td>
+                          {/* Botão de compartilhar */}
+                          <td className="px-2 py-2 align-middle">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => handleOpenShareModal(r)}
+                              title="Compartilhar reserva no WhatsApp"
+                              aria-label="Compartilhar reserva no WhatsApp"
+                              tabIndex={0}
+                              className="h-8 w-8"
+                            >
+                              <Share2 className="w-4 h-4 text-gray-600" />
+                            </Button>
+                          </td>
                         </tr>
                       );
                     })}
@@ -629,6 +645,20 @@ const ConsultaReservas: React.FC = () => {
         </div>
       </div>
     );
+  };
+
+  // --------- STATE PARA MODAL DE COMPARTILHAMENTO ---------
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedReservationForShare, setSelectedReservationForShare] = useState<Reservation | null>(null);
+
+  const handleOpenShareModal = (reservation: Reservation) => {
+    setSelectedReservationForShare(reservation);
+    setIsShareModalOpen(true);
+  };
+
+  const handleCloseShareModal = () => {
+    setIsShareModalOpen(false);
+    setSelectedReservationForShare(null);
   };
 
   return (
@@ -688,6 +718,13 @@ const ConsultaReservas: React.FC = () => {
         reservations: reservationsReturn,
         rowKommoLeadIds: rowKommoLeadIdsReturn,
       })}
+
+      {/* Modal de compartilhamento */}
+      <ReservationWhatsAppModal
+        isOpen={isShareModalOpen}
+        onClose={handleCloseShareModal}
+        reservationData={selectedReservationForShare}
+      />
     </div>
   );
 };
