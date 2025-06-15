@@ -544,13 +544,17 @@ const ConsultaReservas: React.FC = () => {
                           </td>
                           {/* Pickup */}
                           <td className="px-4 py-2">
-                            <span style={{ fontSize: 12, display: "block" }} className="font-normal text-xs">{pickup.date}</span>
-                            <span style={{ fontSize: 12, color: "#666" }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-sm">{pickup.date}</span>
+                              <span className="text-muted-foreground text-xs">{pickup.time}</span>
+                            </div>
                           </td>
                           {/* Return */}
                           <td className="px-4 py-2">
-                            <span style={{ fontSize: 12, display: "block" }} className="text-xs">{ret.date}</span>
-                            <span style={{ fontSize: 12, color: "#666" }} className="px-[20px] text-xs font-thin">{ret.time}</span>
+                            <div className="flex flex-col">
+                              <span className="font-semibold text-sm">{ret.date}</span>
+                              <span className="text-muted-foreground text-xs">{ret.time}</span>
+                            </div>
                           </td>
                           {/* Veículo - plate */}
                           <td className="px-4 py-2 align-middle" style={{ fontSize: 13 }}>{r.plate || "-"}</td>
