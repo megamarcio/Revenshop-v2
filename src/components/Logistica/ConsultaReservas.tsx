@@ -285,7 +285,7 @@ const ConsultaReservas: React.FC = () => {
                 <th className="px-4 py-2 text-left" style={{
                 fontSize: 13,
                 fontWeight: 600
-              }}>Reserva </th>
+              }}>Reserva&nbsp;</th>
                 <th className="px-4 py-2 text-left" style={{
                 fontSize: 13
               }}>Nome do Cliente</th>
@@ -299,21 +299,20 @@ const ConsultaReservas: React.FC = () => {
                 fontSize: 13
               }}>Veículo</th>
                 <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th> {/* Nova coluna para botão WhatsApp */}
+                <th className="px-2 py-2"></th>
+                <th className="px-2 py-2"></th> {/* Nova coluna para botão Kommo */}
               </tr>
             </thead>
             <tbody>
               {reservations.length === 0 && !loading
                 ? <tr>
-                  <td colSpan={6} className="px-4 py-3 text-center text-muted-foreground">
+                  <td colSpan={8} className="px-4 py-3 text-center text-muted-foreground">
                     Nenhum resultado.
                   </td>
                 </tr>
                 : reservations.map((r, idx) => {
                   const pickup = formatDateTime(r.pickup_date);
                   const ret = formatDateTime(r.return_date);
-
-                  // Remover tudo que não for dígito do telefone
                   const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
 
                   return (
@@ -333,7 +332,7 @@ const ConsultaReservas: React.FC = () => {
                           {r.phone_number || "-"}
                         </div>
                       </td>
-                      {/* Customer First Name + Last Name (2 linhas) */}
+                      {/* Customer First Name + Last Name */}
                       <td className="px-4 py-2">
                         <span style={{
                           display: "block",
@@ -413,6 +412,26 @@ const ConsultaReservas: React.FC = () => {
                             </a>
                           </Button>
                           : null}
+                      </td>
+                      {/* Botão Kommo (abre Kommo CRM com o id da reserva) */}
+                      <td className="px-2 py-2 align-middle">
+                        <Button
+                          asChild
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-blue-600 hover:text-blue-800"
+                          title="Ver lead no Kommo"
+                          aria-label="Ver lead no Kommo"
+                          tabIndex={0}
+                        >
+                          <a
+                            href={`https://r3rentalcar.kommo.com/leads/detail/${encodeURIComponent(r.reservation_id)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                          </a>
+                        </Button>
                       </td>
                     </tr>
                   );
