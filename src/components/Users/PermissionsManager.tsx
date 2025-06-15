@@ -88,12 +88,12 @@ const PermissionsManager: React.FC = () => {
                     <Button
                       type="button"
                       key={sp.id}
-                      variant={hasPermission ? "success" : "outline"}
-                      className={`flex items-center gap-2 ${hasPermission ? '' : 'opacity-80'}`}
+                      variant={hasPermission ? "default" : "outline"}
+                      className={`flex items-center gap-2 ${hasPermission ? 'bg-green-500 text-white hover:bg-green-600' : 'opacity-80'}`}
                       size="sm"
                       onClick={() => handleTogglePermission(sp.id)}
                     >
-                      {hasPermission ? <CheckCircle className="w-4 h-4 text-green-600" /> : <ShieldX className="w-4 h-4 text-muted-foreground" />}
+                      {hasPermission ? <CheckCircle className="w-4 h-4 text-white" /> : <ShieldX className="w-4 h-4 text-muted-foreground" />}
                       {sp.label}
                     </Button>
                   );
@@ -111,4 +111,3 @@ const PermissionsManager: React.FC = () => {
 };
 
 export default PermissionsManager;
-

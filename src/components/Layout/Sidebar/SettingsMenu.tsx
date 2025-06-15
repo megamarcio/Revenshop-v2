@@ -7,8 +7,9 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
+  SidebarMenu,
   useSidebar
-} from '@/components/ui/sidebar';
+} from '@/components/ui/sidebar'; // Added SidebarMenu import here
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -116,4 +117,3 @@ const SettingsMenu = ({ activeTab, setActiveTab }: SettingsMenuProps) => {
 };
 
 export default SettingsMenu;
-
