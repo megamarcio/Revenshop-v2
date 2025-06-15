@@ -12,6 +12,7 @@ interface Reservation {
   pickup_date: string;
   return_date: string;
   plate: string;
+  phone_number?: string; // novo campo opcional
 }
 
 // Novo parser para o modelo informado
@@ -50,13 +51,24 @@ const parseReservationList = (data: any): Reservation[] => {
     } else if (item.vehicle_plate) {
       plate = item.vehicle_plate;
     }
+
+    // Novo: phone_number
+    let phone_number = "-";
+    if (item.customer && typeof item.customer === "object") {
+      phone_number = item.customer.phone_number || item.customer.phone || "-";
+    } else if (item.phone_number) {
+      phone_number = item.phone_number;
+    } else if (item.customer_phone) {
+      phone_number = item.customer_phone;
+    }
     return {
       reservation_id: reservationId,
       customer_first_name: customerFirstName,
       customer_last_name: customerLastName,
       pickup_date: pickupDate,
       return_date: returnDate,
-      plate
+      plate,
+      phone_number
     };
   });
 };
@@ -297,11 +309,22 @@ const ConsultaReservas: React.FC = () => {
               const pickup = formatDateTime(r.pickup_date);
               const ret = formatDateTime(r.return_date);
               return <tr key={r.reservation_id + idx} className="border-t align-top">
-                      {/* Reservation ID */}
+                      {/* Reservation ID + phone_number */}
                       <td className="px-4 py-2 align-middle" style={{
                   fontSize: 13,
                   fontWeight: 700
-                }}>{r.reservation_id}</td>
+                }}>
+                        {r.reservation_id}
+                        {/* Novo: Phone number embaixo, fonte menor */}
+                        <div style={{
+                          fontSize: 11,
+                          color: "#757575",
+                          fontWeight: 400,
+                          marginTop: 2
+                        }}>
+                          {r.phone_number || "-"}
+                        </div>
+                      </td>
                       {/* Customer First Name + Last Name (2 linhas) */}
                       <td className="px-4 py-2">
                         <span style={{
