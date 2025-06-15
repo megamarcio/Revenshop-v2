@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { Download } from "lucide-react";
+import { Download, ExternalLink } from "lucide-react";
 
 // Novo tipo, representando exatamente os campos desejados
 interface Reservation {
@@ -298,24 +298,27 @@ const ConsultaReservas: React.FC = () => {
                 <th className="px-4 py-2 text-left" style={{
                 fontSize: 13
               }}>Veículo</th>
+                <th className="px-2 py-2 text-left" style={{ fontSize: 13 }}></th>
               </tr>
             </thead>
             <tbody>
-              {reservations.length === 0 && !loading ? <tr>
-                  <td colSpan={5} className="px-4 py-3 text-center text-muted-foreground">
+              {reservations.length === 0 && !loading
+                ? <tr>
+                  <td colSpan={6} className="px-4 py-3 text-center text-muted-foreground">
                     Nenhum resultado.
                   </td>
-                </tr> : reservations.map((r, idx) => {
-              const pickup = formatDateTime(r.pickup_date);
-              const ret = formatDateTime(r.return_date);
-              return <tr key={r.reservation_id + idx} className="border-t align-top">
+                </tr>
+                : reservations.map((r, idx) => {
+                  const pickup = formatDateTime(r.pickup_date);
+                  const ret = formatDateTime(r.return_date);
+                  return (
+                    <tr key={r.reservation_id + idx} className="border-t align-top">
                       {/* Reservation ID + phone_number */}
                       <td className="px-4 py-2 align-middle" style={{
-                  fontSize: 13,
-                  fontWeight: 700
-                }}>
+                        fontSize: 13,
+                        fontWeight: 700
+                      }}>
                         {r.reservation_id}
-                        {/* Novo: Phone number embaixo, fonte menor */}
                         <div style={{
                           fontSize: 11,
                           color: "#757575",
@@ -328,50 +331,65 @@ const ConsultaReservas: React.FC = () => {
                       {/* Customer First Name + Last Name (2 linhas) */}
                       <td className="px-4 py-2">
                         <span style={{
-                    display: "block",
-                    fontSize: 12,
-                    fontWeight: 600
-                  }}>
+                          display: "block",
+                          fontSize: 12,
+                          fontWeight: 600
+                        }}>
                           {r.customer_first_name}
                         </span>
                         <span style={{
-                    display: "block",
-                    fontSize: 10,
-                    color: "#757575"
-                  }}>
+                          display: "block",
+                          fontSize: 10,
+                          color: "#757575"
+                        }}>
                           {r.customer_last_name}
                         </span>
                       </td>
                       {/* Pickup */}
                       <td className="px-4 py-2">
                         <span style={{
-                    fontSize: 12,
-                    display: "block"
-                  }} className="font-normal text-xs">{pickup.date}</span>
+                          fontSize: 12,
+                          display: "block"
+                        }} className="font-normal text-xs">{pickup.date}</span>
                         <span style={{
-                    fontSize: 12,
-                    color: "#666"
-                  }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
+                          fontSize: 12,
+                          color: "#666"
+                        }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
                       </td>
                       {/* Return */}
                       <td className="px-4 py-2">
                         <span style={{
-                    fontSize: 12,
-                    display: "block"
-                  }} className="text-xs">{ret.date}</span>
+                          fontSize: 12,
+                          display: "block"
+                        }} className="text-xs">{ret.date}</span>
                         <span style={{
-                    fontSize: 12,
-                    color: "#666"
-                  }} className="px-[20px] text-xs font-thin">{ret.time}</span>
+                          fontSize: 12,
+                          color: "#666"
+                        }} className="px-[20px] text-xs font-thin">{ret.time}</span>
                       </td>
                       {/* Veículo - plate */}
                       <td className="px-4 py-2 align-middle" style={{
-                  fontSize: 13
-                }}>
+                        fontSize: 13
+                      }}>
                         {r.plate || "-"}
                       </td>
-                    </tr>;
-            })}
+                      {/* Nova coluna: botão para abrir reserva */}
+                      <td className="px-2 py-2 align-middle">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => window.open(`https://r3-rental.us5.hqrentals.app/car-rental/reservations/step3?id=${encodeURIComponent(r.reservation_id)}`, '_blank')}
+                          title="Abrir reserva do cliente"
+                          aria-label="Abrir reserva do cliente"
+                          tabIndex={0}
+                          className="h-8 w-8"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </td>
+                    </tr>
+                  );
+                })}
             </tbody>
           </table>
         </div>
