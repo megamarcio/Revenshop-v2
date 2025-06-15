@@ -133,6 +133,7 @@ const ConsultaReservas: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [rawApiData, setRawApiData] = useState<any | null>(null);
   const [lastRequestLog, setLastRequestLog] = useState<any | null>(null);
+  const [rowKommoLeadIds, setRowKommoLeadIds] = useState<{ [reservationId: string]: string }>({});
 
   // Nova função para extrair e formatar datas
   const getFiltroDatas = () => {
@@ -204,8 +205,35 @@ const ConsultaReservas: React.FC = () => {
       // Salvar resposta no log
       responseLog.response_json = data;
       setLastRequestLog(responseLog);
+
       const onlyRelevant = parseReservationList(data);
       setReservations(onlyRelevant);
+
+      // --- CAPTURA O "f855" PARA CADA RESERVA ---
+      // Construir um map: reservation.reservation_id => f855
+      // Aceita formatos data.data, data, etc.
+      const list = Array.isArray(data) ? data : data?.data || [];
+      const kommoMap: { [reservationId: string]: string } = {};
+      list.forEach((item: any) => {
+        // Pegue o reservation_id pelo mesmo critério que o parser
+        const reservationId =
+          item.reservation_id ||
+          item.custom_reservation_number ||
+          item.prefixed_id ||
+          (item.id ? String(item.id) : "-");
+        // Extrai o "f855" se existir; aceita vários níveis (item.f855 ou em item.custom_fields?.f855)
+        let kommoId = undefined;
+        if (item.f855) {
+          kommoId = String(item.f855);
+        } else if (item.custom_fields && item.custom_fields.f855) {
+          kommoId = String(item.custom_fields.f855);
+        }
+        if (reservationId && kommoId) {
+          kommoMap[reservationId] = kommoId;
+        }
+      });
+      setRowKommoLeadIds(kommoMap);
+
       if (onlyRelevant.length === 0) {
         toast({
           title: "Nenhum resultado.",
@@ -315,6 +343,9 @@ const ConsultaReservas: React.FC = () => {
                   const ret = formatDateTime(r.return_date);
                   const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
 
+                  // Pegue o KommoLeadId associado a esta reserva
+                  const kommoLeadId = rowKommoLeadIds[r.reservation_id];
+
                   return (
                     <tr key={r.reservation_id + idx} className="border-t align-top">
                       {/* Reservation ID + phone_number */}
@@ -413,25 +444,37 @@ const ConsultaReservas: React.FC = () => {
                           </Button>
                           : null}
                       </td>
-                      {/* Botão Kommo (abre Kommo CRM com o id da reserva) */}
+                      {/* Botão Kommo (abre Kommo CRM com id "f855" do JSON) */}
                       <td className="px-2 py-2 align-middle">
-                        <Button
-                          asChild
-                          size="icon"
-                          variant="ghost"
-                          className="h-8 w-8 text-blue-600 hover:text-blue-800"
-                          title="Ver lead no Kommo"
-                          aria-label="Ver lead no Kommo"
-                          tabIndex={0}
-                        >
-                          <a
-                            href={`https://r3rentalcar.kommo.com/leads/detail/${encodeURIComponent(r.reservation_id)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        {kommoLeadId ? (
+                          <Button
+                            asChild
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-blue-600 hover:text-blue-800"
+                            title="Ver lead no Kommo"
+                            aria-label="Ver lead no Kommo"
+                            tabIndex={0}
+                          >
+                            <a
+                              href={`https://r3rentalcar.kommo.com/leads/detail/${encodeURIComponent(kommoLeadId)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </a>
+                          </Button>
+                        ) : (
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            disabled
+                            className="h-8 w-8 text-gray-300"
+                            title="Lead Kommo não encontrado"
                           >
                             <ExternalLink className="w-4 h-4" />
-                          </a>
-                        </Button>
+                          </Button>
+                        )}
                       </td>
                     </tr>
                   );
