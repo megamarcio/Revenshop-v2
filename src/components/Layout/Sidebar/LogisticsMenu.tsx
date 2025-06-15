@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Truck, ChevronRight, Search } from 'lucide-react';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from '@/components/ui/sidebar';
@@ -7,6 +6,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverTrigger, PopoverContent } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { useReservaConsulta } from "@/contexts/ReservaConsultaContext";
 
 type ReservationItem = {
   reservation_number: string;
@@ -17,17 +17,21 @@ type ReservationItem = {
 
 const LogisticsMenu = () => {
   const { state } = useSidebar();
+  // Utiliza contexto global agora!
+  const {
+    dateRange,
+    setDateRange,
+    setResult,
+    setLoading,
+    setError,
+    loading,
+    error,
+    result,
+  } = useReservaConsulta();
 
-  // Filtros: datas inicial e final
-  const [dateRange, setDateRange] = useState<{ from: Date | undefined; to: Date | undefined }>({ from: undefined, to: undefined });
-  const [result, setResult] = useState<ReservationItem[] | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string>("");
-
-  // Exibir ou não a busca custom
+  // Exibir ou não a busca custom (collapsible do menu)
   const [open, setOpen] = useState(false);
 
-  // Handlers para filtragem e busca dos dados
   const fetchReservations = async () => {
     setLoading(true);
     setError("");
@@ -39,7 +43,6 @@ const LogisticsMenu = () => {
     }
     const fromStr = format(dateRange.from, "yyyy-MM-dd");
     const toStr = format(dateRange.to, "yyyy-MM-dd");
-    // Monta filtros (igual exemplo)
     const filters = encodeURIComponent(JSON.stringify([
       { type: "string", column: "status", operator: "equals", value: "open" },
       { type: "date", column: "reservation_date", operator: "between", value: `${fromStr},${toStr}` }
@@ -54,8 +57,7 @@ const LogisticsMenu = () => {
       });
       if (!res.ok) throw new Error("Falha ao buscar reservas");
       const data = await res.json();
-      // Extrai só campos necessários
-      const onlyRelevant: ReservationItem[] = data?.data?.map((res: any) => ({
+      const onlyRelevant = data?.data?.map((res: any) => ({
         reservation_number: res.reservation_number || "-",
         customer_name: res.customer_name || "-",
         checkin_datetime: res.checkin_datetime || "-",
@@ -74,11 +76,11 @@ const LogisticsMenu = () => {
       <Collapsible className="group/collapsible" open={open} onOpenChange={setOpen}>
         <CollapsibleTrigger asChild>
           <SidebarMenuButton 
-            tooltip={state === "collapsed" ? "Logística Rental Car" : undefined}
+            tooltip={state === "collapsed" ? "Consulta Reservas" : undefined}
             className="w-full hover:bg-muted data-[state=open]:bg-muted"
           >
             <Truck className="h-4 w-4" />
-            <span className="text-sm px-0 mx-0">Logística Rental Car</span>
+            <span className="text-sm px-0 mx-0">Consulta Reservas</span>
             <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
@@ -99,7 +101,7 @@ const LogisticsMenu = () => {
                         <Calendar
                           mode="single"
                           selected={dateRange.from}
-                          onSelect={from => setDateRange(old => ({ ...old, from }))}
+                          onSelect={from => setDateRange({ ...dateRange, from })}
                           className="p-3 pointer-events-auto"
                           disabled={(date) => !!dateRange.to && date > dateRange.to}
                         />
@@ -115,7 +117,7 @@ const LogisticsMenu = () => {
                         <Calendar
                           mode="single"
                           selected={dateRange.to}
-                          onSelect={to => setDateRange(old => ({ ...old, to }))}
+                          onSelect={to => setDateRange({ ...dateRange, to })}
                           className="p-3 pointer-events-auto"
                           disabled={(date) => !!dateRange.from && date < dateRange.from}
                         />
@@ -131,39 +133,8 @@ const LogisticsMenu = () => {
                     </Button>
                   </div>
                 </div>
-                {/* Exibe erros */}
+                {/* Exibe erros abaixo dos filtros */}
                 {error && <div className="text-xs text-red-500 mt-1">{error}</div>}
-
-                {/* Resultado da busca */}
-                {result && (
-                  <div className="bg-gray-100 rounded px-2 py-1 mt-3 max-h-52 overflow-auto">
-                    <table className="text-xs w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="p-1 text-left font-bold">Reserva</th>
-                          <th className="p-1 text-left font-bold">Cliente</th>
-                          <th className="p-1 text-left font-bold">Checkin</th>
-                          <th className="p-1 text-left font-bold">Checkout</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {result.length === 0 && (
-                          <tr>
-                            <td colSpan={4} className="p-2 text-center text-gray-500">Nenhuma reserva encontrada</td>
-                          </tr>
-                        )}
-                        {result.map((res, idx) => (
-                          <tr key={idx} className="border-b last:border-0">
-                            <td className="p-1">{res.reservation_number}</td>
-                            <td className="p-1">{res.customer_name}</td>
-                            <td className="p-1">{res.checkin_datetime ? res.checkin_datetime.replace("T", " ").slice(0,16) : "-"}</td>
-                            <td className="p-1">{res.checkout_datetime ? res.checkout_datetime.replace("T", " ").slice(0,16) : "-"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
               </div>
             </SidebarMenuSubItem>
           </SidebarMenuSub>

@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -18,11 +17,32 @@ import FinancingMenu from './FinancingMenu';
 import LogisticsMenu from './LogisticsMenu';
 import SettingsMenu from './SettingsMenu';
 import { Menu } from "lucide-react";
+import { ReservaConsultaProvider, useReservaConsulta } from "@/contexts/ReservaConsultaContext";
+import ConsultaReservasPage from "@/components/Logistics/ConsultaReservasPage";
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
+
+const ContentWithConsultaResultados = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const { result, loading, error } = useReservaConsulta();
+  const showResultados = !!result || !!loading || !!error;
+  return (
+    <div className="flex w-full">
+      {children}
+      {showResultados && (
+        <div className="flex-1 min-w-0">
+          <ConsultaReservasPage />
+        </div>
+      )}
+    </div>
+  );
+};
 
 const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { t } = useLanguage();
@@ -75,66 +95,71 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   };
 
   return (
-    <Sidebar
-      collapsible="icon"
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-    >
-      <div className="flex items-center gap-2 px-4 py-2">
-        <AppSidebarHeader />
-        <button
-          title={isPinned ? "Desafixar menu" : "Fixar menu aberto"}
-          className={`ml-auto rounded p-1 ${
-            isPinned
-              ? "bg-blue-500 text-white shadow"
-              : "bg-gray-200 text-gray-700 hover:bg-blue-200"
-          } transition`}
-          onClick={togglePin}
-          tabIndex={0}
-          aria-label={isPinned ? "Desafixar menu" : "Fixar menu"}
-          style={{ fontSize: 20 }}
-        >
-          <Menu className={isPinned ? "rotate-90" : ""} size={18} />
-        </button>
-      </div>
+    <ReservaConsultaProvider>
+      <Sidebar
+        collapsible="icon"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div className="flex items-center gap-2 px-4 py-2">
+          <AppSidebarHeader />
+          <button
+            title={isPinned ? "Desafixar menu" : "Fixar menu aberto"}
+            className={`ml-auto rounded p-1 ${
+              isPinned
+                ? "bg-blue-500 text-white shadow"
+                : "bg-gray-200 text-gray-700 hover:bg-blue-200"
+            } transition`}
+            onClick={togglePin}
+            tabIndex={0}
+            aria-label={isPinned ? "Desafixar menu" : "Fixar menu"}
+            style={{ fontSize: 20 }}
+          >
+            <Menu className={isPinned ? "rotate-90" : ""} size={18} />
+          </button>
+        </div>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller).map(item => {
-                const Icon = item.icon;
-                return (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton
-                      isActive={activeTab === item.id}
-                      onClick={() => handleMenuItemClick(item.id)}
-                      tooltip={state === "collapsed" ? item.label : undefined}
-                    >
-                      <Icon />
-                      <span className="text-sm px-0 mx-0">{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {getMenuItems(t, canAccessDashboard, canAccessAuctions, isAdmin, isInternalSeller).map(item => {
+                  const Icon = item.icon;
+                  return (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton
+                        isActive={activeTab === item.id}
+                        onClick={() => handleMenuItemClick(item.id)}
+                        tooltip={state === "collapsed" ? item.label : undefined}
+                      >
+                        <Icon />
+                        <span className="text-sm px-0 mx-0">{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
 
-              {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
-              <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
-                setActiveTab(tab);
-                if (state !== "collapsed" && !isPinned) setOpen(false);
-              }} />
-              <LogisticsMenu />
-              <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
-                setActiveTab(tab);
-                if (state !== "collapsed" && !isPinned) setOpen(false);
-              }} />
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-      </SidebarContent>
-    </Sidebar>
+                {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
+                <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
+                  setActiveTab(tab);
+                  if (state !== "collapsed" && !isPinned) setOpen(false);
+                }} />
+                <LogisticsMenu />
+                <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
+                  setActiveTab(tab);
+                  if (state !== "collapsed" && !isPinned) setOpen(false);
+                }} />
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+      </Sidebar>
+      {/* Abaixo exibimos a área de conteúdo central, incluindo painel de resultado */}
+      <ContentWithConsultaResultados>
+        {/* Aqui viriam os filhos, normalmente */}
+      </ContentWithConsultaResultados>
+    </ReservaConsultaProvider>
   );
 };
 
 export default AppSidebar;
-
