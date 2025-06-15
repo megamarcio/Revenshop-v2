@@ -156,7 +156,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
       </Sidebar>
       {/* Abaixo exibimos a área de conteúdo central, incluindo painel de resultado */}
       <ContentWithConsultaResultados>
-        {/* Nenhum conteúdo central ainda */}
+        <></>
       </ContentWithConsultaResultados>
     </ReservaConsultaProvider>
   );
