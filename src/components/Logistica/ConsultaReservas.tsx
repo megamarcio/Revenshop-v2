@@ -524,13 +524,15 @@ const ConsultaReservas: React.FC = () => {
                                   className={`
                                     ${badge.text === 'Carrinho'
                                       ? 'bg-lime-400 text-black border-lime-400'
+                                      : badge.text === 'Cadeirinha'
+                                      ? 'bg-purple-600 text-white border-purple-600'
                                       : badge.type === 'alert'
                                       ? 'bg-red-500 text-white border-red-500'
                                       : 'bg-[#2563eb] text-white border-[#2563eb]'
                                     }
                                     font-bold h-auto py-0 px-2
                                   `}
-                                  style={{ fontSize: '8px' }}
+                                  style={{ fontSize: '7px' }}
                                 >
                                   {badge.text}
                                 </Badge>
