@@ -58,6 +58,12 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     }
   };
 
+  // Novo: handler para painel logística
+  const openLogistica = () => {
+    setActiveTab("logistica");
+    if (state !== "collapsed") setOpen(false);
+  };
+
   return (
     <Sidebar
       collapsible="icon"
@@ -91,7 +97,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 setActiveTab(tab);
                 if (state !== "collapsed") setOpen(false);
               }} />
-              <LogisticaMenu />
+              <LogisticaMenu onClick={openLogistica} />
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
                 if (state !== "collapsed") setOpen(false);
