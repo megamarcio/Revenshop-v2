@@ -126,18 +126,20 @@ const ConsultaReservas: React.FC = () => {
 
   // Nova função para extrair e formatar datas
   const getFiltroDatas = () => {
-    const inicioDate = dataInicio ? new Date(dataInicio) : null;
-    const fimDate = dataFim ? new Date(dataFim) : null;
-    // Formato yyyy-mm-dd (padrão da API)
+    // Recebe do usuário em yyyy-mm-dd, precisa compor ISO de "meia-noite"
     const inicio =
-      inicioDate && !isNaN(inicioDate.getTime())
-        ? inicioDate.toISOString().slice(0, 10)
+      dataInicio && /^\d{4}-\d{2}-\d{2}$/.test(dataInicio)
+        ? `${dataInicio}T00:00:00`
         : "";
     const fim =
-      fimDate && !isNaN(fimDate.getTime())
-        ? fimDate.toISOString().slice(0, 10)
+      dataFim && /^\d{4}-\d{2}-\d{2}$/.test(dataFim)
+        ? `${dataFim}T00:00:00`
         : "";
-    return { inicio, fim };
+    // A API espera yyyy-mm-dd, então extraímos só a parte da data
+    return {
+      inicio: inicio ? inicio.slice(0, 10) : "",
+      fim: fim ? fim.slice(0, 10) : "",
+    };
   };
 
   const onBuscar = async () => {
@@ -243,24 +245,22 @@ const ConsultaReservas: React.FC = () => {
         <div>
           <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">Data Inicial</label>
           <Input
-            type="datetime-local"
+            type="date"
             id="dataInicio"
             value={dataInicio}
             onChange={(e) => setDataInicio(e.target.value)}
             className="w-[210px]"
-            step={1}
             required
           />
         </div>
         <div>
           <label htmlFor="dataFim" className="block text-sm font-medium mb-1">Data Final</label>
           <Input
-            type="datetime-local"
+            type="date"
             id="dataFim"
             value={dataFim}
             onChange={(e) => setDataFim(e.target.value)}
             className="w-[210px]"
-            step={1}
             required
           />
         </div>
