@@ -1,51 +1,80 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { format, parseISO } from "date-fns";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 
+// Novo tipo, representando exatamente os campos desejados
 interface Reservation {
-  reservation_number: string;
-  customer_name: string;
-  checkin_datetime: string;
-  checkout_datetime: string;
+  reservation_id: string;
+  customer_first_name: string;
+  customer_last_name: string;
+  pickup_date: string;
+  return_date: string;
+  vehicle: string;
 }
 
+// Novo parser para o modelo informado
 const parseReservationList = (data: any): Reservation[] => {
-  // Tenta encontrar reservas dentro de diferentes modelos de resposta.
   const list = Array.isArray(data) ? data : (data?.data || []);
-  // Busca campos customizados no JSON (pode variar conforme API)
-  return (list || []).map((item) => ({
-    reservation_number: item.custom_reservation_number ||
-      item.reservation_number ||
+  return (list || []).map((item) => {
+    // customer pode ser um objeto ou não, então extraímos de ambos jeitos
+    let customerFirstName = "-";
+    let customerLastName = "-";
+    if (item.customer && typeof item.customer === "object") {
+      customerFirstName = item.customer.first_name || "-";
+      customerLastName = item.customer.last_name || "-";
+    } else if (item.customer_fullname) {
+      // Se vier nome completo, tentar separar por espaço
+      const nameParts = String(item.customer_fullname).split(" ");
+      customerFirstName = nameParts[0] || "-";
+      customerLastName = nameParts.slice(1).join(" ") || "-";
+    }
+
+    // reservation_id pode ser id, prefixed_id ou custom_reservation_number
+    const reservationId =
+      item.reservation_id ||
+      item.custom_reservation_number ||
       item.prefixed_id ||
       item.id?.toString() ||
-      "-",
-    customer_name:
-      item.customer_name ||
-      item.customer?.name ||
-      item.customer_fullname ||
-      item.customer?.full_name ||
-      "-",
-    checkin_datetime:
+      "-";
+
+    // pickup_date e return_date (padrão: pick_up_date e return_date)
+    const pickupDate =
       item.pick_up_date ||
       item.checkin_datetime ||
       item.initial_pick_up_date ||
-      "-",
-    checkout_datetime:
+      "-";
+    const returnDate =
       item.return_date ||
       item.checkout_datetime ||
       item.initial_return_date ||
-      "-",
-  }));
+      "-";
+    // Vehicle: buscar campos comuns ao vehicle na reserva
+    let vehicle = "-";
+    if (item.vehicle && typeof item.vehicle === "object") {
+      vehicle = item.vehicle.name || item.vehicle.model || "-";
+    } else if (item.vehicle_name) {
+      vehicle = item.vehicle_name;
+    } else if (item.model) {
+      vehicle = item.model;
+    }
+
+    return {
+      reservation_id: reservationId,
+      customer_first_name: customerFirstName,
+      customer_last_name: customerLastName,
+      pickup_date: pickupDate,
+      return_date: returnDate,
+      vehicle,
+    };
+  });
 };
 
+// Mesma lógica ISO (mantida do original)
 function toFullIsoWithZ(dt: string): string {
   if (!dt) return "";
-  // Já em ISO?
   if (dt.endsWith("Z") && dt.includes("T")) return dt;
-  // Converte para o formato correto (YYYY-MM-DDTHH:mm:ss.000000Z)
   try {
     const date = new Date(dt);
     const year = date.getUTCFullYear();
@@ -61,15 +90,13 @@ function toFullIsoWithZ(dt: string): string {
 }
 
 const ConsultaReservas: React.FC = () => {
-  // data_inicio/data_fim em formato "2025-06-12T08:00"
   const [dataInicio, setDataInicio] = useState("");
   const [dataFim, setDataFim] = useState("");
   const [loading, setLoading] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [rawApiData, setRawApiData] = useState<any | null>(null); // NOVO: armazenamento bruto do JSON
+  const [rawApiData, setRawApiData] = useState<any | null>(null);
 
-  // Garante string correta ISO para filtro
   const getFiltroDatas = () => {
     const inicio = toFullIsoWithZ(dataInicio);
     const fim = toFullIsoWithZ(dataFim);
@@ -80,7 +107,7 @@ const ConsultaReservas: React.FC = () => {
     setLoading(true);
     setReservations([]);
     setError(null);
-    setRawApiData(null); // reseta o dado bruto
+    setRawApiData(null);
 
     const { inicio, fim } = getFiltroDatas();
 
@@ -90,7 +117,7 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // Corrigido: só aplica filtro entre em pick_up_date!
+    // Monta filtro somente pelo pick_up_date
     const filtros = [
       {
         type: "string",
@@ -125,9 +152,8 @@ const ConsultaReservas: React.FC = () => {
       }
       const data = await res.json();
 
-      setRawApiData(data); // salva dados brutos
+      setRawApiData(data);
 
-      // Só mostra campos solicitados:
       const onlyRelevant = parseReservationList(data);
       setReservations(onlyRelevant);
       if (onlyRelevant.length === 0) {
@@ -140,7 +166,6 @@ const ConsultaReservas: React.FC = () => {
     }
   };
 
-  // NOVO: Função para baixar o JSON
   const handleDownloadJson = () => {
     if (!rawApiData) return;
     const jsonStr = JSON.stringify(rawApiData, null, 2);
@@ -158,7 +183,6 @@ const ConsultaReservas: React.FC = () => {
     <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-semibold mb-4">Consulta de Reservas</h2>
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        {/* Data/Hora Inicial */}
         <div>
           <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">Data Inicial</label>
           <Input
@@ -171,7 +195,6 @@ const ConsultaReservas: React.FC = () => {
             required
           />
         </div>
-        {/* Data/Hora Final */}
         <div>
           <label htmlFor="dataFim" className="block text-sm font-medium mb-1">Data Final</label>
           <Input
@@ -194,7 +217,6 @@ const ConsultaReservas: React.FC = () => {
       </div>
       {error && <div className="text-red-500 mb-3">{error}</div>}
 
-      {/* NOVO: Botão de download JSON */}
       {rawApiData && (
         <div className="mb-4">
           <Button variant="secondary" onClick={handleDownloadJson}>
@@ -209,26 +231,30 @@ const ConsultaReservas: React.FC = () => {
           <table className="min-w-full border divide-y divide-gray-200">
             <thead>
               <tr className="bg-muted">
-                <th className="px-4 py-2 text-left"># Reserva</th>
-                <th className="px-4 py-2 text-left">Nome do Cliente</th>
-                <th className="px-4 py-2 text-left">Check-in</th>
-                <th className="px-4 py-2 text-left">Check-out</th>
+                <th className="px-4 py-2 text-left">Reservation ID</th>
+                <th className="px-4 py-2 text-left">Customer First Name</th>
+                <th className="px-4 py-2 text-left">Customer Last Name</th>
+                <th className="px-4 py-2 text-left">Pickup Date</th>
+                <th className="px-4 py-2 text-left">Return Date</th>
+                <th className="px-4 py-2 text-left">Vehicle</th>
               </tr>
             </thead>
             <tbody>
               {reservations.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-3 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-3 text-center text-muted-foreground">
                     Nenhum resultado.
                   </td>
                 </tr>
               ) : (
                 reservations.map((r, idx) => (
-                  <tr key={r.reservation_number + idx} className="border-t">
-                    <td className="px-4 py-2">{r.reservation_number}</td>
-                    <td className="px-4 py-2">{r.customer_name}</td>
-                    <td className="px-4 py-2">{r.checkin_datetime}</td>
-                    <td className="px-4 py-2">{r.checkout_datetime}</td>
+                  <tr key={r.reservation_id + idx} className="border-t">
+                    <td className="px-4 py-2">{r.reservation_id}</td>
+                    <td className="px-4 py-2">{r.customer_first_name}</td>
+                    <td className="px-4 py-2">{r.customer_last_name}</td>
+                    <td className="px-4 py-2">{r.pickup_date}</td>
+                    <td className="px-4 py-2">{r.return_date}</td>
+                    <td className="px-4 py-2">{r.vehicle}</td>
                   </tr>
                 ))
               )}
@@ -241,3 +267,4 @@ const ConsultaReservas: React.FC = () => {
 };
 
 export default ConsultaReservas;
+
