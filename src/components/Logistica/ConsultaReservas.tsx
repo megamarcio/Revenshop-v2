@@ -67,6 +67,7 @@ const ConsultaReservas: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [rawApiData, setRawApiData] = useState<any | null>(null); // NOVO: armazenamento bruto do JSON
 
   // Garante string correta ISO para filtro
   const getFiltroDatas = () => {
@@ -79,6 +80,7 @@ const ConsultaReservas: React.FC = () => {
     setLoading(true);
     setReservations([]);
     setError(null);
+    setRawApiData(null); // reseta o dado bruto
 
     const { inicio, fim } = getFiltroDatas();
 
@@ -129,6 +131,8 @@ const ConsultaReservas: React.FC = () => {
       }
       const data = await res.json();
 
+      setRawApiData(data); // salva dados brutos
+
       // Só mostra campos solicitados:
       const onlyRelevant = parseReservationList(data);
       setReservations(onlyRelevant);
@@ -140,6 +144,20 @@ const ConsultaReservas: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // NOVO: Função para baixar o JSON
+  const handleDownloadJson = () => {
+    if (!rawApiData) return;
+    const jsonStr = JSON.stringify(rawApiData, null, 2);
+    const blob = new Blob([jsonStr], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "reservas.json";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   };
 
   return (
@@ -181,6 +199,15 @@ const ConsultaReservas: React.FC = () => {
         </Button>
       </div>
       {error && <div className="text-red-500 mb-3">{error}</div>}
+
+      {/* NOVO: Botão de download JSON */}
+      {rawApiData && (
+        <div className="mb-4">
+          <Button variant="secondary" onClick={handleDownloadJson}>
+            Baixar JSON do Resultado
+          </Button>
+        </div>
+      )}
 
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-2">Resultados</h3>
