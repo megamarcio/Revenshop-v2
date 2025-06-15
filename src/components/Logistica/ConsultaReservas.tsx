@@ -71,6 +71,24 @@ const parseReservationList = (data: any): Reservation[] => {
   });
 };
 
+// Nova função para formatar datas para "DD/MM" e hora para "HH:MM"
+function formatDateTime(dateStr: string): { date: string; time: string } {
+  if (!dateStr || dateStr === "-") return { date: "-", time: "-" };
+  try {
+    const date = new Date(dateStr);
+    const day = date.getDate().toString().padStart(2, "0");
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const hours = date.getHours().toString().padStart(2, "0");
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+    return {
+      date: `${day}/${month}`,
+      time: `${hours}:${minutes}`,
+    };
+  } catch {
+    return { date: "-", time: "-" };
+  }
+}
+
 // Mesma lógica ISO (mantida do original)
 function toFullIsoWithZ(dt: string): string {
   if (!dt) return "";
@@ -287,31 +305,51 @@ const ConsultaReservas: React.FC = () => {
             <thead>
               <tr className="bg-muted">
                 <th className="px-4 py-2 text-left">Reservation ID</th>
-                <th className="px-4 py-2 text-left">Customer First Name</th>
-                <th className="px-4 py-2 text-left">Customer Last Name</th>
-                <th className="px-4 py-2 text-left">Pickup Date</th>
-                <th className="px-4 py-2 text-left">Return Date</th>
-                <th className="px-4 py-2 text-left">Vehicle</th>
+                <th className="px-4 py-2 text-left">
+                  Customer Name
+                </th>
+                <th className="px-4 py-2 text-left">Pickup</th>
+                <th className="px-4 py-2 text-left">Return</th>
               </tr>
             </thead>
             <tbody>
               {reservations.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-3 text-center text-muted-foreground">
+                  <td colSpan={4} className="px-4 py-3 text-center text-muted-foreground">
                     Nenhum resultado.
                   </td>
                 </tr>
               ) : (
-                reservations.map((r, idx) => (
-                  <tr key={r.reservation_id + idx} className="border-t">
-                    <td className="px-4 py-2">{r.reservation_id}</td>
-                    <td className="px-4 py-2">{r.customer_first_name}</td>
-                    <td className="px-4 py-2">{r.customer_last_name}</td>
-                    <td className="px-4 py-2">{r.pickup_date}</td>
-                    <td className="px-4 py-2">{r.return_date}</td>
-                    <td className="px-4 py-2">{r.vehicle}</td>
-                  </tr>
-                ))
+                reservations.map((r, idx) => {
+                  const pickup = formatDateTime(r.pickup_date);
+                  const ret = formatDateTime(r.return_date);
+
+                  return (
+                    <tr key={r.reservation_id + idx} className="border-t align-top">
+                      {/* Reservation ID */}
+                      <td className="px-4 py-2 font-semibold align-middle">{r.reservation_id}</td>
+                      {/* Customer First Name + Last Name (2 linhas) */}
+                      <td className="px-4 py-2">
+                        <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>
+                          {r.customer_first_name}
+                        </span>
+                        <span style={{ display: "block", fontSize: 10, color: "#757575" }}>
+                          {r.customer_last_name}
+                        </span>
+                      </td>
+                      {/* Pickup */}
+                      <td className="px-4 py-2">
+                        <span style={{ fontSize: 12, display: "block" }}>{pickup.date}</span>
+                        <span style={{ fontSize: 12, color: "#666" }}>{pickup.time}</span>
+                      </td>
+                      {/* Return */}
+                      <td className="px-4 py-2">
+                        <span style={{ fontSize: 12, display: "block" }}>{ret.date}</span>
+                        <span style={{ fontSize: 12, color: "#666" }}>{ret.time}</span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
