@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -117,19 +116,19 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // Monta filtro somente pelo pick_up_date
+    // ATUALIZADO: Filtro de pick_up_date é agora o principal (vem primeiro no array)
     const filtros = [
-      {
-        type: "string",
-        column: "status",
-        operator: "equals",
-        value: "open",
-      },
       {
         type: "string",
         column: "pick_up_date",
         operator: "between",
         value: `${inicio},${fim}`,
+      },
+      {
+        type: "string",
+        column: "status",
+        operator: "equals",
+        value: "open",
       },
     ];
 
@@ -267,4 +266,3 @@ const ConsultaReservas: React.FC = () => {
 };
 
 export default ConsultaReservas;
-
