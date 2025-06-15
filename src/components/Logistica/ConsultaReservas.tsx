@@ -150,25 +150,36 @@ function getLocationBadge(lastName: string, type: "pickup" | "return"): string |
   return null;
 }
 
-// Novo helper para badges de itens extras
-function getExtraItemBadges(lastName: string): string[] {
+// Interface para os tipos de badge
+interface ExtraBadge {
+  text: string;
+  type: 'item' | 'alert';
+}
+
+// Helper atualizado para badges de itens extras
+function getExtraItemBadges(lastName: string): ExtraBadge[] {
   if (!lastName) return [];
   const lower = lastName.toLowerCase();
-  const badges: string[] = [];
+  const badges: ExtraBadge[] = [];
 
-  // Exclusions first
+  // Exclusões primeiro
   const excludesStroller = lower.includes("não preciso carrinho") || lower.includes("no stroller");
   const excludesCarSeat = lower.includes("não preciso car seat") || lower.includes("no car seat");
 
-  // Inclusions
+  // Inclusões
   const includesStroller = lower.includes("carrinho") || lower.includes("stroller");
   const includesCarSeat = lower.includes("cadeirinha") || lower.includes("car seat");
 
   if (includesStroller && !excludesStroller) {
-    badges.push("Carrinho");
+    badges.push({ text: "Carrinho", type: 'item' });
   }
   if (includesCarSeat && !excludesCarSeat) {
-    badges.push("Cadeirinha");
+    badges.push({ text: "Cadeirinha", type: 'item' });
+  }
+
+  // Novo badge "Sign"
+  if (lower.includes("sign não")) {
+    badges.push({ text: "Sign", type: 'alert' });
   }
 
   return badges;
@@ -507,8 +518,19 @@ const ConsultaReservas: React.FC = () => {
                               <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
                               <LocationBadge location={badgeText} />
                               {extraItemBadges.map((badge) => (
-                                <Badge key={badge} variant="secondary" className="bg-[#2563eb] text-white border-[#2563eb]">
-                                  {badge}
+                                <Badge
+                                  key={badge.text}
+                                  variant="secondary"
+                                  className={`
+                                    ${badge.type === 'alert'
+                                      ? 'bg-red-500 text-white border-red-500'
+                                      : 'bg-[#2563eb] text-white border-[#2563eb]'
+                                    }
+                                    font-bold h-auto py-0 px-2
+                                  `}
+                                  style={{ fontSize: '7px' }}
+                                >
+                                  {badge.text}
                                 </Badge>
                               ))}
                             </div>
