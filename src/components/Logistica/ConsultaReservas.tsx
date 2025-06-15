@@ -210,25 +210,25 @@ const ConsultaReservas: React.FC = () => {
       setReservations(onlyRelevant);
 
       // --- CAPTURA O "f855" PARA CADA RESERVA ---
-      // Construir um map: reservation.reservation_id => f855
-      // Aceita formatos data.data, data, etc.
+      // Construir um map: reservation.reservation_id => customer.f855 (só desse local!)
       const list = Array.isArray(data) ? data : data?.data || [];
       const kommoMap: { [reservationId: string]: string } = {};
       list.forEach((item: any) => {
-        // Pegue o reservation_id pelo mesmo critério que o parser
+        // Mesma regra de reservation_id do restante do código
         const reservationId =
           item.reservation_id ||
           item.custom_reservation_number ||
           item.prefixed_id ||
           (item.id ? String(item.id) : "-");
-        // Nova lógica: procura em customer.f855, item.f855 ou item.custom_fields.f855
+        // Buscar APENAS em item.customer.f855
         let kommoId: string | undefined = undefined;
-        if (item.customer && typeof item.customer === "object" && item.customer.f855) {
-          kommoId = String(item.customer.f855);
-        } else if (item.f855) {
-          kommoId = String(item.f855);
-        } else if (item.custom_fields && item.custom_fields.f855) {
-          kommoId = String(item.custom_fields.f855);
+        if (
+          item.customer &&
+          typeof item.customer === "object" &&
+          typeof item.customer.f855 === "string" &&
+          !!item.customer.f855
+        ) {
+          kommoId = item.customer.f855;
         }
         if (reservationId && kommoId) {
           kommoMap[reservationId] = kommoId;
