@@ -43,7 +43,7 @@ const ConsultaReservas: React.FC = () => {
       setLoading: setLoadingPickup,
       setReservations: setReservationsPickup,
       setError: setErrorPickup,
-      set: setRawApiDataPickup,
+      setRawApiData: setRawApiDataPickup,
       setLastRequestLog: setLastRequestLogPickup,
       setRowKommoLeadIds: setRowKommoLeadIdsPickup,
     });
