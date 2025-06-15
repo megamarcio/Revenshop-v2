@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { Download } from "lucide-react";
 
 // Novo tipo, representando exatamente os campos desejados
 interface Reservation {
@@ -95,6 +96,7 @@ const ConsultaReservas: React.FC = () => {
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [rawApiData, setRawApiData] = useState<any | null>(null);
+  const [lastRequestLog, setLastRequestLog] = useState<any | null>(null);
 
   // Nova função para extrair e formatar datas
   const getFiltroDatas = () => {
@@ -117,6 +119,7 @@ const ConsultaReservas: React.FC = () => {
     setReservations([]);
     setError(null);
     setRawApiData(null);
+    setLastRequestLog(null);
 
     const { inicio, fim } = getFiltroDatas();
 
@@ -126,7 +129,6 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // Corrigido: filtro de data deve ser type "date"
     const filtros = [
       {
         type: "date",
@@ -144,24 +146,41 @@ const ConsultaReservas: React.FC = () => {
 
     const filtros_codificados = encodeURIComponent(JSON.stringify(filtros));
     const url = `https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations?filters=${filtros_codificados}`;
+    const headers = {
+      "generated_token": "tenant_token:rafaelvpm",
+      "Authorization":
+        "Basic TURqVUUzSDc4UE82RTkxZTlsZFdHUkdRVnBDMmFGUWo0UzRPUVJyblJ5SXRvelhoQks6Um1NZm1iVER0TUptb1FpQUVRcUVZSEJsOEpXM3N2bUFMTTl5ZWZ1bUxYdjhvWnV6aVU=",
+    };
+
+    let responseLog: any = {
+      url,
+      method: "GET",
+      headers,
+      filters: filtros,
+      filters_encoded: filtros_codificados,
+      response_json: null,
+      error: null,
+    };
 
     try {
       const res = await fetch(url, {
         method: "GET",
-        headers: {
-          "generated_token": "tenant_token:rafaelvpm",
-          "Authorization":
-            "Basic TURqVUUzSDc4UE82RTkxZTlsZFdHUkdRVnBDMmFGUWo0UzRPUVJyblJ5SXRvelhoQks6Um1NZm1iVER0TUptb1FpQUVRcUVZSEJsOEpXM3N2bUFMTTl5ZWZ1bUxYdjhvWnV6aVU=",
-        },
+        headers,
       });
       if (!res.ok) {
         setError("Erro ao buscar reservas.");
+        responseLog.error = `HTTP ${res.status} - ${res.statusText || "Unknown error"}`;
+        setLastRequestLog(responseLog);
         setLoading(false);
         return;
       }
       const data = await res.json();
 
       setRawApiData(data);
+
+      // Salvar resposta no log
+      responseLog.response_json = data;
+      setLastRequestLog(responseLog);
 
       const onlyRelevant = parseReservationList(data);
       setReservations(onlyRelevant);
@@ -170,18 +189,21 @@ const ConsultaReservas: React.FC = () => {
       }
     } catch (e: any) {
       setError("Ocorreu um erro ao buscar dados.");
+      responseLog.error = `JS Exception: ${e?.message || e}`;
+      setLastRequestLog(responseLog);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDownloadJson = () => {
-    if (!rawApiData) return;
-    const jsonStr = JSON.stringify(rawApiData, null, 2);
+  // Botão para baixar o log da última requisição
+  const handleDownloadRequestLog = () => {
+    if (!lastRequestLog) return;
+    const jsonStr = JSON.stringify(lastRequestLog, null, 2);
     const blob = new Blob([jsonStr], { type: "application/json" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = "reservas.json";
+    link.download = "log_requisicao_consulta_reservas.json";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -216,19 +238,43 @@ const ConsultaReservas: React.FC = () => {
             required
           />
         </div>
-        <Button
-          className="h-10 px-8 mt-7"
-          onClick={onBuscar}
-          disabled={loading || !dataInicio || !dataFim}
-        >
-          {loading ? "Buscando..." : "Buscar"}
-        </Button>
+        <div className="flex flex-row items-end gap-2 mt-7">
+          <Button
+            className="h-10 px-8"
+            onClick={onBuscar}
+            disabled={loading || !dataInicio || !dataFim}
+          >
+            {loading ? "Buscando..." : "Buscar"}
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="h-10 w-10"
+            onClick={handleDownloadRequestLog}
+            disabled={!lastRequestLog}
+            title="Baixar log da última requisição"
+            aria-label="Baixar log da última requisição"
+            tabIndex={0}
+          >
+            <Download className="w-5 h-5" />
+          </Button>
+        </div>
       </div>
       {error && <div className="text-red-500 mb-3">{error}</div>}
 
       {rawApiData && (
         <div className="mb-4">
-          <Button variant="secondary" onClick={handleDownloadJson}>
+          <Button variant="secondary" onClick={() => {
+            const jsonStr = JSON.stringify(rawApiData, null, 2);
+            const blob = new Blob([jsonStr], { type: "application/json" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "reservas.json";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+          }}>
             Baixar JSON do Resultado
           </Button>
         </div>
