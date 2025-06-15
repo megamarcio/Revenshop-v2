@@ -60,33 +60,36 @@ const AuctionManagement = () => {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-2 sm:p-6 space-y-6">
       <Card>
         <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
+          <div className="flex flex-col gap-5 sm:flex-row sm:justify-between sm:items-center">
             <div>
               <CardTitle className="text-2xl font-bold text-gray-900">
                 Leilões
               </CardTitle>
-              <p className="text-gray-600">Gerenciar leilões de veículos</p>
+              <p className="text-gray-600 text-sm">Gerenciar leilões de veículos</p>
             </div>
-            <div className="flex flex-row gap-2">
+            {/* Torna os botões empilháveis e mais ergonomicos no mobile */}
+            <div className="flex flex-col gap-2 w-full sm:w-auto sm:flex-row sm:gap-2 sm:items-center">
               <Button
                 onClick={() => setSubmenu('vinConsult')}
                 variant="secondary"
-                className="flex items-center"
+                className="flex items-center w-full sm:w-auto"
                 title="Abrir consulta de VIN"
+                size="lg"
               >
                 <Search className="w-4 h-4 mr-2" />
-                Consulta VIN
+                <span className="text-sm">Consulta VIN</span>
               </Button>
               {canEditVehicles && (
                 <Button 
                   onClick={handleAddAuction}
-                  className="bg-revenshop-primary hover:bg-revenshop-primary/90"
+                  className="bg-revenshop-primary hover:bg-revenshop-primary/90 flex items-center w-full sm:w-auto"
+                  size="lg"
                 >
                   <Plus className="h-4 w-4 mr-2" />
-                  Adicionar Leilão
+                  <span className="text-sm">Adicionar Leilão</span>
                 </Button>
               )}
             </div>
@@ -101,3 +104,4 @@ const AuctionManagement = () => {
 };
 
 export default AuctionManagement;
+
