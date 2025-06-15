@@ -355,7 +355,9 @@ const ConsultaReservas: React.FC = () => {
                         <span style={{ fontSize: 12, color: "#666" }}>{ret.time}</span>
                       </td>
                       {/* Veículo - plate */}
-                      <td className="px-4 py-2 align-middle">{r.plate || "-"}</td>
+                      <td className="px-4 py-2 align-middle" style={{ fontSize: 13 }}>
+                        {r.plate || "-"}
+                      </td>
                     </tr>
                   );
                 })
