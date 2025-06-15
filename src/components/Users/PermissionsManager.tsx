@@ -1,8 +1,10 @@
 
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ShieldCheck, ShieldX, User, CheckCircle } from "lucide-react";
+import { ShieldCheck, ShieldX, User, CheckCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRolePermissions } from "@/hooks/useRolePermissions";
+import { toast } from "@/hooks/use-toast";
 
 const screenPermissions = [
   { id: "dashboard", label: "Dashboard" },
@@ -22,37 +24,29 @@ const roles = [
   { id: "seller", label: "Vendedor" },
 ];
 
-// Mock de permissões (por enquanto; ajuste conforme persistência futura)
-const initialPermissions: Record<string, string[]> = {
-  admin: screenPermissions.map(sp => sp.id),
-  manager: ["dashboard", "users", "profile", "auctions", "vehicles", "customers", "maintenance", "settings"],
-  internal_seller: ["dashboard", "profile", "auctions", "vehicles", "customers"],
-  seller: ["dashboard", "profile", "auctions", "vehicles"],
-};
-
 const PermissionsManager: React.FC = () => {
-  const [selectedRole, setSelectedRole] = React.useState("admin");
-  const [permissions, setPermissions] = React.useState(initialPermissions);
+  const [selectedRole, setSelectedRole] = React.useState<"admin" | "manager" | "internal_seller" | "seller">("admin");
+  const { permissions, loading, addPermission, removePermission, updatePermissions, setPermissions } = useRolePermissions(selectedRole);
 
-  const handleTogglePermission = (screenId: string) => {
-    setPermissions(prev => {
-      const current = prev[selectedRole] || [];
-      const has = current.includes(screenId);
-      return {
-        ...prev,
-        [selectedRole]: has
-          ? current.filter(p => p !== screenId)
-          : [...current, screenId],
-      };
-    });
+  // Toggle de permissão na tela (adição/remoção)
+  const handleTogglePermission = async (screenId: string) => {
+    const has = permissions.includes(screenId as any);
+    if (has) {
+      await removePermission(screenId as any);
+      toast({ title: "Permissão removida!", description: `Permissão para ${screenPermissions.find(x => x.id === screenId)?.label} removida da role.` });
+    } else {
+      await addPermission(screenId as any);
+      toast({ title: "Permissão concedida!", description: `Permissão para ${screenPermissions.find(x => x.id === screenId)?.label} adicionada.` });
+    }
   };
 
-  // Futuramente, enviar para backend. Aqui só mock.
-  const handleSave = () => {
-    // Salvar permissões aqui
-    alert("Permissões salvas! (futuro: persistir no banco de dados)");
+  // Salvar todas permissões (não é obrigatório pois já salva ao clicar)
+  const handleSave = async () => {
+    await updatePermissions(permissions);
+    toast({ title: "Permissões atualizadas!", description: "Permissões salvas com sucesso." });
   };
 
+  // Adiciona loading visual para UX
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <Card>
@@ -71,8 +65,9 @@ const PermissionsManager: React.FC = () => {
                   key={role.id}
                   variant={selectedRole === role.id ? "default" : "outline"}
                   className="w-full"
-                  onClick={() => setSelectedRole(role.id)}
+                  onClick={() => setSelectedRole(role.id as any)}
                   size="sm"
+                  disabled={loading}
                 >
                   <User className="mr-2 w-4 h-4" />
                   {role.label}
@@ -83,7 +78,7 @@ const PermissionsManager: React.FC = () => {
               <span className="mb-2 text-xs font-semibold text-muted-foreground">Permissões para: {roles.find(r => r.id === selectedRole)?.label}</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {screenPermissions.map(sp => {
-                  const hasPermission = permissions[selectedRole]?.includes(sp.id);
+                  const hasPermission = permissions.includes(sp.id as any);
                   return (
                     <Button
                       type="button"
@@ -92,6 +87,7 @@ const PermissionsManager: React.FC = () => {
                       className={`flex items-center gap-2 ${hasPermission ? 'bg-green-500 text-white hover:bg-green-600' : 'opacity-80'}`}
                       size="sm"
                       onClick={() => handleTogglePermission(sp.id)}
+                      disabled={loading}
                     >
                       {hasPermission ? <CheckCircle className="w-4 h-4 text-white" /> : <ShieldX className="w-4 h-4 text-muted-foreground" />}
                       {sp.label}
@@ -100,7 +96,10 @@ const PermissionsManager: React.FC = () => {
                 })}
               </div>
               <div className="mt-4 flex justify-end">
-                <Button onClick={handleSave} className="bg-revenshop-primary">Salvar Permissões</Button>
+                <Button onClick={handleSave} disabled={loading} className="bg-revenshop-primary" type="button">
+                  {loading ? <Loader2 className="animate-spin w-4 h-4 mr-2" /> : null}
+                  Salvar Permissões
+                </Button>
               </div>
             </div>
           </div>

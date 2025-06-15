@@ -601,6 +601,27 @@ export type Database = {
         }
         Relationships: []
       }
+      role_permissions: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: string
+          screen_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: string
+          screen_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: string
+          screen_id?: string
+        }
+        Relationships: []
+      }
       sales: {
         Row: {
           check_details: string | null
