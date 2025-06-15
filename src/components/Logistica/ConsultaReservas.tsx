@@ -1,76 +1,126 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
-import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format, parseISO } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { toast } from "@/hooks/use-toast";
 
 interface Reservation {
   reservation_number: string;
   customer_name: string;
   checkin_datetime: string;
   checkout_datetime: string;
-  // ...other fields ignored
 }
 
 const parseReservationList = (data: any[]): Reservation[] => {
-  // Map/filter to only the relevant fields for display
-  return (data || []).map((item) => ({
-    reservation_number: item.reservation_number || "-",
-    customer_name: item.customer_name || "-",
-    checkin_datetime: item.checkin_datetime || "-",
-    checkout_datetime: item.checkout_datetime || "-",
+  // Tenta encontrar reservas dentro de diferentes modelos de resposta.
+  const list = Array.isArray(data) ? data : (data?.data || []);
+  // Busca campos customizados no JSON (pode variar conforme API)
+  return (list || []).map((item) => ({
+    reservation_number: item.custom_reservation_number ||
+      item.reservation_number ||
+      item.prefixed_id ||
+      item.id?.toString() ||
+      "-",
+    customer_name:
+      item.customer_name ||
+      item.customer?.name ||
+      item.customer_fullname ||
+      item.customer?.full_name ||
+      "-",
+    checkin_datetime:
+      item.pick_up_date ||
+      item.checkin_datetime ||
+      item.initial_pick_up_date ||
+      "-",
+    checkout_datetime:
+      item.return_date ||
+      item.checkout_datetime ||
+      item.initial_return_date ||
+      "-",
   }));
 };
 
+function toFullIsoWithZ(dt: string): string {
+  if (!dt) return "";
+  // Já em ISO?
+  if (dt.endsWith("Z") && dt.includes("T")) return dt;
+  // Converte para o formato correto (YYYY-MM-DDTHH:mm:ss.000000Z)
+  try {
+    const date = new Date(dt);
+    const year = date.getUTCFullYear();
+    const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+    const day = String(date.getUTCDate()).padStart(2, "0");
+    const hour = String(date.getUTCHours()).padStart(2, "0");
+    const min = String(date.getUTCMinutes()).padStart(2, "0");
+    const sec = String(date.getUTCSeconds()).padStart(2, "0");
+    return `${year}-${month}-${day}T${hour}:${min}:${sec}.000000Z`;
+  } catch {
+    return dt;
+  }
+}
+
 const ConsultaReservas: React.FC = () => {
-  const [dateStart, setDateStart] = useState<Date | undefined>(undefined);
-  const [dateEnd, setDateEnd] = useState<Date | undefined>(undefined);
+  // data_inicio/data_fim em formato "2025-06-12T08:00"
+  const [dataInicio, setDataInicio] = useState("");
+  const [dataFim, setDataFim] = useState("");
   const [loading, setLoading] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [error, setError] = useState<string | null>(null);
+
+  // Garante string correta ISO para filtro
+  const getFiltroDatas = () => {
+    const inicio = toFullIsoWithZ(dataInicio);
+    const fim = toFullIsoWithZ(dataFim);
+    return { inicio, fim };
+  };
 
   const onBuscar = async () => {
     setLoading(true);
     setReservations([]);
     setError(null);
 
-    if (!dateStart || !dateEnd) {
-      setError("Selecione as datas inicial e final.");
+    const { inicio, fim } = getFiltroDatas();
+
+    if (!inicio || !fim) {
+      setError("Preencha as datas inicial e final completas (data e hora).");
       setLoading(false);
       return;
     }
 
-    // Formatar datas para o formato esperado pela API (YYYY-MM-DD)
-    const start = format(dateStart, "yyyy-MM-dd");
-    const end = format(dateEnd, "yyyy-MM-dd");
+    // Monta o JSON de filtros conforme instrução
+    const filtros = [
+      {
+        type: "string",
+        column: "status",
+        operator: "equals",
+        value: "open",
+      },
+      {
+        type: "string",
+        column: "pick_up_date",
+        operator: "between",
+        value: `${inicio},${fim}`,
+      },
+      {
+        type: "string",
+        column: "return_date",
+        operator: "between",
+        value: `${inicio},${fim}`,
+      },
+    ];
 
-    // Montar string de filtros
-    const filters = encodeURIComponent(
-      JSON.stringify([
-        {
-          type: "string",
-          column: "status",
-          operator: "equals",
-          value: "open",
-        },
-        {
-          type: "date",
-          column: "reservation_date",
-          operator: "between",
-          value: `${start},${end}`,
-        },
-      ])
-    );
-
-    const url = `https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations?filters=${filters}`;
+    const filtros_codificados = encodeURIComponent(JSON.stringify(filtros));
+    const url = `https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations?filters=${filtros_codificados}`;
 
     try {
       const res = await fetch(url, {
         method: "GET",
         headers: {
           "generated_token": "tenant_token:rafaelvpm",
-          "Authorization": "Basic TURqVUUzSDc4UE82RTkxZTlsZFdHUkdRVnBDMmFGUWo0UzRPUVJyblJ5SXRvelhoQks6Um1NZm1iVER0TUptb1FpQUVRcUVZSEJsOEpXM3N2bUFMTTl5ZWZ1bUxYdjhvWnV6aVU=",
+          "Authorization":
+            "Basic TURqVUUzSDc4UE82RTkxZTlsZFdHUkdRVnBDMmFGUWo0UzRPUVJyblJ5SXRvelhoQks6Um1NZm1iVER0TUptb1FpQUVRcUVZSEJsOEpXM3N2bUFMTTl5ZWZ1bUxYdjhvWnV6aVU=",
         },
       });
       if (!res.ok) {
@@ -80,9 +130,12 @@ const ConsultaReservas: React.FC = () => {
       }
       const data = await res.json();
 
-      // Filtrar apenas os campos requeridos, mesmo que o json seja grande
-      const onlyRelevant: Reservation[] = parseReservationList(data);
+      // Só mostra campos solicitados:
+      const onlyRelevant = parseReservationList(data);
       setReservations(onlyRelevant);
+      if (onlyRelevant.length === 0) {
+        toast({ title: "Nenhum resultado.", description: "Nenhuma reserva encontrada para o filtro." });
+      }
     } catch (e: any) {
       setError("Ocorreu um erro ao buscar dados.");
     } finally {
@@ -91,68 +144,43 @@ const ConsultaReservas: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6">
       <h2 className="text-2xl font-semibold mb-4">Consulta de Reservas</h2>
-      <div className="flex flex-col sm:flex-row items-start sm:items-end gap-4 mb-4">
-        {/* Data Inicial */}
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        {/* Data/Hora Inicial */}
         <div>
-          <label className="block font-medium mb-1">Data Inicial</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className="w-[170px] justify-start text-left font-normal"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateStart ? format(dateStart, "PPP") : <span>Selecione</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={dateStart}
-                onSelect={setDateStart}
-                className="p-3 pointer-events-auto"
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">Data Inicial</label>
+          <Input
+            type="datetime-local"
+            id="dataInicio"
+            value={dataInicio}
+            onChange={(e) => setDataInicio(e.target.value)}
+            className="w-[210px]"
+            step={1}
+            required
+          />
         </div>
-
-        {/* Data Final */}
+        {/* Data/Hora Final */}
         <div>
-          <label className="block font-medium mb-1">Data Final</label>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant={"outline"}
-                className="w-[170px] justify-start text-left font-normal"
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {dateEnd ? format(dateEnd, "PPP") : <span>Selecione</span>}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent align="start" className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={dateEnd}
-                onSelect={setDateEnd}
-                className="p-3 pointer-events-auto"
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
+          <label htmlFor="dataFim" className="block text-sm font-medium mb-1">Data Final</label>
+          <Input
+            type="datetime-local"
+            id="dataFim"
+            value={dataFim}
+            onChange={(e) => setDataFim(e.target.value)}
+            className="w-[210px]"
+            step={1}
+            required
+          />
         </div>
-
         <Button
-          className="h-10 px-8 mt-2 sm:mt-0"
+          className="h-10 px-8 mt-7"
           onClick={onBuscar}
-          disabled={!dateStart || !dateEnd || loading}
+          disabled={loading || !dataInicio || !dataFim}
         >
           {loading ? "Buscando..." : "Buscar"}
         </Button>
       </div>
-
       {error && <div className="text-red-500 mb-3">{error}</div>}
 
       <div className="mt-6">
@@ -171,7 +199,7 @@ const ConsultaReservas: React.FC = () => {
               {reservations.length === 0 && !loading ? (
                 <tr>
                   <td colSpan={4} className="px-4 py-3 text-center text-muted-foreground">
-                    Nenhum resultado para o período selecionado.
+                    Nenhum resultado.
                   </td>
                 </tr>
               ) : (
