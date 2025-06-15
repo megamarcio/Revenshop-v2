@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
-import { Download, ExternalLink } from "lucide-react";
+import { Download, ExternalLink, Phone } from "lucide-react";
 
 // Novo tipo, representando exatamente os campos desejados
 interface Reservation {
@@ -298,7 +298,8 @@ const ConsultaReservas: React.FC = () => {
                 <th className="px-4 py-2 text-left" style={{
                 fontSize: 13
               }}>Veículo</th>
-                <th className="px-2 py-2 text-left" style={{ fontSize: 13 }}></th>
+                <th className="px-2 py-2"></th>
+                <th className="px-2 py-2"></th> {/* Nova coluna para botão WhatsApp */}
               </tr>
             </thead>
             <tbody>
@@ -311,6 +312,10 @@ const ConsultaReservas: React.FC = () => {
                 : reservations.map((r, idx) => {
                   const pickup = formatDateTime(r.pickup_date);
                   const ret = formatDateTime(r.return_date);
+
+                  // Remover tudo que não for dígito do telefone
+                  const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
+
                   return (
                     <tr key={r.reservation_id + idx} className="border-t align-top">
                       {/* Reservation ID + phone_number */}
@@ -373,7 +378,7 @@ const ConsultaReservas: React.FC = () => {
                       }}>
                         {r.plate || "-"}
                       </td>
-                      {/* Nova coluna: botão para abrir reserva */}
+                      {/* Botão para abrir reserva */}
                       <td className="px-2 py-2 align-middle">
                         <Button
                           size="icon"
@@ -386,6 +391,28 @@ const ConsultaReservas: React.FC = () => {
                         >
                           <ExternalLink className="w-4 h-4" />
                         </Button>
+                      </td>
+                      {/* Botão WhatsApp (só aparece se tiver número limpo) */}
+                      <td className="px-2 py-2 align-middle">
+                        {cleanedPhone && cleanedPhone !== "-" ?
+                          <Button
+                            asChild
+                            size="icon"
+                            variant="ghost"
+                            className="h-8 w-8 text-green-600"
+                            title="Enviar mensagem no WhatsApp"
+                            aria-label="Enviar mensagem no WhatsApp"
+                            tabIndex={0}
+                          >
+                            <a
+                              href={`http://wa.me/${cleanedPhone}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              <Phone className="w-4 h-4" />
+                            </a>
+                          </Button>
+                          : null}
                       </td>
                     </tr>
                   );
