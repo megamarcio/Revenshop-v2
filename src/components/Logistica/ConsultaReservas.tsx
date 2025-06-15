@@ -50,13 +50,17 @@ const parseReservationList = (data: any): Reservation[] => {
       item.checkout_datetime ||
       item.initial_return_date ||
       "-";
-    // Veículo: buscar plate de reservation_vehicle_information se existir
+
+    // Corrigido: pegar plate do primeiro elemento do ARRAY reservation_vehicle_information, se existir
     let plate = "-";
-    if (
+    if (Array.isArray(item.reservation_vehicle_information) && item.reservation_vehicle_information.length > 0) {
+      plate = item.reservation_vehicle_information[0]?.plate || "-";
+    } else if (
       item.reservation_vehicle_information &&
       typeof item.reservation_vehicle_information === "object" &&
       item.reservation_vehicle_information.plate
     ) {
+      // fallback antigo para caso algum JSON venha como objeto
       plate = item.reservation_vehicle_information.plate;
     } else if (item.vehicle && typeof item.vehicle === "object") {
       plate = item.vehicle.plate || "-";
