@@ -13,6 +13,7 @@ import { User, Mail, Phone, Shield, Car, DollarSign, Calendar } from 'lucide-rea
 import { useToast } from '@/hooks/use-toast';
 import ImageUpload from '@/components/ui/image-upload';
 import { useUserStats } from '../../hooks/useUserStats';
+import ResetPasswordModal from "@/components/Users/ResetPasswordModal";
 
 const ProfilePage = () => {
   const { user } = useAuth();
@@ -32,6 +33,7 @@ const ProfilePage = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -99,7 +101,7 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-6 max-w-xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Meu Perfil</h1>
@@ -382,6 +384,21 @@ const ProfilePage = () => {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <div className="mt-5 flex flex-col gap-2">
+        <Button
+          variant="outline"
+          onClick={() => setShowResetModal(true)}
+          className="w-full sm:w-fit"
+        >
+          Resetar senha
+        </Button>
+      </div>
+      <ResetPasswordModal
+        open={showResetModal}
+        onOpenChange={setShowResetModal}
+        defaultEmail={user?.email}
+      />
     </div>
   );
 };
