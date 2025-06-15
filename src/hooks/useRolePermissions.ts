@@ -1,4 +1,3 @@
-
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -38,7 +37,8 @@ export function useRolePermissions(selectedRole: RoleType) {
       return;
     }
 
-    setPermissions(data?.map(p => p.screen_id) ?? []);
+    // Corrigir o cast para garantir tipos corretos
+    setPermissions((data?.map(p => p.screen_id) ?? []) as ScreenIdType[]);
     setLoading(false);
   }, [selectedRole]);
 
