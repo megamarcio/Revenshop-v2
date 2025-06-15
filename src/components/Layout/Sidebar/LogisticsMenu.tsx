@@ -1,35 +1,49 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Truck, ChevronRight } from 'lucide-react';
-import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, useSidebar } from '@/components/ui/sidebar';
+import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const LogisticsMenu = () => {
   const { state } = useSidebar();
-  const [open, setOpen] = useState(false);
 
-  // Agora, o filtro por datas aparece só na tela lateral,
-  // então removemos daqui todo o conteúdo de filtro/busca.
+  const handleLogisticaClick = (submenu: string) => {
+    // Placeholder para funcionalidade futura
+    console.log(`Logística ${submenu} - Em desenvolvimento`);
+  };
+
   return (
     <SidebarMenuItem>
-      <Collapsible className="group/collapsible" open={open} onOpenChange={setOpen}>
+      <Collapsible className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton 
-            tooltip={state === "collapsed" ? "Consulta Reservas" : undefined}
+            tooltip={state === "collapsed" ? "Logística Rental Car" : undefined}
             className="w-full hover:bg-muted data-[state=open]:bg-muted"
           >
             <Truck className="h-4 w-4" />
-            <span className="text-sm px-0 mx-0">Consulta Reservas</span>
+            <span className="text-sm px-0 mx-0">Logística Rental Car</span>
             <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
-        {/* Não há mais filtros no menu, mas poderíamos ter atalhos/tipos aqui futuramente */}
         <CollapsibleContent>
           <SidebarMenuSub>
             <SidebarMenuSubItem>
-              <div className="flex flex-col w-full gap-2 px-2 pb-2 text-muted-foreground text-xs">
-                Inicie uma busca na tela principal.
-              </div>
+              <SidebarMenuSubButton
+                onClick={() => handleLogisticaClick('Semana')}
+                className="cursor-pointer opacity-60"
+              >
+                <span>Semana</span>
+                <span className="ml-auto text-xs text-muted-foreground">(em breve)</span>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton
+                onClick={() => handleLogisticaClick('Dia')}
+                className="cursor-pointer opacity-60"
+              >
+                <span>Dia</span>
+                <span className="ml-auto text-xs text-muted-foreground">(em breve)</span>
+              </SidebarMenuSubButton>
             </SidebarMenuSubItem>
           </SidebarMenuSub>
         </CollapsibleContent>
