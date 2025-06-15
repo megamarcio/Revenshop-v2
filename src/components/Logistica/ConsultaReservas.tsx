@@ -304,12 +304,10 @@ const ConsultaReservas: React.FC = () => {
           <table className="min-w-full border divide-y divide-gray-200">
             <thead>
               <tr className="bg-muted">
-                <th className="px-4 py-2 text-left">Reservation ID</th>
-                <th className="px-4 py-2 text-left">
-                  Customer Name
-                </th>
-                <th className="px-4 py-2 text-left">Pickup</th>
-                <th className="px-4 py-2 text-left">Return</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>Reservation ID</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Customer Name</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Pickup</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Return</th>
               </tr>
             </thead>
             <tbody>
@@ -327,7 +325,7 @@ const ConsultaReservas: React.FC = () => {
                   return (
                     <tr key={r.reservation_id + idx} className="border-t align-top">
                       {/* Reservation ID */}
-                      <td className="px-4 py-2 font-semibold align-middle">{r.reservation_id}</td>
+                      <td className="px-4 py-2 align-middle" style={{ fontSize: 13, fontWeight: 700 }}>{r.reservation_id}</td>
                       {/* Customer First Name + Last Name (2 linhas) */}
                       <td className="px-4 py-2">
                         <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>
