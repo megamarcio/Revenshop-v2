@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -15,7 +14,7 @@ import {
 import { getMenuItems } from './menuItems';
 import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
-import LogisticsMenu from './LogisticsMenu';
+import LogisticaMenu from './LogisticaMenu';
 import SettingsMenu from './SettingsMenu';
 
 interface SidebarProps {
@@ -87,12 +86,12 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 );
               })}
 
-              {/* Os menus abaixo também devem retrair ao selecionar uma opção */}
+              {/* Outros menus */}
               <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
                 if (state !== "collapsed") setOpen(false);
               }} />
-              <LogisticsMenu />
+              <LogisticaMenu />
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
                 if (state !== "collapsed") setOpen(false);
