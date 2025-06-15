@@ -11,7 +11,7 @@ interface Reservation {
   customer_last_name: string;
   pickup_date: string;
   return_date: string;
-  vehicle: string;
+  plate: string;
 }
 
 // Novo parser para o modelo informado
@@ -51,13 +51,11 @@ const parseReservationList = (data: any): Reservation[] => {
       item.initial_return_date ||
       "-";
     // Vehicle: buscar campos comuns ao vehicle na reserva
-    let vehicle = "-";
+    let plate = "-";
     if (item.vehicle && typeof item.vehicle === "object") {
-      vehicle = item.vehicle.name || item.vehicle.model || "-";
-    } else if (item.vehicle_name) {
-      vehicle = item.vehicle_name;
-    } else if (item.model) {
-      vehicle = item.model;
+      plate = item.vehicle.plate || "-";
+    } else if (item.vehicle_plate) {
+      plate = item.vehicle_plate;
     }
 
     return {
@@ -66,7 +64,7 @@ const parseReservationList = (data: any): Reservation[] => {
       customer_last_name: customerLastName,
       pickup_date: pickupDate,
       return_date: returnDate,
-      vehicle,
+      plate,
     };
   });
 };
@@ -308,12 +306,13 @@ const ConsultaReservas: React.FC = () => {
                 <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Customer Name</th>
                 <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Pickup</th>
                 <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Return</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Veículo</th>
               </tr>
             </thead>
             <tbody>
               {reservations.length === 0 && !loading ? (
                 <tr>
-                  <td colSpan={4} className="px-4 py-3 text-center text-muted-foreground">
+                  <td colSpan={5} className="px-4 py-3 text-center text-muted-foreground">
                     Nenhum resultado.
                   </td>
                 </tr>
@@ -345,6 +344,8 @@ const ConsultaReservas: React.FC = () => {
                         <span style={{ fontSize: 12, display: "block" }}>{ret.date}</span>
                         <span style={{ fontSize: 12, color: "#666" }}>{ret.time}</span>
                       </td>
+                      {/* Veículo - plate */}
+                      <td className="px-4 py-2 align-middle">{r.plate || "-"}</td>
                     </tr>
                   );
                 })
