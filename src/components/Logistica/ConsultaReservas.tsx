@@ -115,9 +115,18 @@ function toFullIsoWithZ(dt: string): string {
   }
 }
 
+const getTodayDateString = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const ConsultaReservas: React.FC = () => {
-  const [dataInicio, setDataInicio] = useState("");
-  const [dataFim, setDataFim] = useState("");
+  // Definindo padrão: data de hoje
+  const [dataInicio, setDataInicio] = useState(getTodayDateString());
+  const [dataFim, setDataFim] = useState(getTodayDateString());
   const [loading, setLoading] = useState(false);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [error, setError] = useState<string | null>(null);
