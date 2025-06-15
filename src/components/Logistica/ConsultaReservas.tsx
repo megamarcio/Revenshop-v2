@@ -90,7 +90,7 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // Monta o JSON de filtros conforme instrução
+    // Corrigido: só aplica filtro entre em pick_up_date!
     const filtros = [
       {
         type: "string",
@@ -101,12 +101,6 @@ const ConsultaReservas: React.FC = () => {
       {
         type: "string",
         column: "pick_up_date",
-        operator: "between",
-        value: `${inicio},${fim}`,
-      },
-      {
-        type: "string",
-        column: "return_date",
         operator: "between",
         value: `${inicio},${fim}`,
       },
