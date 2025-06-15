@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Download, ExternalLink, Phone } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { LocationBadge } from "./LocationBadge";
 
 // Novo tipo, representando exatamente os campos desejados
 interface Reservation {
@@ -440,8 +441,7 @@ const ConsultaReservas: React.FC = () => {
                       const ret = formatDateTime(r.return_date);
                       const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
                       const kommoLeadId = rowKommoLeadIds[r.reservation_id];
-                      // Atualizado: só exibe badge se encontrar
-                      const badgeText = getLocationBadge(r.customer_last_name, badgeType);
+                      const badgeText = getLocationBadge(r.customer_last_name, badgeType) as "Mco" | "Fort" | "Mia" | "Tampa" | null;
                       return (
                         <tr key={r.reservation_id + idx} className="border-t align-top">
                           {/* Reservation ID + phone_number */}
@@ -453,17 +453,7 @@ const ConsultaReservas: React.FC = () => {
                           <td className="px-4 py-2">
                             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                               <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
-                              {badgeText && (
-                                <Badge
-                                  variant="secondary"
-                                  className={
-                                    `ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap ${badgeColorClass(badgeText)}`
-                                  }
-                                  style={{ letterSpacing: 0.5, lineHeight: "16px" }}
-                                >
-                                  {badgeText}
-                                </Badge>
-                              )}
+                              <LocationBadge location={badgeText} />
                             </div>
                             <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
                           </td>
