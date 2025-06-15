@@ -352,13 +352,13 @@ const ConsultaReservas: React.FC = () => {
       if (!badgeText) return "";
       switch (badgeText) {
         case "Mco":
-          return "bg-blue-200 text-blue-800 border-blue-200";
+          return "bg-[#2563eb] text-white border-[#2563eb]";
         case "Fort":
-          return "bg-gray-200 text-gray-800 border-gray-200";
+          return "bg-[#a21caf] text-white border-[#a21caf]";
         case "Mia":
-          return "bg-green-200 text-green-800 border-green-200";
+          return "bg-[#16a34a] text-white border-[#16a34a]";
         case "Tampa":
-          return "bg-orange-200 text-orange-800 border-orange-200";
+          return "bg-[#eab308] text-[#78350f] border-[#eab308]";
         default:
           return "";
       }
@@ -457,10 +457,9 @@ const ConsultaReservas: React.FC = () => {
                                 <Badge
                                   variant="secondary"
                                   className={
-                                    `ml-2 whitespace-nowrap p-0 text-[9px] h-[18px] min-w-[36px] text-center rounded-full border ` +
-                                    badgeColorClass(badgeText)
+                                    `ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap ${badgeColorClass(badgeText)}`
                                   }
-                                  style={{ letterSpacing: 0.5 }}
+                                  style={{ letterSpacing: 0.5, lineHeight: "16px" }}
                                 >
                                   {badgeText}
                                 </Badge>
