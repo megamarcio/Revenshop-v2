@@ -127,12 +127,20 @@ const getTodayDateString = () => {
 };
 
 // Adicionar uma função logo após o formatDateTime para detectar badge
-function getLocationBadge(lastName: string): string | null {
+function getLocationBadge(lastName: string, type: "pickup" | "return"): string | null {
   if (!lastName) return null;
-  const lower = lastName.toLowerCase();
-  if (lower.includes("mco")) return "In MCO";
-  if (lower.includes("fort")) return "In Fort";
-  if (lower.includes("mia")) return "In Mia";
+  const lower = lastName.toLowerCase().replace(/\s+/g, " ");
+  if (type === "pickup") {
+    if (lower.includes("in mco")) return "MCO";
+    if (lower.includes("in fort")) return "Fort";
+    if (lower.includes("in mia")) return "Mia";
+    if (lower.includes("in tampa")) return "Tampa";
+  } else if (type === "return") {
+    if (lower.includes("out mco")) return "MCO";
+    if (lower.includes("out fort")) return "Fort";
+    if (lower.includes("out mia")) return "Mia";
+    if (lower.includes("out tampa")) return "Tampa";
+  }
   return null;
 }
 
@@ -335,191 +343,195 @@ const ConsultaReservas: React.FC = () => {
     rawApiData: any;
     reservations: Reservation[];
     rowKommoLeadIds: { [r: string]: string };
-  }) => (
-    <div className="border-[2px] border-muted mb-8 rounded-lg p-5 shadow-sm bg-background">
-      <h2 className="text-xl font-bold mb-3">{header}</h2>
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div>
-          <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">
-            Data Inicial
-          </label>
-          <Input type="date" id="dataInicio" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className="w-[210px]" required />
-        </div>
-        <div>
-          <label htmlFor="dataFim" className="block text-sm font-medium mb-1">
-            Data Final
-          </label>
-          <Input type="date" id="dataFim" value={dataFim} onChange={e => setDataFim(e.target.value)} className="w-[210px]" required />
-        </div>
-        <div className="flex flex-row items-end gap-2 mt-7">
-          <Button className="h-10 px-8" onClick={onBuscar} disabled={loading || !dataInicio || !dataFim}>
-            {loading ? "Buscando..." : "Buscar"}
-          </Button>
-          <Button variant="outline" size="icon" className="h-10 w-10" onClick={handleDownloadRequestLog} disabled={!lastRequestLog} title="Baixar log da última requisição" aria-label="Baixar log da última requisição" tabIndex={0}>
-            <Download className="w-5 h-5" />
-          </Button>
-        </div>
-      </div>
-      {error && <div className="text-red-500 mb-3">{error}</div>}
+  }) => {
+    // Detecta tipo para badge: pickup ou return
+    const badgeType: "pickup" | "return" = header.toLowerCase().includes("pickup") ? "pickup" : "return";
 
-      {rawApiData && (
-        <div className="mb-4">
-          <Button
-            variant="secondary"
-            onClick={() => {
-              const jsonStr = JSON.stringify(rawApiData, null, 2);
-              const blob = new Blob([jsonStr], { type: "application/json" });
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
-              link.download = "reservas.json";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(link.href);
-            }}
-          >
-            Baixar JSON do Resultado
-          </Button>
+    return (
+      <div className="border-[2px] border-muted mb-8 rounded-lg p-5 shadow-sm bg-background">
+        <h2 className="text-xl font-bold mb-3">{header}</h2>
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div>
+            <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">
+              Data Inicial
+            </label>
+            <Input type="date" id="dataInicio" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className="w-[210px]" required />
+          </div>
+          <div>
+            <label htmlFor="dataFim" className="block text-sm font-medium mb-1">
+              Data Final
+            </label>
+            <Input type="date" id="dataFim" value={dataFim} onChange={e => setDataFim(e.target.value)} className="w-[210px]" required />
+          </div>
+          <div className="flex flex-row items-end gap-2 mt-7">
+            <Button className="h-10 px-8" onClick={onBuscar} disabled={loading || !dataInicio || !dataFim}>
+              {loading ? "Buscando..." : "Buscar"}
+            </Button>
+            <Button variant="outline" size="icon" className="h-10 w-10" onClick={handleDownloadRequestLog} disabled={!lastRequestLog} title="Baixar log da última requisição" aria-label="Baixar log da última requisição" tabIndex={0}>
+              <Download className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
-      )}
+        {error && <div className="text-red-500 mb-3">{error}</div>}
 
-      <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">Resultados</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-muted">
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>Reserva&nbsp;</th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Nome do Cliente</th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Pickup</th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Retorno</th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Veículo</th>
-                <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {reservations.length === 0 && !loading
-                ? <tr>
-                  <td colSpan={8} className="px-4 py-3 text-center text-muted-foreground">
-                    Nenhum resultado.
-                  </td>
+        {rawApiData && (
+          <div className="mb-4">
+            <Button
+              variant="secondary"
+              onClick={() => {
+                const jsonStr = JSON.stringify(rawApiData, null, 2);
+                const blob = new Blob([jsonStr], { type: "application/json" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "reservas.json";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(link.href);
+              }}
+            >
+              Baixar JSON do Resultado
+            </Button>
+          </div>
+        )}
+
+        <div className="mt-6">
+          <h3 className="text-lg font-semibold mb-2">Resultados</h3>
+          <div className="overflow-x-auto">
+            <table className="min-w-full border divide-y divide-gray-200">
+              <thead>
+                <tr className="bg-muted">
+                  <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>Reserva&nbsp;</th>
+                  <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Nome do Cliente</th>
+                  <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Pickup</th>
+                  <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Retorno</th>
+                  <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Veículo</th>
+                  <th className="px-2 py-2"></th>
+                  <th className="px-2 py-2"></th>
+                  <th className="px-2 py-2"></th>
                 </tr>
-                : reservations.map((r, idx) => {
-                  const pickup = formatDateTime(r.pickup_date);
-                  const ret = formatDateTime(r.return_date);
-                  const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
-                  const kommoLeadId = rowKommoLeadIds[r.reservation_id];
-                  // <--- ADICIONANDO AQUI LOGICA PARA SÓ NA PICKUP MOSTRAR O BADGE -->
-                  const showBadge = header.includes("Pickup Date");
-                  const badgeText = showBadge ? getLocationBadge(r.customer_last_name) : null;
-                  return (
-                    <tr key={r.reservation_id + idx} className="border-t align-top">
-                      {/* Reservation ID + phone_number */}
-                      <td className="px-4 py-2 align-middle" style={{ fontSize: 13, fontWeight: 700 }}>
-                        {r.reservation_id}
-                        <div style={{ fontSize: 11, color: "#757575", fontWeight: 400, marginTop: 2 }}>{r.phone_number || "-"}</div>
-                      </td>
-                      {/* Customer First Name + Last Name + BADGE */}
-                      <td className="px-4 py-2">
-                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                          <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
-                          {badgeText && (
-                            <Badge variant="secondary" className="ml-2 whitespace-nowrap">{badgeText}</Badge>
-                          )}
-                        </div>
-                        <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
-                      </td>
-                      {/* Pickup */}
-                      <td className="px-4 py-2">
-                        <span style={{ fontSize: 12, display: "block" }} className="font-normal text-xs">{pickup.date}</span>
-                        <span style={{ fontSize: 12, color: "#666" }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
-                      </td>
-                      {/* Return */}
-                      <td className="px-4 py-2">
-                        <span style={{ fontSize: 12, display: "block" }} className="text-xs">{ret.date}</span>
-                        <span style={{ fontSize: 12, color: "#666" }} className="px-[20px] text-xs font-thin">{ret.time}</span>
-                      </td>
-                      {/* Veículo - plate */}
-                      <td className="px-4 py-2 align-middle" style={{ fontSize: 13 }}>{r.plate || "-"}</td>
-                      {/* Botão para abrir reserva */}
-                      <td className="px-2 py-2 align-middle">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => window.open(`https://r3-rental.us5.hqrentals.app/car-rental/reservations/step3?id=${encodeURIComponent(r.reservation_id)}`, '_blank')}
-                          title="Abrir reserva do cliente"
-                          aria-label="Abrir reserva do cliente"
-                          tabIndex={0}
-                          className="h-8 w-8"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
-                      </td>
-                      {/* Botão WhatsApp (só aparece se tiver número limpo) */}
-                      <td className="px-2 py-2 align-middle">
-                        {cleanedPhone && cleanedPhone !== "-" ?
-                          <Button
-                            asChild
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-green-600"
-                            title="Enviar mensagem no WhatsApp"
-                            aria-label="Enviar mensagem no WhatsApp"
-                            tabIndex={0}
-                          >
-                            <a
-                              href={`http://wa.me/${cleanedPhone}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Phone className="w-4 h-4" />
-                            </a>
-                          </Button>
-                          : null}
-                      </td>
-                      {/* Botão Kommo (abre Kommo CRM com id "f855" do JSON) */}
-                      <td className="px-2 py-2 align-middle">
-                        {kommoLeadId ? (
-                          <Button
-                            asChild
-                            size="icon"
-                            variant="ghost"
-                            className="h-8 w-8 text-blue-600 hover:text-blue-800"
-                            title="Ver lead no Kommo"
-                            aria-label="Ver lead no Kommo"
-                            tabIndex={0}
-                          >
-                            <a
-                              href={`https://r3rentalcar.kommo.com/leads/detail/${encodeURIComponent(kommoLeadId)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="w-4 h-4" />
-                            </a>
-                          </Button>
-                        ) : (
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            disabled
-                            className="h-8 w-8 text-gray-300"
-                            title="Lead Kommo não encontrado"
-                          >
-                            <ExternalLink className="w-4 h-4" />
-                          </Button>
-                        )}
+              </thead>
+              <tbody>
+                {reservations.length === 0 && !loading
+                  ? <tr>
+                      <td colSpan={8} className="px-4 py-3 text-center text-muted-foreground">
+                        Nenhum resultado.
                       </td>
                     </tr>
-                  );
-                })}
-            </tbody>
-          </table>
+                  : reservations.map((r, idx) => {
+                      const pickup = formatDateTime(r.pickup_date);
+                      const ret = formatDateTime(r.return_date);
+                      const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
+                      const kommoLeadId = rowKommoLeadIds[r.reservation_id];
+                      // Atualizado: só exibe badge se encontrar
+                      const badgeText = getLocationBadge(r.customer_last_name, badgeType);
+                      return (
+                        <tr key={r.reservation_id + idx} className="border-t align-top">
+                          {/* Reservation ID + phone_number */}
+                          <td className="px-4 py-2 align-middle" style={{ fontSize: 13, fontWeight: 700 }}>
+                            {r.reservation_id}
+                            <div style={{ fontSize: 11, color: "#757575", fontWeight: 400, marginTop: 2 }}>{r.phone_number || "-"}</div>
+                          </td>
+                          {/* Customer First Name + Last Name + BADGE */}
+                          <td className="px-4 py-2">
+                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                              <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
+                              {badgeText && (
+                                <Badge variant="secondary" className="ml-2 whitespace-nowrap">{badgeText}</Badge>
+                              )}
+                            </div>
+                            <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
+                          </td>
+                          {/* Pickup */}
+                          <td className="px-4 py-2">
+                            <span style={{ fontSize: 12, display: "block" }} className="font-normal text-xs">{pickup.date}</span>
+                            <span style={{ fontSize: 12, color: "#666" }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
+                          </td>
+                          {/* Return */}
+                          <td className="px-4 py-2">
+                            <span style={{ fontSize: 12, display: "block" }} className="text-xs">{ret.date}</span>
+                            <span style={{ fontSize: 12, color: "#666" }} className="px-[20px] text-xs font-thin">{ret.time}</span>
+                          </td>
+                          {/* Veículo - plate */}
+                          <td className="px-4 py-2 align-middle" style={{ fontSize: 13 }}>{r.plate || "-"}</td>
+                          {/* Botão para abrir reserva */}
+                          <td className="px-2 py-2 align-middle">
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              onClick={() => window.open(`https://r3-rental.us5.hqrentals.app/car-rental/reservations/step3?id=${encodeURIComponent(r.reservation_id)}`, '_blank')}
+                              title="Abrir reserva do cliente"
+                              aria-label="Abrir reserva do cliente"
+                              tabIndex={0}
+                              className="h-8 w-8"
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                            </Button>
+                          </td>
+                          {/* Botão WhatsApp (só aparece se tiver número limpo) */}
+                          <td className="px-2 py-2 align-middle">
+                            {cleanedPhone && cleanedPhone !== "-" ?
+                              <Button
+                                asChild
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-green-600"
+                                title="Enviar mensagem no WhatsApp"
+                                aria-label="Enviar mensagem no WhatsApp"
+                                tabIndex={0}
+                              >
+                                <a
+                                  href={`http://wa.me/${cleanedPhone}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                </a>
+                              </Button>
+                              : null}
+                          </td>
+                          {/* Botão Kommo (abre Kommo CRM com id "f855" do JSON) */}
+                          <td className="px-2 py-2 align-middle">
+                            {kommoLeadId ? (
+                              <Button
+                                asChild
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 text-blue-600 hover:text-blue-800"
+                                title="Ver lead no Kommo"
+                                aria-label="Ver lead no Kommo"
+                                tabIndex={0}
+                              >
+                                <a
+                                  href={`https://r3rentalcar.kommo.com/leads/detail/${encodeURIComponent(kommoLeadId)}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="w-4 h-4" />
+                                </a>
+                              </Button>
+                            ) : (
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                disabled
+                                className="h-8 w-8 text-gray-300"
+                                title="Lead Kommo não encontrado"
+                              >
+                                <ExternalLink className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-6">
