@@ -116,19 +116,13 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // ATUALIZADO: Filtro de pick_up_date é agora o principal (vem primeiro no array)
+    // Agora: apenas filtro de pick_up_date (sem status)
     const filtros = [
       {
         type: "string",
         column: "pick_up_date",
         operator: "between",
         value: `${inicio},${fim}`,
-      },
-      {
-        type: "string",
-        column: "status",
-        operator: "equals",
-        value: "open",
       },
     ];
 
