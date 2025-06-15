@@ -75,7 +75,7 @@ const parseReservationList = (data: any): Reservation[] => {
   });
 };
 
-// Nova função para formatar datas para "DD/MM" e hora para "HH:MM"
+// Nova função para formatar datas para "DD/MM" e hora para "HH:MM AM/PM"
 function formatDateTime(dateStr: string): {
   date: string;
   time: string;
@@ -88,11 +88,16 @@ function formatDateTime(dateStr: string): {
     const date = new Date(dateStr);
     const day = date.getDate().toString().padStart(2, "0");
     const month = (date.getMonth() + 1).toString().padStart(2, "0");
-    const hours = date.getHours().toString().padStart(2, "0");
+    
+    let hours = date.getHours();
     const minutes = date.getMinutes().toString().padStart(2, "0");
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours || 12; // A hora 0 (meia-noite) deve ser 12
+    
     return {
       date: `${day}/${month}`,
-      time: `${hours}:${minutes}`
+      time: `${hours}:${minutes} ${ampm}` // e.g., 9:05 AM or 12:30 PM
     };
   } catch {
     return {
@@ -143,6 +148,20 @@ function getLocationBadge(lastName: string, type: "pickup" | "return"): string |
     if (lower.includes("out tampa")) return "Tampa";
   }
   return null;
+}
+
+// Novo helper para badges de itens extras
+function getExtraItemBadges(lastName: string): string[] {
+  if (!lastName) return [];
+  const lower = lastName.toLowerCase();
+  const badges: string[] = [];
+  if (lower.includes("carrinho") || lower.includes("stroller")) {
+    badges.push("Carrinho");
+  }
+  if (lower.includes("cadeirinha") || lower.includes("car seat")) {
+    badges.push("Cadeirinha");
+  }
+  return badges;
 }
 
 // Helper para ordenar reservas pelo campo correto
@@ -464,6 +483,7 @@ const ConsultaReservas: React.FC = () => {
                       const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
                       const kommoLeadId = rowKommoLeadIds[r.reservation_id];
                       const badgeText = getLocationBadge(r.customer_last_name, badgeType) as "Mco" | "Fort" | "Mia" | "Tampa" | null;
+                      const extraItemBadges = getExtraItemBadges(r.customer_last_name);
                       return (
                         <tr key={r.reservation_id + idx} className="border-t align-top">
                           {/* Reservation ID + phone_number */}
@@ -473,9 +493,14 @@ const ConsultaReservas: React.FC = () => {
                           </td>
                           {/* Customer First Name + Last Name + BADGE */}
                           <td className="px-4 py-2">
-                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 4, flexWrap: "wrap" }}>
                               <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
                               <LocationBadge location={badgeText} />
+                              {extraItemBadges.map((badge) => (
+                                <Badge key={badge} variant="outline" className="border-yellow-400 bg-yellow-50 text-yellow-800">
+                                  {badge}
+                                </Badge>
+                              ))}
                             </div>
                             <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
                           </td>
