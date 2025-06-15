@@ -221,9 +221,11 @@ const ConsultaReservas: React.FC = () => {
           item.custom_reservation_number ||
           item.prefixed_id ||
           (item.id ? String(item.id) : "-");
-        // Extrai o "f855" se existir; aceita vários níveis (item.f855 ou em item.custom_fields?.f855)
-        let kommoId = undefined;
-        if (item.f855) {
+        // Nova lógica: procura em customer.f855, item.f855 ou item.custom_fields.f855
+        let kommoId: string | undefined = undefined;
+        if (item.customer && typeof item.customer === "object" && item.customer.f855) {
+          kommoId = String(item.customer.f855);
+        } else if (item.f855) {
           kommoId = String(item.f855);
         } else if (item.custom_fields && item.custom_fields.f855) {
           kommoId = String(item.custom_fields.f855);
