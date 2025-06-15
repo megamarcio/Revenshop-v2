@@ -13,6 +13,7 @@ import ConsultaReservas from './components/Logistica/ConsultaReservas';
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
 const CustomerManagement = lazy(() => import('./components/Customers/CustomerManagement'));
 const UserManagement = lazy(() => import('./components/Users/UserManagement'));
+const PermissionsManager = lazy(() => import('./components/Users/PermissionsManager'));
 const AdminPanel = lazy(() => import('./components/Admin/AdminPanel'));
 const ProfilePage = lazy(() => import('./components/Profile/ProfilePage'));
 const BuyHerePayHere = lazy(() => import('./components/BHPH/BuyHerePayHere'));
@@ -112,6 +113,8 @@ const App: React.FC = () => {
         return <AIBeta />;
       case 'users':
         return canManageUsers ? <UserManagement /> : null;
+      case 'permissions':
+        return canManageUsers ? <PermissionsManager /> : null;
       case 'admin':
         return canAccessAdmin ? <AdminPanel onNavigateToUsers={() => handleTabChange('users')} /> : null;
       case 'profile':
