@@ -528,7 +528,7 @@ const ConsultaReservas: React.FC = () => {
                                     }
                                     font-bold h-auto py-0 px-2
                                   `}
-                                  style={{ fontSize: '7px' }}
+                                  style={{ fontSize: '8px' }}
                                 >
                                   {badge.text}
                                 </Badge>
