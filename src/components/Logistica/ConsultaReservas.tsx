@@ -347,6 +347,23 @@ const ConsultaReservas: React.FC = () => {
     // Detecta tipo para badge: pickup ou return
     const badgeType: "pickup" | "return" = header.toLowerCase().includes("pickup") ? "pickup" : "return";
 
+    // Função para cor do badge baseado no texto
+    const badgeColorClass = (badgeText: string | null) => {
+      if (!badgeText) return "";
+      switch (badgeText) {
+        case "MCO":
+          return "bg-blue-200 text-blue-800 border-blue-200";
+        case "Fort":
+          return "bg-gray-200 text-gray-800 border-gray-200";
+        case "Mia":
+          return "bg-green-200 text-green-800 border-green-200";
+        case "Tampa":
+          return "bg-orange-200 text-orange-800 border-orange-200";
+        default:
+          return "";
+      }
+    };
+
     return (
       <div className="border-[2px] border-muted mb-8 rounded-lg p-5 shadow-sm bg-background">
         <h2 className="text-xl font-bold mb-3">{header}</h2>
@@ -437,7 +454,16 @@ const ConsultaReservas: React.FC = () => {
                             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                               <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
                               {badgeText && (
-                                <Badge variant="secondary" className="ml-2 whitespace-nowrap">{badgeText}</Badge>
+                                <Badge
+                                  variant="secondary"
+                                  className={
+                                    `ml-2 whitespace-nowrap p-0 text-[9px] h-[18px] min-w-[36px] text-center rounded-full border ` +
+                                    badgeColorClass(badgeText)
+                                  }
+                                  style={{ letterSpacing: 0.5 }}
+                                >
+                                  {badgeText}
+                                </Badge>
                               )}
                             </div>
                             <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
