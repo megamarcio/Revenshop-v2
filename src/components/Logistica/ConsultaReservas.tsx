@@ -522,7 +522,9 @@ const ConsultaReservas: React.FC = () => {
                                   key={badge.text}
                                   variant="secondary"
                                   className={`
-                                    ${badge.type === 'alert'
+                                    ${badge.text === 'Carrinho'
+                                      ? 'bg-lime-400 text-black border-lime-400'
+                                      : badge.type === 'alert'
                                       ? 'bg-red-500 text-white border-red-500'
                                       : 'bg-[#2563eb] text-white border-[#2563eb]'
                                     }
