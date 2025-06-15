@@ -155,12 +155,22 @@ function getExtraItemBadges(lastName: string): string[] {
   if (!lastName) return [];
   const lower = lastName.toLowerCase();
   const badges: string[] = [];
-  if (lower.includes("carrinho") || lower.includes("stroller")) {
+
+  // Exclusions first
+  const excludesStroller = lower.includes("não preciso carrinho") || lower.includes("no stroller");
+  const excludesCarSeat = lower.includes("não preciso car seat") || lower.includes("no car seat");
+
+  // Inclusions
+  const includesStroller = lower.includes("carrinho") || lower.includes("stroller");
+  const includesCarSeat = lower.includes("cadeirinha") || lower.includes("car seat");
+
+  if (includesStroller && !excludesStroller) {
     badges.push("Carrinho");
   }
-  if (lower.includes("cadeirinha") || lower.includes("car seat")) {
+  if (includesCarSeat && !excludesCarSeat) {
     badges.push("Cadeirinha");
   }
+
   return badges;
 }
 
@@ -497,7 +507,7 @@ const ConsultaReservas: React.FC = () => {
                               <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
                               <LocationBadge location={badgeText} />
                               {extraItemBadges.map((badge) => (
-                                <Badge key={badge} variant="outline" className="border-yellow-400 bg-yellow-50 text-yellow-800">
+                                <Badge key={badge} variant="secondary" className="bg-[#2563eb] text-white border-[#2563eb]">
                                   {badge}
                                 </Badge>
                               ))}
