@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ShieldCheck, ShieldX, User, CheckCircle, Loader2 } from "lucide-react";
@@ -8,13 +7,19 @@ import { toast } from "@/hooks/use-toast";
 
 const screenPermissions = [
   { id: "dashboard", label: "Dashboard" },
-  { id: "users", label: "Usuários" },
-  { id: "profile", label: "Perfil" },
-  { id: "auctions", label: "Leilões" },
   { id: "vehicles", label: "Veículos" },
   { id: "customers", label: "Clientes" },
+  { id: "auctions", label: "Leilões" },
+  { id: "tasks", label: "Tarefas" },
   { id: "maintenance", label: "Manutenção" },
-  { id: "settings", label: "Configurações" },
+  { id: "ai-beta", label: "IA (beta)" },
+  { id: "bhph", label: "Buy Here Pay Here" },
+  { id: "financing", label: "Simulador de Financiamento" },
+  { id: "logistica", label: "Logística" },
+  { id: "users", label: "Lista de Usuários" },
+  { id: "permissions", label: "Gerenciar Permissões" },
+  { id: "profile", label: "Perfil" },
+  { id: "admin", label: "Painel Admin" },
 ];
 
 const roles = [

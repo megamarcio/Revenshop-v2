@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -5,13 +6,19 @@ import { supabase } from "@/integrations/supabase/client";
 export type RoleType = "admin" | "manager" | "internal_seller" | "seller";
 export type ScreenIdType =
   | "dashboard"
-  | "users"
-  | "profile"
-  | "auctions"
   | "vehicles"
   | "customers"
+  | "auctions"
+  | "tasks"
   | "maintenance"
-  | "settings";
+  | "ai-beta"
+  | "bhph"
+  | "financing"
+  | "logistica"
+  | "users"
+  | "permissions"
+  | "profile"
+  | "admin";
 
 export interface RolePermission {
   id: string;
