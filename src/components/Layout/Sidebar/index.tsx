@@ -1,4 +1,5 @@
-import React, { useRef } from 'react';
+
+import React, { useRef, useState, useEffect } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
@@ -9,8 +10,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
+import { Switch } from '@/components/ui/switch';
 import { getMenuItems } from './menuItems';
 import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
@@ -21,6 +24,8 @@ interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
+
+const AUTOHIDE_BLOCKED_LOCALSTORAGE_KEY = "sidebar:autoHideBlocked";
 
 const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { t } = useLanguage();
@@ -35,10 +40,19 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   // Track if the sidebar was collapsed before hover (only on desktop)
   const wasCollapsedOnHover = useRef(false);
 
+  // Novo: Estado para bloquear o auto ocultar, salva em localStorage
+  const [blockAutoHide, setBlockAutoHide] = useState(
+    () => localStorage.getItem(AUTOHIDE_BLOCKED_LOCALSTORAGE_KEY) === "true"
+  );
+
+  useEffect(() => {
+    localStorage.setItem(AUTOHIDE_BLOCKED_LOCALSTORAGE_KEY, blockAutoHide ? "true" : "false");
+  }, [blockAutoHide]);
+
   const handleMenuItemClick = (itemId: string) => {
     setActiveTab(itemId);
-    // Após seleção, colapsa o menu automaticamente
-    if (state !== "collapsed") {
+    // Após seleção, colapsa o menu automaticamente ― exceto se estiver bloqueado
+    if (!blockAutoHide && state !== "collapsed") {
       setOpen(false);
     }
   };
@@ -61,7 +75,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   // Novo: handler para painel logística
   const openLogistica = () => {
     setActiveTab("logistica");
-    if (state !== "collapsed") setOpen(false);
+    if (!blockAutoHide && state !== "collapsed") setOpen(false);
   };
 
   return (
@@ -95,19 +109,34 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
               {/* Outros menus */}
               <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (state !== "collapsed") setOpen(false);
+                if (!blockAutoHide && state !== "collapsed") setOpen(false);
               }} />
               <LogisticaMenu onClick={openLogistica} />
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (state !== "collapsed") setOpen(false);
+                if (!blockAutoHide && state !== "collapsed") setOpen(false);
               }} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      {/* Footer com botão/switch para travar/destravar auto-ocultar */}
+      <SidebarFooter>
+        <div className="flex items-center justify-between w-full px-2 py-2">
+          <span className="text-xs text-muted-foreground mr-3">
+            Bloquear auto-ocultar
+          </span>
+          <Switch
+            checked={blockAutoHide}
+            onCheckedChange={setBlockAutoHide}
+            aria-label="Bloquear auto-ocultar sidebar"
+          />
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };
 
 export default AppSidebar;
+
