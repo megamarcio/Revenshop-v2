@@ -126,17 +126,17 @@ const getTodayDateString = () => {
   return `${year}-${month}-${day}`;
 };
 
-// Adicionar uma função logo após o formatDateTime para detectar badge
+// Atualizado: agora retorna Mco (não MCO)
 function getLocationBadge(lastName: string, type: "pickup" | "return"): string | null {
   if (!lastName) return null;
   const lower = lastName.toLowerCase().replace(/\s+/g, " ");
   if (type === "pickup") {
-    if (lower.includes("in mco")) return "MCO";
+    if (lower.includes("in mco")) return "Mco";
     if (lower.includes("in fort")) return "Fort";
     if (lower.includes("in mia")) return "Mia";
     if (lower.includes("in tampa")) return "Tampa";
   } else if (type === "return") {
-    if (lower.includes("out mco")) return "MCO";
+    if (lower.includes("out mco")) return "Mco";
     if (lower.includes("out fort")) return "Fort";
     if (lower.includes("out mia")) return "Mia";
     if (lower.includes("out tampa")) return "Tampa";
@@ -351,7 +351,7 @@ const ConsultaReservas: React.FC = () => {
     const badgeColorClass = (badgeText: string | null) => {
       if (!badgeText) return "";
       switch (badgeText) {
-        case "MCO":
+        case "Mco":
           return "bg-blue-200 text-blue-800 border-blue-200";
         case "Fort":
           return "bg-gray-200 text-gray-800 border-gray-200";
