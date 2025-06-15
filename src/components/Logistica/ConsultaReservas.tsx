@@ -124,54 +124,78 @@ const getTodayDateString = () => {
   const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
-const ConsultaReservas: React.FC = () => {
-  // Definindo padrão: data de hoje
-  const [dataInicio, setDataInicio] = useState(getTodayDateString());
-  const [dataFim, setDataFim] = useState(getTodayDateString());
-  const [loading, setLoading] = useState(false);
-  const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [rawApiData, setRawApiData] = useState<any | null>(null);
-  const [lastRequestLog, setLastRequestLog] = useState<any | null>(null);
-  const [rowKommoLeadIds, setRowKommoLeadIds] = useState<{ [reservationId: string]: string }>({});
 
-  // Nova função para extrair e formatar datas
-  const getFiltroDatas = () => {
-    // Recebe do usuário em yyyy-mm-dd, precisa compor ISO de "meia-noite"
-    const inicio = dataInicio && /^\d{4}-\d{2}-\d{2}$/.test(dataInicio) ? `${dataInicio}T00:00:00` : "";
-    const fim = dataFim && /^\d{4}-\d{2}-\d{2}$/.test(dataFim) ? `${dataFim}T00:00:00` : "";
-    // A API espera yyyy-mm-dd, então extraímos só a parte da data
-    return {
-      inicio: inicio ? inicio.slice(0, 10) : "",
-      fim: fim ? fim.slice(0, 10) : ""
-    };
-  };
-  const onBuscar = async () => {
+const ConsultaReservas: React.FC = () => {
+  // --------- FILTROS PICKUP DATE ---------
+  const [dataInicioPickup, setDataInicioPickup] = useState(getTodayDateString());
+  const [dataFimPickup, setDataFimPickup] = useState(getTodayDateString());
+  const [loadingPickup, setLoadingPickup] = useState(false);
+  const [reservationsPickup, setReservationsPickup] = useState<Reservation[]>([]);
+  const [errorPickup, setErrorPickup] = useState<string | null>(null);
+  const [rawApiDataPickup, setRawApiDataPickup] = useState<any | null>(null);
+  const [lastRequestLogPickup, setLastRequestLogPickup] = useState<any | null>(null);
+  const [rowKommoLeadIdsPickup, setRowKommoLeadIdsPickup] = useState<{ [reservationId: string]: string }>({});
+
+  // --------- FILTROS RETURN DATE ---------
+  const [dataInicioReturn, setDataInicioReturn] = useState(getTodayDateString());
+  const [dataFimReturn, setDataFimReturn] = useState(getTodayDateString());
+  const [loadingReturn, setLoadingReturn] = useState(false);
+  const [reservationsReturn, setReservationsReturn] = useState<Reservation[]>([]);
+  const [errorReturn, setErrorReturn] = useState<string | null>(null);
+  const [rawApiDataReturn, setRawApiDataReturn] = useState<any | null>(null);
+  const [lastRequestLogReturn, setLastRequestLogReturn] = useState<any | null>(null);
+  const [rowKommoLeadIdsReturn, setRowKommoLeadIdsReturn] = useState<{ [reservationId: string]: string }>({});
+
+  // --------- BUSCA GENERICA (usada por ambos) ---------
+  const fetchReservas = async ({
+    dataIni,
+    dataFim,
+    columnType,
+    setLoading,
+    setReservations,
+    setError,
+    setRawApiData,
+    setLastRequestLog,
+    setRowKommoLeadIds,
+  }: {
+    dataIni: string;
+    dataFim: string;
+    columnType: "pick_up_date" | "return_date";
+    setLoading: (b: boolean) => void;
+    setReservations: (r: Reservation[]) => void;
+    setError: (e: string | null) => void;
+    setRawApiData: (d: any) => void;
+    setLastRequestLog: (d: any) => void;
+    setRowKommoLeadIds: (m: { [reservationId: string]: string }) => void;
+  }) => {
     setLoading(true);
     setReservations([]);
     setError(null);
     setRawApiData(null);
     setLastRequestLog(null);
-    const {
-      inicio,
-      fim
-    } = getFiltroDatas();
+
+    const inicio = dataIni && /^\d{4}-\d{2}-\d{2}$/.test(dataIni) ? `${dataIni}T00:00:00` : "";
+    const fim = dataFim && /^\d{4}-\d{2}-\d{2}$/.test(dataFim) ? `${dataFim}T00:00:00` : "";
+
     if (!inicio || !fim) {
-      setError("Preencha as datas inicial e final completas (data e hora).");
+      setError("Preencha as datas inicial e final completas.");
       setLoading(false);
       return;
     }
-    const filtros = [{
-      type: "date",
-      column: "pick_up_date",
-      operator: "between",
-      value: `${inicio},${fim}`
-    }, {
-      type: "string",
-      column: "status",
-      operator: "equals",
-      value: "open"
-    }];
+    const filtros = [
+      {
+        type: "date",
+        column: columnType,
+        operator: "between",
+        value: `${inicio.slice(0,10)},${fim.slice(0,10)}`
+      },
+      {
+        type: "string",
+        column: "status",
+        operator: "equals",
+        value: "open"
+      }
+    ];
     const filtros_codificados = encodeURIComponent(JSON.stringify(filtros));
     const url = `https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations?filters=${filtros_codificados}`;
     const headers = {
@@ -187,11 +211,9 @@ const ConsultaReservas: React.FC = () => {
       response_json: null,
       error: null
     };
+
     try {
-      const res = await fetch(url, {
-        method: "GET",
-        headers
-      });
+      const res = await fetch(url, { method: "GET", headers });
       if (!res.ok) {
         setError("Erro ao buscar reservas.");
         responseLog.error = `HTTP ${res.status} - ${res.statusText || "Unknown error"}`;
@@ -201,26 +223,21 @@ const ConsultaReservas: React.FC = () => {
       }
       const data = await res.json();
       setRawApiData(data);
-
-      // Salvar resposta no log
       responseLog.response_json = data;
       setLastRequestLog(responseLog);
 
       const onlyRelevant = parseReservationList(data);
       setReservations(onlyRelevant);
 
-      // --- CAPTURA O "f855" PARA CADA RESERVA ---
-      // Construir um map: reservation.reservation_id => customer.f855 (só desse local!)
+      // CAPTURA O "f855" PARA CADA RESERVA
       const list = Array.isArray(data) ? data : data?.data || [];
       const kommoMap: { [reservationId: string]: string } = {};
       list.forEach((item: any) => {
-        // Mesma regra de reservation_id do restante do código
         const reservationId =
           item.reservation_id ||
           item.custom_reservation_number ||
           item.prefixed_id ||
           (item.id ? String(item.id) : "-");
-        // Buscar APENAS em item.customer.f855
         let kommoId: string | undefined = undefined;
         if (
           item.customer &&
@@ -251,30 +268,76 @@ const ConsultaReservas: React.FC = () => {
     }
   };
 
-  // Botão para baixar o log da última requisição
-  const handleDownloadRequestLog = () => {
-    if (!lastRequestLog) return;
-    const jsonStr = JSON.stringify(lastRequestLog, null, 2);
-    const blob = new Blob([jsonStr], {
-      type: "application/json"
+  // DISPARADORES DOS DOIS TIPOS DE BUSCA
+  const onBuscarPickup = () =>
+    fetchReservas({
+      dataIni: dataInicioPickup,
+      dataFim: dataFimPickup,
+      columnType: "pick_up_date",
+      setLoading: setLoadingPickup,
+      setReservations: setReservationsPickup,
+      setError: setErrorPickup,
+      setRawApiData: setRawApiDataPickup,
+      setLastRequestLog: setLastRequestLogPickup,
+      setRowKommoLeadIds: setRowKommoLeadIdsPickup,
     });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "log_requisicao_consulta_reservas.json";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
-  };
-  return <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-semibold mb-4">Consulta de Reservas</h2>
+
+  const onBuscarReturn = () =>
+    fetchReservas({
+      dataIni: dataInicioReturn,
+      dataFim: dataFimReturn,
+      columnType: "return_date",
+      setLoading: setLoadingReturn,
+      setReservations: setReservationsReturn,
+      setError: setErrorReturn,
+      setRawApiData: setRawApiDataReturn,
+      setLastRequestLog: setLastRequestLogReturn,
+      setRowKommoLeadIds: setRowKommoLeadIdsReturn,
+    });
+
+  // Helper para renderizar busca/tabela
+  const renderSection = ({
+    header,
+    dataInicio,
+    setDataInicio,
+    dataFim,
+    setDataFim,
+    onBuscar,
+    loading,
+    lastRequestLog,
+    handleDownloadRequestLog,
+    error,
+    rawApiData,
+    reservations,
+    rowKommoLeadIds,
+  }: {
+    header: string;
+    dataInicio: string;
+    setDataInicio: (val: string) => void;
+    dataFim: string;
+    setDataFim: (val: string) => void;
+    onBuscar: () => void;
+    loading: boolean;
+    lastRequestLog: any;
+    handleDownloadRequestLog: () => void;
+    error: string | null;
+    rawApiData: any;
+    reservations: Reservation[];
+    rowKommoLeadIds: { [r: string]: string };
+  }) => (
+    <div className="border-[2px] border-muted mb-8 rounded-lg p-5 shadow-sm bg-background">
+      <h2 className="text-xl font-bold mb-3">{header}</h2>
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div>
-          <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">Data Inicial</label>
+          <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">
+            Data Inicial
+          </label>
           <Input type="date" id="dataInicio" value={dataInicio} onChange={e => setDataInicio(e.target.value)} className="w-[210px]" required />
         </div>
         <div>
-          <label htmlFor="dataFim" className="block text-sm font-medium mb-1">Data Final</label>
+          <label htmlFor="dataFim" className="block text-sm font-medium mb-1">
+            Data Final
+          </label>
           <Input type="date" id="dataFim" value={dataFim} onChange={e => setDataFim(e.target.value)} className="w-[210px]" required />
         </div>
         <div className="flex flex-row items-end gap-2 mt-7">
@@ -288,23 +351,26 @@ const ConsultaReservas: React.FC = () => {
       </div>
       {error && <div className="text-red-500 mb-3">{error}</div>}
 
-      {rawApiData && <div className="mb-4">
-          <Button variant="secondary" onClick={() => {
-        const jsonStr = JSON.stringify(rawApiData, null, 2);
-        const blob = new Blob([jsonStr], {
-          type: "application/json"
-        });
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = "reservas.json";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(link.href);
-      }}>
+      {rawApiData && (
+        <div className="mb-4">
+          <Button
+            variant="secondary"
+            onClick={() => {
+              const jsonStr = JSON.stringify(rawApiData, null, 2);
+              const blob = new Blob([jsonStr], { type: "application/json" });
+              const link = document.createElement("a");
+              link.href = URL.createObjectURL(blob);
+              link.download = "reservas.json";
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(link.href);
+            }}
+          >
             Baixar JSON do Resultado
           </Button>
-        </div>}
+        </div>
+      )}
 
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-2">Resultados</h3>
@@ -312,25 +378,14 @@ const ConsultaReservas: React.FC = () => {
           <table className="min-w-full border divide-y divide-gray-200">
             <thead>
               <tr className="bg-muted">
-                <th className="px-4 py-2 text-left" style={{
-                fontSize: 13,
-                fontWeight: 600
-              }}>Reserva&nbsp;</th>
-                <th className="px-4 py-2 text-left" style={{
-                fontSize: 13
-              }}>Nome do Cliente</th>
-                <th className="px-4 py-2 text-left" style={{
-                fontSize: 13
-              }}>Pickup</th>
-                <th className="px-4 py-2 text-left" style={{
-                fontSize: 13
-              }}>Retorno</th>
-                <th className="px-4 py-2 text-left" style={{
-                fontSize: 13
-              }}>Veículo</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>Reserva&nbsp;</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Nome do Cliente</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Pickup</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Retorno</th>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>Veículo</th>
                 <th className="px-2 py-2"></th>
                 <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th> {/* Nova coluna para botão Kommo */}
+                <th className="px-2 py-2"></th>
               </tr>
             </thead>
             <tbody>
@@ -344,72 +399,31 @@ const ConsultaReservas: React.FC = () => {
                   const pickup = formatDateTime(r.pickup_date);
                   const ret = formatDateTime(r.return_date);
                   const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
-
-                  // Pegue o KommoLeadId associado a esta reserva
                   const kommoLeadId = rowKommoLeadIds[r.reservation_id];
-
                   return (
                     <tr key={r.reservation_id + idx} className="border-t align-top">
                       {/* Reservation ID + phone_number */}
-                      <td className="px-4 py-2 align-middle" style={{
-                        fontSize: 13,
-                        fontWeight: 700
-                      }}>
+                      <td className="px-4 py-2 align-middle" style={{ fontSize: 13, fontWeight: 700 }}>
                         {r.reservation_id}
-                        <div style={{
-                          fontSize: 11,
-                          color: "#757575",
-                          fontWeight: 400,
-                          marginTop: 2
-                        }}>
-                          {r.phone_number || "-"}
-                        </div>
+                        <div style={{ fontSize: 11, color: "#757575", fontWeight: 400, marginTop: 2 }}>{r.phone_number || "-"}</div>
                       </td>
                       {/* Customer First Name + Last Name */}
                       <td className="px-4 py-2">
-                        <span style={{
-                          display: "block",
-                          fontSize: 12,
-                          fontWeight: 600
-                        }}>
-                          {r.customer_first_name}
-                        </span>
-                        <span style={{
-                          display: "block",
-                          fontSize: 10,
-                          color: "#757575"
-                        }}>
-                          {r.customer_last_name}
-                        </span>
+                        <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
+                        <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
                       </td>
                       {/* Pickup */}
                       <td className="px-4 py-2">
-                        <span style={{
-                          fontSize: 12,
-                          display: "block"
-                        }} className="font-normal text-xs">{pickup.date}</span>
-                        <span style={{
-                          fontSize: 12,
-                          color: "#666"
-                        }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
+                        <span style={{ fontSize: 12, display: "block" }} className="font-normal text-xs">{pickup.date}</span>
+                        <span style={{ fontSize: 12, color: "#666" }} className="font-extralight text-xs px-[17px] text-center">{pickup.time}</span>
                       </td>
                       {/* Return */}
                       <td className="px-4 py-2">
-                        <span style={{
-                          fontSize: 12,
-                          display: "block"
-                        }} className="text-xs">{ret.date}</span>
-                        <span style={{
-                          fontSize: 12,
-                          color: "#666"
-                        }} className="px-[20px] text-xs font-thin">{ret.time}</span>
+                        <span style={{ fontSize: 12, display: "block" }} className="text-xs">{ret.date}</span>
+                        <span style={{ fontSize: 12, color: "#666" }} className="px-[20px] text-xs font-thin">{ret.time}</span>
                       </td>
                       {/* Veículo - plate */}
-                      <td className="px-4 py-2 align-middle" style={{
-                        fontSize: 13
-                      }}>
-                        {r.plate || "-"}
-                      </td>
+                      <td className="px-4 py-2 align-middle" style={{ fontSize: 13 }}>{r.plate || "-"}</td>
                       {/* Botão para abrir reserva */}
                       <td className="px-2 py-2 align-middle">
                         <Button
@@ -485,6 +499,67 @@ const ConsultaReservas: React.FC = () => {
           </table>
         </div>
       </div>
-    </div>;
+    </div>
+  );
+
+  return (
+    <div className="max-w-3xl mx-auto p-6">
+      {/* Seção Pickup Date */}
+      {renderSection({
+        header: "Consulta por Pickup Date",
+        dataInicio: dataInicioPickup,
+        setDataInicio: setDataInicioPickup,
+        dataFim: dataFimPickup,
+        setDataFim: setDataFimPickup,
+        onBuscar: onBuscarPickup,
+        loading: loadingPickup,
+        lastRequestLog: lastRequestLogPickup,
+        handleDownloadRequestLog: () => {
+          if (!lastRequestLogPickup) return;
+          const jsonStr = JSON.stringify(lastRequestLogPickup, null, 2);
+          const blob = new Blob([jsonStr], { type: "application/json" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "log_requisicao_consulta_reservas_pickup.json";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+        },
+        error: errorPickup,
+        rawApiData: rawApiDataPickup,
+        reservations: reservationsPickup,
+        rowKommoLeadIds: rowKommoLeadIdsPickup,
+      })}
+
+      {/* Seção Return Date */}
+      {renderSection({
+        header: "Consulta por Return Date",
+        dataInicio: dataInicioReturn,
+        setDataInicio: setDataInicioReturn,
+        dataFim: dataFimReturn,
+        setDataFim: setDataFimReturn,
+        onBuscar: onBuscarReturn,
+        loading: loadingReturn,
+        lastRequestLog: lastRequestLogReturn,
+        handleDownloadRequestLog: () => {
+          if (!lastRequestLogReturn) return;
+          const jsonStr = JSON.stringify(lastRequestLogReturn, null, 2);
+          const blob = new Blob([jsonStr], { type: "application/json" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "log_requisicao_consulta_reservas_return.json";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
+        },
+        error: errorReturn,
+        rawApiData: rawApiDataReturn,
+        reservations: reservationsReturn,
+        rowKommoLeadIds: rowKommoLeadIdsReturn,
+      })}
+    </div>
+  );
 };
 export default ConsultaReservas;
