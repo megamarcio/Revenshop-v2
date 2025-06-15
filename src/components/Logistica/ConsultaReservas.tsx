@@ -116,10 +116,10 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // Filtros: pick_up_date E status 'open'
+    // Corrigido: filtro de data deve ser type "date"
     const filtros = [
       {
-        type: "string",
+        type: "date",
         column: "pick_up_date",
         operator: "between",
         value: `${inicio},${fim}`,
