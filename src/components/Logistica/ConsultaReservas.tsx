@@ -116,13 +116,19 @@ const ConsultaReservas: React.FC = () => {
       return;
     }
 
-    // Agora: apenas filtro de pick_up_date (sem status)
+    // Filtros: pick_up_date E status 'open'
     const filtros = [
       {
         type: "string",
         column: "pick_up_date",
         operator: "between",
         value: `${inicio},${fim}`,
+      },
+      {
+        type: "string",
+        column: "status",
+        operator: "equals",
+        value: "open",
       },
     ];
 
