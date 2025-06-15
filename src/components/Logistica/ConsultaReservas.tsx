@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Download, ExternalLink, Phone } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 // Novo tipo, representando exatamente os campos desejados
 interface Reservation {
@@ -124,6 +125,16 @@ const getTodayDateString = () => {
   const day = String(today.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+
+// Adicionar uma função logo após o formatDateTime para detectar badge
+function getLocationBadge(lastName: string): string | null {
+  if (!lastName) return null;
+  const lower = lastName.toLowerCase();
+  if (lower.includes("mco")) return "In MCO";
+  if (lower.includes("fort")) return "In Fort";
+  if (lower.includes("mia")) return "In Mia";
+  return null;
+}
 
 const ConsultaReservas: React.FC = () => {
   // --------- FILTROS PICKUP DATE ---------
@@ -400,6 +411,9 @@ const ConsultaReservas: React.FC = () => {
                   const ret = formatDateTime(r.return_date);
                   const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
                   const kommoLeadId = rowKommoLeadIds[r.reservation_id];
+                  // <--- ADICIONANDO AQUI LOGICA PARA SÓ NA PICKUP MOSTRAR O BADGE -->
+                  const showBadge = header.includes("Pickup Date");
+                  const badgeText = showBadge ? getLocationBadge(r.customer_last_name) : null;
                   return (
                     <tr key={r.reservation_id + idx} className="border-t align-top">
                       {/* Reservation ID + phone_number */}
@@ -407,9 +421,14 @@ const ConsultaReservas: React.FC = () => {
                         {r.reservation_id}
                         <div style={{ fontSize: 11, color: "#757575", fontWeight: 400, marginTop: 2 }}>{r.phone_number || "-"}</div>
                       </td>
-                      {/* Customer First Name + Last Name */}
+                      {/* Customer First Name + Last Name + BADGE */}
                       <td className="px-4 py-2">
-                        <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                          <span style={{ display: "block", fontSize: 12, fontWeight: 600 }}>{r.customer_first_name}</span>
+                          {badgeText && (
+                            <Badge variant="secondary" className="ml-2 whitespace-nowrap">{badgeText}</Badge>
+                          )}
+                        </div>
                         <span style={{ display: "block", fontSize: 10, color: "#757575" }}>{r.customer_last_name}</span>
                       </td>
                       {/* Pickup */}
