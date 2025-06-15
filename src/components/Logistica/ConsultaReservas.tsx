@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
@@ -13,7 +12,7 @@ interface Reservation {
   checkout_datetime: string;
 }
 
-const parseReservationList = (data: any[]): Reservation[] => {
+const parseReservationList = (data: any): Reservation[] => {
   // Tenta encontrar reservas dentro de diferentes modelos de resposta.
   const list = Array.isArray(data) ? data : (data?.data || []);
   // Busca campos customizados no JSON (pode variar conforme API)
