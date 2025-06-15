@@ -96,9 +96,19 @@ const ConsultaReservas: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [rawApiData, setRawApiData] = useState<any | null>(null);
 
+  // Nova função para extrair e formatar datas
   const getFiltroDatas = () => {
-    const inicio = toFullIsoWithZ(dataInicio);
-    const fim = toFullIsoWithZ(dataFim);
+    const inicioDate = dataInicio ? new Date(dataInicio) : null;
+    const fimDate = dataFim ? new Date(dataFim) : null;
+    // Formato yyyy-mm-dd (padrão da API)
+    const inicio =
+      inicioDate && !isNaN(inicioDate.getTime())
+        ? inicioDate.toISOString().slice(0, 10)
+        : "";
+    const fim =
+      fimDate && !isNaN(fimDate.getTime())
+        ? fimDate.toISOString().slice(0, 10)
+        : "";
     return { inicio, fim };
   };
 
