@@ -50,9 +50,15 @@ const parseReservationList = (data: any): Reservation[] => {
       item.checkout_datetime ||
       item.initial_return_date ||
       "-";
-    // Vehicle: buscar campos comuns ao vehicle na reserva
+    // Veículo: buscar plate de reservation_vehicle_information se existir
     let plate = "-";
-    if (item.vehicle && typeof item.vehicle === "object") {
+    if (
+      item.reservation_vehicle_information &&
+      typeof item.reservation_vehicle_information === "object" &&
+      item.reservation_vehicle_information.plate
+    ) {
+      plate = item.reservation_vehicle_information.plate;
+    } else if (item.vehicle && typeof item.vehicle === "object") {
       plate = item.vehicle.plate || "-";
     } else if (item.vehicle_plate) {
       plate = item.vehicle_plate;
