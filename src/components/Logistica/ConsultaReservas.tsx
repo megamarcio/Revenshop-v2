@@ -145,6 +145,24 @@ function getLocationBadge(lastName: string, type: "pickup" | "return"): string |
   return null;
 }
 
+// Helper para ordenar reservas pelo campo correto
+function getOrderedReservations(
+  reservations: Reservation[],
+  type: "pickup" | "return"
+): Reservation[] {
+  const key = type === "pickup" ? "pickup_date" : "return_date";
+  return [...reservations].sort((a: Reservation, b: Reservation) => {
+    // Prioriza datas válidas
+    if (!a[key] && !b[key]) return 0;
+    if (!a[key]) return 1;
+    if (!b[key]) return -1;
+    // Faz comparação de datas
+    const dateA = new Date(a[key]).getTime();
+    const dateB = new Date(b[key]).getTime();
+    return dateA - dateB;
+  });
+}
+
 const ConsultaReservas: React.FC = () => {
   // --------- FILTROS PICKUP DATE ---------
   const [dataInicioPickup, setDataInicioPickup] = useState(getTodayDateString());
@@ -346,7 +364,8 @@ const ConsultaReservas: React.FC = () => {
     rowKommoLeadIds: { [r: string]: string };
   }) => {
     // Detecta tipo para badge: pickup ou return
-    const badgeType: "pickup" | "return" = header.toLowerCase().includes("pickup") ? "pickup" : "return";
+    const badgeType: "pickup" | "return" =
+      header.toLowerCase().includes("pickup") ? "pickup" : "return";
 
     // Função para cor do badge baseado no texto
     const badgeColorClass = (badgeText: string | null) => {
@@ -364,6 +383,9 @@ const ConsultaReservas: React.FC = () => {
           return "";
       }
     };
+
+    // Aqui, ordena os resultados conforme solicitado:
+    const orderedReservations = getOrderedReservations(reservations, badgeType);
 
     return (
       <div className="border-[2px] border-muted mb-8 rounded-lg p-5 shadow-sm bg-background">
@@ -430,13 +452,13 @@ const ConsultaReservas: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {reservations.length === 0 && !loading
+                {orderedReservations.length === 0 && !loading
                   ? <tr>
                       <td colSpan={8} className="px-4 py-3 text-center text-muted-foreground">
                         Nenhum resultado.
                       </td>
                     </tr>
-                  : reservations.map((r, idx) => {
+                  : orderedReservations.map((r, idx) => {
                       const pickup = formatDateTime(r.pickup_date);
                       const ret = formatDateTime(r.return_date);
                       const cleanedPhone = (r.phone_number || "-").replace(/\D/g, "");
