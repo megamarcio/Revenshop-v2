@@ -6,6 +6,8 @@ import Navbar from './components/Layout/Navbar';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { Loader2 } from 'lucide-react';
 import VehicleListContainer from './components/Vehicles/VehicleListContainer';
+// Adicionando import do novo componente de logística:
+import ConsultaReservas from './components/Logistica/ConsultaReservas';
 
 // Lazy loading dos componentes para melhor performance
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard'));
@@ -114,6 +116,9 @@ const App: React.FC = () => {
         return canAccessAdmin ? <AdminPanel onNavigateToUsers={() => handleTabChange('users')} /> : null;
       case 'profile':
         return <ProfilePage />;
+      case 'logistica':
+        // Renderiza o componente de consulta de reservas ao clicar no menu Logística
+        return <ConsultaReservas />;
       default:
         return null;
     }
