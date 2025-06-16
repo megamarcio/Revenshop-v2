@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, Wrench, AlertTriangle, Calendar } from 'lucide-react';
+import { Plus, Wrench, AlertTriangle, Calendar, Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import MaintenanceForm from './MaintenanceForm';
 import MaintenanceList from './MaintenanceList';
+import MaintenanceViewModal from './MaintenanceViewModal';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useTechnicalItems } from '../../hooks/useTechnicalItems';
 import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
@@ -17,6 +18,7 @@ const MaintenanceManagement = () => {
   const { vehicles } = useVehiclesOptimized({ category: 'forSale', limit: 100, minimal: true });
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
+  const [showOverdueModal, setShowOverdueModal] = useState(false);
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -113,14 +115,25 @@ const MaintenanceManagement = () => {
       {vehiclesWithIssues.length > 0 && (
         <Card className="border-l-4 border-l-red-500 bg-red-50">
           <CardContent className="p-4">
-            <div className="flex items-center gap-3 mb-3">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              <h3 className="text-lg font-semibold text-red-800">
-                Atenção - Veículos Precisam de Manutenção
-              </h3>
-              <Badge variant="destructive" className="ml-auto">
-                {vehiclesWithIssues.length} veículos
-              </Badge>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+                <h3 className="text-lg font-semibold text-red-800">
+                  Atenção - Veículos Precisam de Manutenção
+                </h3>
+                <Badge variant="destructive">
+                  {vehiclesWithIssues.length} veículos
+                </Badge>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowOverdueModal(true)}
+                className="flex items-center gap-2 border-red-300 text-red-700 hover:bg-red-100"
+              >
+                <Eye className="h-4 w-4" />
+                Ver Detalhes
+              </Button>
             </div>
             <div className="space-y-2">
               {vehiclesWithIssues.slice(0, 5).map((vehicle) => (
@@ -200,6 +213,15 @@ const MaintenanceManagement = () => {
           open={showForm}
           onClose={handleCloseForm}
           editingMaintenance={editingMaintenance}
+        />
+      )}
+
+      {showOverdueModal && (
+        <MaintenanceViewModal
+          isOpen={showOverdueModal}
+          onClose={() => setShowOverdueModal(false)}
+          vehicleId={undefined}
+          vehicleName="Todos os Veículos com Itens Pendentes"
         />
       )}
     </div>
