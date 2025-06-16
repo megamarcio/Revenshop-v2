@@ -3,6 +3,7 @@ import React from 'react';
 import { useVehiclePhotos } from '@/hooks/useVehiclePhotos';
 import { useNewVehiclePhotos } from '@/hooks/useNewVehiclePhotos';
 import { useVehicleCardPhotos } from '@/hooks/useVehicleCardPhotos';
+import OptimizedLazyImage from './OptimizedLazyImage';
 import VehiclePhotoDisplay from './VehiclePhotoDisplay';
 
 interface VehicleMainPhotoProps {
@@ -11,6 +12,7 @@ interface VehicleMainPhotoProps {
   vehicleName: string;
   className?: string;
   showLoader?: boolean;
+  useLazyLoading?: boolean;
 }
 
 const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
@@ -18,7 +20,8 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   fallbackPhotos = [],
   vehicleName,
   className = '',
-  showLoader = false
+  showLoader = false,
+  useLazyLoading = true
 }) => {
   const { photos: vehiclePhotos, loading: vehicleLoading } = useVehiclePhotos(vehicleId);
   const { photos: newPhotos, uploading: newPhotosUploading } = useNewVehiclePhotos(vehicleId);
@@ -60,6 +63,19 @@ const VehicleMainPhoto: React.FC<VehicleMainPhotoProps> = ({
   console.log('🏁 FOTO FINAL SELECIONADA:', mainPhoto);
   console.log('=== FIM DEBUG ===');
   
+  // Use lazy loading for better performance when enabled
+  if (useLazyLoading && vehicleId) {
+    return (
+      <OptimizedLazyImage
+        vehicleId={vehicleId}
+        alt={`${vehicleName} - Foto principal`}
+        className={className}
+        showZoom={false}
+      />
+    );
+  }
+  
+  // Fallback to regular photo display
   return (
     <VehiclePhotoDisplay
       photoUrl={mainPhoto}

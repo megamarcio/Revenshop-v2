@@ -12,6 +12,8 @@ interface ProgressiveImageProps {
   placeholder?: React.ReactNode;
   showZoom?: boolean;
   autoLoadMedium?: boolean;
+  threshold?: number;
+  rootMargin?: string;
 }
 
 const ProgressiveImage: React.FC<ProgressiveImageProps> = ({ 
@@ -20,7 +22,9 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   className = '', 
   placeholder, 
   showZoom = false,
-  autoLoadMedium = false
+  autoLoadMedium = false,
+  threshold = 0.1,
+  rootMargin = '100px'
 }) => {
   const [isInView, setIsInView] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
@@ -42,8 +46,8 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
         }
       },
       {
-        threshold: 0.1,
-        rootMargin: '50px'
+        threshold,
+        rootMargin
       }
     );
 
@@ -52,15 +56,17 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     }
 
     return () => observer.disconnect();
-  }, [vehicleId]);
+  }, [vehicleId, threshold, rootMargin]);
 
   // Auto-load medium quality when image is in view and autoLoadMedium is true
   useEffect(() => {
     if (isInView && autoLoadMedium && imageLoaded && !hasLoadedMedium && urls?.medium) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         loadNextQuality();
         setHasLoadedMedium(true);
-      }, 500);
+      }, 300); // Reduced delay for faster loading
+
+      return () => clearTimeout(timer);
     }
   }, [isInView, autoLoadMedium, imageLoaded, hasLoadedMedium, urls, loadNextQuality]);
 
@@ -69,9 +75,11 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
     
     // Auto-advance from micro to small after a short delay
     if (currentUrl === urls?.micro) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         loadNextQuality();
-      }, 200);
+      }, 150); // Reduced delay for smoother transitions
+
+      return () => clearTimeout(timer);
     }
   };
 
@@ -82,7 +90,7 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   const shouldShowPlaceholder = !isInView || loading || !currentUrl || !imageLoaded;
 
   return (
-    <div ref={containerRef} className={`relative overflow-hidden ${className}`}>
+    <div ref={containerRef} className={`relative overflow-hidden group ${className}`}>
       {shouldShowPlaceholder && (
         <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
           {placeholder || (
@@ -110,12 +118,13 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
           <img
             src={currentUrl}
             alt={alt}
-            className={`w-full h-full object-cover transition-all duration-500 ${
+            className={`w-full h-full object-cover transition-all duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
-            } ${currentUrl === urls?.micro ? 'filter blur-sm' : ''}`}
+            } ${currentUrl === urls?.micro ? 'filter blur-[1px] scale-105' : ''}`}
             onLoad={handleImageLoad}
             onError={handleImageError}
             loading="lazy"
+            decoding="async"
           />
           
           {/* Botão de zoom */}
@@ -145,8 +154,8 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
             </Dialog>
           )}
           
-          {/* Indicador de qualidade */}
-          {imageLoaded && currentUrl !== urls?.original && (
+          {/* Indicador de qualidade - só mostra durante o carregamento */}
+          {imageLoaded && currentUrl !== urls?.original && loading && (
             <div className="absolute bottom-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded">
               {currentUrl === urls?.micro ? 'Baixa' : 
                currentUrl === urls?.small ? 'Média' : 'Alta'}
