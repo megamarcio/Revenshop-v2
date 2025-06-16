@@ -2,6 +2,9 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Calendar, AlertTriangle, Wrench } from 'lucide-react';
+import { useMaintenanceCosts } from '../../../hooks/useMaintenanceCosts';
+import MaintenanceCostsChart from './MaintenanceCostsChart';
+import MaintenanceCostsSummary from './MaintenanceCostsSummary';
 
 interface MaintenanceStatsProps {
   openMaintenances: number;
@@ -14,47 +17,62 @@ const MaintenanceStats = ({
   vehiclesWithIssues, 
   totalVehicles 
 }: MaintenanceStatsProps) => {
+  const { last3MonthsCosts } = useMaintenanceCosts();
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-yellow-100">
-              <Calendar className="h-5 w-5 text-yellow-600" />
+    <div className="space-y-6">
+      {/* Stats Cards Originais */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-yellow-100">
+                <Calendar className="h-5 w-5 text-yellow-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Manutenções Pendentes</p>
+                <p className="text-2xl font-bold text-gray-900">{openMaintenances}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Manutenções Pendentes</p>
-              <p className="text-2xl font-bold text-gray-900">{openMaintenances}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-red-100">
+                <AlertTriangle className="h-5 w-5 text-red-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Itens para Trocar</p>
+                <p className="text-2xl font-bold text-gray-900">{vehiclesWithIssues}</p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-red-100">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-blue-100">
+                <Wrench className="h-5 w-5 text-blue-600" />
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">Total de Veículos</p>
+                <p className="text-2xl font-bold text-gray-900">{totalVehicles}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm text-gray-600">Itens para Trocar</p>
-              <p className="text-2xl font-bold text-gray-900">{vehiclesWithIssues}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-blue-100">
-              <Wrench className="h-5 w-5 text-blue-600" />
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total de Veículos</p>
-              <p className="text-2xl font-bold text-gray-900">{totalVehicles}</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Nova Seção de Custos por Mês */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-1">
+          <MaintenanceCostsChart data={last3MonthsCosts} />
+        </div>
+        <div className="lg:col-span-2">
+          <MaintenanceCostsSummary />
+        </div>
+      </div>
     </div>
   );
 };
