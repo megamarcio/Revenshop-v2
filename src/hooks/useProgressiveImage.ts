@@ -35,8 +35,6 @@ export const useProgressiveImage = (vehicleId: string | null): UseProgressiveIma
       };
     }
 
-    const baseUrl = new URL(originalUrl);
-    
     // Micro thumbnail - 50x33, quality 30, blur para placeholder
     const microUrl = new URL(originalUrl);
     microUrl.searchParams.set('width', '50');
@@ -73,27 +71,51 @@ export const useProgressiveImage = (vehicleId: string | null): UseProgressiveIma
     setError(null);
     
     try {
-      console.log('Fetching progressive photo for vehicle:', vehicleId);
+      console.log('🔍 Fetching progressive photo for vehicle:', vehicleId);
       
-      const { data, error } = await supabase
+      // Primeiro tenta buscar na tabela vehicle_photos
+      const { data: vehiclePhoto, error: vehiclePhotoError } = await supabase
         .from('vehicle_photos')
         .select('url')
         .eq('vehicle_id', vehicleId)
         .eq('is_main', true)
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (vehiclePhotoError) {
+        console.error('Error fetching vehicle_photos:', vehiclePhotoError);
       }
 
-      if (data?.url) {
-        const imageUrls = generateImageUrls(data.url);
+      // Se não encontrou, tenta a primeira foto disponível
+      if (!vehiclePhoto?.url) {
+        const { data: firstPhoto, error: firstPhotoError } = await supabase
+          .from('vehicle_photos')
+          .select('url')
+          .eq('vehicle_id', vehicleId)
+          .order('position', { ascending: true })
+          .limit(1)
+          .maybeSingle();
+
+        if (firstPhotoError) {
+          console.error('Error fetching first photo:', firstPhotoError);
+        }
+
+        if (firstPhoto?.url) {
+          console.log('✅ Found first photo for vehicle', vehicleId, ':', firstPhoto.url);
+          const imageUrls = generateImageUrls(firstPhoto.url);
+          setUrls(imageUrls);
+          setCurrentUrl(imageUrls.micro);
+          setCurrentQuality('micro');
+        } else {
+          console.log('❌ No photos found for vehicle', vehicleId);
+          setUrls(null);
+          setCurrentUrl(null);
+        }
+      } else {
+        console.log('✅ Found main photo for vehicle', vehicleId, ':', vehiclePhoto.url);
+        const imageUrls = generateImageUrls(vehiclePhoto.url);
         setUrls(imageUrls);
         setCurrentUrl(imageUrls.micro);
-        console.log('Progressive image URLs generated for vehicle', vehicleId);
-      } else {
-        setUrls(null);
-        setCurrentUrl(null);
+        setCurrentQuality('micro');
       }
     } catch (err) {
       console.error('Error in useProgressiveImage:', err);
@@ -108,25 +130,36 @@ export const useProgressiveImage = (vehicleId: string | null): UseProgressiveIma
   const loadNextQuality = useCallback(() => {
     if (!urls) return;
 
+    console.log('📈 Loading next quality from:', currentQuality);
+    
     switch (currentQuality) {
       case 'micro':
         setCurrentUrl(urls.small);
         setCurrentQuality('small');
+        console.log('➡️ Switched to small quality');
         break;
       case 'small':
         setCurrentUrl(urls.medium);
         setCurrentQuality('medium');
+        console.log('➡️ Switched to medium quality');
         break;
       case 'medium':
         setCurrentUrl(urls.original);
         setCurrentQuality('original');
+        console.log('➡️ Switched to original quality');
         break;
     }
   }, [urls, currentQuality]);
 
   useEffect(() => {
-    fetchPhoto();
-  }, [fetchPhoto]);
+    if (vehicleId) {
+      fetchPhoto();
+    } else {
+      setUrls(null);
+      setCurrentUrl(null);
+      setCurrentQuality('micro');
+    }
+  }, [fetchPhoto, vehicleId]);
 
   return { urls, currentUrl, loading, error, loadNextQuality };
 };

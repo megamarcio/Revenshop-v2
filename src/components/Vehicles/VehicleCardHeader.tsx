@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Loader2, Package } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import VehicleUsageBadge from './VehicleUsageBadge';
-import OptimizedLazyImage from './OptimizedLazyImage';
+import VehicleMainPhoto from './VehicleMainPhoto';
 import { Vehicle } from './VehicleCardTypes';
 import { usePhotoDownload } from '@/hooks/usePhotoDownload';
 
@@ -134,12 +134,13 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
         </div>
       )}
 
-      {/* Optimized Lazy Image with Progressive Loading */}
-      <OptimizedLazyImage
+      {/* Main Photo with fallback to vehicle.photos array */}
+      <VehicleMainPhoto
         vehicleId={vehicle.id}
-        alt={`${vehicle.name} - Foto principal`}
+        fallbackPhotos={vehicle.photos}
+        vehicleName={vehicle.name}
         className="w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden"
-        showZoom={false}
+        useLazyLoading={true}
       />
     </div>
   );

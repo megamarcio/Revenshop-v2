@@ -22,7 +22,7 @@ export const useVehiclePhotos = (vehicleId?: string) => {
     }
     
     setLoading(true);
-    console.log('Fetching photos for vehicle:', vehicleId);
+    console.log('🔍 Fetching photos for vehicle:', vehicleId);
     
     try {
       const { data, error } = await supabase
@@ -31,12 +31,15 @@ export const useVehiclePhotos = (vehicleId?: string) => {
         .eq('vehicle_id', vehicleId)
         .order('position', { ascending: true });
 
-      if (error) throw error;
+      if (error) {
+        console.error('❌ Error fetching vehicle photos:', error);
+        throw error;
+      }
       
-      console.log('Fetched photos:', data);
+      console.log('✅ Fetched photos for vehicle', vehicleId, ':', data);
       setPhotos(data || []);
     } catch (error) {
-      console.error('Error fetching vehicle photos:', error);
+      console.error('❌ Error in fetchPhotos:', error);
       setPhotos([]);
     } finally {
       setLoading(false);
