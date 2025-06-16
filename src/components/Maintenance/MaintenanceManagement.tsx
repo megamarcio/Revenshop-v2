@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +18,7 @@ const MaintenanceManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [showOverdueModal, setShowOverdueModal] = useState(false);
+  const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -52,6 +52,10 @@ const MaintenanceManagement = () => {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingMaintenance(null);
+  };
+
+  const handleViewVehicleMaintenance = (vehicleId: string, vehicleName: string) => {
+    setSelectedVehicleModal({ vehicleId, vehicleName });
   };
 
   // Calculate statistics from real data
@@ -138,17 +142,28 @@ const MaintenanceManagement = () => {
             <div className="space-y-2">
               {vehiclesWithIssues.slice(0, 5).map((vehicle) => (
                 <div key={vehicle.id} className="flex items-center justify-between p-2 bg-white rounded border border-red-200">
-                  <div>
-                    <span className="font-semibold text-red-700">{vehicle.internal_code}</span>
-                    <span className="text-red-600 ml-2">- {vehicle.name}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-red-700">{vehicle.internal_code}</span>
+                      <span className="text-red-600">- {vehicle.name}</span>
+                    </div>
+                    <div className="flex gap-1 mt-1">
+                      {vehicle.issues.map((issue: string, index: number) => (
+                        <Badge key={index} variant="outline" className="text-xs border-red-300 text-red-700">
+                          {issue}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                  <div className="flex gap-1">
-                    {vehicle.issues.map((issue: string, index: number) => (
-                      <Badge key={index} variant="outline" className="text-xs border-red-300 text-red-700">
-                        {issue}
-                      </Badge>
-                    ))}
-                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewVehicleMaintenance(vehicle.id, `${vehicle.internal_code} - ${vehicle.name}`)}
+                    className="ml-2 flex items-center gap-1 border-red-300 text-red-700 hover:bg-red-100"
+                  >
+                    <Wrench className="h-3 w-3" />
+                    Ver Manutenção
+                  </Button>
                 </div>
               ))}
               {vehiclesWithIssues.length > 5 && (
@@ -222,6 +237,15 @@ const MaintenanceManagement = () => {
           onClose={() => setShowOverdueModal(false)}
           vehicleId={undefined}
           vehicleName="Todos os Veículos com Itens Pendentes"
+        />
+      )}
+
+      {selectedVehicleModal && (
+        <MaintenanceViewModal
+          isOpen={true}
+          onClose={() => setSelectedVehicleModal(null)}
+          vehicleId={selectedVehicleModal.vehicleId}
+          vehicleName={selectedVehicleModal.vehicleName}
         />
       )}
     </div>
