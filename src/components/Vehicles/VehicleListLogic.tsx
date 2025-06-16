@@ -13,7 +13,7 @@ export const useVehicleListLogic = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState('internalCode');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const [filterBy, setFilterBy] = useState('all');
+  const [filterBy, setFilterBy] = useState('forSale'); // Mudança: padrão agora é apenas "à venda"
 
   // Use ultra minimal hook for list display with automatic refresh
   const { 
@@ -47,7 +47,17 @@ export const useVehicleListLogic = () => {
         vehicle.color.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesCategory = selectedCategory === 'all' || vehicle.category === selectedCategory;
-      const matchesFilter = filterBy === 'all' || vehicle.category === filterBy;
+      
+      // Filtro principal - por padrão mostrar apenas veículos à venda (não vendidos)
+      let matchesFilter = false;
+      if (filterBy === 'all') {
+        matchesFilter = true;
+      } else if (filterBy === 'forSale') {
+        // Mostrar todos exceto vendidos
+        matchesFilter = vehicle.category !== 'sold';
+      } else {
+        matchesFilter = vehicle.category === filterBy;
+      }
       
       return matchesSearch && matchesCategory && matchesFilter;
     });

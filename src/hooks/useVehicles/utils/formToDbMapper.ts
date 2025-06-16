@@ -29,6 +29,10 @@ export const mapFormToDbData = (formData: any) => {
     internal_code: formData.internalCode,
     color: formData.color,
     
+    // Novos campos adicionados
+    plate: formData.plate || null,
+    sunpass: formData.sunpass || null,
+    
     // Financial fields
     purchase_price: parseFloat(formData.purchasePrice) || 0,
     sale_price: parseFloat(formData.salePrice) || 0,

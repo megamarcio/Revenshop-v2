@@ -16,8 +16,12 @@ export interface VehicleFormData {
   category: "forSale" | "sold";
   
   // Novo campo para uso do veículo
-  vehicleUsage: "rental" | "personal" | "sale" | "consigned" | "";
+  vehicleUsage: "rental" | "personal" | "sale" | "consigned" | "sale-rental" | "maintenance" | "";
   consignmentStore: string;
+  
+  // Novos campos adicionados
+  plate?: string;
+  sunpass?: string;
   
   seller: string;
   finalSalePrice: string;

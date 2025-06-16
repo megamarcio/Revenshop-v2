@@ -8,6 +8,11 @@ export interface Vehicle {
   miles: number;
   internal_code: string;
   color: string;
+  
+  // Novos campos adicionados
+  plate?: string;
+  sunpass?: string;
+  
   purchase_price: number;
   sale_price: number;
   profit_margin: number;
