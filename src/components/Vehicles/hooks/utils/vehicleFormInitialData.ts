@@ -3,8 +3,11 @@ import { VehicleFormData } from '../../types/vehicleFormTypes';
 
 export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
   console.log('getInitialFormData - editingVehicle received:', editingVehicle);
+  console.log('getInitialFormData - editingVehicle has ID:', editingVehicle?.id);
 
-  if (editingVehicle) {
+  // Only use editing vehicle data if it has a valid ID (indicating it's actually being edited)
+  if (editingVehicle && editingVehicle.id) {
+    console.log('getInitialFormData - editing existing vehicle with ID:', editingVehicle.id);
     console.log('getInitialFormData - miles from editingVehicle:', editingVehicle.miles);
     
     const initialData: VehicleFormData = {
@@ -59,18 +62,19 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     };
 
     console.log('getInitialFormData - miles converted to string:', initialData.miles);
-    console.log('getInitialFormData - final initialData:', initialData);
+    console.log('getInitialFormData - final initialData for editing:', initialData);
     
     return initialData;
   }
 
-  // Dados iniciais para novo veículo
+  // Dados iniciais LIMPOS para novo veículo
+  console.log('getInitialFormData - creating clean data for NEW vehicle');
   const newVehicleData: VehicleFormData = {
     name: '',
     vin: '',
     year: '',
     model: '',
-    miles: '0',
+    miles: '',  // Changed from '0' to empty string
     internalCode: '',
     color: '',
     purchasePrice: '',
@@ -113,6 +117,6 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     customFinancingBank: '',
   };
 
-  console.log('getInitialFormData - new vehicle data:', newVehicleData);
+  console.log('getInitialFormData - clean new vehicle data created:', newVehicleData);
   return newVehicleData;
 };

@@ -8,13 +8,17 @@ import { useVehicleFormCalculations } from './utils/vehicleFormCalculations';
 
 export const useVehicleForm = (editingVehicle?: any) => {
   console.log('useVehicleForm - editingVehicle received:', editingVehicle);
+  console.log('useVehicleForm - editingVehicle.id:', editingVehicle?.id);
   
-  // Determine if editing (has valid ID) or creating/duplicating (no ID)
-  const isEditing = editingVehicle && editingVehicle.id;
+  // Determine if editing (has valid ID) or creating new vehicle (no ID or ID is null/undefined)
+  const isEditing = !!(editingVehicle && editingVehicle.id);
+  console.log('useVehicleForm - isEditing determined as:', isEditing);
   
-  const [formData, setFormData] = useState<VehicleFormData>(
-    getInitialFormData(editingVehicle)
-  );
+  const [formData, setFormData] = useState<VehicleFormData>(() => {
+    const initialData = getInitialFormData(editingVehicle);
+    console.log('useVehicleForm - formData state initialized with:', initialData);
+    return initialData;
+  });
 
   const [photos, setPhotos] = useState<string[]>(editingVehicle?.photos || []);
   const [videos, setVideos] = useState<string[]>(
@@ -23,10 +27,11 @@ export const useVehicleForm = (editingVehicle?: any) => {
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<VehicleFormData>>({});
 
-  console.log('useVehicleForm - isEditing:', isEditing);
-  console.log('useVehicleForm - formData initialized:', formData);
-  console.log('useVehicleForm - miles value from editingVehicle:', editingVehicle?.miles);
-  console.log('useVehicleForm - final miles in formData:', formData.miles);
+  console.log('useVehicleForm - final state:');
+  console.log('  - isEditing:', isEditing);
+  console.log('  - formData.name:', formData.name);
+  console.log('  - formData.miles:', formData.miles);
+  console.log('  - formData.vin:', formData.vin);
 
   const {
     handleInputChange,

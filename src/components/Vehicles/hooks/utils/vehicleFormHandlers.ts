@@ -47,9 +47,13 @@ export const useVehicleFormHandlers = (
   };
 
   const validateFormData = () => {
+    console.log('useVehicleFormHandlers - validateFormData called with formData:', formData);
     const newErrors = validateForm(formData);
+    console.log('useVehicleFormHandlers - validation errors:', newErrors);
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const isValid = Object.keys(newErrors).length === 0;
+    console.log('useVehicleFormHandlers - form is valid:', isValid);
+    return isValid;
   };
 
   return {
