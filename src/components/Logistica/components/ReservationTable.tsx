@@ -93,7 +93,6 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                     badgeType={badgeType}
                     kommoLeadId={rowKommoLeadIds[reservation.reservation_id]}
                     onShareClick={onShareClick}
-                    index={idx}
                   />
                 ))
               )}

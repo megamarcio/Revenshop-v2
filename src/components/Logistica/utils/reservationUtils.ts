@@ -76,3 +76,49 @@ export const convertUTCToFloridaTime = (utcDateTime: string): string => {
     return utcDateTime;
   }
 };
+
+// Função para processar lista de reservas da API
+export const parseReservationList = (apiData: any): any[] => {
+  if (!apiData) return [];
+  
+  const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
+  
+  return list.map((item: any) => ({
+    reservation_id: item.reservation_id || item.custom_reservation_number || item.prefixed_id || (item.id ? String(item.id) : "-"),
+    customer_first_name: item.customer?.first_name || '',
+    customer_last_name: item.customer?.last_name || '',
+    pickup_date: item.pick_up_date || '',
+    return_date: item.return_date || '',
+    plate: item.plate || '',
+    phone_number: item.customer?.phone_number || '',
+    // Campos adicionais para compatibilidade com a interface atual
+    confirmation: item.reservation_id || item.custom_reservation_number || item.prefixed_id,
+    renter_name: `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim(),
+    renter_email: item.customer?.email || '',
+    renter_phone: item.customer?.phone_number || '',
+    pick_up_date: item.pick_up_date || '',
+    pick_up_time: item.pick_up_time || '',
+    return_time: item.return_time || '',
+    pick_up_location: item.pick_up_location || '',
+    return_location: item.return_location || '',
+    vehicle_category: item.vehicle_category || '',
+    total_cost: item.total_cost || 0,
+    daily_rate: item.daily_rate || 0
+  }));
+};
+
+// Função para ordenar reservas
+export const getOrderedReservations = (reservations: any[], badgeType: "pickup" | "return"): any[] => {
+  if (!reservations || reservations.length === 0) return [];
+  
+  return [...reservations].sort((a, b) => {
+    const dateA = badgeType === "pickup" ? a.pickup_date || a.pick_up_date : a.return_date;
+    const dateB = badgeType === "pickup" ? b.pickup_date || b.pick_up_date : b.return_date;
+    
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    
+    return new Date(dateA).getTime() - new Date(dateB).getTime();
+  });
+};

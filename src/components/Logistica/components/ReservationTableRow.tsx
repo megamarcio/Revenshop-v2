@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { Reservation } from "../types/reservationTypes";
-import LocationBadge from "../LocationBadge";
+import { LocationBadge } from "../LocationBadge";
 import { adjustTimeForFlorida, formatDateTimeForFlorida } from "../utils/reservationUtils";
 
 interface ReservationTableRowProps {
@@ -47,7 +47,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
     <tr className="border-b hover:bg-gray-50">
       <td className="px-4 py-3">
         <div className="font-medium text-blue-600">
-          #{reservation.confirmation}
+          #{reservation.confirmation || reservation.reservation_id}
         </div>
         {kommoLeadId && (
           <div className="text-xs text-gray-500 mt-1">
@@ -57,9 +57,9 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       </td>
       
       <td className="px-4 py-3">
-        <div className="font-medium">{reservation.renter_name}</div>
+        <div className="font-medium">{reservation.renter_name || `${reservation.customer_first_name} ${reservation.customer_last_name}`.trim()}</div>
         <div className="text-sm text-gray-600">{reservation.renter_email}</div>
-        <div className="text-sm text-gray-600">{reservation.renter_phone}</div>
+        <div className="text-sm text-gray-600">{reservation.renter_phone || reservation.phone_number}</div>
       </td>
       
       <td className="px-4 py-3">
@@ -69,7 +69,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
           </Badge>
           <div className="text-sm">
             {formatDateTime(
-              badgeType === "pickup" ? reservation.pick_up_date : reservation.return_date,
+              badgeType === "pickup" ? (reservation.pick_up_date || reservation.pickup_date) : reservation.return_date,
               badgeType === "pickup" ? reservation.pick_up_time : reservation.return_time
             )}
           </div>
@@ -92,7 +92,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       <td className="px-4 py-3">
         <div className="text-right">
           <div className="font-medium">
-            {formatCurrency(reservation.total_cost)}
+            {formatCurrency(reservation.total_cost || 0)}
           </div>
           {reservation.daily_rate && (
             <div className="text-sm text-gray-600">
