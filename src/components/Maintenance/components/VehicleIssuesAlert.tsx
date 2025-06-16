@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { AlertTriangle, Eye, Wrench } from 'lucide-react';
+import { AlertTriangle, Eye, Wrench, Settings } from 'lucide-react';
 
 interface VehicleIssue {
   id: string;
@@ -26,6 +26,18 @@ const VehicleIssuesAlert = ({
   if (vehiclesWithIssues.length === 0) {
     return null;
   }
+
+  // Helper function to determine the type of issue and its icon
+  const getIssueTypeInfo = (issue: string) => {
+    if (issue.includes('(Trocar)')) {
+      return { type: 'critical', icon: AlertTriangle, color: 'bg-red-100 text-red-700 border-red-300' };
+    } else if (issue.includes('(Próximo da Troca)')) {
+      return { type: 'warning', icon: Settings, color: 'bg-yellow-100 text-yellow-700 border-yellow-300' };
+    } else if (issue.includes('(Manutenção Pendente)')) {
+      return { type: 'maintenance', icon: Wrench, color: 'bg-blue-100 text-blue-700 border-blue-300' };
+    }
+    return { type: 'default', icon: AlertTriangle, color: 'bg-gray-100 text-gray-700 border-gray-300' };
+  };
 
   return (
     <Card className="border-l-4 border-l-red-500 bg-red-50">
@@ -58,12 +70,19 @@ const VehicleIssuesAlert = ({
                   <span className="font-semibold text-red-700">{vehicle.internal_code}</span>
                   <span className="text-red-600">- {vehicle.name}</span>
                 </div>
-                <div className="flex gap-1 mt-1">
-                  {vehicle.issues.map((issue: string, index: number) => (
-                    <Badge key={index} variant="outline" className="text-xs border-red-300 text-red-700">
-                      {issue}
-                    </Badge>
-                  ))}
+                <div className="flex gap-1 mt-1 flex-wrap">
+                  {vehicle.issues.map((issue: string, index: number) => {
+                    const { color } = getIssueTypeInfo(issue);
+                    return (
+                      <Badge 
+                        key={index} 
+                        variant="outline" 
+                        className={`text-xs ${color}`}
+                      >
+                        {issue}
+                      </Badge>
+                    );
+                  })}
                 </div>
               </div>
               <Button

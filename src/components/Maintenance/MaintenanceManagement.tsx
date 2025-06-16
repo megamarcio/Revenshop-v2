@@ -8,6 +8,7 @@ import MaintenanceList from './MaintenanceList';
 import MaintenanceViewModal from './MaintenanceViewModal';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
+import { useVehiclesWithMaintenanceIssues } from '../../hooks/useVehiclesWithMaintenanceIssues';
 import VehicleIssuesAlert from './components/VehicleIssuesAlert';
 import MaintenanceStats from './components/MaintenanceStats';
 import MaintenanceHeader from './components/MaintenanceHeader';
@@ -16,6 +17,7 @@ const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();
   const { maintenances } = useMaintenance();
   const { vehicles } = useVehiclesOptimized({ category: 'forSale', limit: 100, minimal: true });
+  const { vehiclesWithIssues } = useVehiclesWithMaintenanceIssues();
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [showOverdueModal, setShowOverdueModal] = useState(false);
@@ -71,30 +73,6 @@ const MaintenanceManagement = () => {
   }).length;
 
   const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
-
-  // Get vehicles with technical items that need attention
-  const getVehiclesWithIssues = () => {
-    const vehiclesWithIssues: any[] = [];
-    
-    vehicles.forEach(vehicle => {
-      // This is a simplified check - in a real implementation you'd load technical items for each vehicle
-      // For now, we'll simulate some vehicles having issues
-      const hasIssues = Math.random() > 0.7; // Simulate 30% of vehicles having issues
-      
-      if (hasIssues) {
-        vehiclesWithIssues.push({
-          id: vehicle.id,
-          name: vehicle.name,
-          internal_code: vehicle.internal_code,
-          issues: ['Troca de Óleo', 'Bateria'] // Simulated issues
-        });
-      }
-    });
-    
-    return vehiclesWithIssues;
-  };
-
-  const vehiclesWithIssues = getVehiclesWithIssues();
 
   return (
     <div className="p-6 space-y-6">
