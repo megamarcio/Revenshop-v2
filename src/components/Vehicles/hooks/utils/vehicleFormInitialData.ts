@@ -15,11 +15,6 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       miles: editingVehicle.miles?.toString() || '0',
       internalCode: editingVehicle.internalCode || '',
       color: editingVehicle.color || '',
-      
-      // Novos campos adicionados
-      plate: editingVehicle.plate || '',
-      sunpass: editingVehicle.sunpass || '',
-      
       purchasePrice: editingVehicle.purchasePrice?.toString() || '',
       salePrice: editingVehicle.salePrice?.toString() || '',
       minNegotiable: editingVehicle.minNegotiable?.toString() || '',
@@ -78,11 +73,6 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     miles: '0',
     internalCode: '',
     color: '',
-    
-    // Novos campos
-    plate: '',
-    sunpass: '',
-    
     purchasePrice: '',
     salePrice: '',
     minNegotiable: '',

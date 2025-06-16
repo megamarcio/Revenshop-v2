@@ -8,11 +8,6 @@ export interface Vehicle {
   miles: number; // Corrigido: de string para number e mantido como miles
   internalCode: string;
   color: string;
-  
-  // Novos campos adicionados
-  plate?: string;
-  sunpass?: string;
-  
   purchasePrice: number;
   salePrice: number;
   profitMargin: number;

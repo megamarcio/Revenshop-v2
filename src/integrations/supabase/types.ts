@@ -1009,13 +1009,11 @@ export type Database = {
           paid_installments: number | null
           payoff_date: string | null
           payoff_value: number | null
-          plate: string | null
           profit_margin: number | null
           purchase_date: string | null
           purchase_price: number
           remaining_installments: number | null
           sale_price: number
-          sunpass: string | null
           title_location_custom: string | null
           title_location_id: string | null
           title_type_id: string | null
@@ -1052,13 +1050,11 @@ export type Database = {
           paid_installments?: number | null
           payoff_date?: string | null
           payoff_value?: number | null
-          plate?: string | null
           profit_margin?: number | null
           purchase_date?: string | null
           purchase_price: number
           remaining_installments?: number | null
           sale_price: number
-          sunpass?: string | null
           title_location_custom?: string | null
           title_location_id?: string | null
           title_type_id?: string | null
@@ -1095,13 +1091,11 @@ export type Database = {
           paid_installments?: number | null
           payoff_date?: string | null
           payoff_value?: number | null
-          plate?: string | null
           profit_margin?: number | null
           purchase_date?: string | null
           purchase_price?: number
           remaining_installments?: number | null
           sale_price?: number
-          sunpass?: string | null
           title_location_custom?: string | null
           title_location_id?: string | null
           title_type_id?: string | null

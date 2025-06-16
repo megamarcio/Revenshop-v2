@@ -1,153 +1,148 @@
 
-import React, { useState } from 'react';
-import { Download, Download as DownloadIcon, ImageIcon } from 'lucide-react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
+import { Download, Loader2, Package } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import VehiclePhotoViewer from './VehiclePhotoViewer';
 import VehicleUsageBadge from './VehicleUsageBadge';
+import VehiclePhotoViewer from './VehiclePhotoViewer';
 import { Vehicle } from './VehicleCardTypes';
+import { usePhotoDownload } from '@/hooks/usePhotoDownload';
 
 interface VehicleCardHeaderProps {
   vehicle: Vehicle;
-  onDownloadSingle: (photoUrl: string, index: number) => Promise<void>;
-  onDownloadAll: () => Promise<void>;
-  downloading: boolean;
+  onDownloadSingle?: (photoUrl: string, index: number) => void;
+  onDownloadAll?: () => void;
+  downloading?: boolean;
 }
 
-const VehicleCardHeader = ({ 
-  vehicle, 
-  onDownloadSingle, 
-  onDownloadAll, 
-  downloading 
-}: VehicleCardHeaderProps) => {
-  const [showPhotoViewer, setShowPhotoViewer] = useState(false);
-  const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
-
-  // Extrair o uso do veículo da descrição ou usar o campo vehicleUsage
-  const getVehicleUsage = () => {
-    if (vehicle.description) {
-      const usageMatch = vehicle.description.match(/\[USAGE:([^\]]+)\]/);
-      if (usageMatch) {
-        return usageMatch[1];
-      }
+// Helper function to determine vehicle usage from vehicle data
+const getVehicleUsage = (vehicle: Vehicle): string => {
+  console.log('getVehicleUsage - vehicle received:', vehicle);
+  console.log('getVehicleUsage - vehicle.vehicleUsage:', (vehicle as any).vehicleUsage);
+  console.log('getVehicleUsage - vehicle.description:', vehicle.description);
+  
+  // Priority 1: Check vehicleUsage field directly if available
+  if ((vehicle as any).vehicleUsage) {
+    console.log('getVehicleUsage - returning vehicleUsage field:', (vehicle as any).vehicleUsage);
+    return (vehicle as any).vehicleUsage;
+  }
+  
+  // Priority 2: Check if there's specific usage info in description
+  if (vehicle.description) {
+    const match = vehicle.description.match(/\[USAGE:([^\]]+)\]/);
+    if (match) {
+      console.log('getVehicleUsage - found usage in description:', match[1]);
+      return match[1];
     }
-    
-    // Fallback para categoria se não houver uso específico
-    if (vehicle.category === 'rental') return 'rental';
-    if (vehicle.category === 'consigned') return 'consigned';
-    if (vehicle.category === 'maintenance') return 'maintenance';
-    return 'sale'; // Default
+  }
+  
+  // Priority 3: Default mapping based on category
+  const defaultMapping = (() => {
+    switch (vehicle.category) {
+      case 'rental': return 'rental';
+      case 'consigned': return 'consigned';
+      case 'maintenance': return 'personal';
+      default: return 'sale';
+    }
+  })();
+  
+  console.log('getVehicleUsage - using default mapping:', defaultMapping);
+  return defaultMapping;
+};
+
+const getConsignmentStore = (vehicle: Vehicle): string => {
+  console.log('getConsignmentStore - vehicle received:', vehicle);
+  console.log('getConsignmentStore - vehicle.consignmentStore:', (vehicle as any).consignmentStore);
+  console.log('getConsignmentStore - vehicle.description:', vehicle.description);
+  
+  // Priority 1: Check consignmentStore field directly if available
+  if ((vehicle as any).consignmentStore) {
+    console.log('getConsignmentStore - returning consignmentStore field:', (vehicle as any).consignmentStore);
+    return (vehicle as any).consignmentStore;
+  }
+  
+  // Priority 2: Check if there's store info in description
+  if (vehicle.description) {
+    const match = vehicle.description.match(/\[STORE:([^\]]+)\]/);
+    if (match) {
+      console.log('getConsignmentStore - found store in description:', match[1]);
+      return match[1];
+    }
+  }
+  
+  console.log('getConsignmentStore - no store found, returning empty string');
+  return vehicle.consignmentStore || '';
+};
+
+const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderProps) => {
+  const { downloadSinglePhoto, downloadPhotosZip, downloading: isDownloading } = usePhotoDownload();
+
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle recebido:', vehicle);
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle ID:', vehicle.id);
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle name:', vehicle.name);
+  console.log('🎯 VEHICLE CARD HEADER DEBUG - Vehicle photos:', vehicle.photos);
+
+  const handleDownloadAllPhotos = () => {
+    if (vehicle.photos && vehicle.photos.length > 0) {
+      downloadPhotosZip(vehicle.photos, vehicle.name);
+    }
   };
 
-  const vehicleUsage = getVehicleUsage();
-
-  const handlePhotoClick = (index: number) => {
-    setCurrentPhotoIndex(index);
-    setShowPhotoViewer(true);
+  const handleDownloadSinglePhoto = (photoUrl: string, index: number) => {
+    downloadSinglePhoto(photoUrl, vehicle.name, index + 1);
   };
 
-  const handleDownloadSingle = async (photoUrl: string, index: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    await onDownloadSingle(photoUrl, index);
-  };
+  const vehicleUsage = getVehicleUsage(vehicle);
+  const consignmentStore = getConsignmentStore(vehicle);
+
+  console.log('VehicleCardHeader - Final vehicleUsage:', vehicleUsage);
+  console.log('VehicleCardHeader - Final consignmentStore:', consignmentStore);
 
   return (
-    <>
-      <div className="relative">
-        {vehicle.photos && vehicle.photos.length > 0 ? (
-          <div className="relative cursor-pointer" onClick={() => handlePhotoClick(0)}>
-            <img
-              src={vehicle.photos[0]}
-              alt={vehicle.name}
-              className="w-full h-48 object-cover rounded-t-lg"
-              loading="lazy"
-            />
-            
-            {/* Badge de uso do veículo */}
-            <div className="absolute top-2 left-2">
-              <VehicleUsageBadge usage={vehicleUsage} />
-            </div>
-
-            {/* Contador de fotos */}
-            {vehicle.photos.length > 1 && (
-              <div className="absolute top-2 right-2">
-                <Badge variant="secondary" className="bg-black/70 text-white border-0">
-                  <ImageIcon className="w-3 h-3 mr-1" />
-                  {vehicle.photos.length}
-                </Badge>
-              </div>
-            )}
-
-            {/* Botões de download */}
-            <div className="absolute bottom-2 right-2 flex gap-1">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    className="h-7 w-7 p-0 bg-black/70 hover:bg-black/80 border-0"
-                    onClick={(e) => handleDownloadSingle(vehicle.photos[0], 0, e)}
-                    disabled={downloading}
-                  >
-                    <DownloadIcon className="w-3 h-3 text-white" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Baixar esta foto</p>
-                </TooltipContent>
-              </Tooltip>
-
-              {vehicle.photos.length > 1 && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      size="sm"
-                      variant="secondary"
-                      className="h-7 px-2 bg-black/70 hover:bg-black/80 border-0"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDownloadAll();
-                      }}
-                      disabled={downloading}
-                    >
-                      <Download className="w-3 h-3 text-white mr-1" />
-                      <span className="text-xs text-white">Todas</span>
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Baixar todas as fotos</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
-            </div>
-          </div>
-        ) : (
-          <div className="w-full h-48 bg-gray-200 rounded-t-lg flex items-center justify-center relative">
-            <div className="text-gray-400 text-center">
-              <ImageIcon className="w-12 h-12 mx-auto mb-2" />
-              <p className="text-sm">Sem foto</p>
-            </div>
-            
-            {/* Badge de uso do veículo mesmo sem foto */}
-            <div className="absolute top-2 left-2">
-              <VehicleUsageBadge usage={vehicleUsage} />
-            </div>
-          </div>
-        )}
+    <div className="relative">
+      {/* Vehicle Usage Badge - Não mostrar badge "À Venda" padrão */}
+      <div className="absolute top-2 left-2 z-10">
+        <VehicleUsageBadge 
+          usage={vehicleUsage} 
+          consignmentStore={consignmentStore}
+        />
       </div>
 
-      {showPhotoViewer && (
-        <VehiclePhotoViewer
-          photos={vehicle.photos || []}
-          currentIndex={currentPhotoIndex}
-          onClose={() => setShowPhotoViewer(false)}
-          onPrevious={() => setCurrentPhotoIndex(Math.max(0, currentPhotoIndex - 1))}
-          onNext={() => setCurrentPhotoIndex(Math.min(vehicle.photos.length - 1, currentPhotoIndex + 1))}
-          vehicleName={vehicle.name}
-        />
+      {/* Photo Download Buttons */}
+      {vehicle.photos && vehicle.photos.length > 0 && (
+        <div className="absolute top-2 right-2 z-10 flex gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleDownloadAllPhotos}
+                disabled={isDownloading || downloading}
+                className="bg-black/50 hover:bg-black/70 text-white border-0 p-1 h-7 w-7"
+              >
+                {(isDownloading || downloading) ? (
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                ) : (
+                  <Package className="h-3 w-3" />
+                )}
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Baixar todas as fotos (ZIP)</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       )}
-    </>
+
+      {/* Vehicle Photo Viewer - AQUI ESTÁ O PROBLEMA! */}
+      <VehiclePhotoViewer
+        vehicleId={vehicle.id}
+        fallbackPhotos={vehicle.photos}
+        vehicleName={vehicle.name}
+        className="w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden"
+        onDownloadSingle={handleDownloadSinglePhoto}
+      />
+    </div>
   );
 };
 

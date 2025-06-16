@@ -2,7 +2,29 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { mapDbDataToAppData } from './useVehicles/utils/dbToAppMapper';
-import { Vehicle } from './useVehicles/types'; // Importar o tipo correto
+
+export interface Vehicle {
+  id: string;
+  name: string;
+  vin: string;
+  year: number;
+  model: string;
+  miles: number;
+  internal_code: string;
+  color: string;
+  purchase_price: number;
+  sale_price: number;
+  profit_margin: number;
+  min_negotiable: number;
+  carfax_price: number;
+  mmr_value: number;
+  description: string;
+  category: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+  photos: any[];
+}
 
 interface UseVehiclesOptimizedOptions {
   category?: string;
@@ -50,8 +72,6 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
             miles,
             internal_code,
             color,
-            plate,
-            sunpass,
             purchase_price,
             sale_price,
             profit_margin,
@@ -132,7 +152,7 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
 
         console.log('Raw vehicles data from Supabase:', data);
 
-        // Map the data using the correct mapper
+        // Map the data - handle the type issue by casting
         const mappedVehicles = data?.map((vehicle: any) => mapDbDataToAppData(vehicle)) || [];
         
         console.log('Mapped vehicles:', mappedVehicles);
