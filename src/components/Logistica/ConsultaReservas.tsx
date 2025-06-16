@@ -35,31 +35,49 @@ const ConsultaReservas: React.FC = () => {
   const [selectedReservationForShare, setSelectedReservationForShare] = useState<Reservation | null>(null);
 
   // DISPARADORES DOS DOIS TIPOS DE BUSCA
-  const onBuscarPickup = () =>
-    fetchReservas({
-      dataIni: dataInicioPickup,
-      dataFim: dataFimPickup,
-      columnType: "pick_up_date",
-      setLoading: setLoadingPickup,
-      setReservations: setReservationsPickup,
-      setError: setErrorPickup,
-      setRawApiData: setRawApiDataPickup,
-      setLastRequestLog: setLastRequestLogPickup,
-      setRowKommoLeadIds: setRowKommoLeadIdsPickup,
-    });
+  const onBuscarPickup = async () => {
+    try {
+      console.log('Iniciando busca por Pickup Date:', { dataInicioPickup, dataFimPickup });
+      await fetchReservas({
+        dataIni: dataInicioPickup,
+        dataFim: dataFimPickup,
+        columnType: "pick_up_date",
+        setLoading: setLoadingPickup,
+        setReservations: setReservationsPickup,
+        setError: setErrorPickup,
+        setRawApiData: setRawApiDataPickup,
+        setLastRequestLog: setLastRequestLogPickup,
+        setRowKommoLeadIds: setRowKommoLeadIdsPickup,
+      });
+      console.log('Busca por Pickup Date concluída');
+    } catch (error) {
+      console.error('Erro na busca por Pickup Date:', error);
+      setErrorPickup('Erro inesperado na busca. Tente novamente.');
+      setLoadingPickup(false);
+    }
+  };
 
-  const onBuscarReturn = () =>
-    fetchReservas({
-      dataIni: dataInicioReturn,
-      dataFim: dataFimReturn,
-      columnType: "return_date",
-      setLoading: setLoadingReturn,
-      setReservations: setReservationsReturn,
-      setError: setErrorReturn,
-      setRawApiData: setRawApiDataReturn,
-      setLastRequestLog: setLastRequestLogReturn,
-      setRowKommoLeadIds: setRowKommoLeadIdsReturn,
-    });
+  const onBuscarReturn = async () => {
+    try {
+      console.log('Iniciando busca por Return Date:', { dataInicioReturn, dataFimReturn });
+      await fetchReservas({
+        dataIni: dataInicioReturn,
+        dataFim: dataFimReturn,
+        columnType: "return_date",
+        setLoading: setLoadingReturn,
+        setReservations: setReservationsReturn,
+        setError: setErrorReturn,
+        setRawApiData: setRawApiDataReturn,
+        setLastRequestLog: setLastRequestLogReturn,
+        setRowKommoLeadIds: setRowKommoLeadIdsReturn,
+      });
+      console.log('Busca por Return Date concluída');
+    } catch (error) {
+      console.error('Erro na busca por Return Date:', error);
+      setErrorReturn('Erro inesperado na busca. Tente novamente.');
+      setLoadingReturn(false);
+    }
+  };
 
   const handleOpenShareModal = (reservation: Reservation) => {
     setSelectedReservationForShare(reservation);
@@ -86,51 +104,62 @@ const ConsultaReservas: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto p-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold mb-4">Consulta de Reservas</h1>
+        <p className="text-gray-600 mb-6">
+          Consulte reservas por data de pickup ou retorno
+        </p>
+      </div>
+
       {/* Seção Pickup Date */}
-      <ReservationFilters
-        header="Consulta por Pickup Date"
-        dataInicio={dataInicioPickup}
-        setDataInicio={setDataInicioPickup}
-        dataFim={dataFimPickup}
-        setDataFim={setDataFimPickup}
-        onBuscar={onBuscarPickup}
-        loading={loadingPickup}
-        lastRequestLog={lastRequestLogPickup}
-        handleDownloadRequestLog={createDownloadHandler(lastRequestLogPickup, "log_requisicao_consulta_reservas_pickup.json")}
-      />
-      
-      <ReservationTable
-        error={errorPickup}
-        rawApiData={rawApiDataPickup}
-        reservations={reservationsPickup}
-        rowKommoLeadIds={rowKommoLeadIdsPickup}
-        badgeType="pickup"
-        loading={loadingPickup}
-        onShareClick={handleOpenShareModal}
-      />
+      <div className="mb-12">
+        <ReservationFilters
+          header="Consulta por Pickup Date"
+          dataInicio={dataInicioPickup}
+          setDataInicio={setDataInicioPickup}
+          dataFim={dataFimPickup}
+          setDataFim={setDataFimPickup}
+          onBuscar={onBuscarPickup}
+          loading={loadingPickup}
+          lastRequestLog={lastRequestLogPickup}
+          handleDownloadRequestLog={createDownloadHandler(lastRequestLogPickup, "log_requisicao_consulta_reservas_pickup.json")}
+        />
+        
+        <ReservationTable
+          error={errorPickup}
+          rawApiData={rawApiDataPickup}
+          reservations={reservationsPickup}
+          rowKommoLeadIds={rowKommoLeadIdsPickup}
+          badgeType="pickup"
+          loading={loadingPickup}
+          onShareClick={handleOpenShareModal}
+        />
+      </div>
 
       {/* Seção Return Date */}
-      <ReservationFilters
-        header="Consulta por Return Date"
-        dataInicio={dataInicioReturn}
-        setDataInicio={setDataInicioReturn}
-        dataFim={dataFimReturn}
-        setDataFim={setDataFimReturn}
-        onBuscar={onBuscarReturn}
-        loading={loadingReturn}
-        lastRequestLog={lastRequestLogReturn}
-        handleDownloadRequestLog={createDownloadHandler(lastRequestLogReturn, "log_requisicao_consulta_reservas_return.json")}
-      />
-      
-      <ReservationTable
-        error={errorReturn}
-        rawApiData={rawApiDataReturn}
-        reservations={reservationsReturn}
-        rowKommoLeadIds={rowKommoLeadIdsReturn}
-        badgeType="return"
-        loading={loadingReturn}
-        onShareClick={handleOpenShareModal}
-      />
+      <div className="mb-12">
+        <ReservationFilters
+          header="Consulta por Return Date"
+          dataInicio={dataInicioReturn}
+          setDataInicio={setDataInicioReturn}
+          dataFim={dataFimReturn}
+          setDataFim={setDataFimReturn}
+          onBuscar={onBuscarReturn}
+          loading={loadingReturn}
+          lastRequestLog={lastRequestLogReturn}
+          handleDownloadRequestLog={createDownloadHandler(lastRequestLogReturn, "log_requisicao_consulta_reservas_return.json")}
+        />
+        
+        <ReservationTable
+          error={errorReturn}
+          rawApiData={rawApiDataReturn}
+          reservations={reservationsReturn}
+          rowKommoLeadIds={rowKommoLeadIdsReturn}
+          badgeType="return"
+          loading={loadingReturn}
+          onShareClick={handleOpenShareModal}
+        />
+      </div>
 
       {/* Modal de compartilhamento */}
       <ReservationWhatsAppModal

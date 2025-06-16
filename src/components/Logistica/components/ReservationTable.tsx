@@ -26,9 +26,27 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
 }) => {
   const orderedReservations = getOrderedReservations(reservations, badgeType);
 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+          <p className="text-gray-600">Buscando reservas...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <>
-      {error && <div className="text-red-500 mb-3">{error}</div>}
+    <div className="space-y-4">
+      {error && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center">
+            <div className="text-red-500 mr-2">⚠️</div>
+            <div className="text-red-700">{error}</div>
+          </div>
+        </div>
+      )}
 
       {rawApiData && (
         <div className="mb-4">
@@ -79,10 +97,14 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
               </tr>
             </thead>
             <tbody>
-              {orderedReservations.length === 0 && !loading ? (
+              {orderedReservations.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-3 text-center text-muted-foreground">
-                    Nenhum resultado.
+                  <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
+                    <div className="flex flex-col items-center">
+                      <div className="text-4xl mb-2">📋</div>
+                      <p className="text-lg font-medium">Nenhum resultado encontrado</p>
+                      <p className="text-sm">Tente ajustar os filtros de data</p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -100,7 +122,7 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
           </table>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

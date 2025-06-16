@@ -16,6 +16,8 @@ export const useReservationFetch = () => {
     setLastRequestLog,
     setRowKommoLeadIds,
   }: ReservationFetchParams) => {
+    console.log('fetchReservas iniciado:', { dataIni, dataFim, columnType });
+    
     setLoading(true);
     setReservations([]);
     setError(null);
@@ -26,6 +28,7 @@ export const useReservationFetch = () => {
     const fim = dataFim && /^\d{4}-\d{2}-\d{2}$/.test(dataFim) ? `${dataFim}T00:00:00` : "";
 
     if (!inicio || !fim) {
+      console.error('Datas inválidas:', { inicio, fim });
       setError("Preencha as datas inicial e final completas.");
       setLoading(false);
       return;
@@ -64,21 +67,28 @@ export const useReservationFetch = () => {
     };
 
     try {
+      console.log('Fazendo requisição para:', url);
       const res = await fetch(url, { method: "GET", headers });
+      
       if (!res.ok) {
-        setError("Erro ao buscar reservas.");
-        responseLog.error = `HTTP ${res.status} - ${res.statusText || "Unknown error"}`;
+        const errorMessage = `HTTP ${res.status} - ${res.statusText || "Unknown error"}`;
+        console.error('Erro na requisição:', errorMessage);
+        setError("Erro ao buscar reservas. Verifique sua conexão.");
+        responseLog.error = errorMessage;
         setLastRequestLog(responseLog);
         setLoading(false);
         return;
       }
 
       const data = await res.json();
+      console.log('Dados recebidos:', data);
+      
       setRawApiData(data);
       responseLog.response_json = data;
       setLastRequestLog(responseLog);
 
       const onlyRelevant = parseReservationList(data);
+      console.log('Reservas processadas:', onlyRelevant);
       setReservations(onlyRelevant);
 
       const list = Array.isArray(data) ? data : data?.data || [];
@@ -107,14 +117,22 @@ export const useReservationFetch = () => {
       if (onlyRelevant.length === 0) {
         toast({
           title: "Nenhum resultado.",
-          description: "Nenhuma reserva encontrada para o filtro."
+          description: "Nenhuma reserva encontrada para o filtro aplicado."
+        });
+      } else {
+        toast({
+          title: "Busca concluída",
+          description: `${onlyRelevant.length} reserva(s) encontrada(s).`
         });
       }
     } catch (e: any) {
-      setError("Ocorreu um erro ao buscar dados.");
-      responseLog.error = `JS Exception: ${e?.message || e}`;
+      const errorMessage = `Erro de conexão: ${e?.message || e}`;
+      console.error('Erro na busca:', errorMessage);
+      setError("Erro de conexão. Verifique sua internet e tente novamente.");
+      responseLog.error = errorMessage;
       setLastRequestLog(responseLog);
     } finally {
+      console.log('fetchReservas finalizado');
       setLoading(false);
     }
   };
