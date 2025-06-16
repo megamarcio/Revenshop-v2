@@ -17,7 +17,7 @@ const OptimizedLazyImage: React.FC<OptimizedLazyImageProps> = ({
   placeholder, 
   showZoom = false 
 }) => {
-  // Usar o componente ProgressiveImage otimizado para cards de veículos
+  // Usar o novo componente ProgressiveImage
   return (
     <ProgressiveImage
       vehicleId={vehicleId}
@@ -26,8 +26,6 @@ const OptimizedLazyImage: React.FC<OptimizedLazyImageProps> = ({
       placeholder={placeholder}
       showZoom={showZoom}
       autoLoadMedium={true}
-      threshold={0.2} // Carrega quando 20% da imagem está visível
-      rootMargin="150px" // Começa a carregar 150px antes de ficar visível
     />
   );
 };

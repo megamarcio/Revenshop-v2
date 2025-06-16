@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Loader2, Package } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import VehicleUsageBadge from './VehicleUsageBadge';
-import VehicleMainPhoto from './VehicleMainPhoto';
+import VehiclePhotoViewer from './VehiclePhotoViewer';
 import { Vehicle } from './VehicleCardTypes';
 import { usePhotoDownload } from '@/hooks/usePhotoDownload';
 
@@ -99,7 +99,7 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
   console.log('VehicleCardHeader - Final consignmentStore:', consignmentStore);
 
   return (
-    <div className="relative group">
+    <div className="relative">
       {/* Vehicle Usage Badge - Não mostrar badge "À Venda" padrão */}
       <div className="absolute top-2 left-2 z-10">
         <VehicleUsageBadge 
@@ -110,7 +110,7 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
 
       {/* Photo Download Buttons */}
       {vehicle.photos && vehicle.photos.length > 0 && (
-        <div className="absolute top-2 right-2 z-10 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute top-2 right-2 z-10 flex gap-1">
           <Tooltip>
             <TooltipTrigger asChild>
               <Button
@@ -134,13 +134,13 @@ const VehicleCardHeader = ({ vehicle, downloading = false }: VehicleCardHeaderPr
         </div>
       )}
 
-      {/* Main Photo with fallback to vehicle.photos array */}
-      <VehicleMainPhoto
+      {/* Vehicle Photo Viewer - AQUI ESTÁ O PROBLEMA! */}
+      <VehiclePhotoViewer
         vehicleId={vehicle.id}
         fallbackPhotos={vehicle.photos}
         vehicleName={vehicle.name}
         className="w-full h-48 bg-gray-200 rounded-t-lg overflow-hidden"
-        useLazyLoading={true}
+        onDownloadSingle={handleDownloadSinglePhoto}
       />
     </div>
   );
