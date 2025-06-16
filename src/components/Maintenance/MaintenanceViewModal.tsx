@@ -81,8 +81,17 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
   };
 
   const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
-  const overdueMaintenances = maintenances.filter(m => getMaintenanceStatus(m) === 'overdue');
-  const pendingMaintenances = maintenances.filter(m => getMaintenanceStatus(m) === 'pending');
+  
+  // Filtrar apenas manutenções REAIS vencidas (não itens técnicos)
+  const overdueMaintenances = maintenances.filter(m => {
+    const status = getMaintenanceStatus(m);
+    return status === 'overdue';
+  });
+  
+  const pendingMaintenances = maintenances.filter(m => {
+    const status = getMaintenanceStatus(m);
+    return status === 'pending';
+  });
 
   const handleTechnicalPanelClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -103,7 +112,7 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
           </DialogHeader>
 
           <div className="space-y-4">
-            {/* Alertas de Destaque */}
+            {/* Alertas de Destaque - Apenas se houver manutenções reais vencidas */}
             {(overdueMaintenances.length > 0 || pendingMaintenances.length > 0) && (
               <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-200 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-3">
@@ -164,11 +173,6 @@ const MaintenanceViewModal = ({ isOpen, onClose, vehicleId, vehicleName }: Maint
                 >
                   <Settings2 className="h-4 w-4" />
                   Painel Técnico
-                  {(overdueMaintenances.length > 0 || pendingMaintenances.length > 0) && (
-                    <Badge className="bg-red-500 text-white text-xs">
-                      {overdueMaintenances.length + pendingMaintenances.length}
-                    </Badge>
-                  )}
                 </Button>
               </div>
               <div className="text-sm">
