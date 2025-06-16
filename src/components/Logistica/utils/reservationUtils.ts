@@ -1,149 +1,78 @@
 
-import { Reservation, ExtraBadge } from "../types/reservationTypes";
-
-export const parseReservationList = (data: any): Reservation[] => {
-  const list = Array.isArray(data) ? data : data?.data || [];
-  return (list || []).map(item => {
-    let customerFirstName = "-";
-    let customerLastName = "-";
-    
-    if (item.customer && typeof item.customer === "object") {
-      customerFirstName = item.customer.first_name || "-";
-      customerLastName = item.customer.last_name || "-";
-    } else if (item.customer_fullname) {
-      const nameParts = String(item.customer_fullname).split(" ");
-      customerFirstName = nameParts[0] || "-";
-      customerLastName = nameParts.slice(1).join(" ") || "-";
-    }
-
-    const reservationId = item.reservation_id || item.custom_reservation_number || item.prefixed_id || item.id?.toString() || "-";
-    const pickupDate = item.pick_up_date || item.checkin_datetime || item.initial_pick_up_date || "-";
-    const returnDate = item.return_date || item.checkout_datetime || item.initial_return_date || "-";
-
-    let plate = "-";
-    if (Array.isArray(item.reservation_vehicle_information) && item.reservation_vehicle_information.length > 0) {
-      plate = item.reservation_vehicle_information[0]?.plate || "-";
-    } else if (item.reservation_vehicle_information && typeof item.reservation_vehicle_information === "object" && item.reservation_vehicle_information.plate) {
-      plate = item.reservation_vehicle_information.plate;
-    } else if (item.vehicle && typeof item.vehicle === "object") {
-      plate = item.vehicle.plate || "-";
-    } else if (item.vehicle_plate) {
-      plate = item.vehicle_plate;
-    }
-
-    let phone_number = "-";
-    if (item.customer && typeof item.customer === "object") {
-      phone_number = item.customer.phone_number || item.customer.phone || "-";
-    } else if (item.phone_number) {
-      phone_number = item.phone_number;
-    } else if (item.customer_phone) {
-      phone_number = item.customer_phone;
-    }
-
-    return {
-      reservation_id: reservationId,
-      customer_first_name: customerFirstName,
-      customer_last_name: customerLastName,
-      pickup_date: pickupDate,
-      return_date: returnDate,
-      plate,
-      phone_number
-    };
-  });
+export const getTodayDateString = (): string => {
+  return new Date().toISOString().split('T')[0];
 };
 
-export function formatDateTime(dateStr: string): {
-  date: string;
-  time: string;
-} {
-  if (!dateStr || dateStr === "-") return {
-    date: "-",
-    time: "-"
-  };
+// Função para ajustar horário para fuso horário da Flórida (+4h)
+export const adjustTimeForFlorida = (timeString: string): string => {
+  if (!timeString) return timeString;
+  
+  // Extrai horas e minutos do formato "HH:MM" ou "HH:MM:SS"
+  const timeParts = timeString.split(':');
+  if (timeParts.length < 2) return timeString;
+  
+  let hours = parseInt(timeParts[0], 10);
+  const minutes = timeParts[1];
+  const seconds = timeParts[2] || '00';
+  
+  // Adiciona 4 horas para ajustar ao fuso horário da Flórida
+  hours += 4;
+  
+  // Ajusta para formato 24h
+  if (hours >= 24) {
+    hours -= 24;
+  }
+  
+  // Formata com zero à esquerda se necessário
+  const formattedHours = hours.toString().padStart(2, '0');
+  
+  return `${formattedHours}:${minutes}:${seconds}`;
+};
+
+// Função para formatar data e hora com ajuste de fuso horário
+export const formatDateTimeForFlorida = (dateTimeString: string): string => {
+  if (!dateTimeString) return '';
+  
   try {
-    const date = new Date(dateStr);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const date = new Date(dateTimeString);
     
-    let hours = date.getHours();
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours || 12;
+    // Adiciona 4 horas para ajustar ao fuso horário da Flórida
+    date.setHours(date.getHours() + 4);
     
-    return {
-      date: `${day}/${month}`,
-      time: `${hours}:${minutes} ${ampm}`
-    };
-  } catch {
-    return {
-      date: "-",
-      time: "-"
-    };
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch (error) {
+    console.error('Erro ao formatar data/hora:', error);
+    return dateTimeString;
   }
-}
-
-export const getTodayDateString = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
 };
 
-export function getLocationBadge(lastName: string, type: "pickup" | "return"): string | null {
-  if (!lastName) return null;
-  const lower = lastName.toLowerCase().replace(/\s+/g, " ");
-  if (type === "pickup") {
-    if (lower.includes("in mco")) return "Mco";
-    if (lower.includes("in fort")) return "Fort";
-    if (lower.includes("in mia")) return "Mia";
-    if (lower.includes("in tampa")) return "Tampa";
-  } else if (type === "return") {
-    if (lower.includes("out mco")) return "Mco";
-    if (lower.includes("out fort")) return "Fort";
-    if (lower.includes("out mia")) return "Mia";
-    if (lower.includes("out tampa")) return "Tampa";
+// Função para converter UTC para horário da Flórida
+export const convertUTCToFloridaTime = (utcDateTime: string): string => {
+  if (!utcDateTime) return '';
+  
+  try {
+    const utcDate = new Date(utcDateTime + 'Z'); // Garante que seja tratado como UTC
+    
+    // Adiciona 4 horas (EDT) ou 5 horas (EST) - usando 4h como padrão
+    utcDate.setHours(utcDate.getHours() + 4);
+    
+    return utcDate.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch (error) {
+    console.error('Erro ao converter UTC para horário da Flórida:', error);
+    return utcDateTime;
   }
-  return null;
-}
-
-export function getExtraItemBadges(lastName: string): ExtraBadge[] {
-  if (!lastName) return [];
-  const lower = lastName.toLowerCase();
-  const badges: ExtraBadge[] = [];
-
-  const excludesStroller = lower.includes("não preciso carrinho") || lower.includes("no stroller");
-  const excludesCarSeat = lower.includes("não preciso car seat") || lower.includes("no car seat");
-
-  const includesStroller = lower.includes("carrinho") || lower.includes("stroller");
-  const includesCarSeat = lower.includes("cadeirinha") || lower.includes("car seat");
-
-  if (includesStroller && !excludesStroller) {
-    badges.push({ text: "Carrinho", type: 'item' });
-  }
-  if (includesCarSeat && !excludesCarSeat) {
-    badges.push({ text: "Cadeirinha", type: 'item' });
-  }
-
-  if (lower.includes("sign não")) {
-    badges.push({ text: "Sign", type: 'alert' });
-  }
-
-  return badges;
-}
-
-export function getOrderedReservations(
-  reservations: Reservation[],
-  type: "pickup" | "return"
-): Reservation[] {
-  const key = type === "pickup" ? "pickup_date" : "return_date";
-  return [...reservations].sort((a: Reservation, b: Reservation) => {
-    if (!a[key] && !b[key]) return 0;
-    if (!a[key]) return 1;
-    if (!b[key]) return -1;
-    const dateA = new Date(a[key]).getTime();
-    const dateB = new Date(b[key]).getTime();
-    return dateA - dateB;
-  });
-}
+};
