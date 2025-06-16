@@ -32,8 +32,8 @@ export class VehicleDataMapper {
       consignmentStore: vehicle.consignment_store,
       seller: '',
       finalSalePrice: 0,
-      // Use empty array as fallback since photos come from vehicle_photos table
-      photos: [],
+      // IMPORTANTE: Mapear as fotos corretamente do array de photos
+      photos: vehicle.photos || [],
       video: vehicle.video,
       
       // Campos de financiamento mapeados
@@ -66,6 +66,11 @@ export class VehicleDataMapper {
         miles: vehicle.miles || 0,
         internal_code: vehicle.internalCode,
         color: vehicle.color,
+        
+        // Novos campos mapeados
+        plate: vehicle.plate,
+        sunpass: vehicle.sunpass,
+        
         purchase_price: vehicle.purchasePrice,
         sale_price: vehicle.salePrice,
         profit_margin: vehicle.profitMargin,

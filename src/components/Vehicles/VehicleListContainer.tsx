@@ -67,6 +67,11 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
     setSortOrder(newSortOrder);
   };
 
+  // Função wrapper para handleExport que não recebe parâmetros
+  const handleExportWrapper = () => {
+    handleExport('csv'); // Definindo csv como formato padrão
+  };
+
   return (
     <div className="space-y-6">
       <VehicleListHeader 
@@ -95,7 +100,7 @@ const VehicleListContainer = ({ onNavigateToCustomers }: VehicleListContainerPro
         onSortChange={handleSortChange}
         filterBy={filterBy}
         onFilterChange={setFilterBy}
-        onExport={handleExport}
+        onExport={handleExportWrapper}
       />
 
       <VehicleListContent
