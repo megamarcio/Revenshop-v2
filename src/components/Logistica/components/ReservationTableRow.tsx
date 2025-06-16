@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { Reservation } from "../types/reservationTypes";
 import { LocationBadge } from "../LocationBadge";
-import { adjustTimeForFlorida, formatDateTimeForFlorida } from "../utils/reservationUtils";
+import { adjustTimeForFlorida } from "../utils/reservationUtils";
 
 interface ReservationTableRowProps {
   reservation: Reservation;
@@ -41,6 +41,19 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       style: "currency",
       currency: "USD",
     }).format(numAmount || 0);
+  };
+
+  // Helper function to normalize location values to match expected types
+  const normalizeLocation = (location: string | undefined): "Mco" | "Fort" | "Mia" | "Tampa" | null => {
+    if (!location) return null;
+    
+    const normalized = location.toLowerCase();
+    if (normalized.includes('mco') || normalized.includes('orlando')) return "Mco";
+    if (normalized.includes('fort') || normalized.includes('lauderdale')) return "Fort";
+    if (normalized.includes('mia') || normalized.includes('miami')) return "Mia";
+    if (normalized.includes('tampa')) return "Tampa";
+    
+    return null;
   };
 
   return (
@@ -79,7 +92,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       <td className="px-4 py-3">
         <div className="space-y-1">
           <LocationBadge 
-            location={badgeType === "pickup" ? reservation.pick_up_location : reservation.return_location} 
+            location={normalizeLocation(badgeType === "pickup" ? reservation.pick_up_location : reservation.return_location)} 
           />
           {reservation.vehicle_category && (
             <div className="text-sm text-gray-600">
