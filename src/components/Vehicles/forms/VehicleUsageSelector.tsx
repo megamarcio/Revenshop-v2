@@ -21,8 +21,6 @@ const VehicleUsageSelector = ({ value, onChange }: VehicleUsageSelectorProps) =>
           <SelectItem value="rental">Aluguel</SelectItem>
           <SelectItem value="sale">Venda</SelectItem>
           <SelectItem value="consigned">Consignado</SelectItem>
-          <SelectItem value="sale-rental">Venda/Aluguel</SelectItem>
-          <SelectItem value="maintenance">Manutenção</SelectItem>
         </SelectContent>
       </Select>
     </div>
