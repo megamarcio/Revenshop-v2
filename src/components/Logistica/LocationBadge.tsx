@@ -19,8 +19,8 @@ export const LocationBadge: React.FC<LocationBadgeProps> = ({ location }) => {
       return (
         <Badge
           variant="secondary"
-          className="ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200"
-          style={{ letterSpacing: 0.5, lineHeight: "16px" }}
+          className="flex items-center justify-center text-[10px] h-[18px] min-w-[32px] px-[8px] font-bold border rounded-full whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200"
+          style={{ letterSpacing: 0.3, lineHeight: "18px" }}
         >
           N/A
         </Badge>
@@ -32,8 +32,8 @@ export const LocationBadge: React.FC<LocationBadgeProps> = ({ location }) => {
     return (
       <Badge
         variant="secondary"
-        className={`ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap ${colorStyles}`}
-        style={{ letterSpacing: 0.5, lineHeight: "16px" }}
+        className={`flex items-center justify-center text-[10px] h-[18px] min-w-[32px] px-[8px] font-bold border rounded-full whitespace-nowrap ${colorStyles}`}
+        style={{ letterSpacing: 0.3, lineHeight: "18px" }}
       >
         {location}
       </Badge>
@@ -43,8 +43,8 @@ export const LocationBadge: React.FC<LocationBadgeProps> = ({ location }) => {
     return (
       <Badge
         variant="secondary"
-        className="ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap bg-red-100 text-red-600 border-red-200"
-        style={{ letterSpacing: 0.5, lineHeight: "16px" }}
+        className="flex items-center justify-center text-[10px] h-[18px] min-w-[32px] px-[8px] font-bold border rounded-full whitespace-nowrap bg-red-100 text-red-600 border-red-200"
+        style={{ letterSpacing: 0.3, lineHeight: "18px" }}
       >
         ERR
       </Badge>

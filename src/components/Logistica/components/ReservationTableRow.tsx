@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Share2 } from "lucide-react";
 import { Reservation } from "../types/reservationTypes";
 import { LocationBadge } from "../LocationBadge";
-import { adjustTimeForFlorida } from "../utils/reservationUtils";
+import { formatDateTimeForFlorida } from "../utils/reservationUtils";
 
 interface ReservationTableRowProps {
   reservation: Reservation;
@@ -26,12 +26,6 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
     try {
       if (!dateStr) return "N/A";
       
-      let displayTime = "N/A";
-      if (timeStr) {
-        // Ajusta o horário para +4h (fuso da Flórida)
-        displayTime = adjustTimeForFlorida(timeStr);
-      }
-      
       const date = new Date(dateStr);
       if (isNaN(date.getTime())) {
         console.warn('Invalid date:', dateStr);
@@ -40,7 +34,13 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       
       const formattedDate = date.toLocaleDateString("pt-BR");
       
-      return `${formattedDate} ${displayTime}`;
+      if (timeStr) {
+        // Use the utility function for Florida time adjustment
+        const adjustedDateTime = `${dateStr}T${timeStr}`;
+        return formatDateTimeForFlorida(adjustedDateTime);
+      }
+      
+      return formattedDate;
     } catch (error) {
       console.error('Error formatting date:', error, { dateStr, timeStr });
       return "Erro na data";
@@ -62,7 +62,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
     }
   };
 
-  // Helper function to normalize location values to match expected types
+  // Helper function to normalize location values
   const normalizeLocation = (location: string | undefined): "Mco" | "Fort" | "Mia" | "Tampa" | null => {
     try {
       if (!location) return null;
@@ -117,13 +117,33 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       
       <td className="px-4 py-3">
         <div className="flex flex-col gap-1">
-          <Badge variant={badgeType === "pickup" ? "default" : "secondary"}>
-            {badgeType === "pickup" ? "Retirada" : "Devolução"}
-          </Badge>
-          <div className="text-sm">
+          <div className="flex items-center gap-2">
+            <Badge variant="default" className="bg-blue-600 text-white">
+              Retirada
+            </Badge>
+            <LocationBadge location={normalizeLocation(reservation.pick_up_location)} />
+          </div>
+          <div className="text-sm font-medium">
             {formatDateTime(
-              badgeType === "pickup" ? (reservation.pick_up_date || reservation.pickup_date) : reservation.return_date,
-              badgeType === "pickup" ? reservation.pick_up_time : reservation.return_time
+              reservation.pick_up_date || reservation.pickup_date,
+              reservation.pick_up_time
+            )}
+          </div>
+        </div>
+      </td>
+      
+      <td className="px-4 py-3">
+        <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="bg-green-600 text-white">
+              Devolução
+            </Badge>
+            <LocationBadge location={normalizeLocation(reservation.return_location)} />
+          </div>
+          <div className="text-sm font-medium">
+            {formatDateTime(
+              reservation.return_date,
+              reservation.return_time
             )}
           </div>
         </div>
@@ -131,37 +151,26 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       
       <td className="px-4 py-3">
         <div className="space-y-1">
-          <LocationBadge 
-            location={normalizeLocation(badgeType === "pickup" ? reservation.pick_up_location : reservation.return_location)} 
-          />
           {reservation.vehicle_category && (
-            <div className="text-sm text-gray-600">
-              Categoria: {reservation.vehicle_category}
+            <div className="text-sm font-medium">
+              {reservation.vehicle_category}
+            </div>
+          )}
+          {reservation.plate && (
+            <div className="text-xs text-gray-600">
+              Placa: {reservation.plate}
             </div>
           )}
         </div>
       </td>
       
-      <td className="px-4 py-3">
-        <div className="text-right">
-          <div className="font-medium">
-            {formatCurrency(reservation.total_cost || 0)}
-          </div>
-          {reservation.daily_rate && (
-            <div className="text-sm text-gray-600">
-              Diária: {formatCurrency(reservation.daily_rate)}
-            </div>
-          )}
-        </div>
-      </td>
-      
-      <td className="px-4 py-3">
-        <div className="flex gap-2">
+      <td className="px-2 py-3">
+        <div className="flex gap-1">
           <Button
             variant="outline"
             size="sm"
             onClick={safeHandleShare}
-            className="flex items-center gap-1"
+            className="flex items-center gap-1 text-xs px-2 py-1"
           >
             <Share2 className="h-3 w-3" />
             Compartilhar

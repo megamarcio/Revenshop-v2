@@ -98,21 +98,21 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
             <thead>
               <tr className="bg-muted">
                 <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Reserva&nbsp;
+                  Reserva
                 </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
                   Nome do Cliente
                 </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
                   Pickup
                 </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
                   Retorno
                 </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>
+                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
                   Veículo
                 </th>
-                <th className="px-2 py-2 text-left" style={{ fontSize: 13 }}>
+                <th className="px-2 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
                   Ações
                 </th>
               </tr>
