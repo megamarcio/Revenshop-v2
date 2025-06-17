@@ -2,6 +2,7 @@
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { TableCell, TableRow } from "@/components/ui/table";
 import { Share2 } from "lucide-react";
 import { Reservation } from "../types/reservationTypes";
 import { LocationBadge } from "../LocationBadge";
@@ -32,33 +33,15 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
         return "Data inválida";
       }
       
-      const formattedDate = date.toLocaleDateString("pt-BR");
-      
       if (timeStr) {
-        // Use the utility function for Florida time adjustment
         const adjustedDateTime = `${dateStr}T${timeStr}`;
         return formatDateTimeForFlorida(adjustedDateTime);
       }
       
-      return formattedDate;
+      return date.toLocaleDateString("pt-BR");
     } catch (error) {
       console.error('Error formatting date:', error, { dateStr, timeStr });
       return "Erro na data";
-    }
-  };
-
-  const formatCurrency = (amount: number | string) => {
-    try {
-      const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-      if (isNaN(numAmount)) return "N/A";
-      
-      return new Intl.NumberFormat("pt-BR", {
-        style: "currency",
-        currency: "USD",
-      }).format(numAmount || 0);
-    } catch (error) {
-      console.error('Error formatting currency:', error, { amount });
-      return "N/A";
     }
   };
 
@@ -97,28 +80,32 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
   const customerPhone = reservation.renter_phone || reservation.phone_number || 'Telefone não disponível';
 
   return (
-    <tr className="border-b hover:bg-gray-50">
-      <td className="px-4 py-3">
-        <div className="font-medium text-blue-600">
-          #{reservationId}
-        </div>
-        {kommoLeadId && (
-          <div className="text-xs text-gray-500 mt-1">
-            Lead: {kommoLeadId}
+    <TableRow className="hover:bg-muted/50">
+      <TableCell>
+        <div className="space-y-1">
+          <div className="font-semibold text-blue-600">
+            #{reservationId}
           </div>
-        )}
-      </td>
+          {kommoLeadId && (
+            <div className="text-xs text-muted-foreground">
+              Lead: {kommoLeadId}
+            </div>
+          )}
+        </div>
+      </TableCell>
       
-      <td className="px-4 py-3">
-        <div className="font-medium">{customerName}</div>
-        <div className="text-sm text-gray-600">{customerEmail}</div>
-        <div className="text-sm text-gray-600">{customerPhone}</div>
-      </td>
+      <TableCell>
+        <div className="space-y-1">
+          <div className="font-medium">{customerName}</div>
+          <div className="text-sm text-muted-foreground">{customerEmail}</div>
+          <div className="text-sm text-muted-foreground">{customerPhone}</div>
+        </div>
+      </TableCell>
       
-      <td className="px-4 py-3">
-        <div className="flex flex-col gap-1">
+      <TableCell>
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Badge variant="default" className="bg-blue-600 text-white">
+            <Badge variant="default" className="bg-blue-600 text-white hover:bg-blue-700">
               Retirada
             </Badge>
             <LocationBadge location={normalizeLocation(reservation.pick_up_location)} />
@@ -130,12 +117,12 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
             )}
           </div>
         </div>
-      </td>
+      </TableCell>
       
-      <td className="px-4 py-3">
-        <div className="flex flex-col gap-1">
+      <TableCell>
+        <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Badge variant="secondary" className="bg-green-600 text-white">
+            <Badge variant="secondary" className="bg-green-600 text-white hover:bg-green-700">
               Devolução
             </Badge>
             <LocationBadge location={normalizeLocation(reservation.return_location)} />
@@ -147,9 +134,9 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
             )}
           </div>
         </div>
-      </td>
+      </TableCell>
       
-      <td className="px-4 py-3">
+      <TableCell>
         <div className="space-y-1">
           {reservation.vehicle_category && (
             <div className="text-sm font-medium">
@@ -157,27 +144,25 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
             </div>
           )}
           {reservation.plate && (
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-muted-foreground">
               Placa: {reservation.plate}
             </div>
           )}
         </div>
-      </td>
+      </TableCell>
       
-      <td className="px-2 py-3">
-        <div className="flex gap-1">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={safeHandleShare}
-            className="flex items-center gap-1 text-xs px-2 py-1"
-          >
-            <Share2 className="h-3 w-3" />
-            Compartilhar
-          </Button>
-        </div>
-      </td>
-    </tr>
+      <TableCell>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={safeHandleShare}
+          className="flex items-center gap-2"
+        >
+          <Share2 className="h-4 w-4" />
+          Compartilhar
+        </Button>
+      </TableCell>
+    </TableRow>
   );
 };
 

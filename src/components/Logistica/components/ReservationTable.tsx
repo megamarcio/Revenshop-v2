@@ -1,6 +1,14 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Reservation } from "../types/reservationTypes";
 import { getOrderedReservations } from "../utils/reservationUtils";
 import ReservationTableRow from "./ReservationTableRow";
@@ -92,42 +100,30 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
       )}
 
       <div className="mt-6">
-        <h3 className="text-lg font-semibold mb-2">Resultados</h3>
-        <div className="overflow-x-auto">
-          <table className="min-w-full border divide-y divide-gray-200">
-            <thead>
-              <tr className="bg-muted">
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Reserva
-                </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Nome do Cliente
-                </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Pickup
-                </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Retorno
-                </th>
-                <th className="px-4 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Veículo
-                </th>
-                <th className="px-2 py-2 text-left" style={{ fontSize: 13, fontWeight: 600 }}>
-                  Ações
-                </th>
-              </tr>
-            </thead>
-            <tbody>
+        <h3 className="text-lg font-semibold mb-4">Resultados</h3>
+        <div className="border rounded-lg overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[140px]">Reserva</TableHead>
+                <TableHead className="min-w-[200px]">Cliente</TableHead>
+                <TableHead className="min-w-[180px]">Pickup</TableHead>
+                <TableHead className="min-w-[180px]">Retorno</TableHead>
+                <TableHead className="min-w-[150px]">Veículo</TableHead>
+                <TableHead className="w-[120px]">Ações</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {orderedReservations.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
-                    <div className="flex flex-col items-center">
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8">
+                    <div className="flex flex-col items-center text-muted-foreground">
                       <div className="text-4xl mb-2">📋</div>
                       <p className="text-lg font-medium">Nenhum resultado encontrado</p>
                       <p className="text-sm">Tente ajustar os filtros de data</p>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 orderedReservations.map((reservation, idx) => {
                   try {
@@ -143,17 +139,17 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                   } catch (error) {
                     console.error('Error rendering reservation row:', error, { reservation, idx });
                     return (
-                      <tr key={`error-${idx}`}>
-                        <td colSpan={6} className="px-4 py-4 text-center text-red-600">
+                      <TableRow key={`error-${idx}`}>
+                        <TableCell colSpan={6} className="text-center py-4 text-red-600">
                           Erro ao carregar reserva #{reservation.reservation_id || idx}
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     );
                   }
                 })
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
     </div>
