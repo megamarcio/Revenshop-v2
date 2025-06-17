@@ -6,16 +6,7 @@ import { Send, Share2 } from 'lucide-react';
 import WebhookConfigWarning from '@/components/Vehicles/WhatsApp/WebhookConfigWarning';
 import GroupSelector from '@/components/Vehicles/WhatsApp/GroupSelector';
 import { useReservationWhatsApp } from './useReservationWhatsApp';
-
-interface Reservation {
-    reservation_id: string;
-    customer_first_name: string;
-    customer_last_name: string;
-    pickup_date: string;
-    return_date: string;
-    plate: string;
-    phone_number?: string;
-}
+import { Reservation } from './types/reservationTypes';
 
 interface ReservationWhatsAppModalProps {
   isOpen: boolean;
@@ -90,4 +81,3 @@ const ReservationWhatsAppModal = ({ isOpen, onClose, reservationData }: Reservat
 };
 
 export default ReservationWhatsAppModal;
-

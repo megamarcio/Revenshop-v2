@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Reservation } from "./types/reservationTypes";
 import { getTodayDateString } from "./utils/reservationUtils";
@@ -31,7 +30,7 @@ const ConsultaReservas: React.FC = () => {
   const [errorReturn, setErrorReturn] = useState<string | null>(null);
   const [rawApiDataReturn, setRawApiDataReturn] = useState<any | null>(null);
   const [lastRequestLogReturn, setLastRequestLogReturn] = useState<any | null>(null);
-  const [rowKommoLeadIdsReturn, setRowKommoLeadIdsReturn] = useState<{ [reservationId: string]: string }>({});
+  const [rowKommoLeradIdsReturn, setRowKommoLeadIdsReturn] = useState<{ [reservationId: string]: string }>({});
 
   // --------- STATE PARA MODAL DE COMPARTILHAMENTO ---------
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -88,7 +87,7 @@ const ConsultaReservas: React.FC = () => {
 
   const handleOpenShareModal = (reservation: Reservation) => {
     try {
-      console.log('Opening share modal for reservation:', reservation.reservation_id);
+      console.log('Opening share modal for reservation:', reservation.id);
       setSelectedReservationForShare(reservation);
       setIsShareModalOpen(true);
     } catch (error) {
@@ -187,7 +186,7 @@ const ConsultaReservas: React.FC = () => {
               error={errorReturn}
               rawApiData={rawApiDataReturn}
               reservations={reservationsReturn}
-              rowKommoLeadIds={rowKommoLeadIdsReturn}
+              rowKommoLeadIds={rowKommoLeradIdsReturn}
               badgeType="return"
               loading={loadingReturn}
               onShareClick={handleOpenShareModal}
