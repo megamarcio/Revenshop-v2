@@ -83,19 +83,23 @@ export const parseReservationList = (apiData: any): any[] => {
   
   const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
   
-  return list.map((item: any) => ({
-    // Primary fields from the specification
-    id: item.id || item.reservation_id || item.custom_reservation_number || item.prefixed_id || "-",
-    customer: {
-      label: item.customer?.label || `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim() || 'N/A',
-      phone_number: item.customer?.phone_number || 'N/A'
-    },
-    pick_up_date: item.pick_up_date || '',
-    return_date: item.return_date || '',
-    reservation_vehicle_information: {
-      plate: item.reservation_vehicle_information?.plate || item.plate || 'N/A'
-    }
-  }));
+  return list.map((item: any) => {
+    console.log('Processing reservation item:', item);
+    
+    return {
+      // Primary fields from the specification
+      id: item.id || item.reservation_id || item.custom_reservation_number || item.prefixed_id || "-",
+      customer: {
+        label: item.customer?.label || `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim() || 'N/A',
+        phone_number: item.customer?.phone_number || 'N/A'
+      },
+      pick_up_date: item.pick_up_date || '',
+      return_date: item.return_date || '',
+      reservation_vehicle_information: {
+        plate: item.reservation_vehicle_information?.plate || item.plate || item.vehicle?.plate || 'N/A'
+      }
+    };
+  });
 };
 
 // Função para ordenar reservas
