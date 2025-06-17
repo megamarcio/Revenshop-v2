@@ -2,22 +2,12 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { Reservation } from './types/reservationTypes';
 
 interface WhatsAppGroup {
   id: string;
   name: string;
   phone: string;
-}
-
-// from ConsultaReservas.tsx
-interface Reservation {
-  reservation_id: string;
-  customer_first_name: string;
-  customer_last_name: string;
-  pickup_date: string;
-  return_date: string;
-  plate: string;
-  phone_number?: string;
 }
 
 export const useReservationWhatsApp = () => {
@@ -70,6 +60,7 @@ export const useReservationWhatsApp = () => {
 
       const selectedGroupData = groups.find(g => g.id === selectedGroup);
 
+      // Transform the reservation data to match the expected webhook format
       const webhookData = {
         type: 'reservation_share',
         recipient: {
@@ -78,8 +69,14 @@ export const useReservationWhatsApp = () => {
           groupPhone: selectedGroupData?.phone
         },
         reservation: {
-          ...reservationData,
-          customer_full_name: `${reservationData.customer_first_name} ${reservationData.customer_last_name}`,
+          reservation_id: reservationData.id,
+          customer_first_name: reservationData.customer.label.split(' ')[0] || '',
+          customer_last_name: reservationData.customer.label.split(' ').slice(1).join(' ') || '',
+          pickup_date: reservationData.pick_up_date,
+          return_date: reservationData.return_date,
+          plate: reservationData.reservation_vehicle_information.plate,
+          phone_number: reservationData.customer.phone_number,
+          customer_full_name: reservationData.customer.label,
         },
         timestamp: new Date().toISOString()
       };
@@ -140,4 +137,3 @@ export const useReservationWhatsApp = () => {
     sendReservationViaWhatsApp
   };
 };
-
