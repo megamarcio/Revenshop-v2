@@ -1,18 +1,24 @@
-
 export interface Reservation {
-  reservation_id: string;
-  customer_first_name: string;
-  customer_last_name: string;
-  pickup_date: string;
+  id: string;
+  customer: {
+    label: string;
+    phone_number: string;
+  };
+  pick_up_date: string;
   return_date: string;
-  plate: string;
+  reservation_vehicle_information: {
+    plate: string;
+  };
+  // Keep legacy fields for compatibility
+  reservation_id?: string;
+  customer_first_name?: string;
+  customer_last_name?: string;
+  pickup_date?: string;
   phone_number?: string;
-  // Campos adicionais para compatibilidade
   confirmation?: string;
   renter_name?: string;
   renter_email?: string;
   renter_phone?: string;
-  pick_up_date?: string;
   pick_up_time?: string;
   return_time?: string;
   pick_up_location?: string;
@@ -20,6 +26,7 @@ export interface Reservation {
   vehicle_category?: string;
   total_cost?: number;
   daily_rate?: number;
+  plate?: string;
 }
 
 export interface ExtraBadge {

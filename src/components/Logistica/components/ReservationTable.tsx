@@ -105,12 +105,12 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[140px]">Reserva</TableHead>
-                <TableHead className="min-w-[200px]">Cliente</TableHead>
-                <TableHead className="min-w-[180px]">Pickup</TableHead>
-                <TableHead className="min-w-[180px]">Retorno</TableHead>
-                <TableHead className="min-w-[150px]">Veículo</TableHead>
-                <TableHead className="w-[120px]">Ações</TableHead>
+                <TableHead className="text-[10px] font-bold">ID</TableHead>
+                <TableHead className="text-[10px] font-bold">Cliente</TableHead>
+                <TableHead className="text-[10px] font-bold">Telefone</TableHead>
+                <TableHead className="text-[10px] font-bold">Data Pickup</TableHead>
+                <TableHead className="text-[10px] font-bold">Data Retorno</TableHead>
+                <TableHead className="text-[10px] font-bold">Placa</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -129,10 +129,10 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                   try {
                     return (
                       <ReservationTableRow
-                        key={`${reservation.reservation_id}-${idx}`}
+                        key={`${reservation.id}-${idx}`}
                         reservation={reservation}
                         badgeType={badgeType}
-                        kommoLeadId={rowKommoLeadIds[reservation.reservation_id]}
+                        kommoLeadId={rowKommoLeadIds[reservation.id]}
                         onShareClick={onShareClick}
                       />
                     );
@@ -140,8 +140,8 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                     console.error('Error rendering reservation row:', error, { reservation, idx });
                     return (
                       <TableRow key={`error-${idx}`}>
-                        <TableCell colSpan={6} className="text-center py-4 text-red-600">
-                          Erro ao carregar reserva #{reservation.reservation_id || idx}
+                        <TableCell colSpan={6} className="text-center py-4 text-red-600 text-[10px] font-bold">
+                          Erro ao carregar reserva #{reservation.id || idx}
                         </TableCell>
                       </TableRow>
                     );

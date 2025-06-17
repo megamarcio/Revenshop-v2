@@ -84,19 +84,29 @@ export const parseReservationList = (apiData: any): any[] => {
   const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
   
   return list.map((item: any) => ({
+    // Primary fields from your specification
+    id: item.id || item.reservation_id || item.custom_reservation_number || item.prefixed_id || "-",
+    customer: {
+      label: item.customer?.label || `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim() || 'N/A',
+      phone_number: item.customer?.phone_number || 'N/A'
+    },
+    pick_up_date: item.pick_up_date || '',
+    return_date: item.return_date || '',
+    reservation_vehicle_information: {
+      plate: item.reservation_vehicle_information?.plate || item.plate || 'N/A'
+    },
+    // Legacy fields for backward compatibility
     reservation_id: item.reservation_id || item.custom_reservation_number || item.prefixed_id || (item.id ? String(item.id) : "-"),
     customer_first_name: item.customer?.first_name || '',
     customer_last_name: item.customer?.last_name || '',
     pickup_date: item.pick_up_date || '',
     return_date: item.return_date || '',
-    plate: item.plate || '',
+    plate: item.reservation_vehicle_information?.plate || item.plate || '',
     phone_number: item.customer?.phone_number || '',
-    // Campos adicionais para compatibilidade com a interface atual
     confirmation: item.reservation_id || item.custom_reservation_number || item.prefixed_id,
-    renter_name: `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim(),
+    renter_name: item.customer?.label || `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim(),
     renter_email: item.customer?.email || '',
     renter_phone: item.customer?.phone_number || '',
-    pick_up_date: item.pick_up_date || '',
     pick_up_time: item.pick_up_time || '',
     return_time: item.return_time || '',
     pick_up_location: item.pick_up_location || '',
