@@ -14,16 +14,40 @@ const colorClass: Record<string, string> = {
 };
 
 export const LocationBadge: React.FC<LocationBadgeProps> = ({ location }) => {
-  if (!location) return null;
-  return (
-    <Badge
-      variant="secondary"
-      className={
-        `ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap ${colorClass[location] ?? ""}`
-      }
-      style={{ letterSpacing: 0.5, lineHeight: "16px" }}
-    >
-      {location}
-    </Badge>
-  );
+  try {
+    if (!location) {
+      return (
+        <Badge
+          variant="secondary"
+          className="ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap bg-gray-100 text-gray-600 border-gray-200"
+          style={{ letterSpacing: 0.5, lineHeight: "16px" }}
+        >
+          N/A
+        </Badge>
+      );
+    }
+
+    const colorStyles = colorClass[location] || "bg-gray-100 text-gray-600 border-gray-200";
+    
+    return (
+      <Badge
+        variant="secondary"
+        className={`ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap ${colorStyles}`}
+        style={{ letterSpacing: 0.5, lineHeight: "16px" }}
+      >
+        {location}
+      </Badge>
+    );
+  } catch (error) {
+    console.error('Error rendering LocationBadge:', error, { location });
+    return (
+      <Badge
+        variant="secondary"
+        className="ml-2 flex items-center justify-center text-[9px] h-[16px] min-w-[28px] px-[7px] font-bold border rounded-full whitespace-nowrap bg-red-100 text-red-600 border-red-200"
+        style={{ letterSpacing: 0.5, lineHeight: "16px" }}
+      >
+        ERR
+      </Badge>
+    );
+  }
 };

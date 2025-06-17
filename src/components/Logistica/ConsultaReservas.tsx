@@ -6,8 +6,11 @@ import { useReservationFetch } from "./hooks/useReservationFetch";
 import ReservationFilters from "./components/ReservationFilters";
 import ReservationTable from "./components/ReservationTable";
 import ReservationWhatsAppModal from "./ReservationWhatsAppModal";
+import LogisticaErrorBoundary from "./components/LogisticaErrorBoundary";
 
 const ConsultaReservas: React.FC = () => {
+  console.log('ConsultaReservas component mounting');
+  
   const { fetchReservas } = useReservationFetch();
 
   // --------- FILTROS PICKUP DATE ---------
@@ -38,6 +41,8 @@ const ConsultaReservas: React.FC = () => {
   const onBuscarPickup = async () => {
     try {
       console.log('Iniciando busca por Pickup Date:', { dataInicioPickup, dataFimPickup });
+      setErrorPickup(null); // Limpar erro anterior
+      
       await fetchReservas({
         dataIni: dataInicioPickup,
         dataFim: dataFimPickup,
@@ -60,6 +65,8 @@ const ConsultaReservas: React.FC = () => {
   const onBuscarReturn = async () => {
     try {
       console.log('Iniciando busca por Return Date:', { dataInicioReturn, dataFimReturn });
+      setErrorReturn(null); // Limpar erro anterior
+      
       await fetchReservas({
         dataIni: dataInicioReturn,
         dataFim: dataFimReturn,
@@ -80,94 +87,124 @@ const ConsultaReservas: React.FC = () => {
   };
 
   const handleOpenShareModal = (reservation: Reservation) => {
-    setSelectedReservationForShare(reservation);
-    setIsShareModalOpen(true);
+    try {
+      console.log('Opening share modal for reservation:', reservation.reservation_id);
+      setSelectedReservationForShare(reservation);
+      setIsShareModalOpen(true);
+    } catch (error) {
+      console.error('Error opening share modal:', error);
+    }
   };
 
   const handleCloseShareModal = () => {
-    setIsShareModalOpen(false);
-    setSelectedReservationForShare(null);
+    try {
+      console.log('Closing share modal');
+      setIsShareModalOpen(false);
+      setSelectedReservationForShare(null);
+    } catch (error) {
+      console.error('Error closing share modal:', error);
+    }
   };
 
   const createDownloadHandler = (log: any, filename: string) => () => {
-    if (!log) return;
-    const jsonStr = JSON.stringify(log, null, 2);
-    const blob = new Blob([jsonStr], { type: "application/json" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+    try {
+      if (!log) {
+        console.warn('No log data to download');
+        return;
+      }
+      
+      const jsonStr = JSON.stringify(log, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error('Error downloading log:', error);
+    }
   };
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold mb-4">Consulta de Reservas</h1>
-        <p className="text-gray-600 mb-6">
-          Consulte reservas por data de pickup ou retorno
-        </p>
-      </div>
+    <LogisticaErrorBoundary>
+      <div className="max-w-3xl mx-auto p-6">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold mb-4">Consulta de Reservas</h1>
+          <p className="text-gray-600 mb-6">
+            Consulte reservas por data de pickup ou retorno
+          </p>
+        </div>
 
-      {/* Seção Pickup Date */}
-      <div className="mb-12">
-        <ReservationFilters
-          header="Consulta por Pickup Date"
-          dataInicio={dataInicioPickup}
-          setDataInicio={setDataInicioPickup}
-          dataFim={dataFimPickup}
-          setDataFim={setDataFimPickup}
-          onBuscar={onBuscarPickup}
-          loading={loadingPickup}
-          lastRequestLog={lastRequestLogPickup}
-          handleDownloadRequestLog={createDownloadHandler(lastRequestLogPickup, "log_requisicao_consulta_reservas_pickup.json")}
-        />
-        
-        <ReservationTable
-          error={errorPickup}
-          rawApiData={rawApiDataPickup}
-          reservations={reservationsPickup}
-          rowKommoLeadIds={rowKommoLeadIdsPickup}
-          badgeType="pickup"
-          loading={loadingPickup}
-          onShareClick={handleOpenShareModal}
-        />
-      </div>
+        {/* Seção Pickup Date */}
+        <div className="mb-12">
+          <LogisticaErrorBoundary>
+            <ReservationFilters
+              header="Consulta por Pickup Date"
+              dataInicio={dataInicioPickup}
+              setDataInicio={setDataInicioPickup}
+              dataFim={dataFimPickup}
+              setDataFim={setDataFimPickup}
+              onBuscar={onBuscarPickup}
+              loading={loadingPickup}
+              lastRequestLog={lastRequestLogPickup}
+              handleDownloadRequestLog={createDownloadHandler(lastRequestLogPickup, "log_requisicao_consulta_reservas_pickup.json")}
+            />
+          </LogisticaErrorBoundary>
+          
+          <LogisticaErrorBoundary>
+            <ReservationTable
+              error={errorPickup}
+              rawApiData={rawApiDataPickup}
+              reservations={reservationsPickup}
+              rowKommoLeadIds={rowKommoLeadIdsPickup}
+              badgeType="pickup"
+              loading={loadingPickup}
+              onShareClick={handleOpenShareModal}
+            />
+          </LogisticaErrorBoundary>
+        </div>
 
-      {/* Seção Return Date */}
-      <div className="mb-12">
-        <ReservationFilters
-          header="Consulta por Return Date"
-          dataInicio={dataInicioReturn}
-          setDataInicio={setDataInicioReturn}
-          dataFim={dataFimReturn}
-          setDataFim={setDataFimReturn}
-          onBuscar={onBuscarReturn}
-          loading={loadingReturn}
-          lastRequestLog={lastRequestLogReturn}
-          handleDownloadRequestLog={createDownloadHandler(lastRequestLogReturn, "log_requisicao_consulta_reservas_return.json")}
-        />
-        
-        <ReservationTable
-          error={errorReturn}
-          rawApiData={rawApiDataReturn}
-          reservations={reservationsReturn}
-          rowKommoLeadIds={rowKommoLeadIdsReturn}
-          badgeType="return"
-          loading={loadingReturn}
-          onShareClick={handleOpenShareModal}
-        />
-      </div>
+        {/* Seção Return Date */}
+        <div className="mb-12">
+          <LogisticaErrorBoundary>
+            <ReservationFilters
+              header="Consulta por Return Date"
+              dataInicio={dataInicioReturn}
+              setDataInicio={setDataInicioReturn}
+              dataFim={dataFimReturn}
+              setDataFim={setDataFimReturn}
+              onBuscar={onBuscarReturn}
+              loading={loadingReturn}
+              lastRequestLog={lastRequestLogReturn}
+              handleDownloadRequestLog={createDownloadHandler(lastRequestLogReturn, "log_requisicao_consulta_reservas_return.json")}
+            />
+          </LogisticaErrorBoundary>
+          
+          <LogisticaErrorBoundary>
+            <ReservationTable
+              error={errorReturn}
+              rawApiData={rawApiDataReturn}
+              reservations={reservationsReturn}
+              rowKommoLeadIds={rowKommoLeadIdsReturn}
+              badgeType="return"
+              loading={loadingReturn}
+              onShareClick={handleOpenShareModal}
+            />
+          </LogisticaErrorBoundary>
+        </div>
 
-      {/* Modal de compartilhamento */}
-      <ReservationWhatsAppModal
-        isOpen={isShareModalOpen}
-        onClose={handleCloseShareModal}
-        reservationData={selectedReservationForShare}
-      />
-    </div>
+        {/* Modal de compartilhamento */}
+        <LogisticaErrorBoundary>
+          <ReservationWhatsAppModal
+            isOpen={isShareModalOpen}
+            onClose={handleCloseShareModal}
+            reservationData={selectedReservationForShare}
+          />
+        </LogisticaErrorBoundary>
+      </div>
+    </LogisticaErrorBoundary>
   );
 };
 

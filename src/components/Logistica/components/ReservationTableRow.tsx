@@ -20,47 +20,87 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
   badgeType,
   onShareClick,
 }) => {
+  console.log('ReservationTableRow rendering:', { reservation, badgeType });
+
   const formatDateTime = (dateStr: string, timeStr: string) => {
-    if (!dateStr) return "N/A";
-    
-    let displayTime = "N/A";
-    if (timeStr) {
-      // Ajusta o horário para +4h (fuso da Flórida)
-      displayTime = adjustTimeForFlorida(timeStr);
+    try {
+      if (!dateStr) return "N/A";
+      
+      let displayTime = "N/A";
+      if (timeStr) {
+        // Ajusta o horário para +4h (fuso da Flórida)
+        displayTime = adjustTimeForFlorida(timeStr);
+      }
+      
+      const date = new Date(dateStr);
+      if (isNaN(date.getTime())) {
+        console.warn('Invalid date:', dateStr);
+        return "Data inválida";
+      }
+      
+      const formattedDate = date.toLocaleDateString("pt-BR");
+      
+      return `${formattedDate} ${displayTime}`;
+    } catch (error) {
+      console.error('Error formatting date:', error, { dateStr, timeStr });
+      return "Erro na data";
     }
-    
-    const date = new Date(dateStr);
-    const formattedDate = date.toLocaleDateString("pt-BR");
-    
-    return `${formattedDate} ${displayTime}`;
   };
 
   const formatCurrency = (amount: number | string) => {
-    const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "USD",
-    }).format(numAmount || 0);
+    try {
+      const numAmount = typeof amount === "string" ? parseFloat(amount) : amount;
+      if (isNaN(numAmount)) return "N/A";
+      
+      return new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "USD",
+      }).format(numAmount || 0);
+    } catch (error) {
+      console.error('Error formatting currency:', error, { amount });
+      return "N/A";
+    }
   };
 
   // Helper function to normalize location values to match expected types
   const normalizeLocation = (location: string | undefined): "Mco" | "Fort" | "Mia" | "Tampa" | null => {
-    if (!location) return null;
-    
-    const normalized = location.toLowerCase();
-    if (normalized.includes('mco') || normalized.includes('orlando')) return "Mco";
-    if (normalized.includes('fort') || normalized.includes('lauderdale')) return "Fort";
-    if (normalized.includes('mia') || normalized.includes('miami')) return "Mia";
-    if (normalized.includes('tampa')) return "Tampa";
-    
-    return null;
+    try {
+      if (!location) return null;
+      
+      const normalized = location.toLowerCase();
+      if (normalized.includes('mco') || normalized.includes('orlando')) return "Mco";
+      if (normalized.includes('fort') || normalized.includes('lauderdale')) return "Fort";
+      if (normalized.includes('mia') || normalized.includes('miami')) return "Mia";
+      if (normalized.includes('tampa')) return "Tampa";
+      
+      return null;
+    } catch (error) {
+      console.error('Error normalizing location:', error, { location });
+      return null;
+    }
   };
+
+  const safeHandleShare = () => {
+    try {
+      onShareClick(reservation);
+    } catch (error) {
+      console.error('Error in share click handler:', error);
+    }
+  };
+
+  // Garantir que temos dados válidos
+  const reservationId = reservation.confirmation || reservation.reservation_id || 'N/A';
+  const customerName = reservation.renter_name || 
+    `${reservation.customer_first_name || ''} ${reservation.customer_last_name || ''}`.trim() || 
+    'Nome não disponível';
+  const customerEmail = reservation.renter_email || 'Email não disponível';
+  const customerPhone = reservation.renter_phone || reservation.phone_number || 'Telefone não disponível';
 
   return (
     <tr className="border-b hover:bg-gray-50">
       <td className="px-4 py-3">
         <div className="font-medium text-blue-600">
-          #{reservation.confirmation || reservation.reservation_id}
+          #{reservationId}
         </div>
         {kommoLeadId && (
           <div className="text-xs text-gray-500 mt-1">
@@ -70,9 +110,9 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       </td>
       
       <td className="px-4 py-3">
-        <div className="font-medium">{reservation.renter_name || `${reservation.customer_first_name} ${reservation.customer_last_name}`.trim()}</div>
-        <div className="text-sm text-gray-600">{reservation.renter_email}</div>
-        <div className="text-sm text-gray-600">{reservation.renter_phone || reservation.phone_number}</div>
+        <div className="font-medium">{customerName}</div>
+        <div className="text-sm text-gray-600">{customerEmail}</div>
+        <div className="text-sm text-gray-600">{customerPhone}</div>
       </td>
       
       <td className="px-4 py-3">
@@ -120,7 +160,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onShareClick(reservation)}
+            onClick={safeHandleShare}
             className="flex items-center gap-1"
           >
             <Share2 className="h-3 w-3" />

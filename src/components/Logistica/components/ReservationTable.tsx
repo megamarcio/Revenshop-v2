@@ -24,7 +24,21 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
   loading,
   onShareClick,
 }) => {
-  const orderedReservations = getOrderedReservations(reservations, badgeType);
+  console.log('ReservationTable rendering:', { 
+    reservationsCount: reservations?.length, 
+    badgeType, 
+    loading, 
+    error 
+  });
+
+  const orderedReservations = React.useMemo(() => {
+    try {
+      return getOrderedReservations(reservations, badgeType);
+    } catch (error) {
+      console.error('Error ordering reservations:', error);
+      return [];
+    }
+  }, [reservations, badgeType]);
 
   if (loading) {
     return (
@@ -36,6 +50,24 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
       </div>
     );
   }
+
+  const handleDownloadJson = () => {
+    try {
+      if (!rawApiData) return;
+      
+      const jsonStr = JSON.stringify(rawApiData, null, 2);
+      const blob = new Blob([jsonStr], { type: "application/json" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "reservas.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
+    } catch (error) {
+      console.error('Error downloading JSON:', error);
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -52,17 +84,7 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
         <div className="mb-4">
           <Button
             variant="secondary"
-            onClick={() => {
-              const jsonStr = JSON.stringify(rawApiData, null, 2);
-              const blob = new Blob([jsonStr], { type: "application/json" });
-              const link = document.createElement("a");
-              link.href = URL.createObjectURL(blob);
-              link.download = "reservas.json";
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(link.href);
-            }}
+            onClick={handleDownloadJson}
           >
             Baixar JSON do Resultado
           </Button>
@@ -90,16 +112,15 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                 <th className="px-4 py-2 text-left" style={{ fontSize: 13 }}>
                   Veículo
                 </th>
-                <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th>
-                <th className="px-2 py-2"></th>
+                <th className="px-2 py-2 text-left" style={{ fontSize: 13 }}>
+                  Ações
+                </th>
               </tr>
             </thead>
             <tbody>
               {orderedReservations.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
                     <div className="flex flex-col items-center">
                       <div className="text-4xl mb-2">📋</div>
                       <p className="text-lg font-medium">Nenhum resultado encontrado</p>
@@ -108,15 +129,28 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                   </td>
                 </tr>
               ) : (
-                orderedReservations.map((reservation, idx) => (
-                  <ReservationTableRow
-                    key={reservation.reservation_id + idx}
-                    reservation={reservation}
-                    badgeType={badgeType}
-                    kommoLeadId={rowKommoLeadIds[reservation.reservation_id]}
-                    onShareClick={onShareClick}
-                  />
-                ))
+                orderedReservations.map((reservation, idx) => {
+                  try {
+                    return (
+                      <ReservationTableRow
+                        key={`${reservation.reservation_id}-${idx}`}
+                        reservation={reservation}
+                        badgeType={badgeType}
+                        kommoLeadId={rowKommoLeadIds[reservation.reservation_id]}
+                        onShareClick={onShareClick}
+                      />
+                    );
+                  } catch (error) {
+                    console.error('Error rendering reservation row:', error, { reservation, idx });
+                    return (
+                      <tr key={`error-${idx}`}>
+                        <td colSpan={6} className="px-4 py-4 text-center text-red-600">
+                          Erro ao carregar reserva #{reservation.reservation_id || idx}
+                        </td>
+                      </tr>
+                    );
+                  }
+                })
               )}
             </tbody>
           </table>
