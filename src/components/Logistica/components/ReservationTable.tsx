@@ -111,6 +111,7 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                 <TableHead className="text-[10px] font-bold">Data Pickup</TableHead>
                 <TableHead className="text-[10px] font-bold">Data Retorno</TableHead>
                 <TableHead className="text-[10px] font-bold">Placa</TableHead>
+                <TableHead className="text-[10px] font-bold">Veículo</TableHead>
                 <TableHead className="text-[10px] font-bold">Status</TableHead>
                 <TableHead className="text-[10px] font-bold">Ações</TableHead>
               </TableRow>
@@ -118,7 +119,7 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
             <TableBody>
               {orderedReservations.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
+                  <TableCell colSpan={9} className="text-center py-8">
                     <div className="flex flex-col items-center text-muted-foreground">
                       <div className="text-4xl mb-2">📋</div>
                       <p className="text-lg font-medium">Nenhum resultado encontrado</p>
@@ -142,7 +143,7 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
                     console.error('Error rendering reservation row:', error, { reservation, idx });
                     return (
                       <TableRow key={`error-${idx}`}>
-                        <TableCell colSpan={8} className="text-center py-4 text-red-600 text-[10px] font-bold">
+                        <TableCell colSpan={9} className="text-center py-4 text-red-600 text-[10px] font-bold">
                           Erro ao carregar reserva #{reservation.id || idx}
                         </TableCell>
                       </TableRow>

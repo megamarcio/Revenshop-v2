@@ -97,7 +97,8 @@ export const parseReservationList = (apiData: any): any[] => {
       return_date: item.return_date || '',
       reservation_vehicle_information: {
         plate: item.reservation_vehicle_information?.plate || item.plate || item.vehicle?.plate || 'N/A'
-      }
+      },
+      vehicle_name: item.active_vehicle_information?.vehicle?.label || item.vehicle?.label || item.vehicle?.name || 'N/A'
     };
   });
 };

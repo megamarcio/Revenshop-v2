@@ -1,4 +1,3 @@
-
 export interface Reservation {
   id: string;
   customer: {
@@ -10,6 +9,7 @@ export interface Reservation {
   reservation_vehicle_information: {
     plate: string;
   };
+  vehicle_name: string;
 }
 
 export interface ExtraBadge {

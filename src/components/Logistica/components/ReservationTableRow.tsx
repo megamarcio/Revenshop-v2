@@ -29,6 +29,7 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
   const pickupDate = formatToAmericanDateTime(reservation.pick_up_date);
   const returnDate = formatToAmericanDateTime(reservation.return_date);
   const plate = reservation.reservation_vehicle_information?.plate || 'N/A';
+  const vehicleName = reservation.vehicle_name || 'N/A';
 
   // Clean phone number for WhatsApp (remove non-numeric characters)
   const cleanPhone = phoneNumber.replace(/\D/g, '');
@@ -85,7 +86,11 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       </TableCell>
 
       <TableCell className="text-[10px] font-bold p-2">
-        <ReservationBadges rawText={`${customerLabel} ${plate} ${reservation.pick_up_date} ${reservation.return_date}`} />
+        {vehicleName}
+      </TableCell>
+
+      <TableCell className="text-[10px] font-bold p-2">
+        <ReservationBadges rawText={`${customerLabel} ${plate} ${vehicleName} ${reservation.pick_up_date} ${reservation.return_date}`} />
       </TableCell>
       
       <TableCell className="text-[10px] font-bold p-2">
