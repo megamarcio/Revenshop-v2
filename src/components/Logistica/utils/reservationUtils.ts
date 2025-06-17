@@ -91,29 +91,9 @@ export const parseReservationList = (apiData: any): any[] => {
       phone_number: item.customer?.phone_number || 'N/A'
     },
     pick_up_date: item.pick_up_date || '',
-    return_date: item.return_date || '',
     reservation_vehicle_information: {
       plate: item.reservation_vehicle_information?.plate || item.plate || 'N/A'
-    },
-    // Legacy fields for backward compatibility
-    reservation_id: item.reservation_id || item.custom_reservation_number || item.prefixed_id || (item.id ? String(item.id) : "-"),
-    customer_first_name: item.customer?.first_name || '',
-    customer_last_name: item.customer?.last_name || '',
-    pickup_date: item.pick_up_date || '',
-    return_date: item.return_date || '',
-    plate: item.reservation_vehicle_information?.plate || item.plate || '',
-    phone_number: item.customer?.phone_number || '',
-    confirmation: item.reservation_id || item.custom_reservation_number || item.prefixed_id,
-    renter_name: item.customer?.label || `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim(),
-    renter_email: item.customer?.email || '',
-    renter_phone: item.customer?.phone_number || '',
-    pick_up_time: item.pick_up_time || '',
-    return_time: item.return_time || '',
-    pick_up_location: item.pick_up_location || '',
-    return_location: item.return_location || '',
-    vehicle_category: item.vehicle_category || '',
-    total_cost: item.total_cost || 0,
-    daily_rate: item.daily_rate || 0
+    }
   }));
 };
 
@@ -122,8 +102,8 @@ export const getOrderedReservations = (reservations: any[], badgeType: "pickup" 
   if (!reservations || reservations.length === 0) return [];
   
   return [...reservations].sort((a, b) => {
-    const dateA = badgeType === "pickup" ? a.pickup_date || a.pick_up_date : a.return_date;
-    const dateB = badgeType === "pickup" ? b.pickup_date || b.pick_up_date : b.return_date;
+    const dateA = badgeType === "pickup" ? a.pick_up_date : a.return_date;
+    const dateB = badgeType === "pickup" ? b.pick_up_date : b.return_date;
     
     if (!dateA && !dateB) return 0;
     if (!dateA) return 1;

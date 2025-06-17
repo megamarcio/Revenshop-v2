@@ -1,3 +1,4 @@
+
 export interface Reservation {
   id: string;
   customer: {
@@ -9,24 +10,6 @@ export interface Reservation {
   reservation_vehicle_information: {
     plate: string;
   };
-  // Keep legacy fields for compatibility
-  reservation_id?: string;
-  customer_first_name?: string;
-  customer_last_name?: string;
-  pickup_date?: string;
-  phone_number?: string;
-  confirmation?: string;
-  renter_name?: string;
-  renter_email?: string;
-  renter_phone?: string;
-  pick_up_time?: string;
-  return_time?: string;
-  pick_up_location?: string;
-  return_location?: string;
-  vehicle_category?: string;
-  total_cost?: number;
-  daily_rate?: number;
-  plate?: string;
 }
 
 export interface ExtraBadge {
