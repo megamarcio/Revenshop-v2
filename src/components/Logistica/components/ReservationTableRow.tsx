@@ -4,7 +4,7 @@ import { TableCell, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Users } from "lucide-react";
 import { Reservation } from "../types/reservationTypes";
-import { formatToAmericanDateTime } from "../utils/dateFormatter";
+import { convertUTCToFloridaTime } from "../utils/reservationUtils";
 import ReservationBadges from "./ReservationBadges";
 
 interface ReservationTableRowProps {
@@ -26,8 +26,11 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
   const id = reservation.id || 'N/A';
   const customerLabel = reservation.customer?.label || 'N/A';
   const phoneNumber = reservation.customer?.phone_number || 'N/A';
-  const pickupDate = formatToAmericanDateTime(reservation.pick_up_date);
-  const returnDate = formatToAmericanDateTime(reservation.return_date);
+  
+  // Convert times to Florida timezone (UTC-4/EDT)
+  const pickupDate = convertUTCToFloridaTime(reservation.pick_up_date);
+  const returnDate = convertUTCToFloridaTime(reservation.return_date);
+  
   const plate = reservation.reservation_vehicle_information?.plate || 'N/A';
   const vehicleName = reservation.vehicle_name || 'N/A';
 
