@@ -217,16 +217,28 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
           </div>
         </div>
 
-        {/* Linha 2: Datas, Locais e Veículo */}
+        {/* Linha 2: Check-in Date, Return Date, Local e Categoria do Veículo */}
         <div className="flex items-center gap-4 mb-2 text-xs">
           <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3 text-muted-foreground" />
+            <Calendar className="h-3 w-3 text-green-600" />
+            <span className="text-green-700">Check-in:</span>
             <span>{new Date(data.reservation.pick_up_date).toLocaleDateString('pt-BR')}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-red-600" />
+            <span className="text-red-700">Return:</span>
+            <span>{new Date(data.reservation.return_date).toLocaleDateString('pt-BR')}</span>
           </div>
           <div className="flex items-center gap-1">
             <MapPin className="h-3 w-3 text-muted-foreground" />
             <span className="truncate max-w-[120px]">{data.reservation.pick_up_location_label}</span>
           </div>
+          {data.selected_vehicle_class?.vehicle_class?.label && (
+            <div className="flex items-center gap-1">
+              <Car className="h-3 w-3 text-blue-600" />
+              <span className="text-blue-700 truncate max-w-[100px]">{data.selected_vehicle_class.vehicle_class.label}</span>
+            </div>
+          )}
           {data.vehicles?.[0]?.vehicle?.label && (
             <div className="flex items-center gap-1">
               <Car className="h-3 w-3 text-muted-foreground" />
