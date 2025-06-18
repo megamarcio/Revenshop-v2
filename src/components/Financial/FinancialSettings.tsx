@@ -65,97 +65,101 @@ const FinancialSettings = () => {
   const expenseCategories = categories.filter(cat => cat.type === 'despesa');
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Configurações Financeiras</h2>
-          <p className="text-muted-foreground">Gerencie categorias de receitas e despesas</p>
+          <h2 className="text-xl font-bold">Configurações Financeiras</h2>
+          <p className="text-sm text-muted-foreground">Gerencie categorias de receitas e despesas</p>
         </div>
         
-        <Button onClick={() => setIsFormOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
+        <Button onClick={() => setIsFormOpen(true)} size="sm">
+          <Plus className="h-3 w-3 mr-1" />
           Nova Categoria
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-green-600">Categorias de Receitas</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="text-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base text-green-600">Categorias de Receitas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="pt-0">
+            <div className="space-y-1.5">
               {revenueCategories.map((category) => (
-                <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={category.id} className="flex items-center justify-between p-2 border rounded-md">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{category.name}</span>
+                    <span className="text-sm font-medium">{category.name}</span>
                     {category.is_default && (
-                      <Badge variant="outline" className="text-xs">Padrão</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5 py-0.5">Padrão</Badge>
                     )}
                   </div>
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 w-7 p-0"
                       onClick={() => handleEdit(category)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3" />
                     </Button>
                     {!category.is_default && (
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => handleDelete(category.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
                 </div>
               ))}
               {revenueCategories.length === 0 && (
-                <p className="text-center text-muted-foreground">Nenhuma categoria de receita</p>
+                <p className="text-center text-sm text-muted-foreground py-4">Nenhuma categoria de receita</p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-red-600">Categorias de Despesas</CardTitle>
+        <Card className="text-sm">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base text-red-600">Categorias de Despesas</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
+          <CardContent className="pt-0">
+            <div className="space-y-1.5">
               {expenseCategories.map((category) => (
-                <div key={category.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={category.id} className="flex items-center justify-between p-2 border rounded-md">
                   <div className="flex items-center gap-2">
-                    <span className="font-medium">{category.name}</span>
+                    <span className="text-sm font-medium">{category.name}</span>
                     {category.is_default && (
-                      <Badge variant="outline" className="text-xs">Padrão</Badge>
+                      <Badge variant="outline" className="text-xs px-1.5 py-0.5">Padrão</Badge>
                     )}
                   </div>
                   <div className="flex gap-1">
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 w-7 p-0"
                       onClick={() => handleEdit(category)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3" />
                     </Button>
                     {!category.is_default && (
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => handleDelete(category.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-3 w-3" />
                       </Button>
                     )}
                   </div>
                 </div>
               ))}
               {expenseCategories.length === 0 && (
-                <p className="text-center text-muted-foreground">Nenhuma categoria de despesa</p>
+                <p className="text-center text-sm text-muted-foreground py-4">Nenhuma categoria de despesa</p>
               )}
             </div>
           </CardContent>
@@ -163,30 +167,31 @@ const FinancialSettings = () => {
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-lg">
               {selectedCategory ? 'Editar Categoria' : 'Nova Categoria'}
             </DialogTitle>
           </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome da Categoria</Label>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="name" className="text-sm">Nome da Categoria</Label>
               <Input
                 id="name"
+                className="h-9"
                 value={formData.name}
                 onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                 required
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="type">Tipo</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="type" className="text-sm">Tipo</Label>
               <Select
                 value={formData.type}
                 onValueChange={(value) => setFormData(prev => ({ ...prev, type: value as any }))}
               >
-                <SelectTrigger>
+                <SelectTrigger className="h-9">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -196,11 +201,11 @@ const FinancialSettings = () => {
               </Select>
             </div>
 
-            <div className="flex gap-2">
-              <Button type="submit">
+            <div className="flex gap-2 pt-2">
+              <Button type="submit" size="sm">
                 {selectedCategory ? 'Atualizar' : 'Criar'}
               </Button>
-              <Button type="button" variant="outline" onClick={handleCloseForm}>
+              <Button type="button" variant="outline" size="sm" onClick={handleCloseForm}>
                 Cancelar
               </Button>
             </div>
