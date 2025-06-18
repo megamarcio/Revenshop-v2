@@ -92,17 +92,24 @@ export const useReservationDateSearch = () => {
     try {
       console.log(`Buscando reservas de ${startDate} até ${endDate} por ${dateField}`);
       
-      // Construir URL com parâmetros de query
+      // Construir filtros no mesmo formato usado pela logística
+      const filters = [
+        {
+          type: "date",
+          operator: "between",
+          column: dateField,
+          value: [startDate, endDate]
+        }
+      ];
+
       const baseUrl = 'https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations';
       const queryParams = new URLSearchParams({
-        start_date: startDate,
-        end_date: endDate,
-        date_field: dateField,
-        limit: '100' // Limitar resultados para performance
+        filters: encodeURIComponent(JSON.stringify(filters))
       });
       
       const url = `${baseUrl}?${queryParams.toString()}`;
       console.log('URL da busca:', url);
+      console.log('Filtros aplicados:', JSON.stringify(filters, null, 2));
 
       const response = await fetch(url, {
         method: 'GET',
