@@ -52,18 +52,20 @@ const ReservationStatusSection = ({
     const lastNameLower = lastName.toLowerCase();
     const equipments = [];
     
-    // Check for Car Seat (only if not "no car seat" or "nao preciso car seat")
-    if (lastNameLower.includes('car seat') && 
-        !lastNameLower.includes('no car seat') && 
-        !lastNameLower.includes('nao preciso car seat')) {
-      equipments.push('Car Seat');
+    // Check for Car Seat - first check for negative phrases
+    if (lastNameLower.includes('car seat')) {
+      if (!lastNameLower.includes('no car seat') && 
+          !lastNameLower.includes('nao preciso car seat')) {
+        equipments.push('Car Seat');
+      }
     }
     
-    // Check for Stroller (only if not "no stroller" or "nao preciso carrinho")
-    if ((lastNameLower.includes('stroller') || lastNameLower.includes('carrinho')) && 
-        !lastNameLower.includes('no stroller') && 
-        !lastNameLower.includes('nao preciso carrinho')) {
-      equipments.push('Stroller');
+    // Check for Stroller - first check for negative phrases
+    if (lastNameLower.includes('stroller') || lastNameLower.includes('carrinho')) {
+      if (!lastNameLower.includes('no stroller') && 
+          !lastNameLower.includes('nao preciso carrinho')) {
+        equipments.push('Stroller');
+      }
     }
     
     // Check for Booster Seat
