@@ -1,0 +1,137 @@
+
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useExpenses, Expense } from '@/hooks/useExpenses';
+import { toast } from '@/hooks/use-toast';
+import { addMonths, format } from 'date-fns';
+
+interface ReplicateExpenseModalProps {
+  expense: Expense | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
+}
+
+const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
+  expense,
+  open,
+  onOpenChange,
+  onSuccess
+}) => {
+  const [months, setMonths] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const { createExpense } = useExpenses();
+
+  const handleReplicate = async () => {
+    if (!expense || months < 1) return;
+
+    setIsLoading(true);
+    try {
+      const promises = [];
+      
+      for (let i = 1; i <= months; i++) {
+        const newDate = addMonths(new Date(expense.date), i);
+        const newDueDate = expense.due_date ? addMonths(new Date(expense.due_date), i) : null;
+        
+        const replicatedExpense = {
+          description: expense.description,
+          amount: expense.amount,
+          category_id: expense.category_id,
+          type: expense.type,
+          date: format(newDate, 'yyyy-MM-dd'),
+          is_paid: false, // Nova despesa sempre não paga
+          due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
+          notes: expense.notes,
+          created_by: expense.created_by,
+        };
+
+        promises.push(createExpense(replicatedExpense));
+      }
+
+      await Promise.all(promises);
+      
+      toast({
+        title: 'Sucesso',
+        description: `Despesa replicada para ${months} ${months === 1 ? 'mês' : 'meses'}`,
+      });
+
+      onOpenChange(false);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Error replicating expense:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao replicar despesa',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleClose = () => {
+    setMonths(1);
+    onOpenChange(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Replicar Despesa Fixa</DialogTitle>
+        </DialogHeader>
+        
+        {expense && (
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              <p><strong>Despesa:</strong> {expense.description}</p>
+              <p><strong>Valor:</strong> {new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'USD',
+              }).format(expense.amount)}</p>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="months">Quantidade de meses</Label>
+              <Input
+                id="months"
+                type="number"
+                min="1"
+                max="12"
+                value={months}
+                onChange={(e) => setMonths(parseInt(e.target.value) || 1)}
+                placeholder="Digite a quantidade de meses"
+              />
+              <p className="text-xs text-muted-foreground">
+                Máximo de 12 meses
+              </p>
+            </div>
+
+            <div className="flex gap-2 pt-2">
+              <Button 
+                onClick={handleReplicate} 
+                disabled={isLoading || months < 1 || months > 12}
+                className="flex-1"
+              >
+                {isLoading ? 'Replicando...' : `Replicar para ${months} ${months === 1 ? 'mês' : 'meses'}`}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={handleClose}
+                disabled={isLoading}
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default ReplicateExpenseModal;

@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Copy } from 'lucide-react';
 import { useExpenses } from '@/hooks/useExpenses';
 import ExpenseForm from './ExpenseForm';
+import ReplicateExpenseModal from './ReplicateExpenseModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -14,6 +15,8 @@ const ExpenseManagement = () => {
   const { expenses, deleteExpense, refetch } = useExpenses();
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isReplicateOpen, setIsReplicateOpen] = useState(false);
+  const [expenseToReplicate, setExpenseToReplicate] = useState(null);
   const [showPaid, setShowPaid] = useState(true);
 
   const filteredExpenses = expenses.filter(expense => 
@@ -32,6 +35,11 @@ const ExpenseManagement = () => {
     setIsFormOpen(true);
   };
 
+  const handleReplicate = (expense: any) => {
+    setExpenseToReplicate(expense);
+    setIsReplicateOpen(true);
+  };
+
   const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta despesa?')) {
       await deleteExpense(id);
@@ -41,6 +49,12 @@ const ExpenseManagement = () => {
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedExpense(null);
+    refetch();
+  };
+
+  const handleReplicateSuccess = () => {
+    setIsReplicateOpen(false);
+    setExpenseToReplicate(null);
     refetch();
   };
 
@@ -122,6 +136,18 @@ const ExpenseManagement = () => {
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
+                    
+                    {expense.type === 'fixa' && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleReplicate(expense)}
+                        title="Replicar para próximos meses"
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    )}
+                    
                     <Button
                       variant="outline"
                       size="sm"
@@ -162,6 +188,13 @@ const ExpenseManagement = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <ReplicateExpenseModal
+        expense={expenseToReplicate}
+        open={isReplicateOpen}
+        onOpenChange={setIsReplicateOpen}
+        onSuccess={handleReplicateSuccess}
+      />
     </div>
   );
 };
