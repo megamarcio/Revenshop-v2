@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ReservationDetails } from './useReservationById';
 import { useToast } from '@/hooks/use-toast';
 
@@ -10,9 +10,33 @@ export interface ReservationListItem {
   error: string | null;
 }
 
+const STORAGE_KEY = 'reservationsList';
+
 export const useReservationsList = () => {
   const [reservations, setReservations] = useState<ReservationListItem[]>([]);
   const { toast } = useToast();
+
+  // Carregar reservas do localStorage na inicialização
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsedReservations = JSON.parse(stored);
+        setReservations(parsedReservations);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar reservas do localStorage:', error);
+    }
+  }, []);
+
+  // Salvar reservas no localStorage sempre que a lista mudar
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(reservations));
+    } catch (error) {
+      console.error('Erro ao salvar reservas no localStorage:', error);
+    }
+  }, [reservations]);
 
   const addReservation = async (reservationId: string) => {
     if (!reservationId.trim()) return;
@@ -90,10 +114,18 @@ export const useReservationsList = () => {
 
   const removeReservation = (reservationId: string) => {
     setReservations(prev => prev.filter(r => r.id !== reservationId));
+    toast({
+      title: "Reserva removida",
+      description: `Reserva ${reservationId} foi removida da lista.`,
+    });
   };
 
   const clearAll = () => {
     setReservations([]);
+    toast({
+      title: "Lista limpa",
+      description: "Todas as reservas foram removidas da lista.",
+    });
   };
 
   return {
