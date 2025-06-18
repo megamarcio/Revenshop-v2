@@ -1,8 +1,11 @@
+
 export interface Reservation {
   id: string;
   customer: {
     label: string;
     phone_number: string;
+    first_name: string;
+    last_name: string;
   };
   pick_up_date: string;
   return_date: string;
