@@ -12,7 +12,7 @@ const LogisticaReservationThirdLine = ({
 }: LogisticaReservationThirdLineProps) => {
   return <div className="flex items-center gap-2">
       {cleanLabel && <div className="flex items-center flex-1">
-          <span className="text-gray-700 text-xxs text-justify font-bold">{cleanLabel}</span>
+          <span className="text-gray-700 text-xxs text-justify font-semibold text-xs">{cleanLabel}</span>
         </div>}
       
       <ReservationActionButtons data={data} />
