@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Car, UserCheck, Gavel, CheckSquare, Wrench, Bot } from 'lucide-react';
+import { LayoutDashboard, Car, UserCheck, Gavel, CheckSquare, Wrench, Bot, ClipboardList } from 'lucide-react';
 import { TranslationKey } from '../../../types/language';
 
 export interface MenuItem {
@@ -45,6 +45,11 @@ export const getMenuItems = (
     label: 'Manutenção',
     icon: Wrench
   }] : []), 
+  {
+    id: 'acompanhar-reservas',
+    label: 'Acompanhar Reservas',
+    icon: ClipboardList
+  },
   {
     id: 'ai-beta',
     label: 'IA (beta)',

@@ -17,6 +17,7 @@ import UserManagement from '@/components/Users/UserManagement';
 import AdminPanel from '@/components/Admin/AdminPanel';
 import ProfilePage from '@/components/Profile/ProfilePage';
 import FinancialManagement from '@/components/Financial/FinancialManagement';
+import AcompanharReservas from '@/components/Reservas/AcompanharReservas';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -35,6 +36,8 @@ function App() {
         return <TaskManagement />;
       case 'maintenance':
         return <MaintenanceManagement />;
+      case 'acompanhar-reservas':
+        return <AcompanharReservas />;
       case 'ai-beta':
         return <AIBeta />;
       case 'financing':
