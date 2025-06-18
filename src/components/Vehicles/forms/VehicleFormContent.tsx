@@ -1,8 +1,8 @@
 
 import React from 'react';
 import BasicInfoForm from './BasicInfoForm';
-import FinancialInfoForm from './FinancialInfoForm';
 import SaleInfoForm from './SaleInfoForm';
+import CustomerSaleInfoForm from './CustomerSaleInfoForm';
 import MediaUploadForm from './MediaUpload';
 import DescriptionForm from './DescriptionForm';
 import FinancingInfoForm from './FinancingInfoForm';
@@ -16,12 +16,14 @@ interface VehicleFormContentProps {
   isEditing: boolean;
   isGeneratingDescription: boolean;
   showFinancingInfo: boolean;
+  showSaleInfo: boolean;
   editingVehicle?: any;
   onInputChange: (field: keyof VehicleFormData, value: string) => void;
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
   setVideos: React.Dispatch<React.SetStateAction<string[]>>;
   onViewMaintenance: () => void;
   onToggleFinancing: () => void;
+  onToggleSaleInfo: () => void;
   onNavigateToCustomers?: () => void;
   calculateProfitMargin: () => string;
   generateDescription: () => Promise<void>;
@@ -35,12 +37,14 @@ const VehicleFormContent = ({
   isEditing,
   isGeneratingDescription,
   showFinancingInfo,
+  showSaleInfo,
   editingVehicle,
   onInputChange,
   setPhotos,
   setVideos,
   onViewMaintenance,
   onToggleFinancing,
+  onToggleSaleInfo,
   onNavigateToCustomers,
   calculateProfitMargin,
   generateDescription
@@ -61,6 +65,8 @@ const VehicleFormContent = ({
     carfaxPrice: parseFloat(formData.carfaxPrice) || 0,
     mmrValue: parseFloat(formData.mmrValue) || 0,
     description: formData.description || '',
+    plate: formData.plate || '',
+    sunpass: formData.sunpass || '',
     
     // Dados de financiamento
     financingBank: formData.financingBank || '',
@@ -106,13 +112,15 @@ const VehicleFormContent = ({
         onInputChange={onInputChange}
       />
 
-      <FinancialInfoForm
+      <SaleInfoForm
         formData={formData}
         errors={errors}
         onInputChange={onInputChange}
         calculateProfitMargin={calculateProfitMargin}
         vehicleId={isEditing ? editingVehicle?.id : undefined}
         onViewMaintenance={onViewMaintenance}
+        isOpen={showSaleInfo}
+        onToggle={onToggleSaleInfo}
       />
 
       <FinancingInfoForm
@@ -123,7 +131,7 @@ const VehicleFormContent = ({
         onToggle={onToggleFinancing}
       />
 
-      <SaleInfoForm
+      <CustomerSaleInfoForm
         formData={formData}
         errors={errors}
         onInputChange={onInputChange}

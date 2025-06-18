@@ -28,6 +28,8 @@ export const mapFormToDbData = (formData: any) => {
     miles: parseInt(formData.miles) || 0,
     internal_code: formData.internalCode,
     color: formData.color,
+    plate: formData.plate || null, // Add plate field
+    sunpass: formData.sunpass || null, // Add sunpass field
     
     // Financial fields
     purchase_price: parseFloat(formData.purchasePrice) || 0,

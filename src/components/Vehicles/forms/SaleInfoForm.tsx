@@ -1,159 +1,196 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserCheck, DollarSign, UserPlus } from 'lucide-react';
+import { Calculator, Wrench, Eye, ChevronDown, ChevronUp } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useAuth } from '../../../contexts/AuthContext';
+import { useMaintenance } from '../../../hooks/useMaintenance';
+
 interface SaleInfoFormProps {
   formData: {
-    category: 'forSale' | 'sold' | 'rental' | 'maintenance' | 'consigned';
-    consignmentStore?: string;
-    saleDate?: string;
-    finalSalePrice?: string;
-    customerName?: string;
-    customerPhone?: string;
-    seller?: string;
-    saleNotes?: string;
-    paymentMethod?: string;
-    financingCompany?: string;
-    checkDetails?: string;
-    otherPaymentDetails?: string;
-    sellerCommission?: string;
-    titleStatus?: string;
+    purchasePrice: string;
+    salePrice: string;
+    minNegotiable: string;
+    carfaxPrice: string;
+    mmrValue: string;
+    seller: string;
+    finalSalePrice: string;
+    saleDate: string;
+    saleNotes: string;
+    customerName: string;
+    customerPhone: string;
+    paymentMethod: string;
+    financingCompany: string;
+    checkDetails: string;
+    otherPaymentDetails: string;
+    sellerCommission: string;
   };
   errors: Record<string, string>;
   onInputChange: (field: string, value: string) => void;
+  calculateProfitMargin: () => string;
+  vehicleId?: string;
+  onViewMaintenance?: () => void;
   onNavigateToCustomers?: () => void;
+  isOpen?: boolean;
+  onToggle?: () => void;
 }
-const SaleInfoForm = ({
-  formData,
-  errors,
-  onInputChange,
-  onNavigateToCustomers
+
+const SaleInfoForm = ({ 
+  formData, 
+  errors, 
+  onInputChange, 
+  calculateProfitMargin, 
+  vehicleId,
+  onViewMaintenance,
+  onNavigateToCustomers,
+  isOpen = false,
+  onToggle
 }: SaleInfoFormProps) => {
-  const renderPaymentDetails = () => {
-    switch (formData.paymentMethod) {
-      case 'financing':
-        return <div className="space-y-2">
-            <Label htmlFor="financingCompany">Nome da Financeira</Label>
-            <Input id="financingCompany" value={formData.financingCompany || ''} onChange={e => onInputChange('financingCompany', e.target.value)} placeholder="Ex: Banco do Brasil, Santander..." />
-          </div>;
-      case 'check':
-        return <div className="space-y-2">
-            <Label htmlFor="checkDetails">Informações dos Cheques</Label>
-            <Textarea id="checkDetails" value={formData.checkDetails || ''} onChange={e => onInputChange('checkDetails', e.target.value)} placeholder="Ex: 3 cheques de $5000 cada, datas de vencimento..." rows={3} />
-          </div>;
-      case 'other':
-        return <div className="space-y-2">
-            <Label htmlFor="otherPaymentDetails">Detalhes da Forma de Pagamento</Label>
-            <Textarea id="otherPaymentDetails" value={formData.otherPaymentDetails || ''} onChange={e => onInputChange('otherPaymentDetails', e.target.value)} placeholder="Descreva os detalhes da forma de pagamento..." rows={3} />
-          </div>;
-      default:
-        return null;
-    }
+  const { isAdmin, isInternalSeller } = useAuth();
+  const { getTotalMaintenanceCost } = useMaintenance();
+  
+  const maintenanceCost = vehicleId ? getTotalMaintenanceCost(vehicleId) : 0;
+  
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(value);
   };
-  return <div className="space-y-4">
-      
-      <div className="space-y-4">
-        
 
-        {formData.category === 'consigned' && <div className="space-y-2">
-            <Label htmlFor="consignmentStore">Nome da Loja *</Label>
-            <Input id="consignmentStore" value={formData.consignmentStore || ''} onChange={e => onInputChange('consignmentStore', e.target.value)} placeholder="Ex: Auto Center Silva" className={errors.consignmentStore ? 'border-red-500' : ''} />
-            {errors.consignmentStore && <p className="text-sm text-red-500">{errors.consignmentStore}</p>}
-          </div>}
+  const formatProfitMargin = () => {
+    const margin = calculateProfitMargin();
+    // Convert from "2.5x" format to "150%" format
+    const numericValue = parseFloat(margin.replace('x', ''));
+    if (isNaN(numericValue)) return '0%';
+    const percentage = ((numericValue - 1) * 100).toFixed(1);
+    return `${percentage}%`;
+  };
 
-        {formData.category === 'sold' && <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
-            <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-green-800">
-                <DollarSign className="h-5 w-5" />
-                Informações da Venda
-              </CardTitle>
-              <div className="flex items-center justify-between">
-                <p className="text-sm text-green-600">
-                  Para registrar a venda, primeiro cadastre o cliente
-                </p>
-                {onNavigateToCustomers && <Button type="button" variant="outline" size="sm" onClick={onNavigateToCustomers} className="border-green-300 text-green-700 hover:bg-green-50">
-                    <UserPlus className="h-4 w-4 mr-2" />
-                    Cadastrar Cliente
-                  </Button>}
+  return (
+    <Collapsible open={isOpen} onOpenChange={onToggle}>
+      <CollapsibleTrigger asChild>
+        <Button
+          variant="outline"
+          className="w-full justify-between p-4 h-auto"
+          type="button"
+        >
+          <div className="flex items-center space-x-2">
+            <Calculator className="h-5 w-5" />
+            <span className="text-lg font-semibold">Informações de Venda</span>
+          </div>
+          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+        </Button>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className="space-y-4 mt-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="purchasePrice">Valor de Compra ($) *</Label>
+            <Input
+              id="purchasePrice"
+              type="number"
+              step="0.01"
+              value={formData.purchasePrice}
+              onChange={(e) => onInputChange('purchasePrice', e.target.value)}
+              placeholder="Ex: 55000"
+              className={errors.purchasePrice ? 'border-red-500' : ''}
+            />
+            {errors.purchasePrice && <p className="text-sm text-red-500">{errors.purchasePrice}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="salePrice">Valor de Venda ($) *</Label>
+            <Input
+              id="salePrice"
+              type="number"
+              step="0.01"
+              value={formData.salePrice}
+              onChange={(e) => onInputChange('salePrice', e.target.value)}
+              placeholder="Ex: 68000"
+              className={errors.salePrice ? 'border-red-500' : ''}
+            />
+            {errors.salePrice && <p className="text-sm text-red-500">{errors.salePrice}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <Label>Margem de Lucro</Label>
+            <div className="p-3 bg-gray-50 rounded-md">
+              <span className="text-lg font-bold text-green-600">
+                {formatProfitMargin()}
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="minNegotiable">Valor Mín. Negociável ($)</Label>
+            <Input
+              id="minNegotiable"
+              type="number"
+              step="0.01"
+              value={formData.minNegotiable}
+              onChange={(e) => onInputChange('minNegotiable', e.target.value)}
+              placeholder="Ex: 65000"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="carfaxPrice">Valor Carfax ($)</Label>
+            <Input
+              id="carfaxPrice"
+              type="number"
+              step="0.01"
+              value={formData.carfaxPrice}
+              onChange={(e) => onInputChange('carfaxPrice', e.target.value)}
+              placeholder="Ex: 67000"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="mmrValue">Valor MMR ($)</Label>
+            <Input
+              id="mmrValue"
+              type="number"
+              step="0.01"
+              value={formData.mmrValue}
+              onChange={(e) => onInputChange('mmrValue', e.target.value)}
+              placeholder="Ex: 66000"
+            />
+          </div>
+
+          {/* Custo Total de Manutenções - agora em USD */}
+          {(isAdmin || isInternalSeller) && vehicleId && (
+            <div className="space-y-2">
+              <Label className="flex items-center gap-2">
+                <Wrench className="h-4 w-4" />
+                Custo Total Manutenções
+              </Label>
+              <div className="flex items-center gap-2">
+                <div className="flex-1 p-3 bg-orange-50 border border-orange-200 rounded-md">
+                  <span className="text-lg font-bold text-orange-600">
+                    {formatCurrency(maintenanceCost)}
+                  </span>
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onViewMaintenance}
+                  className="flex items-center gap-1"
+                  title="Ver Manutenções"
+                >
+                  <Eye className="h-4 w-4" />
+                  Ver
+                </Button>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <UserCheck className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-800">Dados do Cliente</span>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="customerName">Nome do Cliente *</Label>
-                    <Input id="customerName" value={formData.customerName} onChange={e => onInputChange('customerName', e.target.value)} placeholder="Ex: João Silva" className={errors.customerName ? 'border-red-500' : ''} />
-                    {errors.customerName && <p className="text-sm text-red-500">{errors.customerName}</p>}
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="customerPhone">Telefone do Cliente *</Label>
-                    <Input id="customerPhone" value={formData.customerPhone} onChange={e => onInputChange('customerPhone', e.target.value)} placeholder="Ex: (11) 99999-9999" className={errors.customerPhone ? 'border-red-500' : ''} />
-                    {errors.customerPhone && <p className="text-sm text-red-500">{errors.customerPhone}</p>}
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="saleDate">Data da Venda *</Label>
-                  <Input id="saleDate" type="date" value={formData.saleDate} onChange={e => onInputChange('saleDate', e.target.value)} className={errors.saleDate ? 'border-red-500' : ''} />
-                  {errors.saleDate && <p className="text-sm text-red-500">{errors.saleDate}</p>}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="finalSalePrice">Valor Final de Venda ($) *</Label>
-                  <Input id="finalSalePrice" type="number" step="0.01" value={formData.finalSalePrice} onChange={e => onInputChange('finalSalePrice', e.target.value)} placeholder="Ex: 66500" className={errors.finalSalePrice ? 'border-red-500' : ''} />
-                  {errors.finalSalePrice && <p className="text-sm text-red-500">{errors.finalSalePrice}</p>}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="seller">Nome do Vendedor</Label>
-                  <Input id="seller" value={formData.seller} onChange={e => onInputChange('seller', e.target.value)} placeholder="Ex: Maria Santos" />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="sellerCommission">Comissão do Vendedor ($)</Label>
-                  <Input id="sellerCommission" type="number" step="0.01" value={formData.sellerCommission} onChange={e => onInputChange('sellerCommission', e.target.value)} placeholder="Ex: 1500" />
-                </div>
-              </div>
-
-              {/* Forma de Pagamento */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="paymentMethod">Forma de Pagamento</Label>
-                  <Select value={formData.paymentMethod || ''} onValueChange={value => onInputChange('paymentMethod', value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione a forma de pagamento" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="cash">Cash</SelectItem>
-                      <SelectItem value="financing">Financiamento</SelectItem>
-                      <SelectItem value="bhph">BHPH</SelectItem>
-                      <SelectItem value="check">Check</SelectItem>
-                      <SelectItem value="other">Outros</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {renderPaymentDetails()}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="saleNotes">Observações da Venda</Label>
-                <Textarea id="saleNotes" value={formData.saleNotes} onChange={e => onInputChange('saleNotes', e.target.value)} placeholder="Ex: Cliente pagou à vista, entrega agendada para..." rows={3} />
-              </div>
-            </CardContent>
-          </Card>}
-      </div>
-    </div>;
+            </div>
+          )}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
+  );
 };
+
 export default SaleInfoForm;

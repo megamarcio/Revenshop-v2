@@ -23,6 +23,8 @@ export const mapDbDataToAppData = (dbData: any) => {
     miles: dbData.miles,
     internal_code: dbData.internal_code,
     color: dbData.color,
+    plate: dbData.plate, // Add plate field
+    sunpass: dbData.sunpass, // Add sunpass field
     
     // Financial fields - use snake_case to match Vehicle type
     purchase_price: dbData.purchase_price,
@@ -109,11 +111,11 @@ export const mapDbDataToAppData = (dbData: any) => {
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at,
     
-    // Vehicle usage information - GARANTIR que sejam definidos corretamente
+    // Vehicle usage information - CORRECTLY extracted and mapped
     vehicleUsage: vehicleUsage,
     consignmentStore: consignmentStore,
     
-    // Extended category for backward compatibility - ensure it matches the union type
+    // Extended category for backward compatibility
     extended_category: extractExtendedCategory(dbData),
     consignment_store: consignmentStore,
   };
@@ -136,12 +138,17 @@ const extractVehicleUsage = (dbData: any): string => {
     }
   }
   
-  // Default mapping based on category
+  // Default mapping based on category - CORRECTED
   const defaultMapping = (() => {
     switch (dbData.category) {
-      case 'rental': return 'rental';
+      case 'rentalFleet': return 'rental';
       case 'consigned': return 'consigned';
-      case 'maintenance': return 'personal';
+      case 'maintenance': return 'maintenance';
+      case 'bhph': return 'sale';
+      case 'sold': return 'sale';
+      case 'reserved': return 'sale';
+      case 'auction': return 'sale';
+      case 'logistics': return 'personal';
       default: return 'sale';
     }
   })();
@@ -173,7 +180,7 @@ const extractExtendedCategory = (dbData: any): "rental" | "consigned" | "mainten
       switch (usage) {
         case 'rental': return 'rental';
         case 'consigned': return 'consigned';
-        case 'personal': return 'maintenance';
+        case 'maintenance': return 'maintenance';
         default: return undefined;
       }
     }
@@ -181,7 +188,7 @@ const extractExtendedCategory = (dbData: any): "rental" | "consigned" | "mainten
   
   // Default mapping based on category
   switch (dbData.category) {
-    case 'rental': return 'rental';
+    case 'rentalFleet': return 'rental';
     case 'consigned': return 'consigned';
     case 'maintenance': return 'maintenance';
     default: return undefined;

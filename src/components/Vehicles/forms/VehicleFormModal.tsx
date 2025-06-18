@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import VehicleFormHeader from './VehicleFormHeader';
+
+import React from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Loader2, Trash2, MessageCircle } from 'lucide-react';
 import VehicleFormContent from './VehicleFormContent';
-import VehicleFormActions from './VehicleFormActions';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
 interface VehicleFormModalProps {
@@ -14,6 +15,7 @@ interface VehicleFormModalProps {
   canEditVehicles: boolean;
   isGeneratingDescription: boolean;
   showFinancingInfo: boolean;
+  showSaleInfo: boolean;
   formData: VehicleFormData;
   errors: Partial<VehicleFormData>;
   photos: string[];
@@ -28,6 +30,7 @@ interface VehicleFormModalProps {
   onViewMaintenance: () => void;
   onCarfaxClick: () => void;
   onToggleFinancing: () => void;
+  onToggleSaleInfo: () => void;
   onNavigateToCustomers?: () => void;
   calculateProfitMargin: () => string;
   generateDescription: () => Promise<void>;
@@ -43,6 +46,7 @@ const VehicleFormModal = ({
   canEditVehicles,
   isGeneratingDescription,
   showFinancingInfo,
+  showSaleInfo,
   formData,
   errors,
   photos,
@@ -57,78 +61,85 @@ const VehicleFormModal = ({
   onViewMaintenance,
   onCarfaxClick,
   onToggleFinancing,
+  onToggleSaleInfo,
   onNavigateToCustomers,
   calculateProfitMargin,
   generateDescription,
   onWhatsAppSend
 }: VehicleFormModalProps) => {
-  // Close modal when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Element;
-      const modal = document.querySelector('[data-vehicle-form-modal]');
-      
-      if (modal && !modal.contains(target) && !isLoading) {
-        onClose();
-      }
-    };
-
-    document.removeEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose, isLoading]);
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
-      <Card className="w-full max-w-4xl max-h-[90vh] overflow-y-auto" data-vehicle-form-modal>
-        <VehicleFormHeader
-          isEditing={isEditing}
-          isAdmin={isAdmin}
-          isInternalSeller={isInternalSeller}
-          isLoading={isLoading}
-          vehicleVin={formData.vin}
-          onClose={onClose}
-          onViewMaintenance={onViewMaintenance}
-          onCarfaxClick={onCarfaxClick}
-          onWhatsAppSend={onWhatsAppSend}
-        />
-        
-        <CardContent>
-          <form onSubmit={onSubmit} className="space-y-6">
-            <VehicleFormContent
-              formData={formData}
-              errors={errors}
-              photos={photos}
-              videos={videos}
-              isEditing={isEditing}
-              isGeneratingDescription={isGeneratingDescription}
-              showFinancingInfo={showFinancingInfo}
-              editingVehicle={editingVehicle}
-              onInputChange={onInputChange}
-              setPhotos={setPhotos}
-              setVideos={setVideos}
-              onViewMaintenance={onViewMaintenance}
-              onToggleFinancing={onToggleFinancing}
-              onNavigateToCustomers={onNavigateToCustomers}
-              calculateProfitMargin={calculateProfitMargin}
-              generateDescription={generateDescription}
-            />
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span>{isEditing ? 'Editar Veículo' : 'Cadastrar Novo Veículo'}</span>
+            <div className="flex gap-2">
+              {isEditing && onWhatsAppSend && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={onWhatsAppSend}
+                  className="flex items-center gap-2"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                  WhatsApp
+                </Button>
+              )}
+              {isEditing && onDelete && (isAdmin || isInternalSeller) && (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={onDelete}
+                  className="flex items-center gap-2"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Excluir
+                </Button>
+              )}
+            </div>
+          </DialogTitle>
+        </DialogHeader>
 
-            <VehicleFormActions
-              isEditing={isEditing}
-              isLoading={isLoading}
-              canEditVehicles={canEditVehicles}
-              onClose={onClose}
-              onDelete={onDelete}
-              showDeleteButton={!!(onDelete && editingVehicle?.id)}
-            />
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+        <form onSubmit={onSubmit} className="space-y-6">
+          <VehicleFormContent
+            formData={formData}
+            errors={errors}
+            photos={photos}
+            videos={videos}
+            isEditing={isEditing}
+            isGeneratingDescription={isGeneratingDescription}
+            showFinancingInfo={showFinancingInfo}
+            showSaleInfo={showSaleInfo}
+            editingVehicle={editingVehicle}
+            onInputChange={onInputChange}
+            setPhotos={setPhotos}
+            setVideos={setVideos}
+            onViewMaintenance={onViewMaintenance}
+            onToggleFinancing={onToggleFinancing}
+            onToggleSaleInfo={onToggleSaleInfo}
+            onNavigateToCustomers={onNavigateToCustomers}
+            calculateProfitMargin={calculateProfitMargin}
+            generateDescription={generateDescription}
+          />
+
+          <div className="flex justify-end space-x-4 pt-4 border-t">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Cancelar
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="flex items-center gap-2"
+            >
+              {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isEditing ? 'Atualizar' : 'Cadastrar'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

@@ -1,5 +1,6 @@
 
 export interface VehicleFormData {
+  // Basic info
   name: string;
   vin: string;
   year: string;
@@ -7,18 +8,20 @@ export interface VehicleFormData {
   miles: string;
   internalCode: string;
   color: string;
+  plate: string;
+  sunpass: string;
+  category: string;
+  vehicleUsage: string;
+  consignmentStore: string;
+  
+  // Financial info
   purchasePrice: string;
   salePrice: string;
   minNegotiable: string;
   carfaxPrice: string;
   mmrValue: string;
-  description: string;
-  category: "forSale" | "sold";
   
-  // Novo campo para uso do veículo
-  vehicleUsage: "rental" | "personal" | "sale" | "consigned" | "";
-  consignmentStore: string;
-  
+  // Sale info
   seller: string;
   finalSalePrice: string;
   saleDate: string;
@@ -31,9 +34,9 @@ export interface VehicleFormData {
   otherPaymentDetails: string;
   sellerCommission: string;
   
-  // Campos de financiamento
+  // Financing info
   financingBank: string;
-  financingType: 'comprou-direto' | 'assumiu-financiamento' | '';
+  financingType: string;
   originalFinancedName: string;
   purchaseDate: string;
   dueDate: string;
@@ -48,6 +51,10 @@ export interface VehicleFormData {
   payoffDate: string;
   interestRate: string;
   customFinancingBank: string;
+  
+  // Media and description
+  description: string;
+  video: string;
 }
 
 export interface VehicleFormProps {

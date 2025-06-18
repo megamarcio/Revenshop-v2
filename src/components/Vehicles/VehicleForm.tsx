@@ -18,6 +18,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   const { isAdmin, isInternalSeller, canEditVehicles } = useAuth();
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   const [showFinancingInfo, setShowFinancingInfo] = useState(false);
+  const [showSaleInfo, setShowSaleInfo] = useState(false);
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   
   const {
@@ -112,6 +113,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         interestRate: formData.interestRate ? parseFloat(formData.interestRate) : undefined,
         customFinancingBank: formData.customFinancingBank,
         
+        // Add plate and sunpass
+        plate: formData.plate,
+        sunpass: formData.sunpass,
+        
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
         videos: videos
@@ -152,6 +157,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         canEditVehicles={canEditVehicles}
         isGeneratingDescription={isGeneratingDescription}
         showFinancingInfo={showFinancingInfo}
+        showSaleInfo={showSaleInfo}
         formData={formData}
         errors={errors}
         photos={photos}
@@ -166,6 +172,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         onViewMaintenance={handleViewMaintenance}
         onCarfaxClick={handleCarfaxClick}
         onToggleFinancing={() => setShowFinancingInfo(!showFinancingInfo)}
+        onToggleSaleInfo={() => setShowSaleInfo(!showSaleInfo)}
         onNavigateToCustomers={onNavigateToCustomers}
         calculateProfitMargin={calculateProfitMargin}
         generateDescription={generateDescription}
