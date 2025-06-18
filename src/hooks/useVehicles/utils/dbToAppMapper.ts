@@ -1,6 +1,7 @@
 
 export const mapDbDataToAppData = (dbData: any) => {
-  console.log('mapDbDataToAppData - input:', dbData);
+  console.log('mapDbDataToAppData - input dbData:', dbData);
+  console.log('mapDbDataToAppData - dbData.description:', dbData.description);
   
   // Calculate profit margin
   const profitMargin = dbData.purchase_price && dbData.sale_price 
@@ -71,6 +72,10 @@ export const mapDbDataToAppData = (dbData: any) => {
     created_at: dbData.created_at,
     updated_at: dbData.updated_at,
     
+    // CRÍTICO: Vehicle usage information - GARANTIR campo consistente
+    vehicleUsage: vehicleUsage,
+    consignmentStore: consignmentStore,
+    
     // Add camelCase versions for compatibility with form components
     internalCode: dbData.internal_code,
     purchasePrice: dbData.purchase_price,
@@ -111,35 +116,33 @@ export const mapDbDataToAppData = (dbData: any) => {
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at,
     
-    // Vehicle usage information - GARANTIR mapeamento correto
-    vehicleUsage: vehicleUsage,
-    consignmentStore: consignmentStore,
-    
-    // Para compatibilidade com outros componentes
+    // Para compatibilidade com outros componentes que ainda usam 'usage'
     usage: vehicleUsage,
     extended_category: extractExtendedCategory(dbData),
     consignment_store: consignmentStore,
   };
   
-  console.log('mapDbDataToAppData - final output vehicleUsage:', mappedData.vehicleUsage);
-  console.log('mapDbDataToAppData - final output consignmentStore:', mappedData.consignmentStore);
-  console.log('mapDbDataToAppData - final output:', mappedData);
+  console.log('mapDbDataToAppData - final mapped vehicleUsage:', mappedData.vehicleUsage);
+  console.log('mapDbDataToAppData - final mapped usage (compatibility):', mappedData.usage);
+  console.log('mapDbDataToAppData - final output data:', mappedData);
   return mappedData;
 };
 
 const extractVehicleUsage = (dbData: any): string => {
   console.log('extractVehicleUsage - input dbData.description:', dbData.description);
+  console.log('extractVehicleUsage - input dbData.category:', dbData.category);
   
-  // Check if there's specific usage info in description
+  // Check if there's specific usage info in description - PRIMEIRA PRIORIDADE
   if (dbData.description) {
     const match = dbData.description.match(/\[USAGE:([^\]]+)\]/);
     if (match) {
-      console.log('extractVehicleUsage - Found usage in description:', match[1]);
-      return match[1];
+      const extractedUsage = match[1];
+      console.log('extractVehicleUsage - Found usage in description:', extractedUsage);
+      return extractedUsage;
     }
   }
   
-  // Default mapping based on category - CORRECTED para defaultar para 'sale'
+  // Default mapping based on category - SEGUNDA PRIORIDADE
   const defaultMapping = (() => {
     switch (dbData.category) {
       case 'rentalFleet': return 'rental';
@@ -150,7 +153,7 @@ const extractVehicleUsage = (dbData: any): string => {
       case 'reserved': return 'sale';
       case 'auction': return 'sale';
       case 'logistics': return 'personal';
-      default: return 'sale'; // Default para 'sale' em vez de 'personal'
+      default: return 'sale'; // Default para 'sale'
     }
   })();
   

@@ -1,7 +1,8 @@
 
 export const mapFormToDbData = (formData: any) => {
-  console.log('mapFormToDbData - input formData:', formData);
+  console.log('mapFormToDbData - START - input formData:', formData);
   console.log('mapFormToDbData - vehicleUsage from formData:', formData.vehicleUsage);
+  console.log('mapFormToDbData - consignmentStore from formData:', formData.consignmentStore);
   
   // Prepare the description with vehicle usage and store info
   let description = formData.description || '';
@@ -9,10 +10,12 @@ export const mapFormToDbData = (formData: any) => {
   // Remove existing usage and store info from description to avoid duplicates
   description = description.replace(/\[USAGE:[^\]]+\]/g, '').replace(/\[STORE:[^\]]+\]/g, '').trim();
   
-  // Add vehicle usage to description
+  // Add vehicle usage to description - CRÍTICO: sempre adicionar se presente
   if (formData.vehicleUsage) {
     description += ` [USAGE:${formData.vehicleUsage}]`;
     console.log('mapFormToDbData - added vehicleUsage to description:', formData.vehicleUsage);
+  } else {
+    console.log('mapFormToDbData - WARNING: No vehicleUsage found in formData!');
   }
   
   // Add consignment store to description if consigned and store specified
@@ -66,7 +69,8 @@ export const mapFormToDbData = (formData: any) => {
     video: formData.video || null,
   };
   
-  console.log('mapFormToDbData - output dbData with encoded usage/store:', dbData);
+  console.log('mapFormToDbData - END - output dbData with encoded usage/store:', dbData);
   console.log('mapFormToDbData - final description in dbData:', dbData.description);
+  console.log('mapFormToDbData - vehicleUsage encoded in description:', formData.vehicleUsage);
   return dbData;
 };

@@ -6,10 +6,17 @@ import { getInitialFormData } from './utils/vehicleFormInitialData';
 import { toast } from '@/hooks/use-toast';
 
 export const useVehicleForm = (editingVehicle?: any) => {
+  console.log('useVehicleForm - hook called with editingVehicle:', editingVehicle);
+  console.log('useVehicleForm - editingVehicle?.id:', editingVehicle?.id);
+  console.log('useVehicleForm - editingVehicle?.vehicleUsage:', editingVehicle?.vehicleUsage);
+  console.log('useVehicleForm - editingVehicle?.usage:', editingVehicle?.usage);
+  
   const [formData, setFormData] = useState<VehicleFormData>(() => {
     // Initialize with proper data from the start
-    console.log('useVehicleForm - Initial setup with editingVehicle:', editingVehicle);
-    return getInitialFormData(editingVehicle);
+    console.log('useVehicleForm - Initial state setup with editingVehicle:', editingVehicle);
+    const initialData = getInitialFormData(editingVehicle);
+    console.log('useVehicleForm - Initial state vehicleUsage:', initialData.vehicleUsage);
+    return initialData;
   });
   
   const [photos, setPhotos] = useState<string[]>([]);
@@ -28,19 +35,27 @@ export const useVehicleForm = (editingVehicle?: any) => {
   // Load editing vehicle data using the centralized function
   useEffect(() => {
     console.log('useVehicleForm useEffect - editingVehicle changed:', editingVehicle);
+    console.log('useVehicleForm useEffect - editingVehicle?.vehicleUsage:', editingVehicle?.vehicleUsage);
+    console.log('useVehicleForm useEffect - editingVehicle?.usage:', editingVehicle?.usage);
     
     if (editingVehicle) {
+      console.log('useVehicleForm useEffect - processing editing vehicle with ID:', editingVehicle.id);
+      
+      // CRÍTICO: Usar APENAS a função getInitialFormData para garantir consistência
       const initialData = getInitialFormData(editingVehicle);
-      console.log('useVehicleForm useEffect - setting form data from getInitialFormData:', initialData);
+      console.log('useVehicleForm useEffect - initialData from getInitialFormData:', initialData);
       console.log('useVehicleForm useEffect - vehicleUsage from initialData:', initialData.vehicleUsage);
       
       setFormData(initialData);
       setPhotos(editingVehicle.photos || []);
       setVideos(editingVehicle.videos || (editingVehicle.video ? [editingVehicle.video] : []));
+      
+      console.log('useVehicleForm useEffect - formData updated with vehicleUsage:', initialData.vehicleUsage);
     } else {
       // For new vehicles, reset to clean initial data
       console.log('useVehicleForm useEffect - resetting to clean data for new vehicle');
       const cleanData = getInitialFormData();
+      console.log('useVehicleForm useEffect - clean data vehicleUsage:', cleanData.vehicleUsage);
       setFormData(cleanData);
       setPhotos([]);
       setVideos([]);
