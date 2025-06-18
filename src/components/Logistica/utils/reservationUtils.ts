@@ -1,4 +1,3 @@
-
 export const getTodayDateString = (): string => {
   return new Date().toISOString().split('T')[0];
 };
@@ -53,17 +52,36 @@ export const formatDateTimeForFlorida = (dateTimeString: string): string => {
   }
 };
 
-// Função para converter UTC para horário da Flórida
+// Função para converter UTC para horário da Flórida - corrigida
 export const convertUTCToFloridaTime = (utcDateTime: string): string => {
-  if (!utcDateTime) return '';
+  if (!utcDateTime) return 'N/A';
   
   try {
-    const utcDate = new Date(utcDateTime + 'Z'); // Garante que seja tratado como UTC
+    console.log('Converting date:', utcDateTime);
     
-    // Adiciona 4 horas (EDT) ou 5 horas (EST) - usando 4h como padrão
-    utcDate.setHours(utcDate.getHours() + 4);
+    // Tenta criar a data diretamente primeiro
+    let date = new Date(utcDateTime);
     
-    return utcDate.toLocaleString('pt-BR', {
+    // Se a data for inválida, tenta diferentes abordagens
+    if (isNaN(date.getTime())) {
+      // Se não tem 'Z' no final e parece ser UTC, adiciona
+      if (!utcDateTime.includes('Z') && !utcDateTime.includes('+') && !utcDateTime.includes('-')) {
+        date = new Date(utcDateTime + 'Z');
+      }
+      
+      // Se ainda for inválida, tenta parse manual
+      if (isNaN(date.getTime())) {
+        console.error('Failed to parse date:', utcDateTime);
+        return 'Data Inválida';
+      }
+    }
+    
+    // Adiciona 4 horas para ajustar ao fuso horário da Flórida (EDT)
+    const floridaDate = new Date(date.getTime() + (4 * 60 * 60 * 1000));
+    
+    console.log('Original date:', date, 'Florida date:', floridaDate);
+    
+    return floridaDate.toLocaleString('pt-BR', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -72,8 +90,8 @@ export const convertUTCToFloridaTime = (utcDateTime: string): string => {
       hour12: false
     });
   } catch (error) {
-    console.error('Erro ao converter UTC para horário da Flórida:', error);
-    return utcDateTime;
+    console.error('Erro ao converter UTC para horário da Flórida:', error, 'Input:', utcDateTime);
+    return 'Erro na Data';
   }
 };
 
