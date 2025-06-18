@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Calendar, X } from 'lucide-react';
+import { Calendar, X, Plus } from 'lucide-react';
 import { DateSearchReservation } from '@/hooks/useReservationDateSearch';
 import { ReservationListItem } from '@/hooks/useReservationsList';
 import CompactReservationItem from '../CompactReservationItem';
@@ -109,21 +109,22 @@ const DateSearchResults = ({ results, onAddToList }: DateSearchResultsProps) => 
               }
 
               return (
-                <div key={result.id} className="relative">
+                <div key={result.id} className="space-y-2">
                   <CompactReservationItem
                     reservation={listItem}
                     onRemove={handleRemoveFromSearch}
                     onUpdateField={handleUpdateField}
                   />
-                  {/* Botão adicional para adicionar à lista manual */}
-                  <div className="absolute top-2 right-2">
+                  {/* Botão para adicionar à lista manual - posicionado abaixo do card */}
+                  <div className="flex justify-end">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddToManualList(result.id)}
-                      className="bg-white/90 hover:bg-white text-xs"
+                      className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
                     >
-                      + Lista Manual
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar à Lista Manual
                     </Button>
                   </div>
                 </div>
