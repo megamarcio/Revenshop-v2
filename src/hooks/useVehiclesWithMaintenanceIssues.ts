@@ -10,15 +10,29 @@ interface VehicleWithIssues {
   issues: string[];
 }
 
+interface VehiclesWithIssuesResult {
+  vehiclesWithTechnicalIssues: VehicleWithIssues[];
+  vehiclesWithPendingMaintenance: VehicleWithIssues[];
+  vehiclesWithIssues: VehicleWithIssues[];
+  technicalItemsCount: number;
+  pendingMaintenanceCount: number;
+}
+
 export const useVehiclesWithMaintenanceIssues = () => {
   const {
-    data: vehiclesWithIssues = [],
+    data: result = {
+      vehiclesWithTechnicalIssues: [],
+      vehiclesWithPendingMaintenance: [],
+      vehiclesWithIssues: [],
+      technicalItemsCount: 0,
+      pendingMaintenanceCount: 0
+    },
     isLoading,
     error,
     refetch
   } = useQuery({
     queryKey: ['vehicles-with-maintenance-issues'],
-    queryFn: async (): Promise<VehicleWithIssues[]> => {
+    queryFn: async (): Promise<VehiclesWithIssuesResult> => {
       try {
         console.log('Buscando veículos com problemas de manutenção...');
         
@@ -118,7 +132,7 @@ export const useVehiclesWithMaintenanceIssues = () => {
           });
         });
 
-        // Combine both maps into a single result
+        // Combine both maps into a single result for compatibility
         const combinedIssuesMap = new Map<string, VehicleWithIssues>();
         
         // Add technical issues
@@ -136,14 +150,36 @@ export const useVehiclesWithMaintenanceIssues = () => {
           }
         });
 
-        const result = Array.from(combinedIssuesMap.values());
-        console.log('Resultado final - veículos com problemas:', result.length);
-        console.log('Detalhes dos veículos:', result.map(v => ({ code: v.internal_code, issues: v.issues.length })));
+        const vehiclesWithTechnicalIssues = Array.from(technicalIssuesMap.values());
+        const vehiclesWithPendingMaintenance = Array.from(maintenanceIssuesMap.values());
+        const vehiclesWithIssues = Array.from(combinedIssuesMap.values());
+
+        // Count actual technical items that need to be changed
+        const technicalItemsCount = technicalItems?.filter(item => item.status === 'trocar').length || 0;
+        const pendingMaintenanceCount = pendingMaintenances?.length || 0;
+
+        console.log('Resultado final - veículos com itens técnicos:', vehiclesWithTechnicalIssues.length);
+        console.log('Resultado final - veículos com manutenções pendentes:', vehiclesWithPendingMaintenance.length);
+        console.log('Resultado final - total de veículos com problemas:', vehiclesWithIssues.length);
+        console.log('Contadores - Itens técnicos para trocar:', technicalItemsCount);
+        console.log('Contadores - Manutenções pendentes:', pendingMaintenanceCount);
         
-        return result;
+        return {
+          vehiclesWithTechnicalIssues,
+          vehiclesWithPendingMaintenance,
+          vehiclesWithIssues,
+          technicalItemsCount,
+          pendingMaintenanceCount
+        };
       } catch (error) {
         console.error('Error in useVehiclesWithMaintenanceIssues:', error);
-        return [];
+        return {
+          vehiclesWithTechnicalIssues: [],
+          vehiclesWithPendingMaintenance: [],
+          vehiclesWithIssues: [],
+          technicalItemsCount: 0,
+          pendingMaintenanceCount: 0
+        };
       }
     },
     staleTime: 30000, // 30 seconds
@@ -151,7 +187,11 @@ export const useVehiclesWithMaintenanceIssues = () => {
   });
 
   return {
-    vehiclesWithIssues,
+    vehiclesWithTechnicalIssues: result.vehiclesWithTechnicalIssues,
+    vehiclesWithPendingMaintenance: result.vehiclesWithPendingMaintenance,
+    vehiclesWithIssues: result.vehiclesWithIssues,
+    technicalItemsCount: result.technicalItemsCount,
+    pendingMaintenanceCount: result.pendingMaintenanceCount,
     isLoading,
     error,
     refetch

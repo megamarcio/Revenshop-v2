@@ -10,18 +10,20 @@ interface MaintenanceStatsProps {
   openMaintenances: number;
   vehiclesWithIssues: number;
   totalVehicles: number;
+  technicalItemsCount?: number;
 }
 
 const MaintenanceStats = ({ 
   openMaintenances, 
   vehiclesWithIssues, 
-  totalVehicles 
+  totalVehicles,
+  technicalItemsCount = 0
 }: MaintenanceStatsProps) => {
   const { last3MonthsCosts } = useMaintenanceCosts();
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards Originais */}
+      {/* Stats Cards com contadores separados */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="p-4">
@@ -44,7 +46,7 @@ const MaintenanceStats = ({
               </div>
               <div>
                 <p className="text-sm text-gray-600">Itens para Trocar</p>
-                <p className="text-2xl font-bold text-gray-900">{vehiclesWithIssues}</p>
+                <p className="text-2xl font-bold text-gray-900">{technicalItemsCount}</p>
               </div>
             </div>
           </CardContent>

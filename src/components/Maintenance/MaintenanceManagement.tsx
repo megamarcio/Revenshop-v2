@@ -17,13 +17,20 @@ const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();
   const { maintenances } = useMaintenance();
   const { vehicles } = useVehiclesOptimized({ category: 'forSale', limit: 100, minimal: true });
-  const { vehiclesWithIssues, isLoading: isLoadingIssues } = useVehiclesWithMaintenanceIssues();
+  const { 
+    vehiclesWithIssues, 
+    technicalItemsCount, 
+    pendingMaintenanceCount,
+    isLoading: isLoadingIssues 
+  } = useVehiclesWithMaintenanceIssues();
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [showOverdueModal, setShowOverdueModal] = useState(false);
   const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
 
   console.log('MaintenanceManagement - vehiclesWithIssues:', vehiclesWithIssues.length);
+  console.log('MaintenanceManagement - technicalItemsCount:', technicalItemsCount);
+  console.log('MaintenanceManagement - pendingMaintenanceCount:', pendingMaintenanceCount);
   console.log('MaintenanceManagement - isLoadingIssues:', isLoadingIssues);
 
   if (!isAdmin && !isInternalSeller) {
@@ -99,6 +106,7 @@ const MaintenanceManagement = () => {
         openMaintenances={openMaintenances}
         vehiclesWithIssues={vehiclesWithIssues.length}
         totalVehicles={vehicles.length}
+        technicalItemsCount={technicalItemsCount}
       />
 
       <MaintenanceList 

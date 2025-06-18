@@ -25,9 +25,15 @@ const VehicleMaintenanceSelector = ({
   // Ordenar veículos por código interno (do menor para o maior)
   const vehicles = React.useMemo(() => {
     return [...rawVehicles].sort((a, b) => {
-      // Converter códigos para números para ordenação correta
-      const codeA = parseInt(a.internal_code) || 0;
-      const codeB = parseInt(b.internal_code) || 0;
+      // Extrair apenas os números do código interno
+      const extractNumber = (code: string) => {
+        const match = code.match(/\d+/);
+        return match ? parseInt(match[0], 10) : 0;
+      };
+      
+      const codeA = extractNumber(a.internal_code);
+      const codeB = extractNumber(b.internal_code);
+      
       return codeA - codeB;
     });
   }, [rawVehicles]);
