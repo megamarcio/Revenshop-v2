@@ -46,6 +46,11 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
     }
   };
 
+  const shouldShowPlate = () => {
+    const status = reservation.reservation.status.toLowerCase();
+    return status === 'open' || status === 'rental' || status === 'completed';
+  };
+
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;
   const hqRentalLink = `https://r3-rental.us5.hqrentals.app/car-rental/reservations/step7?id=${reservation.reservation.id}`;
 
@@ -124,8 +129,11 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
                 className="h-8 px-3"
               >
                 <a href={kommoLink} target="_blank" rel="noopener noreferrer">
-                  <Building2 className="h-3 w-3 mr-1" />
-                  Kommo
+                  <img 
+                    src="/lovable-uploads/de9684e1-1c0d-4484-9ed9-a0252882c9e4.png" 
+                    alt="Kommo" 
+                    className="h-4 w-4"
+                  />
                 </a>
               </Button>
               {reservation.customer.phone_number && (
@@ -140,8 +148,11 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
                     target="_blank" 
                     rel="noopener noreferrer"
                   >
-                    <MessageCircle className="h-4 w-4 mr-1" />
-                    WhatsApp
+                    <img 
+                      src="/lovable-uploads/e69b8938-5a38-4b74-b5c3-342f53c90e3c.png" 
+                      alt="WhatsApp" 
+                      className="h-4 w-4"
+                    />
                   </a>
                 </Button>
               )}
@@ -195,6 +206,22 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
                 </div>
               </div>
             </div>
+
+            {/* Classe do Veículo */}
+            {reservation.vehicle_class?.label && (
+              <div className="p-3 bg-blue-50 rounded-lg">
+                <div className="text-sm text-muted-foreground">Classe do Veículo</div>
+                <div className="font-medium">{reservation.vehicle_class.label}</div>
+              </div>
+            )}
+
+            {/* Placa do Veículo */}
+            {shouldShowPlate() && reservation.vehicle?.plate && (
+              <div className="p-3 bg-gray-50 rounded-lg">
+                <div className="text-sm text-muted-foreground">Placa</div>
+                <div className="font-medium">{reservation.vehicle.plate}</div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -18,6 +18,12 @@ export interface ReservationDetails {
     status: string;
     outstanding_balance: string;
   };
+  vehicle_class?: {
+    label: string;
+  };
+  vehicle?: {
+    plate: string;
+  };
 }
 
 export const useReservationById = () => {
