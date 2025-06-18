@@ -51,6 +51,20 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
     return status === 'open' || status === 'rental' || status === 'completed';
   };
 
+  const getVehicleLabel = () => {
+    return reservation.reservation.vehicles?.vehicle?.label || 'N/A';
+  };
+
+  const getVehicleClassLabel = () => {
+    return reservation.reservation.vehicle?.vehicle_class?.label || 
+           reservation.vehicle_class?.label || 'N/A';
+  };
+
+  const getVehiclePlate = () => {
+    return reservation.reservation.vehicles?.vehicle?.plate || 
+           reservation.vehicle?.plate || 'N/A';
+  };
+
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;
   const hqRentalLink = `https://r3-rental.us5.hqrentals.app/car-rental/reservations/step7?id=${reservation.reservation.id}`;
 
@@ -207,18 +221,22 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
             </div>
 
             {/* Classe do Veículo */}
-            {reservation.vehicle_class?.label && (
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <div className="text-sm text-muted-foreground">Classe do Veículo</div>
-                <div className="font-medium">{reservation.vehicle_class.label}</div>
-              </div>
-            )}
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <div className="text-sm text-muted-foreground">Classe do Veículo</div>
+              <div className="font-medium">{getVehicleClassLabel()}</div>
+            </div>
+
+            {/* Veículo Selecionado */}
+            <div className="p-3 bg-purple-50 rounded-lg">
+              <div className="text-sm text-muted-foreground">Veículo Selecionado</div>
+              <div className="font-medium">{getVehicleLabel()}</div>
+            </div>
 
             {/* Placa do Veículo */}
-            {shouldShowPlate() && reservation.vehicle?.plate && (
+            {shouldShowPlate() && (
               <div className="p-3 bg-gray-50 rounded-lg">
                 <div className="text-sm text-muted-foreground">Placa</div>
-                <div className="font-medium">{reservation.vehicle.plate}</div>
+                <div className="font-medium">{getVehiclePlate()}</div>
               </div>
             )}
           </div>

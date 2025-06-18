@@ -17,6 +17,17 @@ export interface ReservationDetails {
     return_location_label: string;
     status: string;
     outstanding_balance: string;
+    vehicles?: {
+      vehicle?: {
+        label?: string;
+        plate?: string;
+      };
+    };
+    vehicle?: {
+      vehicle_class?: {
+        label?: string;
+      };
+    };
   };
   vehicle_class?: {
     label: string;
