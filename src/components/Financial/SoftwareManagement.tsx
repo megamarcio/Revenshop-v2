@@ -15,12 +15,14 @@ import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+type PaymentType = 'unico' | 'mensal' | 'anual' | 'bianual' | 'trianual';
+
 interface Software {
   id: string;
   name: string;
   description?: string;
   cost: number;
-  payment_type: 'unico' | 'mensal' | 'anual' | 'bianual' | 'trianual';
+  payment_type: PaymentType;
   purchase_date?: string;
   next_payment_date?: string;
   is_active: boolean;
@@ -41,7 +43,7 @@ const SoftwareManagement = () => {
     name: '',
     description: '',
     cost: 0,
-    payment_type: 'mensal' as const,
+    payment_type: 'mensal' as PaymentType,
     purchase_date: '',
     next_payment_date: '',
     is_active: true,
@@ -58,7 +60,7 @@ const SoftwareManagement = () => {
         .order('name');
 
       if (error) throw error;
-      setSoftware(data || []);
+      setSoftware((data || []) as Software[]);
     } catch (error) {
       console.error('Error fetching software:', error);
       toast({
@@ -190,7 +192,7 @@ const SoftwareManagement = () => {
     }).format(value);
   };
 
-  const getPaymentTypeLabel = (type: string) => {
+  const getPaymentTypeLabel = (type: PaymentType) => {
     switch (type) {
       case 'unico': return 'Único';
       case 'mensal': return 'Mensal';
@@ -201,7 +203,7 @@ const SoftwareManagement = () => {
     }
   };
 
-  const getPaymentTypeColor = (type: string) => {
+  const getPaymentTypeColor = (type: PaymentType) => {
     switch (type) {
       case 'unico': return 'bg-gray-100 text-gray-800';
       case 'mensal': return 'bg-blue-100 text-blue-800';
@@ -345,7 +347,7 @@ const SoftwareManagement = () => {
                 <Label htmlFor="payment_type">Tipo de Pagamento *</Label>
                 <Select
                   value={formData.payment_type}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, payment_type: value as any }))}
+                  onValueChange={(value: PaymentType) => setFormData(prev => ({ ...prev, payment_type: value }))}
                 >
                   <SelectTrigger>
                     <SelectValue />

@@ -37,7 +37,7 @@ export const useExpenses = () => {
         .order('date', { ascending: false });
 
       if (error) throw error;
-      setExpenses(data || []);
+      setExpenses((data || []) as Expense[]);
     } catch (error) {
       console.error('Error fetching expenses:', error);
       toast({
@@ -63,7 +63,7 @@ export const useExpenses = () => {
 
       if (error) throw error;
       
-      setExpenses(prev => [data, ...prev]);
+      setExpenses(prev => [data as Expense, ...prev]);
       toast({
         title: 'Sucesso',
         description: 'Despesa criada com sucesso',
@@ -94,7 +94,7 @@ export const useExpenses = () => {
 
       if (error) throw error;
       
-      setExpenses(prev => prev.map(exp => exp.id === id ? data : exp));
+      setExpenses(prev => prev.map(exp => exp.id === id ? data as Expense : exp));
       toast({
         title: 'Sucesso',
         description: 'Despesa atualizada com sucesso',

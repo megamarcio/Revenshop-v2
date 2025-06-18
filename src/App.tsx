@@ -1,15 +1,16 @@
+
 import React, { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
-import Dashboard from '@/components/Dashboard';
+import Dashboard from '@/components/Dashboard/Dashboard';
 import VehicleList from '@/components/Vehicles/VehicleList';
 import CustomerManagement from '@/components/Customers/CustomerManagement';
 import AuctionManagement from '@/components/Auctions/AuctionManagement';
 import TaskManagement from '@/components/Tasks/TaskManagement';
 import MaintenanceManagement from '@/components/Maintenance/MaintenanceManagement';
 import AIBeta from '@/components/AI/AIBeta';
-import FinancingSimulation from '@/components/Financing/FinancingSimulation';
+import FinancingSimulation from '@/components/FinancingSimulation/FinancingSimulation';
 import BuyHerePayHere from '@/components/BHPH/BuyHerePayHere';
 import ConsultaReservas from '@/components/Logistica/ConsultaReservas';
 import UserManagement from '@/components/Users/UserManagement';
@@ -52,7 +53,7 @@ function App() {
       case 'users':
         return <UserManagement />;
       case 'admin':
-        return <AdminPanel />;
+        return <AdminPanel onNavigateToUsers={() => setActiveTab('users')} />;
       case 'profile':
         return <ProfilePage />;
       default:

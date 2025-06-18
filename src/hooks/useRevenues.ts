@@ -36,7 +36,7 @@ export const useRevenues = () => {
         .order('date', { ascending: false });
 
       if (error) throw error;
-      setRevenues(data || []);
+      setRevenues((data || []) as Revenue[]);
     } catch (error) {
       console.error('Error fetching revenues:', error);
       toast({
@@ -62,7 +62,7 @@ export const useRevenues = () => {
 
       if (error) throw error;
       
-      setRevenues(prev => [data, ...prev]);
+      setRevenues(prev => [data as Revenue, ...prev]);
       toast({
         title: 'Sucesso',
         description: 'Receita criada com sucesso',
@@ -93,7 +93,7 @@ export const useRevenues = () => {
 
       if (error) throw error;
       
-      setRevenues(prev => prev.map(rev => rev.id === id ? data : rev));
+      setRevenues(prev => prev.map(rev => rev.id === id ? data as Revenue : rev));
       toast({
         title: 'Sucesso',
         description: 'Receita atualizada com sucesso',

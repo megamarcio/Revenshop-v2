@@ -24,7 +24,7 @@ export const useFinancialCategories = () => {
         .order('name');
 
       if (error) throw error;
-      setCategories(data || []);
+      setCategories((data || []) as FinancialCategory[]);
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast({
@@ -47,7 +47,7 @@ export const useFinancialCategories = () => {
 
       if (error) throw error;
       
-      setCategories(prev => [...prev, data]);
+      setCategories(prev => [...prev, data as FinancialCategory]);
       toast({
         title: 'Sucesso',
         description: 'Categoria criada com sucesso',
@@ -75,7 +75,7 @@ export const useFinancialCategories = () => {
 
       if (error) throw error;
       
-      setCategories(prev => prev.map(cat => cat.id === id ? data : cat));
+      setCategories(prev => prev.map(cat => cat.id === id ? data as FinancialCategory : cat));
       toast({
         title: 'Sucesso',
         description: 'Categoria atualizada com sucesso',
