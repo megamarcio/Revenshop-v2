@@ -7,7 +7,7 @@ import { Reservation } from '../types/reservationTypes';
 import { mapLogisticaToReservationFormat } from '../utils/logisticaDataMapper';
 import ReservationFirstLine from '@/components/Reservas/components/ReservationFirstLine';
 import ReservationSecondLine from '@/components/Reservas/components/ReservationSecondLine';
-import ReservationThirdLine from '@/components/Reservas/components/ReservationThirdLine';
+import LogisticaReservationThirdLine from './LogisticaReservationThirdLine';
 
 interface LogisticaCompactReservationItemProps {
   reservation: Reservation;
@@ -23,10 +23,6 @@ const LogisticaCompactReservationItem = ({
   const mappedReservation = mapLogisticaToReservationFormat(reservation, kommoLeadId);
   
   const handleRemove = () => {
-    // Not applicable for Logística - this is read-only data
-  };
-  
-  const handleUpdateField = () => {
     // Not applicable for Logística - this is read-only data
   };
 
@@ -55,12 +51,9 @@ const LogisticaCompactReservationItem = ({
           extraActions={shareButton}
         />
         
-        <ReservationThirdLine 
+        <LogisticaReservationThirdLine 
           data={mappedReservation.data} 
-          temperature={mappedReservation.temperature} 
-          notes={mappedReservation.notes} 
-          onUpdateField={handleUpdateField} 
-          reservationId={mappedReservation.id} 
+          vehicleName={reservation.vehicle_name}
         />
       </CardContent>
     </Card>
