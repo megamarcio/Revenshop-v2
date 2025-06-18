@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -95,6 +96,10 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${data.customer.f855}`;
   const hqRentalLink = `https://r3-rental.us5.hqrentals.app/car-rental/reservations/step7?id=${data.reservation.id}`;
 
+  // Verificar se os dados necessários estão disponíveis
+  const hasPhoneNumber = data.customer.phone_number && data.customer.phone_number.trim() !== '';
+  const hasKommoNumber = data.customer.f855 && data.customer.f855.trim() !== '';
+
   // Função para obter informações de equipamentos infantis
   const getChildEquipmentInfo = () => {
     const lastNameLower = data.customer.last_name.toLowerCase();
@@ -169,7 +174,7 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
             <span className="text-xs text-muted-foreground">#{data.reservation.id}</span>
             <User className="h-3 w-3 text-muted-foreground" />
             <span className="text-sm font-medium truncate">{data.customer.first_name}</span>
-            {data.customer.phone_number && (
+            {hasPhoneNumber && (
               <span className="text-xs text-muted-foreground">({data.customer.phone_number})</span>
             )}
           </div>
@@ -236,38 +241,61 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
             <Button 
               variant="outline" 
               size="sm" 
-              asChild
-              className="h-7 w-7 p-0"
+              asChild={!!data.reservation.id}
+              disabled={!data.reservation.id}
+              className={`h-7 w-7 p-0 ${!data.reservation.id ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <a href={hqRentalLink} target="_blank" rel="noopener noreferrer">
-                <img 
-                  src="/lovable-uploads/e3703660-4058-4893-918f-dbc178a72a69.png" 
-                  alt="HQ Rental" 
-                  className="h-3 w-3"
-                />
-              </a>
+              {data.reservation.id ? (
+                <a href={hqRentalLink} target="_blank" rel="noopener noreferrer">
+                  <img 
+                    src="/lovable-uploads/e3703660-4058-4893-918f-dbc178a72a69.png" 
+                    alt="HQ Rental" 
+                    className="h-3 w-3"
+                  />
+                </a>
+              ) : (
+                <div>
+                  <img 
+                    src="/lovable-uploads/e3703660-4058-4893-918f-dbc178a72a69.png" 
+                    alt="HQ Rental" 
+                    className="h-3 w-3 opacity-50"
+                  />
+                </div>
+              )}
             </Button>
             <Button 
               variant="outline" 
               size="sm" 
-              asChild
-              className="h-7 w-7 p-0"
+              asChild={hasKommoNumber}
+              disabled={!hasKommoNumber}
+              className={`h-7 w-7 p-0 ${!hasKommoNumber ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              <a href={kommoLink} target="_blank" rel="noopener noreferrer">
-                <img 
-                  src="/lovable-uploads/de9684e1-1c0d-4484-9ed9-a0252882c9e4.png" 
-                  alt="Kommo" 
-                  className="h-3 w-3"
-                />
-              </a>
+              {hasKommoNumber ? (
+                <a href={kommoLink} target="_blank" rel="noopener noreferrer">
+                  <img 
+                    src="/lovable-uploads/de9684e1-1c0d-4484-9ed9-a0252882c9e4.png" 
+                    alt="Kommo" 
+                    className="h-3 w-3"
+                  />
+                </a>
+              ) : (
+                <div>
+                  <img 
+                    src="/lovable-uploads/de9684e1-1c0d-4484-9ed9-a0252882c9e4.png" 
+                    alt="Kommo" 
+                    className="h-3 w-3 opacity-50"
+                  />
+                </div>
+              )}
             </Button>
-            {data.customer.phone_number && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                asChild
-                className="h-7 w-7 p-0 bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
-              >
+            <Button 
+              variant="outline" 
+              size="sm" 
+              asChild={hasPhoneNumber}
+              disabled={!hasPhoneNumber}
+              className={`h-7 w-7 p-0 ${hasPhoneNumber ? 'bg-green-50 hover:bg-green-100 text-green-700 border-green-200' : 'opacity-50 cursor-not-allowed'}`}
+            >
+              {hasPhoneNumber ? (
                 <a 
                   href={`http://wa.me/${data.customer.phone_number}`} 
                   target="_blank" 
@@ -279,8 +307,16 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
                     className="h-3 w-3"
                   />
                 </a>
-              </Button>
-            )}
+              ) : (
+                <div>
+                  <img 
+                    src="/lovable-uploads/e69b8938-5a38-4b74-b5c3-342f53c90e3c.png" 
+                    alt="WhatsApp" 
+                    className="h-3 w-3 opacity-50"
+                  />
+                </div>
+              )}
+            </Button>
           </div>
         </div>
       </CardContent>
