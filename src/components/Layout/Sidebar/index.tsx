@@ -17,7 +17,7 @@ import { getMenuItems } from './menuItems';
 import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
 import FinancialMenu from './FinancialMenu';
-import LogisticaMenu from './LogisticaMenu';
+import RentalCarMenu from './RentalCarMenu';
 import SettingsMenu from './SettingsMenu';
 
 interface SidebarProps {
@@ -117,7 +117,11 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 if (autoHideEnabled && state !== "collapsed") setOpen(false);
               }} />
               
-              <LogisticaMenu onClick={openLogistica} />
+              <RentalCarMenu activeTab={activeTab} setActiveTab={(tab) => {
+                setActiveTab(tab);
+                if (autoHideEnabled && state !== "collapsed") setOpen(false);
+              }} />
+              
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
                 if (autoHideEnabled && state !== "collapsed") setOpen(false);
