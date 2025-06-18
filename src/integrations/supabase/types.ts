@@ -138,6 +138,60 @@ export type Database = {
         }
         Relationships: []
       }
+      bank_statements: {
+        Row: {
+          amount: number
+          balance: number | null
+          created_at: string
+          description: string
+          id: string
+          is_processed: boolean
+          linked_expense_id: string | null
+          linked_revenue_id: string | null
+          reference_number: string | null
+          transaction_date: string
+        }
+        Insert: {
+          amount: number
+          balance?: number | null
+          created_at?: string
+          description: string
+          id?: string
+          is_processed?: boolean
+          linked_expense_id?: string | null
+          linked_revenue_id?: string | null
+          reference_number?: string | null
+          transaction_date: string
+        }
+        Update: {
+          amount?: number
+          balance?: number | null
+          created_at?: string
+          description?: string
+          id?: string
+          is_processed?: boolean
+          linked_expense_id?: string | null
+          linked_revenue_id?: string | null
+          reference_number?: string | null
+          transaction_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bank_statements_linked_expense_id_fkey"
+            columns: ["linked_expense_id"]
+            isOneToOne: false
+            referencedRelation: "expenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bank_statements_linked_revenue_id_fkey"
+            columns: ["linked_revenue_id"]
+            isOneToOne: false
+            referencedRelation: "revenues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bhph_customers: {
         Row: {
           address: string | null
@@ -321,6 +375,57 @@ export type Database = {
           },
         ]
       }
+      company_software: {
+        Row: {
+          cost: number
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          license_key: string | null
+          name: string
+          next_payment_date: string | null
+          notes: string | null
+          payment_type: string
+          purchase_date: string | null
+          updated_at: string
+          vendor: string | null
+        }
+        Insert: {
+          cost: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          license_key?: string | null
+          name: string
+          next_payment_date?: string | null
+          notes?: string | null
+          payment_type: string
+          purchase_date?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Update: {
+          cost?: number
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          license_key?: string | null
+          name?: string
+          next_payment_date?: string | null
+          notes?: string | null
+          payment_type?: string
+          purchase_date?: string | null
+          updated_at?: string
+          vendor?: string | null
+        }
+        Relationships: []
+      }
       customer_bank_statements: {
         Row: {
           customer_id: string
@@ -482,6 +587,86 @@ export type Database = {
         }
         Relationships: []
       }
+      expenses: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string
+          due_date: string | null
+          id: string
+          is_paid: boolean
+          notes: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description: string
+          due_date?: string | null
+          id?: string
+          is_paid?: boolean
+          notes?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string
+          due_date?: string | null
+          id?: string
+          is_paid?: boolean
+          notes?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_categories: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       maintenance_records: {
         Row: {
           created_at: string
@@ -603,6 +788,56 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      revenues: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          created_by: string | null
+          date: string
+          description: string
+          id: string
+          is_confirmed: boolean
+          notes: string | null
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date: string
+          description: string
+          id?: string
+          is_confirmed?: boolean
+          notes?: string | null
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          date?: string
+          description?: string
+          id?: string
+          is_confirmed?: boolean
+          notes?: string | null
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "revenues_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "financial_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       role_permissions: {
         Row: {

@@ -1,4 +1,3 @@
-
 import React, { useRef, useState, useEffect } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -17,6 +16,7 @@ import { Switch } from '@/components/ui/switch';
 import { getMenuItems } from './menuItems';
 import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
+import FinancialMenu from './FinancialMenu';
 import LogisticaMenu from './LogisticaMenu';
 import SettingsMenu from './SettingsMenu';
 
@@ -111,6 +111,12 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 setActiveTab(tab);
                 if (autoHideEnabled && state !== "collapsed") setOpen(false);
               }} />
+              
+              <FinancialMenu activeTab={activeTab} setActiveTab={(tab) => {
+                setActiveTab(tab);
+                if (autoHideEnabled && state !== "collapsed") setOpen(false);
+              }} />
+              
               <LogisticaMenu onClick={openLogistica} />
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
@@ -137,4 +143,3 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 };
 
 export default AppSidebar;
-
