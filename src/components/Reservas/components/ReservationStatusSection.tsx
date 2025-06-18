@@ -9,6 +9,8 @@ interface ReservationStatusSectionProps {
   reservationId: string | number;
   outstandingBalance: string;
   totalPrice?: string;
+  phoneNumber?: string;
+  hasSignature: boolean;
 }
 
 const getStatusColor = (status: string) => {
@@ -37,17 +39,31 @@ const ReservationStatusSection = ({
   status, 
   reservationId, 
   outstandingBalance,
-  totalPrice
+  totalPrice,
+  phoneNumber,
+  hasSignature
 }: ReservationStatusSectionProps) => {
+  const shouldShowNoSign = !hasSignature && status.toLowerCase() !== 'quote';
+
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-3">
-        <Badge className={getStatusColor(status)}>
-          {status}
-        </Badge>
-        <span className="text-sm text-muted-foreground">
-          #{reservationId || 'N/A'}
-        </span>
+        <div className="flex items-center gap-2">
+          <Badge className={getStatusColor(status)}>
+            {status}
+          </Badge>
+          {shouldShowNoSign && (
+            <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded">
+              No Sign
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>#{reservationId || 'N/A'}</span>
+          {phoneNumber && (
+            <span>({phoneNumber})</span>
+          )}
+        </div>
       </div>
       <div className="flex items-center gap-1 text-lg font-semibold">
         <Tooltip>

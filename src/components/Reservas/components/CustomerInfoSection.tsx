@@ -25,38 +25,44 @@ const CustomerInfoSection = ({
 }: CustomerInfoSectionProps) => {
   const shouldShowNoSign = !hasSignature && status.toLowerCase() !== 'quote';
 
+  // Check if Last_Name contains Car Seat, Stroller, or Booster Seat
+  const getChildEquipmentInfo = () => {
+    const lastNameLower = lastName.toLowerCase();
+    if (lastNameLower.includes('car seat')) return 'Car Seat';
+    if (lastNameLower.includes('stroller') || lastNameLower.includes('carrinho')) return 'Stroller';
+    if (lastNameLower.includes('booster seat')) return 'Booster Seat';
+    return null;
+  };
+
+  const childEquipment = getChildEquipmentInfo();
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <User className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium">Cliente:</span>
-          <span>{firstName}</span>
-          {phoneNumber && (
-            <span className="text-sm text-muted-foreground">
-              ({phoneNumber})
+    <div className="space-y-3">
+      {/* Customer name on full line */}
+      <div className="flex items-center gap-2">
+        <User className="h-4 w-4 text-muted-foreground" />
+        <span className="font-medium">Cliente:</span>
+        <span className="whitespace-nowrap overflow-hidden text-ellipsis flex-1">{firstName}</span>
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
+                <Info className="h-3 w-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Nome completo: {firstName} {lastName}</p>
+            </TooltipContent>
+          </Tooltip>
+          {childEquipment && (
+            <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
+              {childEquipment}
             </span>
           )}
-          <div className="flex items-center gap-1">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
-                  <Info className="h-3 w-3" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Nome completo: {firstName} {lastName}</p>
-              </TooltipContent>
-            </Tooltip>
-            {shouldShowNoSign && (
-              <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-[10px]">
-                No Sign
-              </span>
-            )}
-          </div>
         </div>
       </div>
 
+      {/* Action buttons */}
       <div className="flex justify-end gap-2">
         <Button 
           variant="outline" 

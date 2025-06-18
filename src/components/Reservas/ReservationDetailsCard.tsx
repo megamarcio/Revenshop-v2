@@ -55,6 +55,8 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
             reservationId={reservation.reservation.id}
             outstandingBalance={reservation.reservation.outstanding_balance}
             totalPrice={getTotalPrice()}
+            phoneNumber={reservation.customer.phone_number}
+            hasSignature={hasSignature()}
           />
 
           <CustomerInfoSection
