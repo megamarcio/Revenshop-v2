@@ -52,23 +52,41 @@ const ReservationStatusSection = ({
     const lastNameLower = lastName.toLowerCase();
     const equipments = [];
     
-    // Check for Car Seat - first check for negative phrases
-    if (lastNameLower.includes('car seat')) {
-      if (!lastNameLower.includes('no car seat') && 
-          !lastNameLower.includes('nao preciso car seat')) {
+    // Check for Car Seat Badge
+    // Não mostre se contém frases negativas
+    const hasCarSeatNegative = lastNameLower.includes('no car seat') || 
+                              lastNameLower.includes('nao preciso car seat');
+    
+    if (!hasCarSeatNegative) {
+      // Mostre se tiver padrões específicos
+      const hasCarSeatPattern = lastNameLower.includes('1x car seat') ||
+                               lastNameLower.includes('2x car seat') ||
+                               lastNameLower.includes('1x cadeirinha') ||
+                               lastNameLower.includes('2x cadeirinhas');
+      
+      if (hasCarSeatPattern) {
         equipments.push('Car Seat');
       }
     }
     
-    // Check for Stroller - first check for negative phrases
-    if (lastNameLower.includes('stroller') || lastNameLower.includes('carrinho')) {
-      if (!lastNameLower.includes('no stroller') && 
-          !lastNameLower.includes('nao preciso carrinho')) {
+    // Check for Stroller Badge
+    // Não mostre se contém frases negativas
+    const hasStrollerNegative = lastNameLower.includes('no stroller') ||
+                               lastNameLower.includes('nao preciso carrinho');
+    
+    if (!hasStrollerNegative) {
+      // Mostre se tiver padrões específicos
+      const hasStrollerPattern = lastNameLower.includes('1x stroller') ||
+                                lastNameLower.includes('2x stroller') ||
+                                lastNameLower.includes('1x carrinho') ||
+                                lastNameLower.includes('2x carrinhos');
+      
+      if (hasStrollerPattern) {
         equipments.push('Stroller');
       }
     }
     
-    // Check for Booster Seat
+    // Check for Booster Seat (mantém a lógica original)
     if (lastNameLower.includes('booster seat')) {
       equipments.push('Booster Seat');
     }
