@@ -19,7 +19,6 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
   let hasCarSeat = false;
   let hasStroller = false;
   let signStatus = '';
-  let reservationStatus = 'Confirmed'; // Default status
   
   labelParts.forEach(part => {
     const lowerPart = part.toLowerCase();
@@ -34,12 +33,6 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
     }
     if (lowerPart.includes('sign')) {
       signStatus = part;
-      // Extract status based on sign information
-      if (lowerPart.includes('sign não')) {
-        reservationStatus = 'Pending';
-      } else if (lowerPart.includes('sign') && !lowerPart.includes('não')) {
-        reservationStatus = 'Confirmed';
-      }
     }
   });
 
@@ -54,7 +47,7 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
         return_date: reservation.return_date,
         pick_up_location_label: 'MCO', // Default from typical pattern
         return_location_label: 'MCO', // Default from typical pattern  
-        status: reservationStatus, // Use extracted status
+        status: reservation.status || 'Open', // Use the actual status from JSON
         outstanding_balance: '0', // Default balance
         signed_at: signStatus.includes('não') ? null : new Date().toISOString(),
       },

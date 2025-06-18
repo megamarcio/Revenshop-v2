@@ -10,6 +10,7 @@ export interface Reservation {
     plate: string;
   };
   vehicle_name: string;
+  status: string; // Adicionado campo status
 }
 
 export interface ExtraBadge {
