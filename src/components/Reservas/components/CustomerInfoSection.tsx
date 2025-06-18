@@ -11,6 +11,7 @@ interface CustomerInfoSectionProps {
   kommoLink: string;
   hqRentalLink: string;
   hasSignature: boolean;
+  status: string;
 }
 
 const CustomerInfoSection = ({ 
@@ -19,8 +20,11 @@ const CustomerInfoSection = ({
   phoneNumber,
   kommoLink,
   hqRentalLink,
-  hasSignature 
+  hasSignature,
+  status
 }: CustomerInfoSectionProps) => {
+  const shouldShowNoSign = !hasSignature && status.toLowerCase() !== 'quote';
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -28,26 +32,28 @@ const CustomerInfoSection = ({
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">Cliente:</span>
           <span>{firstName}</span>
-          {!hasSignature && (
-            <span className="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">
-              No Sign
-            </span>
-          )}
           {phoneNumber && (
             <span className="text-sm text-muted-foreground">
               ({phoneNumber})
             </span>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
-                <Info className="h-3 w-3" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Nome completo: {firstName} {lastName}</p>
-            </TooltipContent>
-          </Tooltip>
+          <div className="flex items-center gap-1">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
+                  <Info className="h-3 w-3" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Nome completo: {firstName} {lastName}</p>
+              </TooltipContent>
+            </Tooltip>
+            {shouldShowNoSign && (
+              <span className="text-xs bg-red-100 text-red-800 px-1.5 py-0.5 rounded text-[10px]">
+                No Sign
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

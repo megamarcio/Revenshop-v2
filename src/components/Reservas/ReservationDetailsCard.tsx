@@ -64,6 +64,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
             kommoLink={kommoLink}
             hqRentalLink={hqRentalLink}
             hasSignature={hasSignature()}
+            status={reservation.reservation.status}
           />
 
           <DateLocationSection
