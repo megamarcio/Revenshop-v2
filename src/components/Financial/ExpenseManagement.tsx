@@ -69,11 +69,11 @@ const ExpenseManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Despesas</h2>
-          <p className="text-muted-foreground">Gerencie suas despesas e obrigações</p>
+          <h2 className="text-xl font-bold">Despesas</h2>
+          <p className="text-sm text-muted-foreground">Gerencie suas despesas e obrigações</p>
         </div>
         
         <div className="flex gap-2">
@@ -82,36 +82,36 @@ const ExpenseManagement = () => {
             size="sm"
             onClick={() => setShowPaid(!showPaid)}
           >
-            {showPaid ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+            {showPaid ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
             {showPaid ? 'Ocultar Pagas' : 'Mostrar Todas'}
           </Button>
           
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setIsFormOpen(true)} size="sm">
+            <Plus className="h-3 w-3 mr-1" />
             Nova Despesa
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {filteredExpenses.map((expense) => (
-          <Card key={expense.id}>
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <Card key={expense.id} className="text-sm">
+            <CardContent className="p-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold">{expense.description}</h3>
-                    <Badge className={getTypeColor(expense.type)}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <h3 className="font-medium text-sm">{expense.description}</h3>
+                    <Badge className={`${getTypeColor(expense.type)} text-xs px-1.5 py-0.5`}>
                       {expense.type}
                     </Badge>
                     {expense.is_paid && (
-                      <Badge variant="outline" className="bg-green-100 text-green-800">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5">
                         Pago
                       </Badge>
                     )}
                   </div>
                   
-                  <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="text-xs text-muted-foreground space-y-1">
                     <p>Data: {format(new Date(expense.date), 'dd/MM/yyyy', { locale: ptBR })}</p>
                     {expense.due_date && (
                       <p>Vencimento: {format(new Date(expense.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p>
@@ -121,9 +121,9 @@ const ExpenseManagement = () => {
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <div className="text-lg font-bold text-red-600">
+                    <div className="text-base font-bold text-red-600">
                       {formatCurrency(expense.amount)}
                     </div>
                   </div>
@@ -132,28 +132,31 @@ const ExpenseManagement = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 w-7 p-0"
                       onClick={() => handleEdit(expense)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3" />
                     </Button>
                     
                     {expense.type === 'fixa' && (
                       <Button
                         variant="outline"
                         size="sm"
+                        className="h-7 w-7 p-0"
                         onClick={() => handleReplicate(expense)}
                         title="Replicar para próximos meses"
                       >
-                        <Copy className="h-4 w-4" />
+                        <Copy className="h-3 w-3" />
                       </Button>
                     )}
                     
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={() => handleDelete(expense.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -163,8 +166,8 @@ const ExpenseManagement = () => {
         ))}
 
         {filteredExpenses.length === 0 && (
-          <Card>
-            <CardContent className="p-8 text-center">
+          <Card className="text-sm">
+            <CardContent className="p-6 text-center">
               <p className="text-muted-foreground">Nenhuma despesa encontrada</p>
             </CardContent>
           </Card>
@@ -174,7 +177,7 @@ const ExpenseManagement = () => {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-lg">
               {selectedExpense ? 'Editar Despesa' : 'Nova Despesa'}
             </DialogTitle>
           </DialogHeader>

@@ -53,11 +53,11 @@ const RevenueManagement = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="space-y-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h2 className="text-2xl font-bold">Receitas</h2>
-          <p className="text-muted-foreground">Gerencie suas receitas e previsões</p>
+          <h2 className="text-xl font-bold">Receitas</h2>
+          <p className="text-sm text-muted-foreground">Gerencie suas receitas e previsões</p>
         </div>
         
         <div className="flex gap-2">
@@ -66,45 +66,45 @@ const RevenueManagement = () => {
             size="sm"
             onClick={() => setShowConfirmed(!showConfirmed)}
           >
-            {showConfirmed ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+            {showConfirmed ? <EyeOff className="h-3 w-3 mr-1" /> : <Eye className="h-3 w-3 mr-1" />}
             {showConfirmed ? 'Ocultar Confirmadas' : 'Mostrar Todas'}
           </Button>
           
-          <Button onClick={() => setIsFormOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
+          <Button onClick={() => setIsFormOpen(true)} size="sm">
+            <Plus className="h-3 w-3 mr-1" />
             Nova Receita
           </Button>
         </div>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid gap-3">
         {filteredRevenues.map((revenue) => (
-          <Card key={revenue.id}>
-            <CardContent className="p-4">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <Card key={revenue.id} className="text-sm">
+            <CardContent className="p-3">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
-                    <h3 className="font-semibold">{revenue.description}</h3>
-                    <Badge className={getTypeColor(revenue.type)}>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <h3 className="font-medium text-sm">{revenue.description}</h3>
+                    <Badge className={`${getTypeColor(revenue.type)} text-xs px-1.5 py-0.5`}>
                       {revenue.type}
                     </Badge>
                     {revenue.is_confirmed && (
-                      <Badge variant="outline" className="bg-green-100 text-green-800">
+                      <Badge variant="outline" className="bg-green-100 text-green-800 text-xs px-1.5 py-0.5">
                         Confirmada
                       </Badge>
                     )}
                   </div>
                   
-                  <div className="text-sm text-muted-foreground space-y-1">
+                  <div className="text-xs text-muted-foreground space-y-1">
                     <p>Data: {format(new Date(revenue.date), 'dd/MM/yyyy', { locale: ptBR })}</p>
                     {revenue.category && <p>Categoria: {revenue.category.name}</p>}
                     {revenue.notes && <p>Obs: {revenue.notes}</p>}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                   <div className="text-right">
-                    <div className="text-lg font-bold text-green-600">
+                    <div className="text-base font-bold text-green-600">
                       {formatCurrency(revenue.amount)}
                     </div>
                   </div>
@@ -113,16 +113,18 @@ const RevenueManagement = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 w-7 p-0"
                       onClick={() => handleEdit(revenue)}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3 w-3" />
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
+                      className="h-7 w-7 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={() => handleDelete(revenue.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
@@ -132,8 +134,8 @@ const RevenueManagement = () => {
         ))}
 
         {filteredRevenues.length === 0 && (
-          <Card>
-            <CardContent className="p-8 text-center">
+          <Card className="text-sm">
+            <CardContent className="p-6 text-center">
               <p className="text-muted-foreground">Nenhuma receita encontrada</p>
             </CardContent>
           </Card>
@@ -143,7 +145,7 @@ const RevenueManagement = () => {
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-lg">
               {selectedRevenue ? 'Editar Receita' : 'Nova Receita'}
             </DialogTitle>
           </DialogHeader>
