@@ -51,27 +51,27 @@ const QuickLinksMenu = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center space-x-1 sm:space-x-2 h-8 sm:h-9 px-2 sm:px-3">
+        <Button variant="outline" size="sm" className="h-7 w-7 p-0 sm:h-8 sm:w-8 sm:px-2 border-0 bg-transparent">
           <Globe className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="hidden sm:inline text-xs sm:text-sm">Links Úteis</span>
+          <span className="hidden sm:inline text-xs ml-1">Links</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent 
         align="end" 
-        className="w-56 sm:w-64 z-[9999] bg-popover border shadow-lg"
+        className="w-48 sm:w-56 z-[9999] bg-popover border shadow-lg"
         sideOffset={5}
       >
         {quickLinks.map((link, index) => (
           <React.Fragment key={link.name}>
             <DropdownMenuItem
-              className="flex items-start space-x-2 sm:space-x-3 p-2 sm:p-3 cursor-pointer hover:bg-accent focus:bg-accent"
+              className="flex items-start space-x-2 p-2 cursor-pointer hover:bg-accent focus:bg-accent"
               onClick={() => handleLinkClick(link.url)}
             >
-              <link.icon className="h-3 w-3 sm:h-4 sm:w-4 mt-0.5 text-primary flex-shrink-0" />
+              <link.icon className="h-3 w-3 mt-0.5 text-primary flex-shrink-0" />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-1">
-                  <span className="font-medium text-xs sm:text-sm text-foreground">{link.name}</span>
-                  <ExternalLink className="h-2 w-2 sm:h-3 sm:w-3 text-muted-foreground" />
+                  <span className="font-medium text-xs text-foreground">{link.name}</span>
+                  <ExternalLink className="h-2 w-2 text-muted-foreground" />
                 </div>
                 <p className="text-xs text-muted-foreground mt-0.5 hidden sm:block">{link.description}</p>
               </div>

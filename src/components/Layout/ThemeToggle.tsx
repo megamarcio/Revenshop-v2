@@ -11,33 +11,35 @@ const ThemeToggle = () => {
   const getThemeIcon = (currentTheme: string | undefined) => {
     switch (currentTheme) {
       case 'light':
-        return <Sun className="h-4 w-4" />;
+        return <Sun className="h-3 w-3 sm:h-4 sm:w-4" />;
       case 'dark':
-        return <Moon className="h-4 w-4" />;
+        return <Moon className="h-3 w-3 sm:h-4 sm:w-4" />;
       default:
-        return <Sun className="h-4 w-4" />;
+        return <Sun className="h-3 w-3 sm:h-4 sm:w-4" />;
     }
   };
 
   return (
     <Select value={theme} onValueChange={setTheme}>
-      <SelectTrigger className="w-32 h-9">
-        <div className="flex items-center space-x-2">
+      <SelectTrigger className="w-7 h-7 sm:w-20 sm:h-8 border-0 bg-transparent">
+        <div className="flex items-center space-x-1">
           {getThemeIcon(theme)}
-          <SelectValue />
+          <span className="hidden sm:inline text-xs">
+            <SelectValue />
+          </span>
         </div>
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="light">
           <div className="flex items-center space-x-2">
-            <Sun className="h-4 w-4" />
-            <span>Claro</span>
+            <Sun className="h-3 w-3" />
+            <span className="text-xs">Claro</span>
           </div>
         </SelectItem>
         <SelectItem value="dark">
           <div className="flex items-center space-x-2">
-            <Moon className="h-4 w-4" />
-            <span>Escuro</span>
+            <Moon className="h-3 w-3" />
+            <span className="text-xs">Escuro</span>
           </div>
         </SelectItem>
       </SelectContent>

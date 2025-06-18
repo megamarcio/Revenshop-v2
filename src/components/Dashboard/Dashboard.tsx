@@ -6,6 +6,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import StatsCard from './StatsCard';
 import DateFilter from './DateFilter';
 import PendingTasks from './PendingTasks';
+import FinancialChart from './FinancialChart';
 import { DollarSign, Car, ShoppingCart, FileText } from 'lucide-react';
 
 const Dashboard = () => {
@@ -102,6 +103,10 @@ const Dashboard = () => {
           prefix="$ "
         />
       </div>
+
+      {(isAdmin || isManager) && (
+        <FinancialChart />
+      )}
 
       <PendingTasks />
     </div>

@@ -66,7 +66,7 @@ function App() {
       <div className="min-h-screen flex w-full">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-1 flex flex-col">
-          <Header />
+          <Header onNavigateToProfile={() => setActiveTab('profile')} />
           <main className="flex-1 overflow-auto bg-background">
             {renderContent()}
           </main>
