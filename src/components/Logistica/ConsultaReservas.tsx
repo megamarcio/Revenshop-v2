@@ -42,7 +42,7 @@ const ConsultaReservas: React.FC = () => {
   const onBuscarPickup = async () => {
     try {
       console.log('Iniciando busca por Pickup Date:', { dataInicioPickup, dataFimPickup });
-      setErrorPickup(null); // Limpar erro anterior
+      setErrorPickup(null);
       
       await fetchReservas({
         dataIni: dataInicioPickup,
@@ -66,7 +66,7 @@ const ConsultaReservas: React.FC = () => {
   const onBuscarReturn = async () => {
     try {
       console.log('Iniciando busca por Return Date:', { dataInicioReturn, dataFimReturn });
-      setErrorReturn(null); // Limpar erro anterior
+      setErrorReturn(null);
       
       await fetchReservas({
         dataIni: dataInicioReturn,
@@ -152,7 +152,7 @@ const ConsultaReservas: React.FC = () => {
           <LogisticaErrorBoundary>
             <ReservationFilters
               header="Consulta por Pickup Date"
-              dataInicio={dataI��icioPickup}
+              dataInicio={dataInicioPickup}
               setDataInicio={setDataInicioPickup}
               dataFim={dataFimPickup}
               setDataFim={setDataFimPickup}
