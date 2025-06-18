@@ -11,6 +11,7 @@ interface ReservationStatusSectionProps {
   totalPrice?: string;
   phoneNumber?: string;
   hasSignature: boolean;
+  lastName: string;
 }
 
 const getStatusColor = (status: string) => {
@@ -41,9 +42,39 @@ const ReservationStatusSection = ({
   outstandingBalance,
   totalPrice,
   phoneNumber,
-  hasSignature
+  hasSignature,
+  lastName
 }: ReservationStatusSectionProps) => {
   const shouldShowNoSign = !hasSignature && status.toLowerCase() !== 'quote';
+
+  // Check if Last_Name contains Car Seat, Stroller, or Booster Seat
+  const getChildEquipmentInfo = () => {
+    const lastNameLower = lastName.toLowerCase();
+    const equipments = [];
+    
+    // Check for Car Seat (only if not "no car seat" or "nao preciso car seat")
+    if (lastNameLower.includes('car seat') && 
+        !lastNameLower.includes('no car seat') && 
+        !lastNameLower.includes('nao preciso car seat')) {
+      equipments.push('Car Seat');
+    }
+    
+    // Check for Stroller (only if not "no stroller" or "nao preciso carrinho")
+    if ((lastNameLower.includes('stroller') || lastNameLower.includes('carrinho')) && 
+        !lastNameLower.includes('no stroller') && 
+        !lastNameLower.includes('nao preciso carrinho')) {
+      equipments.push('Stroller');
+    }
+    
+    // Check for Booster Seat
+    if (lastNameLower.includes('booster seat')) {
+      equipments.push('Booster Seat');
+    }
+    
+    return equipments;
+  };
+
+  const childEquipments = getChildEquipmentInfo();
 
   return (
     <div className="flex justify-between items-center">
@@ -57,6 +88,11 @@ const ReservationStatusSection = ({
               No Sign
             </span>
           )}
+          {childEquipments.map((equipment, index) => (
+            <span key={index} className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
+              {equipment}
+            </span>
+          ))}
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span>#{reservationId || 'N/A'}</span>

@@ -23,19 +23,6 @@ const CustomerInfoSection = ({
   hasSignature,
   status
 }: CustomerInfoSectionProps) => {
-  const shouldShowNoSign = !hasSignature && status.toLowerCase() !== 'quote';
-
-  // Check if Last_Name contains Car Seat, Stroller, or Booster Seat
-  const getChildEquipmentInfo = () => {
-    const lastNameLower = lastName.toLowerCase();
-    if (lastNameLower.includes('car seat')) return 'Car Seat';
-    if (lastNameLower.includes('stroller') || lastNameLower.includes('carrinho')) return 'Stroller';
-    if (lastNameLower.includes('booster seat')) return 'Booster Seat';
-    return null;
-  };
-
-  const childEquipment = getChildEquipmentInfo();
-
   return (
     <div className="space-y-3">
       {/* Customer name on full line */}
@@ -54,11 +41,6 @@ const CustomerInfoSection = ({
               <p>Nome completo: {firstName} {lastName}</p>
             </TooltipContent>
           </Tooltip>
-          {childEquipment && (
-            <span className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-              {childEquipment}
-            </span>
-          )}
         </div>
       </div>
 
