@@ -23,8 +23,8 @@ export const mapDbDataToAppData = (dbData: any) => {
     miles: dbData.miles,
     internal_code: dbData.internal_code,
     color: dbData.color,
-    plate: dbData.plate, // Add plate field
-    sunpass: dbData.sunpass, // Add sunpass field
+    plate: dbData.plate,
+    sunpass: dbData.sunpass,
     
     // Financial fields - use snake_case to match Vehicle type
     purchase_price: dbData.purchase_price,
@@ -111,11 +111,12 @@ export const mapDbDataToAppData = (dbData: any) => {
     createdAt: dbData.created_at,
     updatedAt: dbData.updated_at,
     
-    // Vehicle usage information - CORRECTLY extracted and mapped
+    // Vehicle usage information - GARANTIR mapeamento correto
     vehicleUsage: vehicleUsage,
     consignmentStore: consignmentStore,
     
-    // Extended category for backward compatibility
+    // Para compatibilidade com outros componentes
+    usage: vehicleUsage,
     extended_category: extractExtendedCategory(dbData),
     consignment_store: consignmentStore,
   };
@@ -138,7 +139,7 @@ const extractVehicleUsage = (dbData: any): string => {
     }
   }
   
-  // Default mapping based on category - CORRECTED
+  // Default mapping based on category - CORRECTED para defaultar para 'sale'
   const defaultMapping = (() => {
     switch (dbData.category) {
       case 'rentalFleet': return 'rental';
@@ -149,7 +150,7 @@ const extractVehicleUsage = (dbData: any): string => {
       case 'reserved': return 'sale';
       case 'auction': return 'sale';
       case 'logistics': return 'personal';
-      default: return 'sale';
+      default: return 'sale'; // Default para 'sale' em vez de 'personal'
     }
   })();
   

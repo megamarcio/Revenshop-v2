@@ -9,6 +9,7 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
   if (editingVehicle && editingVehicle.id) {
     console.log('getInitialFormData - editing existing vehicle with ID:', editingVehicle.id);
     console.log('getInitialFormData - miles from editingVehicle:', editingVehicle.miles);
+    console.log('getInitialFormData - vehicleUsage from editingVehicle:', editingVehicle.vehicleUsage);
     
     const initialData: VehicleFormData = {
       name: editingVehicle.name || '',
@@ -18,6 +19,8 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       miles: editingVehicle.miles?.toString() || '0',
       internalCode: editingVehicle.internalCode || '',
       color: editingVehicle.color || '',
+      plate: editingVehicle.plate || '',
+      sunpass: editingVehicle.sunpass || '',
       purchasePrice: editingVehicle.purchasePrice?.toString() || '',
       salePrice: editingVehicle.salePrice?.toString() || '',
       minNegotiable: editingVehicle.minNegotiable?.toString() || '',
@@ -26,8 +29,8 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       description: editingVehicle.description || '',
       category: editingVehicle.category || 'forSale',
       
-      // Novo campo para uso do veículo
-      vehicleUsage: editingVehicle.vehicleUsage || editingVehicle.usage || 'personal',
+      // CRÍTICO: Garantir que vehicleUsage seja corretamente mapeado
+      vehicleUsage: editingVehicle.vehicleUsage || editingVehicle.usage || 'sale',
       consignmentStore: editingVehicle.consignmentStore || '',
       
       seller: editingVehicle.seller || '',
@@ -59,9 +62,13 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       payoffDate: editingVehicle.payoffDate || '',
       interestRate: editingVehicle.interestRate?.toString() || '',
       customFinancingBank: editingVehicle.customFinancingBank || '',
+      
+      // Campo de vídeo
+      video: editingVehicle.video || '',
     };
 
     console.log('getInitialFormData - miles converted to string:', initialData.miles);
+    console.log('getInitialFormData - vehicleUsage mapped:', initialData.vehicleUsage);
     console.log('getInitialFormData - final initialData for editing:', initialData);
     
     return initialData;
@@ -74,9 +81,11 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     vin: '',
     year: '',
     model: '',
-    miles: '',  // Changed from '0' to empty string
+    miles: '',
     internalCode: '',
     color: '',
+    plate: '',
+    sunpass: '',
     purchasePrice: '',
     salePrice: '',
     minNegotiable: '',
@@ -84,7 +93,7 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     mmrValue: '',
     description: '',
     category: 'forSale',
-    vehicleUsage: 'personal',
+    vehicleUsage: 'sale',
     consignmentStore: '',
     seller: '',
     finalSalePrice: '',
@@ -115,6 +124,9 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     payoffDate: '',
     interestRate: '',
     customFinancingBank: '',
+    
+    // Campo de vídeo
+    video: '',
   };
 
   console.log('getInitialFormData - clean new vehicle data created:', newVehicleData);
