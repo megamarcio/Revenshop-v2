@@ -2,7 +2,8 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, MapPin, User, DollarSign, Hash } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { CalendarDays, MapPin, User, DollarSign, Hash, Clock, ExternalLink, MessageCircle } from 'lucide-react';
 import { ReservationDetails } from '@/hooks/useReservationById';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -17,6 +18,14 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
       return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
     } catch {
       return dateString;
+    }
+  };
+
+  const formatTime = (dateString: string) => {
+    try {
+      return format(new Date(dateString), 'HH:mm', { locale: ptBR });
+    } catch {
+      return '';
     }
   };
 
@@ -35,6 +44,8 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;
 
   return (
     <Card className="w-full max-w-2xl mx-auto">
@@ -56,7 +67,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
           </div>
         </div>
 
-        {/* Informações do Cliente */}
+        {/* Informações do Cliente e Links */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
@@ -69,19 +80,57 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
               <Hash className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">Kommo Lead ID:</span>
               <span>{reservation.customer.f855}</span>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+                className="h-6 px-2"
+              >
+                <a href={kommoLink} target="_blank" rel="noopener noreferrer">
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Kommo
+                </a>
+              </Button>
             </div>
+          </div>
+
+          {/* Botão WhatsApp */}
+          <div className="flex justify-end">
+            {reservation.customer.phone_number && (
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+                className="bg-green-50 hover:bg-green-100 text-green-700 border-green-200"
+              >
+                <a 
+                  href={`http://wa.me/${reservation.customer.phone_number}`} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                >
+                  <MessageCircle className="h-4 w-4 mr-2" />
+                  WhatsApp
+                </a>
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Datas */}
+        {/* Datas e Horários */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
             <div className="flex items-center gap-2">
               <CalendarDays className="h-4 w-4 text-green-600" />
               <span className="font-medium">Data de Retirada:</span>
             </div>
-            <div className="pl-6 text-lg">
-              {formatDate(reservation.reservation.pick_up_date)}
+            <div className="pl-6 space-y-1">
+              <div className="text-lg">
+                {formatDate(reservation.reservation.pick_up_date)}
+              </div>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {formatTime(reservation.reservation.pick_up_date)}
+              </div>
             </div>
           </div>
 
@@ -90,8 +139,14 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
               <CalendarDays className="h-4 w-4 text-red-600" />
               <span className="font-medium">Data de Devolução:</span>
             </div>
-            <div className="pl-6 text-lg">
-              {formatDate(reservation.reservation.return_date)}
+            <div className="pl-6 space-y-1">
+              <div className="text-lg">
+                {formatDate(reservation.reservation.return_date)}
+              </div>
+              <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <Clock className="h-3 w-3" />
+                {formatTime(reservation.reservation.return_date)}
+              </div>
             </div>
           </div>
         </div>

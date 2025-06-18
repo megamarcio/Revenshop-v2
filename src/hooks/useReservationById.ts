@@ -6,6 +6,7 @@ export interface ReservationDetails {
   customer: {
     first_name: string;
     f855: string; // Kommo Lead ID
+    phone_number?: string; // Telefone para WhatsApp
   };
   reservation: {
     pick_up_date: string;
