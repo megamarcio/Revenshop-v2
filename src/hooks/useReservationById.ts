@@ -5,10 +5,12 @@ import { useToast } from '@/hooks/use-toast';
 export interface ReservationDetails {
   customer: {
     first_name: string;
+    last_name: string; // Adicionado sobrenome
     f855: string; // Kommo Lead ID
     phone_number?: string; // Telefone para WhatsApp
   };
   reservation: {
+    id?: string | number; // Adicionado ID da reserva
     pick_up_date: string;
     pick_up_location_label: string;
     return_date: string;
