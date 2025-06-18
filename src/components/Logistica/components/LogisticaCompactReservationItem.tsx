@@ -54,6 +54,7 @@ const LogisticaCompactReservationItem = ({
         <LogisticaReservationThirdLine 
           data={mappedReservation.data} 
           vehicleName={reservation.vehicle_name}
+          cleanLabel={mappedReservation.cleanLabel}
         />
       </CardContent>
     </Card>

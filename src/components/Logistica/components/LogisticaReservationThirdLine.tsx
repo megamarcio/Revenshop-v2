@@ -6,14 +6,15 @@ import ReservationActionButtons from '@/components/Reservas/components/Reservati
 interface LogisticaReservationThirdLineProps {
   data: ReservationDetails;
   vehicleName?: string;
+  cleanLabel?: string;
 }
 
-const LogisticaReservationThirdLine = ({ data }: LogisticaReservationThirdLineProps) => {
+const LogisticaReservationThirdLine = ({ data, cleanLabel }: LogisticaReservationThirdLineProps) => {
   return (
     <div className="flex items-center gap-2">
-      {data.customer.last_name && (
+      {cleanLabel && (
         <div className="flex items-center flex-1">
-          <span className="text-[10px] font-bold text-red-600">{data.customer.last_name}</span>
+          <span className="text-[10px] font-bold text-red-600">{cleanLabel}</span>
         </div>
       )}
       

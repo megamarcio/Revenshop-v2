@@ -9,6 +9,7 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
   error: null;
   temperature?: string;
   notes?: string;
+  cleanLabel?: string;
 } => {
   // Extract customer name from the label (first part before " - ")
   const customerFullName = reservation.customer.label.split(' - ')[0] || reservation.customer.label;
@@ -18,8 +19,11 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
   const firstName = nameParts[0] || '';
   const lastName = nameParts.slice(1).join(' ') || '';
   
-  // Try to extract vehicle class and other info from customer label
+  // Create clean label without the customer name
   const labelParts = reservation.customer.label.split(' - ');
+  const cleanLabel = labelParts.slice(1).join(' - ') || ''; // Remove first part (name)
+  
+  // Try to extract vehicle class and other info from customer label
   let vehicleClass = '';
   let hasCarSeat = false;
   let hasStroller = false;
@@ -45,6 +49,7 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
     id: reservation.id.toString(),
     loading: false,
     error: null,
+    cleanLabel,
     data: {
       reservation: {
         id: reservation.id.toString(),
