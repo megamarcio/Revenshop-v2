@@ -14,6 +14,8 @@ interface ReservationDetailsCardProps {
 }
 
 const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) => {
+  console.log('Reservation data:', reservation); // Debug log
+
   const formatDate = (dateString: string) => {
     try {
       return format(new Date(dateString), 'dd/MM/yyyy', { locale: ptBR });
@@ -52,17 +54,17 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
   };
 
   const getVehicleLabel = () => {
+    console.log('Vehicle data:', reservation.reservation.vehicles); // Debug log
     return reservation.reservation.vehicles?.vehicle?.label || 'N/A';
   };
 
   const getVehicleClassLabel = () => {
-    return reservation.reservation.vehicle?.vehicle_class?.label || 
-           reservation.vehicle_class?.label || 'N/A';
+    console.log('Vehicle class data:', reservation.reservation.vehicle); // Debug log
+    return reservation.reservation.vehicle?.vehicle_class?.label || 'N/A';
   };
 
   const getVehiclePlate = () => {
-    return reservation.reservation.vehicles?.vehicle?.plate || 
-           reservation.vehicle?.plate || 'N/A';
+    return reservation.reservation.vehicles?.vehicle?.plate || 'N/A';
   };
 
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;
