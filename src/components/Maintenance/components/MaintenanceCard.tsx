@@ -53,9 +53,9 @@ const MaintenanceCard = ({
 
   return (
     <Card className={`hover:shadow-md transition-shadow ${cardBorderClass}`}>
-      <CardContent className="p-3">
-        {/* Linha principal compacta */}
-        <div className="flex items-center justify-between mb-2">
+      <CardContent className="p-2">
+        {/* Primeira linha - Informações principais */}
+        <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {/* Status e Urgente */}
             <div className="flex gap-1 flex-shrink-0">
@@ -107,30 +107,32 @@ const MaintenanceCard = ({
           </div>
         </div>
 
-        {/* Linha de detalhes compacta */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600">
-          <div className="flex items-center gap-1">
-            <Calendar className="h-3 w-3 text-gray-400" />
-            <span>Criado: {formatDate(maintenance.detection_date)}</span>
-          </div>
-          
-          {maintenance.promised_date && (
+        {/* Segunda linha - Detalhes compactos */}
+        <div className="flex items-center justify-between text-xs text-gray-600">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
             <div className="flex items-center gap-1">
-              <Clock className="h-3 w-3 text-orange-500" />
-              <span>Promessa: {formatDate(maintenance.promised_date)}</span>
+              <Calendar className="h-3 w-3 text-gray-400" />
+              <span>{formatDate(maintenance.detection_date)}</span>
             </div>
-          )}
-          
-          <div className="flex items-center gap-1">
-            <Wrench className="h-3 w-3 text-gray-400" />
-            <span className="truncate">{maintenance.mechanic_name}</span>
+            
+            {maintenance.promised_date && (
+              <div className="flex items-center gap-1">
+                <Clock className="h-3 w-3 text-orange-500" />
+                <span>{formatDate(maintenance.promised_date)}</span>
+              </div>
+            )}
+            
+            <div className="flex items-center gap-1">
+              <Wrench className="h-3 w-3 text-gray-400" />
+              <span className="truncate max-w-20">{maintenance.mechanic_name}</span>
+            </div>
           </div>
-        </div>
 
-        {/* Itens de manutenção */}
-        <div className="mt-2 text-xs text-gray-600">
-          <span className="font-medium">Itens:</span>
-          <span className="ml-1">{getMaintenanceItemsDisplay()}</span>
+          {/* Itens de manutenção em destaque */}
+          <div className="flex-shrink-0 max-w-48">
+            <span className="font-medium text-revenshop-primary">Itens:</span>
+            <span className="ml-1 truncate">{getMaintenanceItemsDisplay()}</span>
+          </div>
         </div>
       </CardContent>
     </Card>
