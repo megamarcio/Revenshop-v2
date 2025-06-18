@@ -117,9 +117,8 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
                   <img 
                     src="/lovable-uploads/e3703660-4058-4893-918f-dbc178a72a69.png" 
                     alt="HQ Rental" 
-                    className="h-4 w-4 mr-1"
+                    className="h-4 w-4"
                   />
-                  HQ Rental
                 </a>
               </Button>
               <Button 
