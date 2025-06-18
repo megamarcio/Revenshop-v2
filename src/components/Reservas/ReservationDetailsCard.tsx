@@ -14,7 +14,7 @@ interface ReservationDetailsCardProps {
 }
 
 const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) => {
-  console.log('Reservation data:', reservation); // Debug log
+  console.log('Complete reservation data:', reservation);
 
   const shouldShowPlate = () => {
     const status = reservation.reservation.status.toLowerCase();
@@ -22,17 +22,21 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
   };
 
   const getVehicleLabel = () => {
-    console.log('Vehicle data:', reservation.reservation.vehicles); // Debug log
-    return reservation.reservation.vehicles?.vehicle?.label || 'N/A';
+    const vehicleData = reservation.vehicles?.[0]?.vehicle?.label;
+    console.log('Vehicle label from vehicles array:', vehicleData);
+    return vehicleData || 'N/A';
   };
 
   const getVehicleClassLabel = () => {
-    console.log('Vehicle class data:', reservation.reservation.vehicle); // Debug log
-    return reservation.reservation.vehicle?.vehicle_class?.label || 'N/A';
+    const classData = reservation.selected_vehicle_class?.vehicle_class?.label;
+    console.log('Vehicle class from selected_vehicle_class:', classData);
+    return classData || 'N/A';
   };
 
   const getVehiclePlate = () => {
-    return reservation.reservation.vehicles?.vehicle?.plate || 'N/A';
+    const plateData = reservation.vehicles?.[0]?.vehicle?.plate;
+    console.log('Vehicle plate from vehicles array:', plateData);
+    return plateData || 'N/A';
   };
 
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;

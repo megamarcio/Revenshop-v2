@@ -5,36 +5,30 @@ import { useToast } from '@/hooks/use-toast';
 export interface ReservationDetails {
   customer: {
     first_name: string;
-    last_name: string; // Adicionado sobrenome
+    last_name: string;
     f855: string; // Kommo Lead ID
-    phone_number?: string; // Telefone para WhatsApp
+    phone_number?: string;
   };
   reservation: {
-    id?: string | number; // Adicionado ID da reserva
+    id?: string | number;
     pick_up_date: string;
     pick_up_location_label: string;
     return_date: string;
     return_location_label: string;
     status: string;
     outstanding_balance: string;
-    vehicles?: {
-      vehicle?: {
-        label?: string;
-        plate?: string;
-      };
+  };
+  selected_vehicle_class?: {
+    vehicle_class?: {
+      label?: string;
     };
+  };
+  vehicles?: Array<{
     vehicle?: {
-      vehicle_class?: {
-        label?: string;
-      };
+      label?: string;
+      plate?: string;
     };
-  };
-  vehicle_class?: {
-    label: string;
-  };
-  vehicle?: {
-    plate: string;
-  };
+  }>;
 }
 
 export const useReservationById = () => {
