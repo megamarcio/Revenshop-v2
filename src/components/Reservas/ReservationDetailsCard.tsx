@@ -16,7 +16,7 @@ interface ReservationDetailsCardProps {
 const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) => {
   console.log('Complete reservation data:', reservation);
 
-  const shouldShowPlate = () => {
+  const shouldShowVehicleInfo = () => {
     const status = reservation.reservation.status.toLowerCase();
     return status === 'open' || status === 'rental' || status === 'completed';
   };
@@ -33,10 +33,12 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
     return classData || 'N/A';
   };
 
-  const getVehiclePlate = () => {
-    const plateData = reservation.vehicles?.[0]?.vehicle?.plate;
-    console.log('Vehicle plate from vehicles array:', plateData);
-    return plateData || 'N/A';
+  const hasSignature = () => {
+    return reservation.reservation.signed_at !== null && reservation.reservation.signed_at !== '';
+  };
+
+  const getTotalPrice = () => {
+    return reservation.reservation.total_price?.amount_for_display || 'N/A';
   };
 
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;
@@ -52,6 +54,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
             status={reservation.reservation.status}
             reservationId={reservation.reservation.id}
             outstandingBalance={reservation.reservation.outstanding_balance}
+            totalPrice={getTotalPrice()}
           />
 
           <CustomerInfoSection
@@ -60,6 +63,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
             phoneNumber={reservation.customer.phone_number}
             kommoLink={kommoLink}
             hqRentalLink={hqRentalLink}
+            hasSignature={hasSignature()}
           />
 
           <DateLocationSection
@@ -72,8 +76,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
           <VehicleInfoSection
             vehicleClass={getVehicleClassLabel()}
             vehicleLabel={getVehicleLabel()}
-            vehiclePlate={getVehiclePlate()}
-            shouldShowPlate={shouldShowPlate()}
+            shouldShowVehicleInfo={shouldShowVehicleInfo()}
           />
         </CardContent>
       </Card>

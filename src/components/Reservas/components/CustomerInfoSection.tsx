@@ -10,6 +10,7 @@ interface CustomerInfoSectionProps {
   phoneNumber?: string;
   kommoLink: string;
   hqRentalLink: string;
+  hasSignature: boolean;
 }
 
 const CustomerInfoSection = ({ 
@@ -17,7 +18,8 @@ const CustomerInfoSection = ({
   lastName, 
   phoneNumber,
   kommoLink,
-  hqRentalLink 
+  hqRentalLink,
+  hasSignature 
 }: CustomerInfoSectionProps) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -26,6 +28,11 @@ const CustomerInfoSection = ({
           <User className="h-4 w-4 text-muted-foreground" />
           <span className="font-medium">Cliente:</span>
           <span>{firstName}</span>
+          {!hasSignature && (
+            <span className="text-sm bg-red-100 text-red-800 px-2 py-1 rounded">
+              No Sign
+            </span>
+          )}
           {phoneNumber && (
             <span className="text-sm text-muted-foreground">
               ({phoneNumber})

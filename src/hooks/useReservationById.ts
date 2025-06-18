@@ -17,6 +17,10 @@ export interface ReservationDetails {
     return_location_label: string;
     status: string;
     outstanding_balance: string;
+    signed_at?: string | null;
+    total_price?: {
+      amount_for_display: string;
+    };
   };
   selected_vehicle_class?: {
     vehicle_class?: {
@@ -31,11 +35,29 @@ export interface ReservationDetails {
   }>;
 }
 
+// Histórico de consultas
+const MAX_HISTORY = 10;
+let queryHistory: string[] = JSON.parse(localStorage.getItem('reservationQueryHistory') || '[]');
+
 export const useReservationById = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ReservationDetails | null>(null);
   const { toast } = useToast();
+
+  // Função para adicionar ao histórico
+  const addToHistory = (reservationId: string) => {
+    if (!queryHistory.includes(reservationId)) {
+      queryHistory.unshift(reservationId);
+      queryHistory = queryHistory.slice(0, MAX_HISTORY);
+      localStorage.setItem('reservationQueryHistory', JSON.stringify(queryHistory));
+    }
+  };
+
+  // Função para obter o histórico
+  const getHistory = () => {
+    return queryHistory;
+  };
 
   const fetchReservation = async (reservationId: string) => {
     if (!reservationId.trim()) {
@@ -71,6 +93,7 @@ export const useReservationById = () => {
       console.log('API Response:', result);
       
       setData(result.data);
+      addToHistory(reservationId);
       toast({
         title: "Sucesso",
         description: "Reserva encontrada com sucesso!",
@@ -94,6 +117,7 @@ export const useReservationById = () => {
     data,
     fetchReservation,
     clearData: () => setData(null),
-    clearError: () => setError(null)
+    clearError: () => setError(null),
+    getHistory
   };
 };
