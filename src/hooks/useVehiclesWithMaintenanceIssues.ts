@@ -10,23 +10,6 @@ interface VehicleWithIssues {
   issues: string[];
 }
 
-interface TechnicalItemIssue {
-  vehicle_id: string;
-  vehicle_name: string;
-  vehicle_internal_code: string;
-  technical_items: Array<{
-    name: string;
-    status: string;
-  }>;
-}
-
-interface MaintenanceIssue {
-  vehicle_id: string;
-  vehicle_name: string;
-  vehicle_internal_code: string;
-  maintenance_items: string[];
-}
-
 export const useVehiclesWithMaintenanceIssues = () => {
   const {
     data: vehiclesWithIssues = [],
@@ -37,7 +20,9 @@ export const useVehiclesWithMaintenanceIssues = () => {
     queryKey: ['vehicles-with-maintenance-issues'],
     queryFn: async (): Promise<VehicleWithIssues[]> => {
       try {
-        // Fetch technical items that need attention (status 'trocar' or 'proximo-troca')
+        console.log('Buscando veículos com problemas de manutenção...');
+        
+        // Fetch ONLY technical items with status 'trocar' or 'proximo-troca'
         const { data: technicalItems, error: technicalError } = await supabase
           .from('technical_items')
           .select(`
@@ -56,12 +41,16 @@ export const useVehiclesWithMaintenanceIssues = () => {
           throw technicalError;
         }
 
-        // Fetch pending maintenance records (no repair_date)
+        console.log('Itens técnicos encontrados:', technicalItems?.length || 0);
+
+        // Fetch pending maintenance records (no repair_date but has promised_date or detection_date)
         const { data: pendingMaintenances, error: maintenanceError } = await supabase
           .from('maintenance_records')
           .select(`
             vehicle_id,
             maintenance_items,
+            promised_date,
+            detection_date,
             vehicles!inner(
               name,
               internal_code
@@ -73,6 +62,8 @@ export const useVehiclesWithMaintenanceIssues = () => {
           console.error('Error fetching pending maintenances:', maintenanceError);
           throw maintenanceError;
         }
+
+        console.log('Manutenções pendentes encontradas:', pendingMaintenances?.length || 0);
 
         // Process technical items issues
         const technicalIssuesMap = new Map<string, VehicleWithIssues>();
@@ -145,7 +136,11 @@ export const useVehiclesWithMaintenanceIssues = () => {
           }
         });
 
-        return Array.from(combinedIssuesMap.values());
+        const result = Array.from(combinedIssuesMap.values());
+        console.log('Resultado final - veículos com problemas:', result.length);
+        console.log('Detalhes dos veículos:', result.map(v => ({ code: v.internal_code, issues: v.issues.length })));
+        
+        return result;
       } catch (error) {
         console.error('Error in useVehiclesWithMaintenanceIssues:', error);
         return [];

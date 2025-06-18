@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,11 +17,14 @@ const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();
   const { maintenances } = useMaintenance();
   const { vehicles } = useVehiclesOptimized({ category: 'forSale', limit: 100, minimal: true });
-  const { vehiclesWithIssues } = useVehiclesWithMaintenanceIssues();
+  const { vehiclesWithIssues, isLoading: isLoadingIssues } = useVehiclesWithMaintenanceIssues();
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [showOverdueModal, setShowOverdueModal] = useState(false);
   const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
+
+  console.log('MaintenanceManagement - vehiclesWithIssues:', vehiclesWithIssues.length);
+  console.log('MaintenanceManagement - isLoadingIssues:', isLoadingIssues);
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -82,11 +86,14 @@ const MaintenanceManagement = () => {
         onNewMaintenance={handleNewMaintenance}
       />
 
-      <VehicleIssuesAlert
-        vehiclesWithIssues={vehiclesWithIssues}
-        onViewDetails={() => setShowOverdueModal(true)}
-        onViewVehicleMaintenance={handleViewVehicleMaintenance}
-      />
+      {/* Só mostra o alerta se realmente houver veículos com problemas */}
+      {!isLoadingIssues && vehiclesWithIssues.length > 0 && (
+        <VehicleIssuesAlert
+          vehiclesWithIssues={vehiclesWithIssues}
+          onViewDetails={() => setShowOverdueModal(true)}
+          onViewVehicleMaintenance={handleViewVehicleMaintenance}
+        />
+      )}
 
       <MaintenanceStats
         openMaintenances={openMaintenances}
