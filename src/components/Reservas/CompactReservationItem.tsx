@@ -13,9 +13,10 @@ interface CompactReservationItemProps {
   reservation: ReservationListItem;
   onRemove: (id: string) => void;
   onUpdateField: (id: string, field: 'temperature' | 'notes', value: string) => void;
+  extraActions?: React.ReactNode;
 }
 
-const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: CompactReservationItemProps) => {
+const CompactReservationItem = ({ reservation, onRemove, onUpdateField, extraActions }: CompactReservationItemProps) => {
   if (reservation.loading) {
     return <ReservationLoadingState reservationId={reservation.id} onRemove={onRemove} />;
   }
@@ -46,7 +47,10 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
           onRemove={onRemove} 
         />
         
-        <ReservationSecondLine data={data} />
+        <ReservationSecondLine 
+          data={data} 
+          extraActions={extraActions}
+        />
         
         <ReservationThirdLine 
           data={data} 
