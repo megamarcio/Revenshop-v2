@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Car } from 'lucide-react';
 import { ReservationDetails } from '@/hooks/useReservationById';
 import ReservationActionButtons from '@/components/Reservas/components/ReservationActionButtons';
 
@@ -9,13 +8,12 @@ interface LogisticaReservationThirdLineProps {
   vehicleName?: string;
 }
 
-const LogisticaReservationThirdLine = ({ data, vehicleName }: LogisticaReservationThirdLineProps) => {
+const LogisticaReservationThirdLine = ({ data }: LogisticaReservationThirdLineProps) => {
   return (
     <div className="flex items-center gap-2">
-      {vehicleName && (
-        <div className="flex items-center gap-1 flex-1">
-          <Car className="h-3 w-3 text-blue-600" />
-          <span className="text-xs text-blue-700">{vehicleName}</span>
+      {data.customer.last_name && (
+        <div className="flex items-center flex-1">
+          <span className="text-[10px] font-bold text-red-600">{data.customer.last_name}</span>
         </div>
       )}
       
