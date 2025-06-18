@@ -8,6 +8,8 @@ export interface ReservationListItem {
   data: ReservationDetails | null;
   loading: boolean;
   error: string | null;
+  temperature?: string;
+  notes?: string;
 }
 
 const STORAGE_KEY = 'reservationsList';
@@ -22,6 +24,7 @@ export const useReservationsList = () => {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsedReservations = JSON.parse(stored);
+        console.log('Carregando reservas do localStorage:', parsedReservations);
         setReservations(parsedReservations);
       }
     } catch (error) {
@@ -31,10 +34,13 @@ export const useReservationsList = () => {
 
   // Salvar reservas no localStorage sempre que a lista mudar
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(reservations));
-    } catch (error) {
-      console.error('Erro ao salvar reservas no localStorage:', error);
+    if (reservations.length > 0) {
+      try {
+        console.log('Salvando reservas no localStorage:', reservations);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(reservations));
+      } catch (error) {
+        console.error('Erro ao salvar reservas no localStorage:', error);
+      }
     }
   }, [reservations]);
 
@@ -56,10 +62,16 @@ export const useReservationsList = () => {
       id: reservationId,
       data: null,
       loading: true,
-      error: null
+      error: null,
+      temperature: '',
+      notes: ''
     };
 
-    setReservations(prev => [...prev, newReservation]);
+    setReservations(prev => {
+      const updated = [...prev, newReservation];
+      console.log('Adicionando nova reserva:', updated);
+      return updated;
+    });
 
     // Buscar dados da API
     try {
@@ -81,13 +93,15 @@ export const useReservationsList = () => {
 
       const result = await response.json();
       
-      setReservations(prev => 
-        prev.map(r => 
+      setReservations(prev => {
+        const updated = prev.map(r => 
           r.id === reservationId 
             ? { ...r, data: result.data, loading: false, error: null }
             : r
-        )
-      );
+        );
+        console.log('Atualizando reserva com dados da API:', updated);
+        return updated;
+      });
 
       toast({
         title: "Reserva adicionada",
@@ -96,13 +110,15 @@ export const useReservationsList = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
       
-      setReservations(prev => 
-        prev.map(r => 
+      setReservations(prev => {
+        const updated = prev.map(r => 
           r.id === reservationId 
             ? { ...r, loading: false, error: errorMessage }
             : r
-        )
-      );
+        );
+        console.log('Erro ao carregar reserva:', updated);
+        return updated;
+      });
 
       toast({
         title: "Erro ao carregar reserva",
@@ -112,8 +128,24 @@ export const useReservationsList = () => {
     }
   };
 
+  const updateReservationField = (reservationId: string, field: 'temperature' | 'notes', value: string) => {
+    setReservations(prev => {
+      const updated = prev.map(r => 
+        r.id === reservationId 
+          ? { ...r, [field]: value }
+          : r
+      );
+      console.log(`Atualizando ${field} da reserva ${reservationId}:`, value);
+      return updated;
+    });
+  };
+
   const removeReservation = (reservationId: string) => {
-    setReservations(prev => prev.filter(r => r.id !== reservationId));
+    setReservations(prev => {
+      const updated = prev.filter(r => r.id !== reservationId);
+      console.log('Removendo reserva:', reservationId);
+      return updated;
+    });
     toast({
       title: "Reserva removida",
       description: `Reserva ${reservationId} foi removida da lista.`,
@@ -122,6 +154,8 @@ export const useReservationsList = () => {
 
   const clearAll = () => {
     setReservations([]);
+    localStorage.removeItem(STORAGE_KEY);
+    console.log('Limpando todas as reservas');
     toast({
       title: "Lista limpa",
       description: "Todas as reservas foram removidas da lista.",
@@ -132,6 +166,7 @@ export const useReservationsList = () => {
     reservations,
     addReservation,
     removeReservation,
-    clearAll
+    clearAll,
+    updateReservationField
   };
 };

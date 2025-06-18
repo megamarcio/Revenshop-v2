@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +10,7 @@ import { ReservationListItem } from '@/hooks/useReservationsList';
 interface CompactReservationItemProps {
   reservation: ReservationListItem;
   onRemove: (id: string) => void;
+  onUpdateField: (id: string, field: 'temperature' | 'notes', value: string) => void;
 }
 
 const getStatusColor = (status: string) => {
@@ -35,10 +35,7 @@ const getStatusColor = (status: string) => {
   }
 };
 
-const CompactReservationItem = ({ reservation, onRemove }: CompactReservationItemProps) => {
-  const [temperature, setTemperature] = useState<string>('');
-  const [notes, setNotes] = useState<string>('');
-
+const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: CompactReservationItemProps) => {
   if (reservation.loading) {
     return (
       <Card>
@@ -212,7 +209,10 @@ const CompactReservationItem = ({ reservation, onRemove }: CompactReservationIte
 
         {/* Linha 3: Temperatura, Observações e Botões de Ação */}
         <div className="flex items-center gap-2">
-          <Select value={temperature} onValueChange={setTemperature}>
+          <Select 
+            value={reservation.temperature || ''} 
+            onValueChange={(value) => onUpdateField(reservation.id, 'temperature', value)}
+          >
             <SelectTrigger className="w-24 h-7 text-xs">
               <SelectValue placeholder="Temp" />
             </SelectTrigger>
@@ -227,8 +227,8 @@ const CompactReservationItem = ({ reservation, onRemove }: CompactReservationIte
           
           <Textarea
             placeholder="Observações..."
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
+            value={reservation.notes || ''}
+            onChange={(e) => onUpdateField(reservation.id, 'notes', e.target.value)}
             className="flex-1 h-7 min-h-7 max-h-7 text-xs resize-none"
           />
           
