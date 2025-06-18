@@ -114,19 +114,18 @@ const DateSearchResults = ({ results, onAddToList }: DateSearchResultsProps) => 
                     reservation={listItem}
                     onRemove={handleRemoveFromSearch}
                     onUpdateField={handleUpdateField}
+                    extraActions={
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleAddToManualList(result.id)}
+                        className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                        title="Add Lista Manual"
+                      >
+                        <Plus className="h-3 w-3" />
+                      </Button>
+                    }
                   />
-                  {/* Botão para adicionar à lista manual - ícone apenas, ao lado da lixeira */}
-                  <div className="absolute top-2 right-16">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleAddToManualList(result.id)}
-                      className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
-                      title="Adicionar à Lista Manual"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </Button>
-                  </div>
                 </div>
               );
             })}
