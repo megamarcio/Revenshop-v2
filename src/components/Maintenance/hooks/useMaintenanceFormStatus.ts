@@ -33,9 +33,9 @@ export const useMaintenanceFormStatus = (repairDate?: Date, promisedDate?: Date)
       case 'open':
         return 'Em Aberto';
       case 'pending':
-        return 'Pendente';
-      case 'completed':
         return 'Concluída';
+      case 'completed':
+        return 'Pendente';
       default:
         return 'Indefinido';
     }
