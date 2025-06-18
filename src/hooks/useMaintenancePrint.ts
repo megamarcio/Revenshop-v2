@@ -11,6 +11,20 @@ interface PrintData {
 }
 
 export const useMaintenancePrint = () => {
+  const getMaintenanceItemsDisplay = (maintenance: MaintenanceRecord) => {
+    if (maintenance.maintenance_items.includes('Outros') && maintenance.custom_maintenance) {
+      const otherItems = maintenance.maintenance_items.filter(item => item !== 'Outros');
+      const outrosText = `Outros: ${maintenance.custom_maintenance}`;
+      
+      if (otherItems.length > 0) {
+        return `${otherItems.join(', ')}, ${outrosText}`;
+      }
+      return outrosText;
+    }
+    
+    return maintenance.maintenance_items.join(', ');
+  };
+
   const generatePrintHTML = (data: PrintData): string => {
     const { maintenances, filter, totalCount, totalValue, date } = data;
 
@@ -24,6 +38,7 @@ export const useMaintenancePrint = () => {
         <td>${formatDate(maintenance.detection_date)}</td>
         <td>${maintenance.promised_date ? formatDate(maintenance.promised_date) : 'N/A'}</td>
         <td>${maintenance.mechanic_name}</td>
+        <td>${getMaintenanceItemsDisplay(maintenance)}</td>
       </tr>
     `).join('');
 
@@ -63,7 +78,9 @@ export const useMaintenancePrint = () => {
               border: 1px solid #000; 
               padding: 6px; 
               text-align: left;
-              font-size: 10px;
+              font-size: 9px;
+              word-wrap: break-word;
+              max-width: 120px;
             }
             th { 
               background-color: #f0f0f0; 
@@ -77,6 +94,8 @@ export const useMaintenancePrint = () => {
             @media print {
               body { margin: 0; }
               .no-print { display: none; }
+              table { font-size: 8px; }
+              th, td { padding: 4px; }
             }
           </style>
         </head>
@@ -104,6 +123,7 @@ export const useMaintenancePrint = () => {
                 <th>Data Criação</th>
                 <th>Data Promessa</th>
                 <th>Mecânico</th>
+                <th>Itens de Manutenção</th>
               </tr>
             </thead>
             <tbody>
