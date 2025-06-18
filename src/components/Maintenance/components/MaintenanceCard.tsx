@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Wrench, Phone, Edit, Trash2, Clock, AlertTriangle } from 'lucide-react';
+import { Calendar, Wrench, Edit, Trash2, Clock, AlertTriangle } from 'lucide-react';
 import { MaintenanceRecord } from '../../../types/maintenance';
 import { useMaintenanceStatus } from '../hooks/useMaintenanceStatus';
 import { formatCurrency, formatDate, getMaintenanceTypeLabel } from '../utils/maintenanceFormatters';
@@ -52,85 +52,85 @@ const MaintenanceCard = ({
     : "border-l-4 border-l-revenshop-primary";
 
   return (
-    <Card className={`hover:shadow-lg transition-shadow ${cardBorderClass} relative`}>
-      <CardContent className="p-4">
-        {/* Status e Urgente no canto superior esquerdo do card */}
-        <div className="absolute top-3 left-3 flex gap-2">
-          <Badge className={getStatusBadgeStyles(status)}>
-            {getStatusLabel(status)}
-          </Badge>
-          {maintenance.is_urgent && (
-            <Badge className="bg-red-500 hover:bg-red-600 text-white border-0 flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" />
-              Urgente
-            </Badge>
-          )}
-        </div>
-
-        <div className="ml-24 flex items-start justify-between mb-3">
-          <div className="flex items-center gap-3">
-            <span className="font-bold text-revenshop-primary">
-              {maintenance.vehicle_internal_code}
-            </span>
-            <span className="text-gray-700">- {maintenance.vehicle_name}</span>
-            <span className="text-sm">
-              {getMaintenanceTypeLabel(maintenance.maintenance_type)}
-            </span>
+    <Card className={`hover:shadow-md transition-shadow ${cardBorderClass}`}>
+      <CardContent className="p-3">
+        {/* Linha principal compacta */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            {/* Status e Urgente */}
+            <div className="flex gap-1 flex-shrink-0">
+              <Badge className={`${getStatusBadgeStyles(status)} text-[10px] px-1 py-0`}>
+                {getStatusLabel(status)}
+              </Badge>
+              {maintenance.is_urgent && (
+                <Badge className="bg-red-500 hover:bg-red-600 text-white text-[10px] px-1 py-0 flex items-center gap-1">
+                  <AlertTriangle className="h-2 w-2" />
+                  Urgente
+                </Badge>
+              )}
+            </div>
+            
+            {/* Código e Nome do Veículo */}
+            <div className="flex items-center gap-1 flex-1 min-w-0">
+              <span className="font-bold text-revenshop-primary text-sm flex-shrink-0">
+                {maintenance.vehicle_internal_code}
+              </span>
+              <span className="text-gray-700 text-sm truncate">
+                - {maintenance.vehicle_name}
+              </span>
+              <span className="text-xs text-gray-500 flex-shrink-0">
+                {getMaintenanceTypeLabel(maintenance.maintenance_type)}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-revenshop-primary text-lg">
+          
+          {/* Valor e Ações */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <span className="font-bold text-revenshop-primary text-sm">
               {formatCurrency(maintenance.total_amount)}
             </span>
             {canEditVehicles && (
               <div className="flex gap-1">
-                <Button variant="ghost" size="sm" onClick={() => onEdit(maintenance)}>
-                  <Edit className="h-4 w-4" />
+                <Button variant="ghost" size="sm" onClick={() => onEdit(maintenance)} className="h-6 w-6 p-0">
+                  <Edit className="h-3 w-3" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => onDelete(maintenance)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
-                  <Trash2 className="h-4 w-4" />
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => onDelete(maintenance)} 
+                  className="h-6 w-6 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="h-3 w-3" />
                 </Button>
               </div>
             )}
           </div>
         </div>
 
-        <div className="ml-24 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-600">Criado em:</span>
-              <span>{formatDate(maintenance.detection_date)}</span>
-            </div>
-            {maintenance.promised_date && (
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-orange-500" />
-                <span className="text-gray-600">Prometida:</span>
-                <span>{formatDate(maintenance.promised_date)}</span>
-              </div>
-            )}
-            {maintenance.repair_date && (
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-green-500" />
-                <span className="text-gray-600">Reparo:</span>
-                <span>{formatDate(maintenance.repair_date)}</span>
-              </div>
-            )}
+        {/* Linha de detalhes compacta */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-gray-600">
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-gray-400" />
+            <span>Criado: {formatDate(maintenance.detection_date)}</span>
           </div>
+          
+          {maintenance.promised_date && (
+            <div className="flex items-center gap-1">
+              <Clock className="h-3 w-3 text-orange-500" />
+              <span>Promessa: {formatDate(maintenance.promised_date)}</span>
+            </div>
+          )}
+          
+          <div className="flex items-center gap-1">
+            <Wrench className="h-3 w-3 text-gray-400" />
+            <span className="truncate">{maintenance.mechanic_name}</span>
+          </div>
+        </div>
 
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Wrench className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-600">Mecânico:</span>
-              <span>{maintenance.mechanic_name}</span>
-            </div>
-          </div>
-
-          <div className="space-y-1">
-            <div className="text-sm">
-              <span className="text-gray-600">Itens:</span>
-              <span className="ml-2">{getMaintenanceItemsDisplay()}</span>
-            </div>
-          </div>
+        {/* Itens de manutenção */}
+        <div className="mt-2 text-xs text-gray-600">
+          <span className="font-medium">Itens:</span>
+          <span className="ml-1">{getMaintenanceItemsDisplay()}</span>
         </div>
       </CardContent>
     </Card>
