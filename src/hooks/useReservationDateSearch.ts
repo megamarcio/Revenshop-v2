@@ -92,17 +92,28 @@ export const useReservationDateSearch = () => {
     try {
       console.log(`Buscando reservas de ${startDate} até ${endDate} por ${dateField}`);
       
-      // Usar filtros simples com start_date e end_date, como na logística
-      const baseUrl = 'https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations';
-      const queryParams = new URLSearchParams({
-        start_date: startDate,
-        end_date: endDate,
-        sort_by: dateField,
-        order: 'desc'
-      });
+      // Usar exatamente o mesmo formato da logística
+      const inicio = startDate && /^\d{4}-\d{2}-\d{2}$/.test(startDate) ? `${startDate}T00:00:00` : "";
+      const fim = endDate && /^\d{4}-\d{2}-\d{2}$/.test(endDate) ? `${endDate}T00:00:00` : "";
+
+      if (!inicio || !fim) {
+        throw new Error("Formato de data inválido");
+      }
+
+      const filtros = [
+        {
+          type: "date",
+          column: dateField,
+          operator: "between",
+          value: `${inicio.slice(0,10)},${fim.slice(0,10)}`
+        }
+      ];
+
+      const filtros_codificados = encodeURIComponent(JSON.stringify(filtros));
+      const url = `https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations?filters=${filtros_codificados}`;
       
-      const url = `${baseUrl}?${queryParams.toString()}`;
       console.log('URL da busca:', url);
+      console.log('Filtros aplicados:', JSON.stringify(filtros, null, 2));
 
       const response = await fetch(url, {
         method: 'GET',
