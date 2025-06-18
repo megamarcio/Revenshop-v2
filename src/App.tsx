@@ -49,7 +49,7 @@ function App() {
       case 'bank-statements':
       case 'software':
       case 'financial-config':
-        return <FinancialManagement />;
+        return <FinancialManagement initialTab={activeTab} />;
       case 'users':
         return <UserManagement />;
       case 'admin':

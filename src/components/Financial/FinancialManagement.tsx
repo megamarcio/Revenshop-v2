@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import FinancialDashboard from './FinancialDashboard';
 import RevenueManagement from './RevenueManagement';
@@ -8,8 +8,32 @@ import BankStatementImport from './BankStatementImport';
 import SoftwareManagement from './SoftwareManagement';
 import FinancialSettings from './FinancialSettings';
 
-const FinancialManagement = () => {
+interface FinancialManagementProps {
+  initialTab?: string;
+}
+
+const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Map sidebar tabs to internal tabs
+  const mapSidebarTabToInternalTab = (sidebarTab: string) => {
+    switch (sidebarTab) {
+      case 'financial': return 'dashboard';
+      case 'revenues': return 'revenues';
+      case 'expenses': return 'expenses';
+      case 'bank-statements': return 'bank';
+      case 'software': return 'software';
+      case 'financial-config': return 'settings';
+      default: return 'dashboard';
+    }
+  };
+
+  useEffect(() => {
+    if (initialTab) {
+      const mappedTab = mapSidebarTabToInternalTab(initialTab);
+      setActiveTab(mappedTab);
+    }
+  }, [initialTab]);
 
   return (
     <div className="w-full max-w-7xl mx-auto p-4">
