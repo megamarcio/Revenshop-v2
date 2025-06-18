@@ -48,7 +48,7 @@ const Header: React.FC<HeaderProps> = ({ onNavigateToProfile }) => {
             <SelectTrigger className="w-10 h-7 sm:w-12 sm:h-8 text-xs border-0 bg-transparent p-1">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent className="z-50 min-w-[60px]">
+            <SelectContent className="z-[9999] min-w-[60px] bg-popover border shadow-lg">
               <SelectItem value="pt">🇧🇷</SelectItem>
               <SelectItem value="es">🇪🇸</SelectItem>
               <SelectItem value="en">🇺🇸</SelectItem>

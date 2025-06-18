@@ -109,22 +109,22 @@ const DateSearchResults = ({ results, onAddToList }: DateSearchResultsProps) => 
               }
 
               return (
-                <div key={result.id} className="space-y-2">
+                <div key={result.id} className="relative">
                   <CompactReservationItem
                     reservation={listItem}
                     onRemove={handleRemoveFromSearch}
                     onUpdateField={handleUpdateField}
                   />
-                  {/* Botão para adicionar à lista manual - posicionado abaixo do card */}
-                  <div className="flex justify-end">
+                  {/* Botão para adicionar à lista manual - ao lado dos botões de ação */}
+                  <div className="absolute top-2 right-24">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddToManualList(result.id)}
-                      className="text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                      className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
                     >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar à Lista Manual
+                      <Plus className="h-3 w-3 mr-1" />
+                      Add Lista Manual
                     </Button>
                   </div>
                 </div>

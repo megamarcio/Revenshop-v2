@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Car, Search, List, Truck } from 'lucide-react';
+import { Car, Search, List, Truck, ChevronDown } from 'lucide-react';
 import {
   SidebarMenuItem,
   SidebarMenuButton,
@@ -36,6 +36,7 @@ const RentalCarMenu = ({ activeTab, setActiveTab }: RentalCarMenuProps) => {
           >
             <Car className="h-4 w-4" />
             <span className="text-sm px-0 mx-0">Rental Car</span>
+            <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
