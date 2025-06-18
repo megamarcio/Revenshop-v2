@@ -9,6 +9,13 @@ import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
 import WhatsAppSendModal from './WhatsAppSendModal';
 
+interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+}
+
 interface ExtendedVehicleFormProps extends VehicleFormProps {
   onDelete?: (id: string) => Promise<void>;
 }
@@ -20,6 +27,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   const [showFinancingInfo, setShowFinancingInfo] = useState(false);
   const [showSaleInfo, setShowSaleInfo] = useState(false);
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   
   const {
     formData,
@@ -42,6 +50,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   console.log('VehicleForm - editingVehicle:', editingVehicle);
   console.log('VehicleForm - isEditing:', isEditing);
   console.log('VehicleForm - current formData.vehicleUsage:', formData.vehicleUsage);
+  console.log('VehicleForm - current formData.category:', formData.category);
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
@@ -71,16 +80,53 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
     }
   };
 
+  const validateSaleInfo = () => {
+    const saleErrors: any = {};
+    
+    if (formData.category === 'sold') {
+      if (!formData.finalSalePrice) {
+        saleErrors.finalSalePrice = 'Valor final de venda é obrigatório';
+      }
+      if (!formData.saleDate) {
+        saleErrors.saleDate = 'Data da venda é obrigatória';
+      }
+      if (!formData.customerName) {
+        saleErrors.customerName = 'Nome do cliente é obrigatório';
+      }
+      if (!formData.customerPhone) {
+        saleErrors.customerPhone = 'Telefone do cliente é obrigatório';
+      }
+      if (!formData.paymentMethod) {
+        saleErrors.paymentMethod = 'Método de pagamento é obrigatório';
+      }
+    }
+    
+    return saleErrors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     console.log('VehicleForm - handleSubmit - formData before validation:', formData);
     console.log('VehicleForm - handleSubmit - vehicleUsage:', formData.vehicleUsage);
+    console.log('VehicleForm - handleSubmit - category:', formData.category);
     
+    // Validate basic form data
     if (!validateFormData()) {
       toast({
         title: t('error'),
         description: t('fixRequiredFields') || 'Por favor, corrija os campos obrigatórios.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate sale info if vehicle is sold
+    const saleErrors = validateSaleInfo();
+    if (Object.keys(saleErrors).length > 0) {
+      toast({
+        title: t('error'),
+        description: 'Por favor, preencha todos os campos obrigatórios da venda.',
         variant: 'destructive',
       });
       return;
@@ -125,6 +171,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         vehicleUsage: formData.vehicleUsage,
         consignmentStore: formData.consignmentStore,
         
+        // NOVO: Incluir categoria e informações do cliente selecionado
+        category: formData.category,
+        selectedCustomer: selectedCustomer,
+        
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
         videos: videos
@@ -136,7 +186,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         console.log('VehicleForm - handleSubmit - adding ID for update:', editingVehicle.id);
       }
 
-      console.log('VehicleForm - submitting vehicleData with vehicleUsage:', vehicleData.vehicleUsage);
+      console.log('VehicleForm - submitting vehicleData with category:', vehicleData.category);
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
 
       await onSave(vehicleData);
@@ -186,6 +236,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         calculateProfitMargin={calculateProfitMargin}
         generateDescription={generateDescription}
         onWhatsAppSend={isEditing ? handleWhatsAppSend : undefined}
+        selectedCustomer={selectedCustomer}
+        onCustomerChange={setSelectedCustomer}
       />
 
       {showMaintenanceModal && (

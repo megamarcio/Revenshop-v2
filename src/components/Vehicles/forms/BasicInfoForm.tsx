@@ -105,6 +105,25 @@ const BasicInfoForm = ({ formData, errors, onInputChange }: BasicInfoFormProps) 
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="category">Status do Veículo *</Label>
+          <Select
+            value={formData.category}
+            onValueChange={(value) => onInputChange('category', value)}
+          >
+            <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+              <SelectValue placeholder="Selecione o status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="forSale">À Venda</SelectItem>
+              <SelectItem value="sold">Vendido</SelectItem>
+              <SelectItem value="reserved">Reservado</SelectItem>
+              <SelectItem value="maintenance">Em Manutenção</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.category && <p className="text-sm text-red-500">{errors.category}</p>}
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="plate">Placa</Label>
           <Input
             id="plate"

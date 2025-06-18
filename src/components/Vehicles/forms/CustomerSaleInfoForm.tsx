@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,21 +7,60 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Users } from 'lucide-react';
 import { VehicleFormData } from '../types/vehicleFormTypes';
+import CustomerSelector from './CustomerSelector';
+import NewCustomerModal from './NewCustomerModal';
+
+interface Customer {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+}
 
 interface CustomerSaleInfoFormProps {
   formData: VehicleFormData;
   errors: Partial<VehicleFormData>;
   onInputChange: (field: keyof VehicleFormData, value: string) => void;
   onNavigateToCustomers?: () => void;
+  selectedCustomer?: Customer;
+  onCustomerChange?: (customer: Customer | null) => void;
 }
 
 const CustomerSaleInfoForm = ({ 
   formData, 
   errors, 
   onInputChange, 
-  onNavigateToCustomers 
+  onNavigateToCustomers,
+  selectedCustomer,
+  onCustomerChange
 }: CustomerSaleInfoFormProps) => {
+  const [showNewCustomerModal, setShowNewCustomerModal] = useState(false);
   const isVehicleSold = formData.category === 'sold';
+
+  const handleCustomerCreated = (customer: Customer) => {
+    if (onCustomerChange) {
+      onCustomerChange(customer);
+      // Auto-fill customer fields
+      onInputChange('customerName', customer.name);
+      onInputChange('customerPhone', customer.phone);
+    }
+  };
+
+  const handleCustomerSelected = (customer: Customer | null) => {
+    if (onCustomerChange) {
+      onCustomerChange(customer);
+    }
+    
+    if (customer) {
+      // Auto-fill customer fields
+      onInputChange('customerName', customer.name);
+      onInputChange('customerPhone', customer.phone);
+    } else {
+      // Clear customer fields
+      onInputChange('customerName', '');
+      onInputChange('customerPhone', '');
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -43,6 +82,13 @@ const CustomerSaleInfoForm = ({
             )}
           </div>
 
+          {/* Customer Selection */}
+          <CustomerSelector
+            value={selectedCustomer}
+            onChange={handleCustomerSelected}
+            onCreateNew={() => setShowNewCustomerModal(true)}
+          />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="seller">Vendedor</Label>
@@ -55,7 +101,7 @@ const CustomerSaleInfoForm = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="finalSalePrice">Valor Final de Venda ($)</Label>
+              <Label htmlFor="finalSalePrice">Valor Final de Venda ($) *</Label>
               <Input
                 id="finalSalePrice"
                 type="number"
@@ -63,19 +109,23 @@ const CustomerSaleInfoForm = ({
                 value={formData.finalSalePrice}
                 onChange={(e) => onInputChange('finalSalePrice', e.target.value)}
                 placeholder="Ex: 67500"
+                className={errors.finalSalePrice ? 'border-red-500' : ''}
               />
+              {errors.finalSalePrice && <p className="text-sm text-red-500">{errors.finalSalePrice}</p>}
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="saleDate">Data da Venda</Label>
+              <Label htmlFor="saleDate">Data da Venda *</Label>
               <Input
                 id="saleDate"
                 type="date"
                 value={formData.saleDate}
                 onChange={(e) => onInputChange('saleDate', e.target.value)}
+                className={errors.saleDate ? 'border-red-500' : ''}
               />
+              {errors.saleDate && <p className="text-sm text-red-500">{errors.saleDate}</p>}
             </div>
 
             <div className="space-y-2">
@@ -93,33 +143,39 @@ const CustomerSaleInfoForm = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="customerName">Nome do Cliente</Label>
+              <Label htmlFor="customerName">Nome do Cliente *</Label>
               <Input
                 id="customerName"
                 value={formData.customerName}
                 onChange={(e) => onInputChange('customerName', e.target.value)}
                 placeholder="Nome completo do cliente"
+                className={errors.customerName ? 'border-red-500' : ''}
+                readOnly={!!selectedCustomer}
               />
+              {errors.customerName && <p className="text-sm text-red-500">{errors.customerName}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="customerPhone">Telefone do Cliente</Label>
+              <Label htmlFor="customerPhone">Telefone do Cliente *</Label>
               <Input
                 id="customerPhone"
                 value={formData.customerPhone}
                 onChange={(e) => onInputChange('customerPhone', e.target.value)}
                 placeholder="Ex: (555) 123-4567"
+                className={errors.customerPhone ? 'border-red-500' : ''}
+                readOnly={!!selectedCustomer}
               />
+              {errors.customerPhone && <p className="text-sm text-red-500">{errors.customerPhone}</p>}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+            <Label htmlFor="paymentMethod">Método de Pagamento *</Label>
             <Select
               value={formData.paymentMethod || ''}
               onValueChange={(value) => onInputChange('paymentMethod', value)}
             >
-              <SelectTrigger>
+              <SelectTrigger className={errors.paymentMethod ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Selecione o método de pagamento" />
               </SelectTrigger>
               <SelectContent>
@@ -129,6 +185,7 @@ const CustomerSaleInfoForm = ({
                 <SelectItem value="other">Outro</SelectItem>
               </SelectContent>
             </Select>
+            {errors.paymentMethod && <p className="text-sm text-red-500">{errors.paymentMethod}</p>}
           </div>
 
           {formData.paymentMethod === 'financing' && (
@@ -177,6 +234,12 @@ const CustomerSaleInfoForm = ({
               rows={3}
             />
           </div>
+
+          <NewCustomerModal
+            isOpen={showNewCustomerModal}
+            onClose={() => setShowNewCustomerModal(false)}
+            onCustomerCreated={handleCustomerCreated}
+          />
         </>
       )}
     </div>
