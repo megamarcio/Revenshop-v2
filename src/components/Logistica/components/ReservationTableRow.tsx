@@ -80,10 +80,6 @@ const ReservationTableRow: React.FC<ReservationTableRowProps> = ({
       <TableCell className="text-[10px] font-bold p-2">
         {returnDate}
       </TableCell>
-      
-      <TableCell className="text-[10px] font-bold p-2">
-        {plate}
-      </TableCell>
 
       <TableCell className="text-[10px] font-bold p-2">
         {vehicleName}

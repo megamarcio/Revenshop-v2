@@ -1,6 +1,8 @@
+
 import React, { useState } from "react";
 import { Reservation } from "./types/reservationTypes";
 import { getTodayDateString } from "./utils/reservationUtils";
+import { generateLogisticsPDF } from "./utils/pdfGenerator";
 import { useReservationFetch } from "./hooks/useReservationFetch";
 import ReservationFilters from "./components/ReservationFilters";
 import ReservationTable from "./components/ReservationTable";
@@ -105,6 +107,15 @@ const ConsultaReservas: React.FC = () => {
     }
   };
 
+  const handleGeneratePDF = () => {
+    try {
+      console.log('Generating logistics PDF');
+      generateLogisticsPDF(reservationsPickup, reservationsReturn);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    }
+  };
+
   const createDownloadHandler = (log: any, filename: string) => () => {
     try {
       if (!log) {
@@ -141,7 +152,7 @@ const ConsultaReservas: React.FC = () => {
           <LogisticaErrorBoundary>
             <ReservationFilters
               header="Consulta por Pickup Date"
-              dataInicio={dataInicioPickup}
+              dataInicio={dataI��icioPickup}
               setDataInicio={setDataInicioPickup}
               dataFim={dataFimPickup}
               setDataFim={setDataFimPickup}
@@ -161,6 +172,7 @@ const ConsultaReservas: React.FC = () => {
               badgeType="pickup"
               loading={loadingPickup}
               onShareClick={handleOpenShareModal}
+              onGeneratePDF={handleGeneratePDF}
             />
           </LogisticaErrorBoundary>
         </div>
@@ -190,6 +202,7 @@ const ConsultaReservas: React.FC = () => {
               badgeType="return"
               loading={loadingReturn}
               onShareClick={handleOpenShareModal}
+              onGeneratePDF={handleGeneratePDF}
             />
           </LogisticaErrorBoundary>
         </div>

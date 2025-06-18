@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Badge } from "@/components/ui/badge";
 
@@ -12,43 +11,52 @@ const ReservationBadges: React.FC<ReservationBadgesProps> = ({ rawText }) => {
   const badges = [];
   const text = rawText.toLowerCase();
 
-  // Location badges
-  if (text.includes('in fort')) {
+  // Customer-based badges (new conditions)
+  if (text.includes('booster')) {
     badges.push(
-      <Badge key="fort" className="bg-red-500 text-white text-[9px] font-bold px-2 py-1">
-        Fort
+      <Badge key="booster" className="bg-orange-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
+        Booster
       </Badge>
     );
   }
-  
-  if (text.includes('in mia')) {
+
+  if (text.includes('in mia') || text.includes('out mia')) {
     badges.push(
-      <Badge key="mia" className="bg-purple-500 text-white text-[9px] font-bold px-2 py-1">
+      <Badge key="mia" className="bg-purple-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
         Mia
       </Badge>
     );
   }
   
+  if (text.includes('in fort') || text.includes('out fort')) {
+    badges.push(
+      <Badge key="fort" className="bg-red-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
+        Fort
+      </Badge>
+    );
+  }
+
+  // Location badges (keep existing conditions but with smaller size)
   if (text.includes('in mco')) {
     badges.push(
-      <Badge key="mco" className="bg-green-500 text-white text-[9px] font-bold px-2 py-1">
-        Mco
+      <Badge key="mco" className="bg-green-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
+        MCO
       </Badge>
     );
   }
   
   if (text.includes('in tampa')) {
     badges.push(
-      <Badge key="tampa" className="bg-blue-500 text-white text-[9px] font-bold px-2 py-1">
+      <Badge key="tampa" className="bg-blue-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
         Tampa
       </Badge>
     );
   }
 
-  // Equipment badges
+  // Equipment badges (keep existing conditions but with smaller size)
   if (text.includes('1x car seat')) {
     badges.push(
-      <Badge key="car-seat" className="bg-blue-500 text-white text-[9px] font-bold px-2 py-1">
+      <Badge key="car-seat" className="bg-blue-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
         Car Seat
       </Badge>
     );
@@ -56,16 +64,16 @@ const ReservationBadges: React.FC<ReservationBadgesProps> = ({ rawText }) => {
   
   if (text.includes('1x carrinho')) {
     badges.push(
-      <Badge key="stroller" className="bg-yellow-500 text-black text-[9px] font-bold px-2 py-1">
+      <Badge key="stroller" className="bg-yellow-500 text-black text-[8px] font-bold px-1 py-0.5 h-4">
         Stroller
       </Badge>
     );
   }
 
-  // Sign badge
+  // Sign badge (keep existing condition but with smaller size)
   if (text.includes('sign não')) {
     badges.push(
-      <Badge key="sign" className="bg-red-500 text-white text-[9px] font-bold px-2 py-1">
+      <Badge key="sign" className="bg-red-500 text-white text-[8px] font-bold px-1 py-0.5 h-4">
         Sign
       </Badge>
     );
