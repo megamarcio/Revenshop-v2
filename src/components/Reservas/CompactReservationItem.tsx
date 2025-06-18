@@ -53,6 +53,11 @@ const getTemperatureIndicator = (temperature: string) => {
   }
 };
 
+const extractFirstLocationName = (locationLabel: string): string => {
+  if (!locationLabel) return '';
+  return locationLabel.split(' ')[0];
+};
+
 const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: CompactReservationItemProps) => {
   if (reservation.loading) {
     return (
@@ -170,6 +175,10 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
   const shouldShowNoSign = !data.reservation.signed_at && data.reservation.status.toLowerCase() !== 'quote';
   const temperatureIndicator = getTemperatureIndicator(reservation.temperature || '');
 
+  // Extrair primeiro nome das localidades
+  const pickupLocationShort = extractFirstLocationName(data.reservation.pick_up_location_label);
+  const returnLocationShort = extractFirstLocationName(data.reservation.return_location_label || data.reservation.pick_up_location_label);
+
   return (
     <Card style={{ backgroundColor: reservation.temperature ? temperatureIndicator.bgColor : undefined }}>
       <CardContent className="p-3">
@@ -217,7 +226,7 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
           </div>
         </div>
 
-        {/* Linha 2: Check-in Date, Return Date, Local e Categoria do Veículo */}
+        {/* Linha 2: Check-in Date, Return Date, Localidades e Categoria do Veículo */}
         <div className="flex items-center gap-4 mb-2 text-xs">
           <div className="flex items-center gap-1">
             <Calendar className="h-3 w-3 text-green-600" />
@@ -230,8 +239,12 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
             <span>{new Date(data.reservation.return_date).toLocaleDateString('pt-BR')}</span>
           </div>
           <div className="flex items-center gap-1">
-            <MapPin className="h-3 w-3 text-muted-foreground" />
-            <span className="truncate max-w-[120px]">{data.reservation.pick_up_location_label}</span>
+            <MapPin className="h-3 w-3 text-green-600" />
+            <span className="text-green-700 truncate max-w-[80px]">{pickupLocationShort}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <MapPin className="h-3 w-3 text-red-600" />
+            <span className="text-red-700 truncate max-w-[80px]">{returnLocationShort}</span>
           </div>
           {data.selected_vehicle_class?.vehicle_class?.label && (
             <div className="flex items-center gap-1">

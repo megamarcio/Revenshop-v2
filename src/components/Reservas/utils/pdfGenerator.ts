@@ -35,6 +35,11 @@ const getTemperatureEmoji = (temperature: string) => {
   }
 };
 
+const extractFirstLocationName = (locationLabel: string): string => {
+  if (!locationLabel) return '';
+  return locationLabel.split(' ')[0];
+};
+
 export const generateReservationsListPDF = (reservations: ReservationListItem[]) => {
   const validReservations = reservations.filter(r => r.data && !r.loading && !r.error);
   
@@ -58,19 +63,25 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
     const tempColor = getTemperatureColor(reservation.temperature || '');
     const tempEmoji = getTemperatureEmoji(reservation.temperature || '');
     
+    // Extrair primeiro nome das localidades
+    const pickupLocationShort = extractFirstLocationName(data.reservation.pick_up_location_label);
+    const returnLocationShort = extractFirstLocationName(data.reservation.return_location_label || data.reservation.pick_up_location_label);
+    
     tableRows += `
       <tr>
         <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">#${data.reservation.id}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${data.customer.first_name} ${data.customer.last_name || ''}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${data.customer.first_name}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${data.customer.phone_number || 'N/A'}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${new Date(data.reservation.pick_up_date).toLocaleDateString('pt-BR')}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${data.reservation.pick_up_location_label}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${data.vehicles?.[0]?.vehicle?.label || 'N/A'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${new Date(data.reservation.return_date).toLocaleDateString('pt-BR')}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${pickupLocationShort}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${returnLocationShort}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${data.selected_vehicle_class?.vehicle_class?.label || 'N/A'}</td>
         <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-weight: bold;">${data.reservation.outstanding_balance}</td>
         <td style="padding: 8px; border: 1px solid #ddd; text-align: center; background-color: ${tempColor}20; color: ${tempColor};">
           ${tempEmoji} ${reservation.temperature || 'N/A'}
         </td>
-        <td style="padding: 8px; border: 1px solid #ddd; max-width: 200px; word-wrap: break-word;">${reservation.notes || '-'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; max-width: 150px; word-wrap: break-word;">${reservation.notes || '-'}</td>
       </tr>
     `;
   });
@@ -105,11 +116,12 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            font-size: 12px;
           }
           th {
             background-color: #2563eb;
             color: white;
-            padding: 12px 8px;
+            padding: 10px 6px;
             text-align: left;
             border: 1px solid #ddd;
           }
@@ -141,9 +153,11 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
               <th>ID</th>
               <th>Cliente</th>
               <th>Telefone</th>
-              <th>Data Retirada</th>
-              <th>Local Retirada</th>
-              <th>Veículo</th>
+              <th>Check-in</th>
+              <th>Return</th>
+              <th>Local Check-in</th>
+              <th>Local Return</th>
+              <th>Categoria</th>
               <th>Valor</th>
               <th>Temperatura</th>
               <th>Observações</th>
