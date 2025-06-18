@@ -36,6 +36,23 @@ const getStatusColor = (status: string) => {
   }
 };
 
+const getTemperatureIndicator = (temperature: string) => {
+  switch (temperature.toLowerCase()) {
+    case 'sol':
+      return { emoji: '☀️', color: 'bg-yellow-100 text-yellow-800', bgColor: '#FEF3C7' };
+    case 'quente':
+      return { emoji: '🔥', color: 'bg-red-100 text-red-800', bgColor: '#FEE2E2' };
+    case 'morno':
+      return { emoji: '🌡️', color: 'bg-orange-100 text-orange-800', bgColor: '#FED7AA' };
+    case 'frio':
+      return { emoji: '❄️', color: 'bg-blue-100 text-blue-800', bgColor: '#DBEAFE' };
+    case 'congelado':
+      return { emoji: '🧊', color: 'bg-indigo-100 text-indigo-800', bgColor: '#E0E7FF' };
+    default:
+      return { emoji: '⚪', color: 'bg-gray-100 text-gray-800', bgColor: '#F3F4F6' };
+  }
+};
+
 const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: CompactReservationItemProps) => {
   if (reservation.loading) {
     return (
@@ -151,9 +168,10 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
 
   const childEquipments = getChildEquipmentInfo();
   const shouldShowNoSign = !data.reservation.signed_at && data.reservation.status.toLowerCase() !== 'quote';
+  const temperatureIndicator = getTemperatureIndicator(reservation.temperature || '');
 
   return (
-    <Card>
+    <Card style={{ backgroundColor: reservation.temperature ? temperatureIndicator.bgColor : undefined }}>
       <CardContent className="p-3">
         {/* Linha 1: Status, ID, Cliente, Valor e Botão Remover */}
         <div className="flex items-center justify-between mb-2">
@@ -171,6 +189,11 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
                 {equipment.type}
               </span>
             ))}
+            {reservation.temperature && (
+              <span className={`text-xs px-1.5 py-0.5 rounded ${temperatureIndicator.color}`}>
+                {temperatureIndicator.emoji} {reservation.temperature}
+              </span>
+            )}
             <span className="text-xs text-muted-foreground">#{data.reservation.id}</span>
             <User className="h-3 w-3 text-muted-foreground" />
             <span className="text-sm font-medium truncate">{data.customer.first_name}</span>
@@ -222,11 +245,11 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField }: Compac
               <SelectValue placeholder="Temp" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="sol">Sol</SelectItem>
-              <SelectItem value="quente">Quente</SelectItem>
-              <SelectItem value="morno">Morno</SelectItem>
-              <SelectItem value="frio">Frio</SelectItem>
-              <SelectItem value="congelado">Congelado</SelectItem>
+              <SelectItem value="sol">☀️ Sol</SelectItem>
+              <SelectItem value="quente">🔥 Quente</SelectItem>
+              <SelectItem value="morno">🌡️ Morno</SelectItem>
+              <SelectItem value="frio">❄️ Frio</SelectItem>
+              <SelectItem value="congelado">🧊 Congelado</SelectItem>
             </SelectContent>
           </Select>
           

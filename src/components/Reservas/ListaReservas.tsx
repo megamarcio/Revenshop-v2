@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, FileText } from 'lucide-react';
 import { useReservationsList } from '@/hooks/useReservationsList';
 import CompactReservationItem from './CompactReservationItem';
+import { generateReservationsListPDF } from './utils/pdfGenerator';
 
 const ListaReservas = () => {
   const [reservationId, setReservationId] = useState('');
@@ -24,23 +25,42 @@ const ListaReservas = () => {
     }
   };
 
+  const handleGeneratePDF = () => {
+    generateReservationsListPDF(reservations);
+  };
+
+  const validReservationsCount = reservations.filter(r => r.data && !r.loading && !r.error).length;
+
   return (
     <div className="container mx-auto p-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             Lista de Reservas
-            {reservations.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={clearAll}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Limpar Tudo
-              </Button>
-            )}
+            <div className="flex gap-2">
+              {validReservationsCount > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGeneratePDF}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  <FileText className="h-4 w-4 mr-2" />
+                  Gerar PDF
+                </Button>
+              )}
+              {reservations.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={clearAll}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Limpar Tudo
+                </Button>
+              )}
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
