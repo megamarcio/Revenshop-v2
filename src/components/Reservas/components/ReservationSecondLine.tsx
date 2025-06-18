@@ -1,49 +1,60 @@
 
 import React from 'react';
-import { Calendar, MapPin, Car } from 'lucide-react';
+import { MapPin, Calendar } from 'lucide-react';
 import { ReservationDetails } from '@/hooks/useReservationById';
-import { extractFirstLocationName } from '../utils/reservationHelpers';
 
 interface ReservationSecondLineProps {
   data: ReservationDetails;
 }
 
 const ReservationSecondLine = ({ data }: ReservationSecondLineProps) => {
-  const pickupLocationShort = extractFirstLocationName(data.reservation.pick_up_location_label);
-  const returnLocationShort = extractFirstLocationName(data.reservation.return_location_label || data.reservation.pick_up_location_label);
+  const formatDate = (dateString: string) => {
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR');
+    } catch {
+      return dateString;
+    }
+  };
 
   return (
-    <div className="flex items-center gap-4 mb-2 text-xs">
-      <div className="flex items-center gap-1">
-        <Calendar className="h-3 w-3 text-green-600" />
-        <span className="text-green-700">Check-in:</span>
-        <span>{new Date(data.reservation.pick_up_date).toLocaleDateString('pt-BR')}</span>
+    <div className="space-y-2">
+      {/* Nome do cliente */}
+      <div className="flex items-center gap-2">
+        <span className="font-medium text-sm text-gray-700">Cliente:</span>
+        <span className="text-sm font-medium text-gray-900">
+          {data.customer.first_name} {data.customer.last_name}
+        </span>
       </div>
-      <div className="flex items-center gap-1">
-        <Calendar className="h-3 w-3 text-red-600" />
-        <span className="text-red-700">Return:</span>
-        <span>{new Date(data.reservation.return_date).toLocaleDateString('pt-BR')}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <MapPin className="h-3 w-3 text-green-600" />
-        <span className="text-green-700 truncate max-w-[80px]">{pickupLocationShort}</span>
-      </div>
-      <div className="flex items-center gap-1">
-        <MapPin className="h-3 w-3 text-red-600" />
-        <span className="text-red-700 truncate max-w-[80px]">{returnLocationShort}</span>
-      </div>
-      {data.selected_vehicle_class?.vehicle_class?.label && (
+      
+      {/* Datas */}
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
         <div className="flex items-center gap-1">
-          <Car className="h-3 w-3 text-blue-600" />
-          <span className="text-blue-700 truncate max-w-[100px]">{data.selected_vehicle_class.vehicle_class.label}</span>
+          <Calendar className="h-3 w-3" />
+          <span>Retirada: {formatDate(data.reservation.pick_up_date)}</span>
         </div>
-      )}
-      {data.vehicles?.[0]?.vehicle?.label && (
         <div className="flex items-center gap-1">
-          <Car className="h-3 w-3 text-muted-foreground" />
-          <span className="truncate max-w-[100px]">{data.vehicles[0].vehicle.label}</span>
+          <Calendar className="h-3 w-3" />
+          <span>Devolução: {formatDate(data.reservation.return_date)}</span>
         </div>
-      )}
+      </div>
+      
+      {/* Locais */}
+      <div className="flex items-center gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-1">
+          <MapPin className="h-3 w-3" />
+          <span className="truncate">
+            {data.reservation.pick_up_location_label}
+          </span>
+        </div>
+        {data.reservation.return_location_label !== data.reservation.pick_up_location_label && (
+          <div className="flex items-center gap-1">
+            <MapPin className="h-3 w-3" />
+            <span className="truncate">
+              {data.reservation.return_location_label}
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
