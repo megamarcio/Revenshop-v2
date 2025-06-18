@@ -2,15 +2,38 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 import { useRevenues } from '@/hooks/useRevenues';
 import { useExpenses } from '@/hooks/useExpenses';
+import { useFinancialChartData } from '@/hooks/useFinancialChartData';
 import { TrendingUp, TrendingDown, DollarSign, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+const chartConfig = {
+  despesasPrevistas: {
+    label: 'Despesas Previstas',
+    color: '#ef4444'
+  },
+  receitasPagas: {
+    label: 'Receitas Pagas',
+    color: '#22c55e'
+  },
+  previsaoReceitas: {
+    label: 'Previsão Receitas',
+    color: '#3b82f6'
+  },
+  receitasConfirmadas: {
+    label: 'Receitas Confirmadas',
+    color: '#10b981'
+  }
+};
+
 const FinancialDashboard = () => {
   const { revenues } = useRevenues();
   const { expenses } = useExpenses();
+  const { data: chartData, isLoading: chartLoading } = useFinancialChartData();
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -41,6 +64,73 @@ const FinancialDashboard = () => {
 
   return (
     <div className="space-y-6">
+      {/* Financial Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Fluxo Financeiro - Últimos 6 Meses</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {chartLoading ? (
+            <div className="h-64 bg-gray-100 animate-pulse rounded"></div>
+          ) : (
+            <>
+              <ChartContainer config={chartConfig} className="h-64 sm:h-80">
+                <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <XAxis dataKey="month" fontSize={12} />
+                  <YAxis fontSize={12} tickFormatter={formatCurrency} />
+                  <ChartTooltip 
+                    content={<ChartTooltipContent 
+                      formatter={(value, name) => [formatCurrency(Number(value)), chartConfig[name as keyof typeof chartConfig]?.label]}
+                    />} 
+                  />
+                  <Bar 
+                    dataKey="despesasPrevistas" 
+                    fill={chartConfig.despesasPrevistas.color}
+                    radius={[2, 2, 0, 0]}
+                  />
+                  <Bar 
+                    dataKey="receitasPagas" 
+                    fill={chartConfig.receitasPagas.color}
+                    radius={[2, 2, 0, 0]}
+                  />
+                  <Bar 
+                    dataKey="previsaoReceitas" 
+                    fill={chartConfig.previsaoReceitas.color}
+                    radius={[2, 2, 0, 0]}
+                    opacity={0.7}
+                  />
+                  <Bar 
+                    dataKey="receitasConfirmadas" 
+                    fill={chartConfig.receitasConfirmadas.color}
+                    radius={[2, 2, 0, 0]}
+                  />
+                </BarChart>
+              </ChartContainer>
+              
+              <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <span>Despesas Previstas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span>Receitas Pagas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded opacity-70"></div>
+                  <span>Previsão Receitas</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-emerald-500 rounded"></div>
+                  <span>Receitas Confirmadas</span>
+                </div>
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -97,6 +187,7 @@ const FinancialDashboard = () => {
         </Card>
       </div>
 
+      {/* Lists Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
