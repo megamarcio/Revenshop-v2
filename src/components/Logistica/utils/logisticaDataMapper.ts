@@ -10,6 +10,14 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
   temperature?: string;
   notes?: string;
 } => {
+  // Extract customer name from the label (first part before " - ")
+  const customerFullName = reservation.customer.label.split(' - ')[0] || reservation.customer.label;
+  
+  // Split the full name into first and last name
+  const nameParts = customerFullName.trim().split(' ');
+  const firstName = nameParts[0] || '';
+  const lastName = nameParts.slice(1).join(' ') || '';
+  
   // Try to extract vehicle class and other info from customer label
   const labelParts = reservation.customer.label.split(' - ');
   let vehicleClass = '';
@@ -49,8 +57,8 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
         signed_at: signStatus.includes('não') ? null : new Date().toISOString(),
       },
       customer: {
-        first_name: reservation.customer.first_name || '',
-        last_name: reservation.customer.last_name || '',
+        first_name: firstName,
+        last_name: lastName,
         phone_number: reservation.customer.phone_number || '',
         f855: kommoLeadId || '',
       },
