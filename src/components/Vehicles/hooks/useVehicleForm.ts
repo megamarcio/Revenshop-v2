@@ -2,59 +2,16 @@
 import { useState, useEffect } from 'react';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 import { useVehicleFormCalculations } from './utils/vehicleFormCalculations';
+import { getInitialFormData } from './utils/vehicleFormInitialData';
 import { toast } from '@/hooks/use-toast';
 
-const initialFormData: VehicleFormData = {
-  name: '',
-  vin: '',
-  year: '',
-  model: '',
-  miles: '',
-  internalCode: '',
-  color: '',
-  plate: '',
-  sunpass: '',
-  category: 'forSale',
-  vehicleUsage: 'sale',
-  consignmentStore: '',
-  purchasePrice: '',
-  salePrice: '',
-  minNegotiable: '',
-  carfaxPrice: '',
-  mmrValue: '',
-  seller: '',
-  finalSalePrice: '',
-  saleDate: '',
-  saleNotes: '',
-  customerName: '',
-  customerPhone: '',
-  paymentMethod: '',
-  financingCompany: '',
-  checkDetails: '',
-  otherPaymentDetails: '',
-  sellerCommission: '',
-  financingBank: '',
-  financingType: '',
-  originalFinancedName: '',
-  purchaseDate: '',
-  dueDate: '',
-  installmentValue: '',
-  downPayment: '',
-  financedAmount: '',
-  totalInstallments: '',
-  paidInstallments: '',
-  remainingInstallments: '',
-  totalToPay: '',
-  payoffValue: '',
-  payoffDate: '',
-  interestRate: '',
-  customFinancingBank: '',
-  description: '',
-  video: ''
-};
-
 export const useVehicleForm = (editingVehicle?: any) => {
-  const [formData, setFormData] = useState<VehicleFormData>(initialFormData);
+  const [formData, setFormData] = useState<VehicleFormData>(() => {
+    // Initialize with proper data from the start
+    console.log('useVehicleForm - Initial setup with editingVehicle:', editingVehicle);
+    return getInitialFormData(editingVehicle);
+  });
+  
   const [photos, setPhotos] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -68,70 +25,45 @@ export const useVehicleForm = (editingVehicle?: any) => {
     formData.salePrice
   );
 
-  // Load editing vehicle data
+  // Load editing vehicle data using the centralized function
   useEffect(() => {
+    console.log('useVehicleForm useEffect - editingVehicle changed:', editingVehicle);
+    
     if (editingVehicle) {
-      console.log('useVehicleForm - Loading editing vehicle:', editingVehicle);
+      const initialData = getInitialFormData(editingVehicle);
+      console.log('useVehicleForm useEffect - setting form data from getInitialFormData:', initialData);
+      console.log('useVehicleForm useEffect - vehicleUsage from initialData:', initialData.vehicleUsage);
       
-      setFormData({
-        name: editingVehicle.name || '',
-        vin: editingVehicle.vin || '',
-        year: editingVehicle.year?.toString() || '',
-        model: editingVehicle.model || '',
-        miles: editingVehicle.miles?.toString() || '',
-        internalCode: editingVehicle.internal_code || editingVehicle.internalCode || '',
-        color: editingVehicle.color || '',
-        plate: editingVehicle.plate || '',
-        sunpass: editingVehicle.sunpass || '',
-        category: editingVehicle.category || 'forSale',
-        vehicleUsage: editingVehicle.vehicleUsage || 'sale',
-        consignmentStore: editingVehicle.consignmentStore || '',
-        purchasePrice: editingVehicle.purchase_price?.toString() || editingVehicle.purchasePrice?.toString() || '',
-        salePrice: editingVehicle.sale_price?.toString() || editingVehicle.salePrice?.toString() || '',
-        minNegotiable: editingVehicle.min_negotiable?.toString() || editingVehicle.minNegotiable?.toString() || '',
-        carfaxPrice: editingVehicle.carfax_price?.toString() || editingVehicle.carfaxPrice?.toString() || '',
-        mmrValue: editingVehicle.mmr_value?.toString() || editingVehicle.mmrValue?.toString() || '',
-        seller: editingVehicle.seller || '',
-        finalSalePrice: editingVehicle.finalSalePrice?.toString() || '',
-        saleDate: editingVehicle.saleDate || '',
-        saleNotes: editingVehicle.saleNotes || '',
-        customerName: editingVehicle.customerName || '',
-        customerPhone: editingVehicle.customerPhone || '',
-        paymentMethod: editingVehicle.paymentMethod || '',
-        financingCompany: editingVehicle.financingCompany || '',
-        checkDetails: editingVehicle.checkDetails || '',
-        otherPaymentDetails: editingVehicle.otherPaymentDetails || '',
-        sellerCommission: editingVehicle.sellerCommission?.toString() || '',
-        financingBank: editingVehicle.financing_bank || editingVehicle.financingBank || '',
-        financingType: editingVehicle.financing_type || editingVehicle.financingType || '',
-        originalFinancedName: editingVehicle.original_financed_name || editingVehicle.originalFinancedName || '',
-        purchaseDate: editingVehicle.purchase_date || editingVehicle.purchaseDate || '',
-        dueDate: editingVehicle.due_date || editingVehicle.dueDate || '',
-        installmentValue: editingVehicle.installment_value?.toString() || editingVehicle.installmentValue?.toString() || '',
-        downPayment: editingVehicle.down_payment?.toString() || editingVehicle.downPayment?.toString() || '',
-        financedAmount: editingVehicle.financed_amount?.toString() || editingVehicle.financedAmount?.toString() || '',
-        totalInstallments: editingVehicle.total_installments?.toString() || editingVehicle.totalInstallments?.toString() || '',
-        paidInstallments: editingVehicle.paid_installments?.toString() || editingVehicle.paidInstallments?.toString() || '',
-        remainingInstallments: editingVehicle.remaining_installments?.toString() || editingVehicle.remainingInstallments?.toString() || '',
-        totalToPay: editingVehicle.total_to_pay?.toString() || editingVehicle.totalToPay?.toString() || '',
-        payoffValue: editingVehicle.payoff_value?.toString() || editingVehicle.payoffValue?.toString() || '',
-        payoffDate: editingVehicle.payoff_date || editingVehicle.payoffDate || '',
-        interestRate: editingVehicle.interest_rate?.toString() || editingVehicle.interestRate?.toString() || '',
-        customFinancingBank: editingVehicle.custom_financing_bank || editingVehicle.customFinancingBank || '',
-        description: editingVehicle.description || '',
-        video: editingVehicle.video || ''
-      });
-      
+      setFormData(initialData);
       setPhotos(editingVehicle.photos || []);
       setVideos(editingVehicle.videos || (editingVehicle.video ? [editingVehicle.video] : []));
+    } else {
+      // For new vehicles, reset to clean initial data
+      console.log('useVehicleForm useEffect - resetting to clean data for new vehicle');
+      const cleanData = getInitialFormData();
+      setFormData(cleanData);
+      setPhotos([]);
+      setVideos([]);
     }
   }, [editingVehicle]);
 
   const handleInputChange = (field: keyof VehicleFormData, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    console.log(`useVehicleForm - handleInputChange: ${field} = ${value}`);
+    
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Log specifically for vehicleUsage changes
+      if (field === 'vehicleUsage') {
+        console.log('useVehicleForm - vehicleUsage changed to:', value);
+        console.log('useVehicleForm - formData after vehicleUsage change:', newData);
+      }
+      
+      return newData;
+    });
     
     // Clear error when user starts typing
     if (errors[field]) {

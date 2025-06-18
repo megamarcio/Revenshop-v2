@@ -41,6 +41,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
   console.log('VehicleForm - editingVehicle:', editingVehicle);
   console.log('VehicleForm - isEditing:', isEditing);
+  console.log('VehicleForm - current formData.vehicleUsage:', formData.vehicleUsage);
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
@@ -72,6 +73,9 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    console.log('VehicleForm - handleSubmit - formData before validation:', formData);
+    console.log('VehicleForm - handleSubmit - vehicleUsage:', formData.vehicleUsage);
     
     if (!validateFormData()) {
       toast({
@@ -117,6 +121,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         plate: formData.plate,
         sunpass: formData.sunpass,
         
+        // CRÍTICO: Garantir que vehicleUsage seja incluído
+        vehicleUsage: formData.vehicleUsage,
+        consignmentStore: formData.consignmentStore,
+        
         photos: photos,
         video: videos.length > 0 ? videos[0] : undefined,
         videos: videos
@@ -128,6 +136,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         console.log('VehicleForm - handleSubmit - adding ID for update:', editingVehicle.id);
       }
 
+      console.log('VehicleForm - submitting vehicleData with vehicleUsage:', vehicleData.vehicleUsage);
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
 
       await onSave(vehicleData);
