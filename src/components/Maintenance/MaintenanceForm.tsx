@@ -11,6 +11,7 @@ import ReceiptUploadForm from './forms/ReceiptUploadForm';
 import MaintenanceFormHeader from './forms/MaintenanceFormHeader';
 import MaintenanceFormActions from './forms/MaintenanceFormActions';
 import MaintenancePartsManager from './components/MaintenancePartsManager';
+import UrgentMaintenanceSection from './forms/UrgentMaintenanceSection';
 import { useMaintenanceFormData } from './hooks/useMaintenanceFormData';
 import { useMaintenanceFormStatus } from './hooks/useMaintenanceFormStatus';
 import { useMaintenanceFormSubmit } from './hooks/useMaintenanceFormSubmit';
@@ -135,6 +136,14 @@ const MaintenanceForm = ({
               ...prev,
               custom_maintenance: custom
             }))} 
+          />
+
+          <UrgentMaintenanceSection
+            isUrgent={formData.is_urgent}
+            onUrgentChange={urgent => setFormData(prev => ({
+              ...prev,
+              is_urgent: urgent
+            }))}
           />
 
           <MechanicInfoForm 

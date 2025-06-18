@@ -37,6 +37,7 @@ export interface MaintenanceRecord {
   labor: MaintenanceLabor[];
   total_amount: number;
   receipt_urls: string[];
+  is_urgent: boolean;
   created_at?: string;
   created_by?: string;
 }
@@ -55,6 +56,7 @@ export interface MaintenanceFormData {
   parts: MaintenancePart[];
   labor: MaintenanceLabor[];
   receipt_urls: string[];
+  is_urgent: boolean;
 }
 
 export const PARTS_WEBSITES = [

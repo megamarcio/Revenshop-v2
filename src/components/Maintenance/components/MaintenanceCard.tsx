@@ -1,17 +1,20 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Wrench, Phone, Edit, Trash2, Clock } from 'lucide-react';
+import { Calendar, Wrench, Phone, Edit, Trash2, Clock, AlertTriangle } from 'lucide-react';
 import { MaintenanceRecord } from '../../../types/maintenance';
 import { useMaintenanceStatus } from '../hooks/useMaintenanceStatus';
 import { formatCurrency, formatDate, getMaintenanceTypeLabel } from '../utils/maintenanceFormatters';
+
 interface MaintenanceCardProps {
   maintenance: MaintenanceRecord;
   canEditVehicles: boolean;
   onEdit: (maintenance: MaintenanceRecord) => void;
   onDelete: (maintenance: MaintenanceRecord) => void;
 }
+
 const MaintenanceCard = ({
   maintenance,
   canEditVehicles,
@@ -23,14 +26,45 @@ const MaintenanceCard = ({
     getStatusLabel,
     getStatusBadgeStyles
   } = useMaintenanceStatus();
+
   const status = getMaintenanceStatus(maintenance);
-  return <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-revenshop-primary relative">
+
+  const getMaintenanceItemsDisplay = () => {
+    if (maintenance.maintenance_items.includes('Outros') && maintenance.custom_maintenance) {
+      const otherItems = maintenance.maintenance_items.filter(item => item !== 'Outros');
+      const outrosText = `Outros: ${maintenance.custom_maintenance}`;
+      
+      if (otherItems.length > 0) {
+        return `${otherItems.slice(0, 1).join(', ')}, ${outrosText}`;
+      }
+      return outrosText;
+    }
+    
+    const displayItems = maintenance.maintenance_items.slice(0, 2).join(', ');
+    if (maintenance.maintenance_items.length > 2) {
+      return `${displayItems}... +${maintenance.maintenance_items.length - 2}`;
+    }
+    return displayItems;
+  };
+
+  const cardBorderClass = maintenance.is_urgent 
+    ? "border-l-4 border-l-red-500 bg-red-50" 
+    : "border-l-4 border-l-revenshop-primary";
+
+  return (
+    <Card className={`hover:shadow-lg transition-shadow ${cardBorderClass} relative`}>
       <CardContent className="p-4">
-        {/* Status no canto superior esquerdo do card */}
-        <div className="absolute top-3 left-3">
+        {/* Status e Urgente no canto superior esquerdo do card */}
+        <div className="absolute top-3 left-3 flex gap-2">
           <Badge className={getStatusBadgeStyles(status)}>
             {getStatusLabel(status)}
           </Badge>
+          {maintenance.is_urgent && (
+            <Badge className="bg-red-500 hover:bg-red-600 text-white border-0 flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              Urgente
+            </Badge>
+          )}
         </div>
 
         <div className="ml-24 flex items-start justify-between mb-3">
@@ -47,14 +81,16 @@ const MaintenanceCard = ({
             <span className="font-bold text-revenshop-primary text-lg">
               {formatCurrency(maintenance.total_amount)}
             </span>
-            {canEditVehicles && <div className="flex gap-1">
+            {canEditVehicles && (
+              <div className="flex gap-1">
                 <Button variant="ghost" size="sm" onClick={() => onEdit(maintenance)}>
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => onDelete(maintenance)} className="text-red-600 hover:text-red-700 hover:bg-red-50">
                   <Trash2 className="h-4 w-4" />
                 </Button>
-              </div>}
+              </div>
+            )}
           </div>
         </div>
 
@@ -65,16 +101,20 @@ const MaintenanceCard = ({
               <span className="text-gray-600">Criado em:</span>
               <span>{formatDate(maintenance.detection_date)}</span>
             </div>
-            {maintenance.promised_date && <div className="flex items-center gap-2">
+            {maintenance.promised_date && (
+              <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-orange-500" />
                 <span className="text-gray-600">Prometida:</span>
                 <span>{formatDate(maintenance.promised_date)}</span>
-              </div>}
-            {maintenance.repair_date && <div className="flex items-center gap-2">
+              </div>
+            )}
+            {maintenance.repair_date && (
+              <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4 text-green-500" />
                 <span className="text-gray-600">Reparo:</span>
                 <span>{formatDate(maintenance.repair_date)}</span>
-              </div>}
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">
@@ -83,18 +123,18 @@ const MaintenanceCard = ({
               <span className="text-gray-600">Mecânico:</span>
               <span>{maintenance.mechanic_name}</span>
             </div>
-            
           </div>
 
           <div className="space-y-1">
             <div className="text-sm">
               <span className="text-gray-600">Itens:</span>
-              <span className="ml-2">{maintenance.maintenance_items.slice(0, 2).join(', ')}</span>
-              {maintenance.maintenance_items.length > 2 && <span className="text-gray-500">... +{maintenance.maintenance_items.length - 2}</span>}
+              <span className="ml-2">{getMaintenanceItemsDisplay()}</span>
             </div>
           </div>
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default MaintenanceCard;

@@ -490,6 +490,7 @@ export type Database = {
           details: string | null
           detection_date: string
           id: string
+          is_urgent: boolean
           labor: Json
           maintenance_items: string[]
           maintenance_type: string
@@ -510,6 +511,7 @@ export type Database = {
           details?: string | null
           detection_date: string
           id?: string
+          is_urgent?: boolean
           labor?: Json
           maintenance_items?: string[]
           maintenance_type: string
@@ -530,6 +532,7 @@ export type Database = {
           details?: string | null
           detection_date?: string
           id?: string
+          is_urgent?: boolean
           labor?: Json
           maintenance_items?: string[]
           maintenance_type?: string

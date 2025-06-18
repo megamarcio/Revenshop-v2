@@ -64,6 +64,7 @@ export const addMaintenanceRecord = async (
       labor: maintenance.labor as any, // Cast to Json type for Supabase
       total_amount: maintenance.total_amount,
       receipt_urls: maintenance.receipt_urls,
+      is_urgent: maintenance.is_urgent,
       created_by: userId
     };
 

@@ -16,7 +16,8 @@ export const useMaintenanceFormData = (editingMaintenance?: any) => {
     mechanic_phone: '',
     parts: [],
     labor: [],
-    receipt_urls: []
+    receipt_urls: [],
+    is_urgent: false
   });
 
   const [detectionDate, setDetectionDate] = useState<Date>(new Date());
@@ -45,7 +46,8 @@ export const useMaintenanceFormData = (editingMaintenance?: any) => {
           }))
         })),
         labor: editingMaintenance.labor || [],
-        receipt_urls: editingMaintenance.receipt_urls || []
+        receipt_urls: editingMaintenance.receipt_urls || [],
+        is_urgent: editingMaintenance.is_urgent || false
       });
       
       if (editingMaintenance.detection_date) {

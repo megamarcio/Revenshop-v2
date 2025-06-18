@@ -27,6 +27,7 @@ export interface DatabaseMaintenanceRecord {
   labor: unknown;
   total_amount: number;
   receipt_urls: string[];
+  is_urgent: boolean;
   created_at: string;
   created_by: string | null;
   vehicles?: {

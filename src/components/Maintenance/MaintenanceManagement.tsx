@@ -8,8 +8,7 @@ import MaintenanceList from './MaintenanceList';
 import MaintenanceViewModal from './MaintenanceViewModal';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
-import { useVehiclesWithMaintenanceIssues } from '../../hooks/useVehiclesWithMaintenanceIssues';
-import VehicleIssuesAlert from './components/VehicleIssuesAlert';
+import UrgentMaintenanceAlert from './components/UrgentMaintenanceAlert';
 import MaintenanceStats from './components/MaintenanceStats';
 import MaintenanceHeader from './components/MaintenanceHeader';
 
@@ -17,21 +16,9 @@ const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();
   const { maintenances } = useMaintenance();
   const { vehicles } = useVehiclesOptimized({ category: 'forSale', limit: 100, minimal: true });
-  const { 
-    vehiclesWithIssues, 
-    technicalItemsCount, 
-    pendingMaintenanceCount,
-    isLoading: isLoadingIssues 
-  } = useVehiclesWithMaintenanceIssues();
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
-  const [showOverdueModal, setShowOverdueModal] = useState(false);
   const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
-
-  console.log('MaintenanceManagement - vehiclesWithIssues:', vehiclesWithIssues.length);
-  console.log('MaintenanceManagement - technicalItemsCount:', technicalItemsCount);
-  console.log('MaintenanceManagement - pendingMaintenanceCount:', pendingMaintenanceCount);
-  console.log('MaintenanceManagement - isLoadingIssues:', isLoadingIssues);
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -74,13 +61,24 @@ const MaintenanceManagement = () => {
   // Calculate statistics from real data
   const openMaintenances = maintenances.filter(m => {
     const today = new Date();
-    const repairDate = m.repair_date ? new Date(m.repair_date) : null;
+    const repairDate =.repair_date ? new Date(m.repair_date) : null;
     const promisedDate = m.promised_date ? new Date(m.promised_date) : null;
     
     // Open: no repair date and (no promised date or promised date >= today)
-    // Pending: has promised date but no repair date
     return !repairDate && (!promisedDate || promisedDate >= today);
   }).length;
+
+  // Filter urgent maintenances that are pending/open
+  const urgentMaintenances = maintenances.filter(m => {
+    if (!m.is_urgent) return false;
+    
+    const repairDate = m.repair_date ? new Date(m.repair_date) : null;
+    const promisedDate = m.promised_date ? new Date(m.promised_date) : null;
+    const today = new Date();
+    
+    // Only show urgent maintenances that are not completed
+    return !repairDate && (!promisedDate || promisedDate >= today);
+  });
 
   const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
 
@@ -93,20 +91,19 @@ const MaintenanceManagement = () => {
         onNewMaintenance={handleNewMaintenance}
       />
 
-      {/* Só mostra o alerta se realmente houver veículos com problemas */}
-      {!isLoadingIssues && vehiclesWithIssues.length > 0 && (
-        <VehicleIssuesAlert
-          vehiclesWithIssues={vehiclesWithIssues}
-          onViewDetails={() => setShowOverdueModal(true)}
-          onViewVehicleMaintenance={handleViewVehicleMaintenance}
+      {/* Alert for urgent maintenances */}
+      {urgentMaintenances.length > 0 && (
+        <UrgentMaintenanceAlert
+          urgentMaintenances={urgentMaintenances}
+          onViewDetails={handleViewVehicleMaintenance}
         />
       )}
 
       <MaintenanceStats
         openMaintenances={openMaintenances}
-        vehiclesWithIssues={vehiclesWithIssues.length}
+        vehiclesWithIssues={0} // Removido o sistema anterior
         totalVehicles={vehicles.length}
-        technicalItemsCount={technicalItemsCount}
+        technicalItemsCount={0} // Removido o sistema anterior
       />
 
       <MaintenanceList 
@@ -118,15 +115,6 @@ const MaintenanceManagement = () => {
           open={showForm}
           onClose={handleCloseForm}
           editingMaintenance={editingMaintenance}
-        />
-      )}
-
-      {showOverdueModal && (
-        <MaintenanceViewModal
-          isOpen={showOverdueModal}
-          onClose={() => setShowOverdueModal(false)}
-          vehicleId={undefined}
-          vehicleName="Todos os Veículos com Itens Pendentes"
         />
       )}
 
