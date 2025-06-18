@@ -52,13 +52,12 @@ export const useMaintenanceFormSubmit = ({
       return;
     }
 
-    const status = getMaintenanceStatus();
-    
-    // Validar se data de reparo é obrigatória para status "completed"
-    if (status === 'completed' && !repairDate) {
+    // Validar se data de reparo é obrigatória apenas quando existe
+    // A data prometida nunca é obrigatória
+    if (repairDate && !repairDate) {
       toast({
         title: 'Erro',
-        description: 'Data de reparo é obrigatória para manutenções concluídas',
+        description: 'Data de reparo inválida',
         variant: 'destructive'
       });
       return;

@@ -118,7 +118,7 @@ const DateSelectionForm = ({
 
           {/* Data Prometida */}
           <div className="space-y-2">
-            <Label>Data Prometida</Label>
+            <Label>Data Prometida <span className="text-gray-500 text-sm">(opcional)</span></Label>
             <div className="flex gap-2">
               <Popover>
                 <PopoverTrigger asChild>
@@ -143,7 +143,7 @@ const DateSelectionForm = ({
 
           {/* Data de Reparo */}
           <div className="space-y-2">
-            <Label>Data de Reparo</Label>
+            <Label>Data de Reparo <span className="text-gray-500 text-sm">(opcional)</span></Label>
             <div className="flex gap-2">
               <Popover>
                 <PopoverTrigger asChild>

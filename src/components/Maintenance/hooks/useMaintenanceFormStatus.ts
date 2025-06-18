@@ -1,7 +1,5 @@
 
-import { MaintenanceFormData } from '../../../types/maintenance';
-
-export const useMaintenanceFormStatus = (repairDate?: Date, promisedDate?: Date) => {
+export const useMaintenanceFormStatus = (promisedDate?: Date, repairDate?: Date) => {
   const getMaintenanceStatus = () => {
     // Concluída: com data de reparo
     if (repairDate) return 'completed';
@@ -33,9 +31,9 @@ export const useMaintenanceFormStatus = (repairDate?: Date, promisedDate?: Date)
       case 'open':
         return 'Em Aberto';
       case 'pending':
-        return 'Concluída';
-      case 'completed':
         return 'Pendente';
+      case 'completed':
+        return 'Concluída';
       default:
         return 'Indefinido';
     }
