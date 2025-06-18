@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { CalendarDays, MapPin, User, DollarSign, Clock, ExternalLink, MessageCircle, Info } from 'lucide-react';
+import { CalendarDays, MapPin, User, DollarSign, Clock, ExternalLink, MessageCircle, Info, Building2 } from 'lucide-react';
 import { ReservationDetails } from '@/hooks/useReservationById';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -47,6 +47,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
   };
 
   const kommoLink = `https://r3rentalcar.kommo.com/leads/detail/${reservation.customer.f855}`;
+  const hqRentalLink = `https://r3-rental.us5.hqrentals.app/car-rental/reservations/step7?id=${reservation.reservation.id}`;
 
   return (
     <TooltipProvider>
@@ -81,6 +82,11 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
                 <User className="h-4 w-4 text-muted-foreground" />
                 <span className="font-medium">Cliente:</span>
                 <span>{reservation.customer.first_name}</span>
+                {reservation.customer.phone_number && (
+                  <span className="text-sm text-muted-foreground">
+                    ({reservation.customer.phone_number})
+                  </span>
+                )}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-5 w-5 p-0">
@@ -94,7 +100,7 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
               </div>
             </div>
 
-            {/* Botões Kommo e WhatsApp */}
+            {/* Botões HQ Rental, Kommo e WhatsApp */}
             <div className="flex justify-end gap-2">
               <Button 
                 variant="outline" 
@@ -102,8 +108,23 @@ const ReservationDetailsCard = ({ reservation }: ReservationDetailsCardProps) =>
                 asChild
                 className="h-8 px-3"
               >
+                <a href={hqRentalLink} target="_blank" rel="noopener noreferrer">
+                  <img 
+                    src="/lovable-uploads/e3703660-4058-4893-918f-dbc178a72a69.png" 
+                    alt="HQ Rental" 
+                    className="h-4 w-4 mr-1"
+                  />
+                  HQ Rental
+                </a>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                asChild
+                className="h-8 px-3"
+              >
                 <a href={kommoLink} target="_blank" rel="noopener noreferrer">
-                  <ExternalLink className="h-3 w-3 mr-1" />
+                  <Building2 className="h-3 w-3 mr-1" />
                   Kommo
                 </a>
               </Button>
