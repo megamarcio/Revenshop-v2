@@ -18,10 +18,10 @@ const ReservationFirstLine = ({ data, temperature, onRemove, extraActions }: Res
   return (
     <div className="flex items-center justify-between mb-2">
       <div className="flex items-center gap-2 flex-1">
-        <span className="font-medium text-sm">{data.reservation.confirmation_number}</span>
+        <span className="font-medium text-sm">#{data.reservation.id}</span>
         {temperature && (
           <span className="text-xs px-1.5 py-0.5 rounded text-white" style={{ backgroundColor: temperatureIndicator.color }}>
-            {temperatureIndicator.emoji} {temperatureIndicator.label}
+            {temperatureIndicator.emoji} {temperature}
           </span>
         )}
       </div>
@@ -31,7 +31,7 @@ const ReservationFirstLine = ({ data, temperature, onRemove, extraActions }: Res
         <Button
           variant="outline"
           size="sm"
-          onClick={() => onRemove(data.reservation.id)}
+          onClick={() => onRemove(String(data.reservation.id))}
           className="h-7 w-7 p-0 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
           title="Remover"
         >
