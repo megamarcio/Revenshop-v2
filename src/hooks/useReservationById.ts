@@ -33,6 +33,8 @@ export interface ReservationDetails {
       plate?: string;
     };
   }>;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // Histórico de consultas

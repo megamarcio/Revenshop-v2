@@ -5,12 +5,16 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Plus, Trash2, FileText } from 'lucide-react';
 import { useReservationsList } from '@/hooks/useReservationsList';
+import { useReservationDateSearch } from '@/hooks/useReservationDateSearch';
 import CompactReservationItem from './CompactReservationItem';
+import ReservationDateFilters from './components/ReservationDateFilters';
+import DateSearchResults from './components/DateSearchResults';
 import { generateReservationsListPDF } from './utils/pdfGenerator';
 
 const ListaReservas = () => {
   const [reservationId, setReservationId] = useState('');
   const { reservations, addReservation, removeReservation, clearAll, updateReservationField } = useReservationsList();
+  const { searchResults, loading: searchLoading, searchReservations, clearResults } = useReservationDateSearch();
 
   const handleAddReservation = async () => {
     if (reservationId.trim()) {
@@ -29,14 +33,38 @@ const ListaReservas = () => {
     generateReservationsListPDF(reservations);
   };
 
+  const handleDateSearch = (startDate: string, endDate: string, dateField: 'created_at' | 'updated_at') => {
+    searchReservations(startDate, endDate, dateField);
+  };
+
+  const handleAddFromSearch = async (reservationId: string) => {
+    await addReservation(reservationId);
+  };
+
   const validReservationsCount = reservations.filter(r => r.data && !r.loading && !r.error).length;
+  const hasSearchResults = searchResults.length > 0;
 
   return (
     <div className="container mx-auto p-6">
+      {/* Filtro de Datas */}
+      <ReservationDateFilters
+        onSearch={handleDateSearch}
+        onClear={clearResults}
+        loading={searchLoading}
+        hasResults={hasSearchResults}
+      />
+
+      {/* Resultados da Busca por Data */}
+      <DateSearchResults
+        results={searchResults}
+        onAddToList={handleAddFromSearch}
+      />
+
+      {/* Lista Manual de Reservas */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            Lista de Reservas
+            Lista de Reservas Manual
             <div className="flex gap-2">
               {validReservationsCount > 0 && (
                 <Button
