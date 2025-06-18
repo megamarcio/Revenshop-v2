@@ -61,7 +61,7 @@ const MaintenanceManagement = () => {
   // Calculate statistics from real data
   const openMaintenances = maintenances.filter(m => {
     const today = new Date();
-    const repairDate =.repair_date ? new Date(m.repair_date) : null;
+    const repairDate = m.repair_date ? new Date(m.repair_date) : null;
     const promisedDate = m.promised_date ? new Date(m.promised_date) : null;
     
     // Open: no repair date and (no promised date or promised date >= today)
