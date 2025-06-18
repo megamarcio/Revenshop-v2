@@ -1,11 +1,41 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { ReservationDetails } from './useReservationById';
 
 export interface DateSearchReservation {
   id: string;
-  data: ReservationDetails;
+  data: {
+    reservation: {
+      id?: string | number;
+      pick_up_date: string;
+      pick_up_location_label: string;
+      return_date: string;
+      return_location_label: string;
+      status: string;
+      outstanding_balance: string;
+      signed_at?: string | null;
+      total_price?: {
+        amount_for_display: string;
+      };
+    };
+    customer: {
+      first_name: string;
+      last_name: string;
+      f855: string;
+      phone_number?: string;
+    };
+    selected_vehicle_class?: {
+      vehicle_class?: {
+        label?: string;
+      };
+    };
+    vehicles?: Array<{
+      vehicle?: {
+        label?: string;
+        plate?: string;
+      };
+    }>;
+  };
   created_at?: string;
   updated_at?: string;
 }
@@ -97,24 +127,65 @@ export const useReservationDateSearch = () => {
       const result = await response.json();
       console.log('Resposta da API:', result);
 
-      // Processar resposta da API
+      // Processar resposta da API - mapear para o formato esperado pelo componente
       let reservations: DateSearchReservation[] = [];
       
       if (result.data && Array.isArray(result.data)) {
         // Se a API retorna uma lista de reservas
-        reservations = result.data.map((reservation: any, index: number) => ({
-          id: reservation.id || `search-${Date.now()}-${index}`,
-          data: reservation,
-          created_at: reservation.created_at,
-          updated_at: reservation.updated_at
+        reservations = result.data.map((apiReservation: any, index: number) => ({
+          id: apiReservation.id || `search-${Date.now()}-${index}`,
+          data: {
+            reservation: {
+              id: apiReservation.id,
+              pick_up_date: apiReservation.pick_up_date,
+              pick_up_location_label: apiReservation.pick_up_location_label,
+              return_date: apiReservation.return_date,
+              return_location_label: apiReservation.return_location_label,
+              status: apiReservation.status,
+              outstanding_balance: apiReservation.outstanding_balance,
+              signed_at: apiReservation.signed_at,
+              total_price: apiReservation.total_price_without_taxes || apiReservation.total_price
+            },
+            customer: {
+              first_name: apiReservation.customer?.first_name || 'N/A',
+              last_name: apiReservation.customer?.last_name || 'N/A',
+              f855: apiReservation.customer?.f855 || '',
+              phone_number: apiReservation.customer?.phone_number
+            },
+            selected_vehicle_class: apiReservation.selected_vehicle_class,
+            vehicles: apiReservation.vehicles
+          },
+          created_at: apiReservation.created_at,
+          updated_at: apiReservation.updated_at
         }));
       } else if (result.data) {
         // Se a API retorna uma única reserva
+        const apiReservation = result.data;
         reservations = [{
-          id: result.data.id || `search-${Date.now()}`,
-          data: result.data,
-          created_at: result.data.created_at,
-          updated_at: result.data.updated_at
+          id: apiReservation.id || `search-${Date.now()}`,
+          data: {
+            reservation: {
+              id: apiReservation.id,
+              pick_up_date: apiReservation.pick_up_date,
+              pick_up_location_label: apiReservation.pick_up_location_label,
+              return_date: apiReservation.return_date,
+              return_location_label: apiReservation.return_location_label,
+              status: apiReservation.status,
+              outstanding_balance: apiReservation.outstanding_balance,
+              signed_at: apiReservation.signed_at,
+              total_price: apiReservation.total_price_without_taxes || apiReservation.total_price
+            },
+            customer: {
+              first_name: apiReservation.customer?.first_name || 'N/A',
+              last_name: apiReservation.customer?.last_name || 'N/A',
+              f855: apiReservation.customer?.f855 || '',
+              phone_number: apiReservation.customer?.phone_number
+            },
+            selected_vehicle_class: apiReservation.selected_vehicle_class,
+            vehicles: apiReservation.vehicles
+          },
+          created_at: apiReservation.created_at,
+          updated_at: apiReservation.updated_at
         }];
       }
 
