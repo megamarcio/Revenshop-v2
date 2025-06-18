@@ -115,16 +115,16 @@ const DateSearchResults = ({ results, onAddToList }: DateSearchResultsProps) => 
                     onRemove={handleRemoveFromSearch}
                     onUpdateField={handleUpdateField}
                   />
-                  {/* Botão para adicionar à lista manual - ao lado dos botões de ação */}
-                  <div className="absolute top-2 right-24">
+                  {/* Botão para adicionar à lista manual - ícone apenas, ao lado da lixeira */}
+                  <div className="absolute top-2 right-16">
                     <Button
                       variant="outline"
                       size="sm"
                       onClick={() => handleAddToManualList(result.id)}
-                      className="h-7 px-2 text-xs text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                      className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 border-blue-200 hover:border-blue-300"
+                      title="Adicionar à Lista Manual"
                     >
-                      <Plus className="h-3 w-3 mr-1" />
-                      Add Lista Manual
+                      <Plus className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>

@@ -60,20 +60,26 @@ const ReservationDateFilters = ({ onSearch, onClear, loading, hasResults }: Rese
     onClear();
   };
 
+  const formatDateForDisplay = (dateString: string) => {
+    // Usar apenas a data local sem conversão de timezone para evitar o problema do dia anterior
+    const [year, month, day] = dateString.split('-');
+    return new Date(parseInt(year), parseInt(month) - 1, parseInt(day)).toLocaleDateString('pt-BR');
+  };
+
   const isSearchDisabled = !startDate || !endDate || loading || !!validationError;
 
   return (
     <Card className="mb-6">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-lg">
           <Calendar className="h-5 w-5" />
           Buscar Reservas por Período
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <div>
-            <label className="block text-sm font-medium mb-2">Data Inicial</label>
+            <label className="block text-sm font-medium mb-1">Data Inicial</label>
             <Input
               type="date"
               value={startDate}
@@ -81,12 +87,12 @@ const ReservationDateFilters = ({ onSearch, onClear, loading, hasResults }: Rese
                 setStartDate(e.target.value);
                 setValidationError('');
               }}
-              className="w-full"
+              className="w-full text-sm"
               max={endDate || undefined}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Data Final</label>
+            <label className="block text-sm font-medium mb-1">Data Final</label>
             <Input
               type="date"
               value={endDate}
@@ -94,14 +100,14 @@ const ReservationDateFilters = ({ onSearch, onClear, loading, hasResults }: Rese
                 setEndDate(e.target.value);
                 setValidationError('');
               }}
-              className="w-full"
+              className="w-full text-sm"
               min={startDate || undefined}
             />
           </div>
           <div>
-            <label className="block text-sm font-medium mb-2">Campo de Data</label>
+            <label className="block text-sm font-medium mb-1">Campo de Data</label>
             <Select value={dateField} onValueChange={(value: 'created_at' | 'updated_at') => setDateField(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="text-sm">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -110,22 +116,24 @@ const ReservationDateFilters = ({ onSearch, onClear, loading, hasResults }: Rese
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-end gap-2">
+          <div className="flex items-end gap-1">
             <Button 
               onClick={handleSearch} 
               disabled={isSearchDisabled}
-              className="flex-1"
+              className="flex-1 h-9 text-xs"
+              size="sm"
             >
-              <Search className="h-4 w-4 mr-2" />
+              <Search className="h-3 w-3 mr-1" />
               {loading ? 'Buscando...' : 'Buscar'}
             </Button>
             {hasResults && (
               <Button 
                 onClick={handleClear} 
                 variant="outline"
-                className="flex-1"
+                className="flex-1 h-9 text-xs"
+                size="sm"
               >
-                <X className="h-4 w-4 mr-2" />
+                <X className="h-3 w-3 mr-1" />
                 Limpar
               </Button>
             )}
@@ -133,15 +141,15 @@ const ReservationDateFilters = ({ onSearch, onClear, loading, hasResults }: Rese
         </div>
         
         {validationError && (
-          <div className="mt-3 flex items-center gap-2 text-red-600 text-sm">
-            <AlertCircle className="h-4 w-4" />
+          <div className="mt-2 flex items-center gap-2 text-red-600 text-xs">
+            <AlertCircle className="h-3 w-3" />
             {validationError}
           </div>
         )}
         
         {(startDate && endDate && !validationError) && (
-          <div className="mt-3 text-sm text-muted-foreground">
-            Período selecionado: {new Date(startDate).toLocaleDateString('pt-BR')} - {new Date(endDate).toLocaleDateString('pt-BR')}
+          <div className="mt-2 text-xs text-muted-foreground">
+            Período selecionado: {formatDateForDisplay(startDate)} - {formatDateForDisplay(endDate)}
           </div>
         )}
       </CardContent>
