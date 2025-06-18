@@ -1,18 +1,10 @@
 
 import React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { FileText } from "lucide-react";
 import { Reservation } from "../types/reservationTypes";
 import { getOrderedReservations } from "../utils/reservationUtils";
-import ReservationTableRow from "./ReservationTableRow";
+import LogisticaCompactReservationItem from "./LogisticaCompactReservationItem";
 
 interface ReservationTableProps {
   error: string | null;
@@ -115,58 +107,38 @@ const ReservationTable: React.FC<ReservationTableProps> = ({
 
       <div className="mt-6">
         <h3 className="text-lg font-semibold mb-4">Resultados</h3>
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-[10px] font-bold">ID</TableHead>
-                <TableHead className="text-[10px] font-bold">Cliente</TableHead>
-                <TableHead className="text-[10px] font-bold">Telefone</TableHead>
-                <TableHead className="text-[10px] font-bold">Data Pickup</TableHead>
-                <TableHead className="text-[10px] font-bold">Data Retorno</TableHead>
-                <TableHead className="text-[10px] font-bold">Veículo</TableHead>
-                <TableHead className="text-[10px] font-bold">Status</TableHead>
-                <TableHead className="text-[10px] font-bold">Ações</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {orderedReservations.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8">
-                    <div className="flex flex-col items-center text-muted-foreground">
-                      <div className="text-4xl mb-2">📋</div>
-                      <p className="text-lg font-medium">Nenhum resultado encontrado</p>
-                      <p className="text-sm">Tente ajustar os filtros de data</p>
+        
+        {orderedReservations.length === 0 ? (
+          <div className="flex flex-col items-center text-muted-foreground py-8">
+            <div className="text-4xl mb-2">📋</div>
+            <p className="text-lg font-medium">Nenhum resultado encontrado</p>
+            <p className="text-sm">Tente ajustar os filtros de data</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {orderedReservations.map((reservation, idx) => {
+              try {
+                return (
+                  <LogisticaCompactReservationItem
+                    key={`${reservation.id}-${idx}`}
+                    reservation={reservation}
+                    kommoLeadId={rowKommoLeadIds[reservation.id]}
+                    onShareClick={onShareClick}
+                  />
+                );
+              } catch (error) {
+                console.error('Error rendering reservation card:', error, { reservation, idx });
+                return (
+                  <div key={`error-${idx}`} className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="text-red-700 text-sm">
+                      Erro ao carregar reserva #{reservation.id || idx}
                     </div>
-                  </TableCell>
-                </TableRow>
-              ) : (
-                orderedReservations.map((reservation, idx) => {
-                  try {
-                    return (
-                      <ReservationTableRow
-                        key={`${reservation.id}-${idx}`}
-                        reservation={reservation}
-                        badgeType={badgeType}
-                        kommoLeadId={rowKommoLeadIds[reservation.id]}
-                        onShareClick={onShareClick}
-                      />
-                    );
-                  } catch (error) {
-                    console.error('Error rendering reservation row:', error, { reservation, idx });
-                    return (
-                      <TableRow key={`error-${idx}`}>
-                        <TableCell colSpan={8} className="text-center py-4 text-red-600 text-[10px] font-bold">
-                          Erro ao carregar reserva #{reservation.id || idx}
-                        </TableCell>
-                      </TableRow>
-                    );
-                  }
-                })
-              )}
-            </TableBody>
-          </Table>
-        </div>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
