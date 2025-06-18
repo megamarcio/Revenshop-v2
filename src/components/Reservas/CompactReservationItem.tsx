@@ -36,12 +36,6 @@ const CompactReservationItem = ({ reservation, onRemove, onUpdateField, extraAct
   }
 
   const data = reservation.data;
-  
-  // Debug logs para verificar os dados do cliente
-  console.log('CompactReservationItem - Customer data:', data.customer);
-  console.log('CompactReservationItem - First name:', data.customer?.first_name);
-  console.log('CompactReservationItem - Last name:', data.customer?.last_name);
-  
   const temperatureIndicator = getTemperatureIndicator(reservation.temperature || '');
 
   return (
