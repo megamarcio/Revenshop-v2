@@ -65,7 +65,14 @@ const ReservationStatusSection = ({
                                lastNameLower.includes('2x cadeirinhas');
       
       if (hasCarSeatPattern) {
-        equipments.push('Car Seat');
+        // Determinar se é Car Seat A ou B
+        let carSeatType = 'Car Seat';
+        if (lastNameLower.includes('car seat a') || lastNameLower.includes('cadeirinha a')) {
+          carSeatType = 'Car Seat A';
+        } else if (lastNameLower.includes('car seat b') || lastNameLower.includes('cadeirinha b')) {
+          carSeatType = 'Car Seat B';
+        }
+        equipments.push({ type: carSeatType, color: 'bg-yellow-100 text-yellow-800' });
       }
     }
     
@@ -82,13 +89,13 @@ const ReservationStatusSection = ({
                                 lastNameLower.includes('2x carrinhos');
       
       if (hasStrollerPattern) {
-        equipments.push('Stroller');
+        equipments.push({ type: 'Stroller', color: 'bg-green-100 text-green-800' });
       }
     }
     
-    // Check for Booster Seat (mantém a lógica original)
-    if (lastNameLower.includes('booster seat')) {
-      equipments.push('Booster Seat');
+    // Check for Booster Badge
+    if (lastNameLower.includes('booster')) {
+      equipments.push({ type: 'Booster', color: 'bg-purple-100 text-purple-800' });
     }
     
     return equipments;
@@ -109,8 +116,8 @@ const ReservationStatusSection = ({
             </span>
           )}
           {childEquipments.map((equipment, index) => (
-            <span key={index} className="text-xs bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">
-              {equipment}
+            <span key={index} className={`text-xs px-1.5 py-0.5 rounded ${equipment.color}`}>
+              {equipment.type}
             </span>
           ))}
         </div>
