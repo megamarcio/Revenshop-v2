@@ -20,8 +20,8 @@ export const useMaintenanceStatus = () => {
   const getStatusLabel = (status: string) => {
     switch (status) {
       case 'open': return 'Em Aberto';
-      case 'pending': return 'Concluída';
-      case 'completed': return 'Pendente';
+      case 'pending': return 'Pendente';
+      case 'completed': return 'Concluída';
       default: return status;
     }
   };

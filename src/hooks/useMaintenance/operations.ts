@@ -111,19 +111,29 @@ export const updateMaintenanceRecord = async (
   updates: Partial<MaintenanceRecord>
 ): Promise<boolean> => {
   try {
-    // Preparar atualizações tratando strings vazias nas datas como null
+    // Preparar atualizações filtrando campos que não existem na tabela
     const updateData: any = {};
     
+    // Lista de campos válidos na tabela maintenance_records
+    const validFields = [
+      'vehicle_id', 'detection_date', 'repair_date', 'promised_date', 
+      'maintenance_type', 'maintenance_items', 'custom_maintenance', 
+      'details', 'mechanic_name', 'mechanic_phone', 'parts', 'labor', 
+      'total_amount', 'receipt_urls', 'is_urgent'
+    ];
+    
     Object.keys(updates).forEach(key => {
-      if (key === 'repair_date' || key === 'promised_date') {
-        // Converter strings vazias para null para campos de data
-        const value = updates[key as keyof MaintenanceRecord];
-        updateData[key] = value === '' ? null : value;
-      } else if (key === 'parts' || key === 'labor') {
-        // Cast arrays to Json type for Supabase
-        updateData[key] = updates[key as keyof MaintenanceRecord] as any;
-      } else if (updates[key as keyof MaintenanceRecord] !== undefined) {
-        updateData[key] = updates[key as keyof MaintenanceRecord];
+      if (validFields.includes(key)) {
+        if (key === 'repair_date' || key === 'promised_date') {
+          // Converter strings vazias para null para campos de data
+          const value = updates[key as keyof MaintenanceRecord];
+          updateData[key] = value === '' ? null : value;
+        } else if (key === 'parts' || key === 'labor') {
+          // Cast arrays to Json type for Supabase
+          updateData[key] = updates[key as keyof MaintenanceRecord] as any;
+        } else if (updates[key as keyof MaintenanceRecord] !== undefined) {
+          updateData[key] = updates[key as keyof MaintenanceRecord];
+        }
       }
     });
 
