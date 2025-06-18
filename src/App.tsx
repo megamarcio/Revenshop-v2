@@ -4,7 +4,7 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
 import Dashboard from '@/components/Dashboard/Dashboard';
-import VehicleList from '@/components/Vehicles/VehicleList';
+import VehicleListContainer from '@/components/Vehicles/VehicleListContainer';
 import CustomerManagement from '@/components/Customers/CustomerManagement';
 import AuctionManagement from '@/components/Auctions/AuctionManagement';
 import TaskManagement from '@/components/Tasks/TaskManagement';
@@ -26,7 +26,7 @@ function App() {
       case 'dashboard':
         return <Dashboard />;
       case 'vehicles':
-        return <VehicleList />;
+        return <VehicleListContainer onNavigateToCustomers={() => setActiveTab('customers')} />;
       case 'customers':
         return <CustomerManagement />;
       case 'auctions':
