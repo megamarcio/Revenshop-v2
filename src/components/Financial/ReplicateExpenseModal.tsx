@@ -114,20 +114,20 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
                 id="months"
                 type="number"
                 min="1"
-                max="12"
+                max="72"
                 value={months}
                 onChange={(e) => setMonths(parseInt(e.target.value) || 1)}
                 placeholder="Digite a quantidade de meses"
               />
               <p className="text-xs text-muted-foreground">
-                Máximo de 12 meses
+                Máximo de 72 meses
               </p>
             </div>
 
             <div className="flex gap-2 pt-2">
               <Button 
                 onClick={handleReplicate} 
-                disabled={isLoading || months < 1 || months > 12}
+                disabled={isLoading || months < 1 || months > 72}
                 className="flex-1"
               >
                 {isLoading ? 'Replicando...' : `Replicar para ${months} ${months === 1 ? 'mês' : 'meses'}`}
