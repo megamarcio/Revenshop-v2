@@ -14,7 +14,20 @@ export const useReservationWhatsApp = () => {
   const [selectedGroup, setSelectedGroup] = useState('');
   const [groups, setGroups] = useState<WhatsAppGroup[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const { toast } = useToast();
+
+  const handleShareClick = (reservation: Reservation) => {
+    setSelectedReservation(reservation);
+    setIsWhatsAppModalOpen(true);
+  };
+
+  const handleCloseWhatsAppModal = () => {
+    setIsWhatsAppModalOpen(false);
+    setSelectedReservation(null);
+    setSelectedGroup('');
+  };
 
   const loadGroups = async () => {
     try {
@@ -133,6 +146,10 @@ export const useReservationWhatsApp = () => {
     setSelectedGroup,
     groups,
     isLoading,
+    selectedReservation,
+    isWhatsAppModalOpen,
+    handleShareClick,
+    handleCloseWhatsAppModal,
     loadGroups,
     sendReservationViaWhatsApp
   };
