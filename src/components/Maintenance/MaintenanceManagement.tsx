@@ -6,8 +6,11 @@ import { Wrench } from 'lucide-react';
 import MaintenanceForm from './MaintenanceForm';
 import MaintenanceList from './MaintenanceList';
 import MaintenanceViewModal from './MaintenanceViewModal';
+import VehicleSelectionModal from './VehicleSelectionModal';
+import TechnicalPanelRedesigned from './TechnicalPanel/TechnicalPanelRedesigned';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
+import { useVehicleSelectionModal } from '../../hooks/useVehicleSelectionModal';
 import UrgentMaintenanceAlert from './components/UrgentMaintenanceAlert';
 import MaintenanceStats from './components/MaintenanceStats';
 import MaintenanceHeader from './components/MaintenanceHeader';
@@ -19,6 +22,15 @@ const MaintenanceManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
+
+  const {
+    isVehicleSelectionOpen,
+    selectedVehicleForTechnical,
+    openVehicleSelection,
+    closeVehicleSelection,
+    handleVehicleSelect,
+    closeTechnicalPanel,
+  } = useVehicleSelectionModal();
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -89,6 +101,7 @@ const MaintenanceManagement = () => {
         openMaintenances={openMaintenances}
         totalCost={totalCost}
         onNewMaintenance={handleNewMaintenance}
+        onOpenTechnicalPanel={openVehicleSelection}
       />
 
       {/* Alert for urgent maintenances */}
@@ -124,6 +137,23 @@ const MaintenanceManagement = () => {
           onClose={() => setSelectedVehicleModal(null)}
           vehicleId={selectedVehicleModal.vehicleId}
           vehicleName={selectedVehicleModal.vehicleName}
+        />
+      )}
+
+      {/* Modal de seleção de veículo para painel técnico */}
+      <VehicleSelectionModal
+        isOpen={isVehicleSelectionOpen}
+        onClose={closeVehicleSelection}
+        onSelectVehicle={handleVehicleSelect}
+      />
+
+      {/* Painel técnico do veículo selecionado */}
+      {selectedVehicleForTechnical && (
+        <TechnicalPanelRedesigned
+          isOpen={true}
+          onClose={closeTechnicalPanel}
+          vehicleId={selectedVehicleForTechnical.vehicleId}
+          vehicleName={selectedVehicleForTechnical.vehicleName}
         />
       )}
     </div>

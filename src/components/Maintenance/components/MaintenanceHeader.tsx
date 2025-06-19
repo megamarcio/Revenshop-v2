@@ -1,20 +1,22 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Settings } from 'lucide-react';
 
 interface MaintenanceHeaderProps {
   totalMaintenances: number;
   openMaintenances: number;
   totalCost: number;
   onNewMaintenance: () => void;
+  onOpenTechnicalPanel: () => void;
 }
 
 const MaintenanceHeader = ({ 
   totalMaintenances, 
   openMaintenances, 
   totalCost, 
-  onNewMaintenance 
+  onNewMaintenance,
+  onOpenTechnicalPanel
 }: MaintenanceHeaderProps) => {
   return (
     <div className="flex items-center justify-between">
@@ -28,6 +30,14 @@ const MaintenanceHeader = ({
         </div>
       </div>
       <div className="flex gap-3">
+        <Button 
+          onClick={onOpenTechnicalPanel} 
+          variant="outline"
+          className="border-revenshop-primary text-revenshop-primary hover:bg-revenshop-primary hover:text-white"
+        >
+          <Settings className="h-4 w-4 mr-2" />
+          Painel Técnico
+        </Button>
         <Button onClick={onNewMaintenance} className="bg-revenshop-primary hover:bg-revenshop-primary/90">
           <Plus className="h-4 w-4 mr-2" />
           Nova Manutenção
