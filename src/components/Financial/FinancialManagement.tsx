@@ -46,7 +46,6 @@ const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 
         </TabsContent>
 
         <TabsContent value="expenses">
-          {console.log('Renderizando ExpenseManagement')}
           <ExpenseManagement />
         </TabsContent>
 
