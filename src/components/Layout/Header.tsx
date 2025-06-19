@@ -4,8 +4,9 @@ import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, Menu } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { useSidebar } from '@/components/ui/sidebar';
 import ThemeToggle from './ThemeToggle';
 import QuickLinksMenu from './QuickLinksMenu';
 
@@ -16,6 +17,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ onNavigateToProfile }) => {
   const { language, setLanguage, t } = useLanguage();
   const { user, signOut } = useAuth();
+  const { toggleSidebar } = useSidebar();
 
   const handleProfileClick = () => {
     if (onNavigateToProfile) {
@@ -26,9 +28,21 @@ const Header: React.FC<HeaderProps> = ({ onNavigateToProfile }) => {
   return (
     <header className="bg-card shadow-sm border-b border-border px-2 sm:px-4 py-3 sticky top-0 z-40">
       <div className="flex items-center justify-between w-full">
-        {/* Left side - Sidebar trigger on mobile */}
+        {/* Left side - Sidebar triggers */}
         <div className="flex items-center space-x-2">
+          {/* Mobile trigger */}
           <SidebarTrigger className="md:hidden" />
+          
+          {/* Desktop toggle button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleSidebar}
+            className="hidden md:flex h-8 w-8 p-0"
+            title="Toggle Sidebar"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
         </div>
 
         {/* Center section - Hidden on mobile, shown on larger screens */}

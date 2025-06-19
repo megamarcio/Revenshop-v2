@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +10,7 @@ import ReservationWhatsAppModal from './ReservationWhatsAppModal';
 import { useReservationWhatsApp } from './useReservationWhatsApp';
 import { Reservation } from './types/reservationTypes';
 import { toast } from 'sonner';
+import { exportLogisticaReservationsToPDF } from './utils/logisticaPdfExport';
 
 const ConsultaReservas = () => {
   const [dataIni, setDataIni] = useState(() => {
@@ -78,9 +78,8 @@ const ConsultaReservas = () => {
       return;
     }
     
-    // Implementar exportação para PDF
-    toast.info('Funcionalidade de exportação em desenvolvimento');
-  }, [reservations]);
+    exportLogisticaReservationsToPDF(reservations, { start: dataIni, end: dataFim });
+  }, [reservations, dataIni, dataFim]);
 
   const handleDownloadRequestLog = useCallback(() => {
     if (!lastRequestLog) return;

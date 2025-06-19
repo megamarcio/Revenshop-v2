@@ -1,8 +1,8 @@
-
 import React, { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
+import { usePreventBackNavigation } from '@/hooks/usePreventBackNavigation';
 import Dashboard from '@/components/Dashboard/Dashboard';
 import VehicleListContainer from '@/components/Vehicles/VehicleListContainer';
 import CustomerManagement from '@/components/Customers/CustomerManagement';
@@ -22,6 +22,9 @@ import ListaReservas from '@/components/Reservas/ListaReservas';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Prevent back navigation on mobile
+  usePreventBackNavigation();
 
   const renderContent = () => {
     switch (activeTab) {
