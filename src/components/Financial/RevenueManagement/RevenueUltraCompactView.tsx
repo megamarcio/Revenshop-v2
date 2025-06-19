@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -24,17 +24,21 @@ interface Revenue {
 interface RevenueUltraCompactViewProps {
   revenues: Revenue[];
   onEdit: (revenue: Revenue) => void;
+  onReplicate: (revenue: Revenue) => void;
   onDelete: (id: string) => void;
   formatCurrency: (value: number) => string;
   getTypeColor: (type: string) => string;
+  canReplicate: (revenue: Revenue) => boolean;
 }
 
 const RevenueUltraCompactView: React.FC<RevenueUltraCompactViewProps> = ({
   revenues,
   onEdit,
+  onReplicate,
   onDelete,
   formatCurrency,
   getTypeColor,
+  canReplicate,
 }) => {
   return (
     <div className="space-y-1">
@@ -82,6 +86,17 @@ const RevenueUltraCompactView: React.FC<RevenueUltraCompactViewProps> = ({
                 >
                   <Edit className="h-2 w-2" />
                 </Button>
+                
+                {canReplicate(revenue) && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-5 w-5 p-0"
+                    onClick={() => onReplicate(revenue)}
+                  >
+                    <Copy className="h-2 w-2" />
+                  </Button>
+                )}
                 
                 <Button
                   variant="outline"
