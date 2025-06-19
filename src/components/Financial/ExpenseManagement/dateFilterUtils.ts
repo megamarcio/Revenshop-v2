@@ -11,39 +11,38 @@ export interface DateRange {
 
 export const getDateRangeForFilter = (filter: DateFilterType): DateRange => {
   // Usar uma nova instância de Date() para garantir horário local
-  const today = new Date();
-  // Ajustar para fuso horário local
-  const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   switch (filter) {
     case 'day':
       return {
-        start: startOfDay(localToday),
-        end: endOfDay(localToday),
+        start: startOfDay(today),
+        end: endOfDay(today),
       };
 
     case 'week':
       return {
-        start: startOfWeek(localToday, { locale: ptBR }),
-        end: endOfWeek(localToday, { locale: ptBR }),
+        start: startOfWeek(today, { locale: ptBR }),
+        end: endOfWeek(today, { locale: ptBR }),
       };
 
     case 'biweekly':
       return {
-        start: startOfDay(subDays(localToday, 14)),
-        end: endOfDay(localToday),
+        start: startOfDay(subDays(today, 14)),
+        end: endOfDay(today),
       };
 
     case 'month':
       return {
-        start: startOfMonth(localToday),
-        end: endOfMonth(localToday),
+        start: startOfMonth(today),
+        end: endOfMonth(today),
       };
 
     case 'year':
       return {
-        start: startOfYear(localToday),
-        end: endOfYear(localToday),
+        start: startOfYear(today),
+        end: endOfYear(today),
       };
 
     case 'all':
@@ -63,10 +62,22 @@ export const filterExpensesByDateRange = (expenses: any[], dateRange: DateRange)
   return expenses.filter(expense => {
     // Para despesas, usar due_date como prioridade, fallback para date
     const referenceDate = expense.due_date ? new Date(expense.due_date) : new Date(expense.date);
-    // Garantir que a comparação seja feita em horário local
-    const localReferenceDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
     
-    return localReferenceDate >= dateRange.start! && localReferenceDate <= dateRange.end!;
+    // Normalizar para comparação apenas de data (sem horário)
+    const normalizedDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
+    const normalizedStart = new Date(dateRange.start!.getFullYear(), dateRange.start!.getMonth(), dateRange.start!.getDate());
+    const normalizedEnd = new Date(dateRange.end!.getFullYear(), dateRange.end!.getMonth(), dateRange.end!.getDate());
+    
+    // Debug logs (remover após teste)
+    console.log('Expense:', expense.description, {
+      dueDate: expense.due_date,
+      normalizedDate: normalizedDate.toISOString(),
+      rangeStart: normalizedStart.toISOString(),
+      rangeEnd: normalizedEnd.toISOString(),
+      isInRange: normalizedDate >= normalizedStart && normalizedDate <= normalizedEnd
+    });
+    
+    return normalizedDate >= normalizedStart && normalizedDate <= normalizedEnd;
   });
 };
 
@@ -78,10 +89,13 @@ export const filterRevenuesByDateRange = (revenues: any[], dateRange: DateRange)
   return revenues.filter(revenue => {
     // Para receitas, usar sempre date
     const revenueDate = new Date(revenue.date);
-    // Garantir que a comparação seja feita em horário local
-    const localRevenueDate = new Date(revenueDate.getFullYear(), revenueDate.getMonth(), revenueDate.getDate());
     
-    return localRevenueDate >= dateRange.start! && localRevenueDate <= dateRange.end!;
+    // Normalizar para comparação apenas de data (sem horário)
+    const normalizedDate = new Date(revenueDate.getFullYear(), revenueDate.getMonth(), revenueDate.getDate());
+    const normalizedStart = new Date(dateRange.start!.getFullYear(), dateRange.start!.getMonth(), dateRange.start!.getDate());
+    const normalizedEnd = new Date(dateRange.end!.getFullYear(), dateRange.end!.getMonth(), dateRange.end!.getDate());
+    
+    return normalizedDate >= normalizedStart && normalizedDate <= normalizedEnd;
   });
 };
 
