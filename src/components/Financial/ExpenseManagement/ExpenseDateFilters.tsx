@@ -1,9 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { DateFilterType, getFilterButtonLabel } from './dateFilterUtils';
-
-export { DateFilterType };
+import { type DateFilterType, getFilterButtonLabel } from './dateFilterUtils';
 
 interface ExpenseDateFiltersProps {
   selectedFilter: DateFilterType;
@@ -34,3 +32,4 @@ const ExpenseDateFilters: React.FC<ExpenseDateFiltersProps> = ({
 };
 
 export default ExpenseDateFilters;
+export type { DateFilterType };

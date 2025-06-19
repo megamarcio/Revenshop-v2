@@ -1,19 +1,13 @@
 
 import { format, startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import type { Expense } from '@/hooks/useExpenses';
 
 export type DateFilterType = 'today' | 'week' | 'fortnight' | 'month' | 'year' | 'all';
 
 export interface DateRange {
   start: Date;
   end: Date;
-}
-
-export interface Expense {
-  id: string;
-  due_date: string;
-  is_paid: boolean;
-  [key: string]: any;
 }
 
 export const getDateRangeForFilter = (filter: DateFilterType): DateRange | null => {
@@ -28,14 +22,14 @@ export const getDateRangeForFilter = (filter: DateFilterType): DateRange | null 
     
     case 'week':
       return {
-        start: startOfWeek(now, { locale: ptBR }),
-        end: endOfWeek(now, { locale: ptBR })
+        start: startOfDay(now),
+        end: endOfDay(addDays(now, 7))
       };
     
     case 'fortnight':
       return {
         start: startOfDay(now),
-        end: endOfDay(addDays(now, 14))
+        end: endOfDay(addDays(now, 15))
       };
     
     case 'month':
@@ -75,12 +69,11 @@ export const getFilterLabel = (filter: DateFilterType): string => {
       return `Hoje - ${format(now, 'dd/MM/yyyy', { locale: ptBR })}`;
     
     case 'week':
-      const weekStart = startOfWeek(now, { locale: ptBR });
-      const weekEnd = endOfWeek(now, { locale: ptBR });
-      return `Esta semana - ${format(weekStart, 'dd/MM', { locale: ptBR })} à ${format(weekEnd, 'dd/MM', { locale: ptBR })}`;
+      const weekEnd = addDays(now, 7);
+      return `Próximos 7 dias - ${format(now, 'dd/MM', { locale: ptBR })} à ${format(weekEnd, 'dd/MM', { locale: ptBR })}`;
     
     case 'fortnight':
-      const fortnightEnd = addDays(now, 14);
+      const fortnightEnd = addDays(now, 15);
       return `Próximos 15 dias - ${format(now, 'dd/MM', { locale: ptBR })} à ${format(fortnightEnd, 'dd/MM', { locale: ptBR })}`;
     
     case 'month':
