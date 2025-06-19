@@ -2,7 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, List, LayoutGrid, Minus } from 'lucide-react';
-import RevenueDateFilters, { DateFilterType } from './RevenueDateFilters';
+import RevenueDateFilters from './RevenueDateFilters';
+import { DateFilterType } from './dateFilterUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
