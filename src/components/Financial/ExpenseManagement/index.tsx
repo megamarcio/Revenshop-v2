@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useExpenses } from '@/hooks/useExpenses';
 import ExpenseForm from '../ExpenseForm';
@@ -8,7 +8,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import ExpenseManagementHeader from './ExpenseManagementHeader';
 import ExpenseListView from './ExpenseListView';
 import ExpenseCompactView from './ExpenseCompactView';
+import ExpenseUltraCompactView from './ExpenseUltraCompactView';
 import { useExpenseManagementUtils } from './useExpenseManagementUtils';
+import { DateFilterType, getDateRangeForFilter, filterExpensesByDateRange, getFilterLabel } from './dateFilterUtils';
+
+type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
 const ExpenseManagement = () => {
   const { expenses, deleteExpense, refetch } = useExpenses();
@@ -17,13 +21,23 @@ const ExpenseManagement = () => {
   const [isReplicateOpen, setIsReplicateOpen] = useState(false);
   const [expenseToReplicate, setExpenseToReplicate] = useState(null);
   const [showPaid, setShowPaid] = useState(true);
-  const [viewMode, setViewMode] = useState<'list' | 'compact'>('list');
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
 
   const { formatCurrency, getTypeColor, canReplicate } = useExpenseManagementUtils();
 
-  const filteredExpenses = expenses.filter(expense => 
-    showPaid ? true : !expense.is_paid
-  );
+  const filteredExpenses = useMemo(() => {
+    // Primeiro aplica o filtro de pagamento
+    let filtered = expenses.filter(expense => 
+      showPaid ? true : !expense.is_paid
+    );
+
+    // Depois aplica o filtro de data
+    const dateRange = getDateRangeForFilter(dateFilter);
+    filtered = filterExpensesByDateRange(filtered, dateRange);
+
+    return filtered;
+  }, [expenses, showPaid, dateFilter]);
 
   const handleEdit = (expense: any) => {
     setSelectedExpense(expense);
@@ -55,44 +69,75 @@ const ExpenseManagement = () => {
 
   const handleNewExpense = () => setIsFormOpen(true);
   const handleToggleShowPaid = () => setShowPaid(!showPaid);
-  const handleToggleViewMode = () => setViewMode(viewMode === 'list' ? 'compact' : 'list');
+  
+  const handleToggleViewMode = () => {
+    setViewMode(current => {
+      switch (current) {
+        case 'list':
+          return 'compact';
+        case 'compact':
+          return 'ultra-compact';
+        case 'ultra-compact':
+          return 'list';
+        default:
+          return 'list';
+      }
+    });
+  };
+
+  const handleDateFilterChange = (filter: DateFilterType) => {
+    setDateFilter(filter);
+  };
+
+  const renderExpenseView = () => {
+    const commonProps = {
+      expenses: filteredExpenses,
+      onEdit: handleEdit,
+      onReplicate: handleReplicate,
+      onDelete: handleDelete,
+      formatCurrency,
+      getTypeColor,
+      canReplicate,
+    };
+
+    switch (viewMode) {
+      case 'list':
+        return <ExpenseListView {...commonProps} />;
+      case 'compact':
+        return <ExpenseCompactView {...commonProps} />;
+      case 'ultra-compact':
+        return <ExpenseUltraCompactView {...commonProps} />;
+      default:
+        return <ExpenseListView {...commonProps} />;
+    }
+  };
 
   return (
     <div className="space-y-4">
       <ExpenseManagementHeader
         showPaid={showPaid}
         viewMode={viewMode}
+        dateFilter={dateFilter}
         onToggleShowPaid={handleToggleShowPaid}
         onToggleViewMode={handleToggleViewMode}
+        onDateFilterChange={handleDateFilterChange}
         onNewExpense={handleNewExpense}
       />
 
-      {viewMode === 'list' ? (
-        <ExpenseListView
-          expenses={filteredExpenses}
-          onEdit={handleEdit}
-          onReplicate={handleReplicate}
-          onDelete={handleDelete}
-          formatCurrency={formatCurrency}
-          getTypeColor={getTypeColor}
-          canReplicate={canReplicate}
-        />
-      ) : (
-        <ExpenseCompactView
-          expenses={filteredExpenses}
-          onEdit={handleEdit}
-          onReplicate={handleReplicate}
-          onDelete={handleDelete}
-          formatCurrency={formatCurrency}
-          getTypeColor={getTypeColor}
-          canReplicate={canReplicate}
-        />
+      {dateFilter !== 'all' && (
+        <div className="text-center text-sm text-muted-foreground">
+          {getFilterLabel(dateFilter)} • {filteredExpenses.length} {filteredExpenses.length === 1 ? 'despesa' : 'despesas'}
+        </div>
       )}
+
+      {renderExpenseView()}
 
       {filteredExpenses.length === 0 && (
         <Card className="text-sm">
           <CardContent className="p-6 text-center">
-            <p className="text-muted-foreground">Nenhuma despesa encontrada</p>
+            <p className="text-muted-foreground">
+              {dateFilter === 'all' ? 'Nenhuma despesa encontrada' : 'Nenhuma despesa encontrada para o período selecionado'}
+            </p>
           </CardContent>
         </Card>
       )}
