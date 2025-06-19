@@ -8,7 +8,7 @@ import RevenueManagementHeader from './RevenueManagementHeader';
 import RevenueListView from './RevenueListView';
 import RevenueCompactView from './RevenueCompactView';
 import RevenueUltraCompactView from './RevenueUltraCompactView';
-import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from '../ExpenseManagement/dateFilterUtils';
+import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from './dateFilterUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 

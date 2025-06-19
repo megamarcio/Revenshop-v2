@@ -50,6 +50,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     localStorage.setItem(AUTOHIDE_ENABLED_LOCALSTORAGE_KEY, autoHideEnabled ? "true" : "false");
   }, [autoHideEnabled]);
 
+  // Simplified menu item click handler
   const handleMenuItemClick = (itemId: string) => {
     setActiveTab(itemId);
     // No mobile, sempre fecha o sidebar após clicar
@@ -103,42 +104,11 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 );
               })}
 
-              {/* Outros menus */}
-              <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
-                setActiveTab(tab);
-                if (isMobile) {
-                  setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
-                }
-              }} />
-              
-              <FinancialMenu activeTab={activeTab} setActiveTab={(tab) => {
-                setActiveTab(tab);
-                if (isMobile) {
-                  setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
-                }
-              }} />
-              
-              <RentalCarMenu activeTab={activeTab} setActiveTab={(tab) => {
-                setActiveTab(tab);
-                if (isMobile) {
-                  setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
-                }
-              }} />
-              
-              <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
-                setActiveTab(tab);
-                if (isMobile) {
-                  setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
-                }
-              }} />
+              {/* Simplified menu handlers */}
+              <FinancingMenu activeTab={activeTab} setActiveTab={handleMenuItemClick} />
+              <FinancialMenu activeTab={activeTab} setActiveTab={handleMenuItemClick} />
+              <RentalCarMenu activeTab={activeTab} setActiveTab={handleMenuItemClick} />
+              <SettingsMenu activeTab={activeTab} setActiveTab={handleMenuItemClick} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
