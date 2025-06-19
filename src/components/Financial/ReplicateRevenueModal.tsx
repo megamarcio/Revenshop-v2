@@ -52,7 +52,7 @@ const ReplicateRevenueModal: React.FC<ReplicateRevenueModalProps> = ({
 
       await Promise.all(promises);
       
-      const revenueTypeLabel = revenue.type === 'mensal' ? 'receita mensal' : 
+      const revenueTypeLabel = revenue.type === 'padrao' ? 'receita padrão' : 
                               revenue.type === 'estimada' ? 'receita estimada' : 'receita';
       
       toast({
@@ -81,13 +81,12 @@ const ReplicateRevenueModal: React.FC<ReplicateRevenueModalProps> = ({
 
   const getRevenueTypeLabel = (type: string) => {
     switch (type) {
-      case 'mensal': return 'Receita Mensal';
+      case 'padrao': return 'Receita Padrão';
       case 'estimada': return 'Receita Estimada';
       case 'avulsa': return 'Receita Avulsa';
       case 'comissao': return 'Comissão';
       case 'extra': return 'Receita Extra';
       case 'investimento': return 'Retorno de Investimento';
-      case 'padrao': return 'Receita Padrão';
       default: return 'Receita';
     }
   };
