@@ -9,7 +9,7 @@ import {
   useSidebar 
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronDown, DollarSign, TrendingUp, TrendingDown, FileText, Settings, Monitor } from 'lucide-react';
+import { ChevronDown, DollarSign, TrendingUp, TrendingDown, FileText, Settings, Monitor, Repeat } from 'lucide-react';
 
 interface FinancialMenuProps {
   activeTab: string;
@@ -24,6 +24,7 @@ const FinancialMenu: React.FC<FinancialMenuProps> = ({ activeTab, setActiveTab }
     { id: 'financial', label: 'Dashboard', icon: DollarSign },
     { id: 'revenues', label: 'Receitas', icon: TrendingUp },
     { id: 'expenses', label: 'Despesas', icon: TrendingDown },
+    { id: 'fixed-expenses', label: 'Despesas Fixas', icon: Repeat },
     { id: 'bank-statements', label: 'Extratos', icon: FileText },
     { id: 'software', label: 'Software', icon: Monitor },
     { id: 'financial-config', label: 'Configurações', icon: Settings },

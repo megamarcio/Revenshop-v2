@@ -7,36 +7,38 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { useExpenses, Expense } from '@/hooks/useExpenses';
 import { useFinancialCategories } from '@/hooks/useFinancialCategories';
 import { format } from 'date-fns';
-import { Calendar, Repeat } from 'lucide-react';
 
-interface ExpenseFormProps {
+interface FixedExpenseFormProps {
   expense?: Expense;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
-const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel }) => {
-  const { createExpense, updateExpense, cancelRecurring } = useExpenses();
+const FixedExpenseForm: React.FC<FixedExpenseFormProps> = ({ expense, onSuccess, onCancel }) => {
+  const { createExpense, updateExpense } = useExpenses();
   const { categories } = useFinancialCategories();
   
   const [formData, setFormData] = useState({
     description: expense?.description || '',
     amount: expense?.amount || 0,
     category_id: expense?.category_id || '',
-    type: expense?.type || 'variavel' as const,
+    type: expense?.type || 'fixa' as const,
     due_date: expense?.due_date || format(new Date(), 'yyyy-MM-dd'),
     is_paid: expense?.is_paid || false,
     notes: expense?.notes || '',
+    is_recurring: true,
+    recurring_interval: expense?.recurring_interval || 1,
+    recurring_start_date: expense?.recurring_start_date || format(new Date(), 'yyyy-MM-dd'),
+    recurring_end_date: expense?.recurring_end_date || '',
+    is_active_recurring: expense?.is_active_recurring ?? true,
   });
 
   const [isLoading, setIsLoading] = useState(false);
 
   const expenseCategories = categories.filter(cat => cat.type === 'despesa');
-  const isGeneratedExpense = expense?.parent_expense_id;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,6 +48,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
       const dataToSubmit = {
         ...formData,
         date: formData.due_date,
+        recurring_end_date: formData.recurring_end_date || null,
       };
 
       if (expense) {
@@ -55,18 +58,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
       }
       onSuccess?.();
     } catch (error) {
-      console.error('Error saving expense:', error);
+      console.error('Error saving fixed expense:', error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleCancelRecurring = async () => {
-    if (!expense?.parent_expense_id) return;
-    
-    if (confirm('Deseja cancelar a recorrência desta despesa fixa? Isso impedirá a geração de novas despesas.')) {
-      await cancelRecurring(expense.parent_expense_id);
-      onSuccess?.();
     }
   };
 
@@ -77,35 +71,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {expense ? 'Editar Despesa' : 'Nova Despesa'}
-          {isGeneratedExpense && (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              <Repeat className="h-3 w-3 mr-1" />
-              Gerada Automaticamente
-            </Badge>
-          )}
-        </CardTitle>
+        <CardTitle>{expense ? 'Editar Despesa Fixa' : 'Nova Despesa Fixa'}</CardTitle>
       </CardHeader>
       <CardContent>
-        {isGeneratedExpense && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-blue-800">
-              <Calendar className="h-4 w-4" />
-              <span>Esta despesa foi gerada automaticamente a partir de uma despesa fixa.</span>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-2 text-red-600 hover:text-red-700"
-              onClick={handleCancelRecurring}
-            >
-              Cancelar Recorrência
-            </Button>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -167,14 +135,54 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
               </Select>
             </div>
 
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="due_date">Data de Vencimento</Label>
+            <div className="space-y-2">
+              <Label htmlFor="due_date">Data de Vencimento (Primeiro Mês)</Label>
               <Input
                 id="due_date"
                 type="date"
                 value={formData.due_date}
                 onChange={(e) => handleInputChange('due_date', e.target.value)}
                 required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="recurring_interval">Intervalo (em meses)</Label>
+              <Select
+                value={formData.recurring_interval.toString()}
+                onValueChange={(value) => handleInputChange('recurring_interval', parseInt(value))}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Todo mês</SelectItem>
+                  <SelectItem value="2">A cada 2 meses</SelectItem>
+                  <SelectItem value="3">A cada 3 meses (Trimestral)</SelectItem>
+                  <SelectItem value="6">A cada 6 meses (Semestral)</SelectItem>
+                  <SelectItem value="12">A cada 12 meses (Anual)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="recurring_start_date">Data de Início da Recorrência</Label>
+              <Input
+                id="recurring_start_date"
+                type="date"
+                value={formData.recurring_start_date}
+                onChange={(e) => handleInputChange('recurring_start_date', e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="recurring_end_date">Data de Fim da Recorrência (Opcional)</Label>
+              <Input
+                id="recurring_end_date"
+                type="date"
+                value={formData.recurring_end_date}
+                onChange={(e) => handleInputChange('recurring_end_date', e.target.value)}
               />
             </div>
           </div>
@@ -186,9 +194,22 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
                 checked={formData.is_paid}
                 onCheckedChange={(checked) => handleInputChange('is_paid', checked)}
               />
-              <Label htmlFor="is_paid">Pago</Label>
+              <Label htmlFor="is_paid">Primeiro mês já está pago</Label>
             </div>
           </div>
+
+          {expense && (
+            <div className="space-y-2">
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="is_active_recurring"
+                  checked={formData.is_active_recurring}
+                  onCheckedChange={(checked) => handleInputChange('is_active_recurring', checked)}
+                />
+                <Label htmlFor="is_active_recurring">Recorrência ativa</Label>
+              </div>
+            </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="notes">Observações</Label>
@@ -216,4 +237,4 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
   );
 };
 
-export default ExpenseForm;
+export default FixedExpenseForm;

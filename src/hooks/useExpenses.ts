@@ -9,13 +9,19 @@ export interface Expense {
   amount: number;
   category_id?: string;
   type: 'fixa' | 'variavel' | 'sazonal' | 'investimento';
-  date: string; // Obrigatório para compatibilidade com banco
-  due_date: string; // Data de vencimento - principal referência
+  date: string;
+  due_date: string;
   is_paid: boolean;
   notes?: string;
   created_by?: string;
   created_at: string;
   updated_at: string;
+  is_recurring: boolean;
+  recurring_interval?: number;
+  recurring_start_date?: string;
+  recurring_end_date?: string;
+  parent_expense_id?: string;
+  is_active_recurring: boolean;
   category?: {
     name: string;
     type: string;
@@ -53,10 +59,9 @@ export const useExpenses = () => {
 
   const createExpense = async (expense: Omit<Expense, 'id' | 'created_at' | 'updated_at' | 'category'>) => {
     try {
-      // Garantir que date tenha o mesmo valor de due_date para compatibilidade
       const expenseData = {
         ...expense,
-        date: expense.due_date, // Usar due_date como valor para date
+        date: expense.due_date,
       };
 
       const { data, error } = await supabase
@@ -73,7 +78,7 @@ export const useExpenses = () => {
       setExpenses(prev => [data as Expense, ...prev]);
       toast({
         title: 'Sucesso',
-        description: 'Despesa criada com sucesso',
+        description: expense.is_recurring ? 'Despesa fixa criada com sucesso' : 'Despesa criada com sucesso',
       });
       return data;
     } catch (error) {
@@ -89,7 +94,6 @@ export const useExpenses = () => {
 
   const updateExpense = async (id: string, updates: Partial<Expense>) => {
     try {
-      // Se due_date foi atualizado, atualizar date também para compatibilidade
       const updateData = {
         ...updates,
         ...(updates.due_date && { date: updates.due_date }),
@@ -149,6 +153,34 @@ export const useExpenses = () => {
     }
   };
 
+  const cancelRecurring = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('expenses')
+        .update({ is_active_recurring: false })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      setExpenses(prev => prev.map(exp => 
+        exp.id === id ? { ...exp, is_active_recurring: false } : exp
+      ));
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Recorrência cancelada com sucesso',
+      });
+    } catch (error) {
+      console.error('Error canceling recurring:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao cancelar recorrência',
+        variant: 'destructive',
+      });
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchExpenses();
   }, []);
@@ -159,6 +191,7 @@ export const useExpenses = () => {
     createExpense,
     updateExpense,
     deleteExpense,
+    cancelRecurring,
     refetch: fetchExpenses,
   };
 };
