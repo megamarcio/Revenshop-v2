@@ -31,9 +31,18 @@ const ExpenseManagement = () => {
       showPaid ? true : !expense.is_paid
     );
 
-    // Depois aplica o filtro de data
+    // Depois aplica o filtro de data com a nova lógica
     const dateRange = getDateRangeForFilter(dateFilter);
-    filtered = filterExpensesByDateRange(filtered, dateRange);
+    filtered = filterExpensesByDateRange(filtered, dateRange, dateFilter);
+
+    console.log('Filtros aplicados:', {
+      totalExpenses: expenses.length,
+      afterPaymentFilter: expenses.filter(expense => showPaid ? true : !expense.is_paid).length,
+      afterDateFilter: filtered.length,
+      dateFilter,
+      dateRange,
+      sampleDates: expenses.slice(0, 3).map(e => ({ id: e.id, due_date: e.due_date }))
+    });
 
     return filtered;
   }, [expenses, showPaid, dateFilter]);
