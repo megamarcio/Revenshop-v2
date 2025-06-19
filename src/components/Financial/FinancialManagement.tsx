@@ -7,16 +7,45 @@ import FinancialDashboard from './FinancialDashboard';
 import ExpenseManagement from './ExpenseManagement';
 import RevenueManagement from './RevenueManagement';
 import FinancialSettings from './FinancialSettings';
+import BankStatementImport from './BankStatementImport';
+import SoftwareManagement from './SoftwareManagement';
 import { useFinancialChartData } from '@/hooks/useFinancialChartData';
 
-const FinancialManagement = () => {
-  const { monthlyData, totalRevenue, totalExpenses, netProfit } = useFinancialChartData();
+interface FinancialManagementProps {
+  initialTab?: string;
+}
+
+const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 'dashboard' }) => {
+  const { data: monthlyData, isLoading } = useFinancialChartData();
+
+  // Calcular totais a partir dos dados mensais
+  const totalRevenue = monthlyData.reduce((sum, month) => sum + month.receitasConfirmadas, 0);
+  const totalExpenses = monthlyData.reduce((sum, month) => sum + month.despesasPrevistas, 0);
+  const netProfit = totalRevenue - totalExpenses;
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'USD',
     }).format(value);
+  };
+
+  // Determinar a aba ativa baseada no initialTab
+  const getActiveTab = () => {
+    switch (initialTab) {
+      case 'expenses':
+        return 'expenses';
+      case 'revenues':
+        return 'revenues';
+      case 'bank-statements':
+        return 'bank-statements';
+      case 'software':
+        return 'software';
+      case 'financial-config':
+        return 'settings';
+      default:
+        return 'dashboard';
+    }
   };
 
   return (
@@ -74,11 +103,13 @@ const FinancialManagement = () => {
         </Card>
       </div>
 
-      <Tabs defaultValue="dashboard" className="space-y-4">
+      <Tabs defaultValue={getActiveTab()} className="space-y-4">
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="revenues">Receitas</TabsTrigger>
           <TabsTrigger value="expenses">Despesas</TabsTrigger>
+          <TabsTrigger value="bank-statements">Extratos</TabsTrigger>
+          <TabsTrigger value="software">Software</TabsTrigger>
           <TabsTrigger value="settings">Configurações</TabsTrigger>
         </TabsList>
 
@@ -92,6 +123,14 @@ const FinancialManagement = () => {
 
         <TabsContent value="expenses">
           <ExpenseManagement />
+        </TabsContent>
+
+        <TabsContent value="bank-statements">
+          <BankStatementImport />
+        </TabsContent>
+
+        <TabsContent value="software">
+          <SoftwareManagement />
         </TabsContent>
 
         <TabsContent value="settings">

@@ -55,21 +55,6 @@ export const getDateRangeForFilter = (filter: DateFilterType): DateRange => {
   }
 };
 
-export const filterExpensesByDateRange = (expenses: any[], dateRange: DateRange) => {
-  if (!dateRange.start || !dateRange.end) {
-    return expenses;
-  }
-
-  return expenses.filter(expense => {
-    // Para despesas, usar due_date como prioridade, fallback para date
-    const referenceDate = expense.due_date ? new Date(expense.due_date) : new Date(expense.date);
-    // Garantir que a comparação seja feita em horário local
-    const localReferenceDate = new Date(referenceDate.getFullYear(), referenceDate.getMonth(), referenceDate.getDate());
-    
-    return localReferenceDate >= dateRange.start! && localReferenceDate <= dateRange.end!;
-  });
-};
-
 export const filterRevenuesByDateRange = (revenues: any[], dateRange: DateRange) => {
   if (!dateRange.start || !dateRange.end) {
     return revenues;
@@ -89,7 +74,7 @@ export const getFilterLabel = (filter: DateFilterType): string => {
   const dateRange = getDateRangeForFilter(filter);
   
   if (!dateRange.start || !dateRange.end) {
-    return 'Todas as despesas';
+    return 'Todas as receitas';
   }
 
   const start = format(dateRange.start, 'dd/MM', { locale: ptBR });

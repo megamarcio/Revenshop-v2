@@ -2,8 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Filter } from 'lucide-react';
-
-export type DateFilterType = 'day' | 'week' | 'biweekly' | 'month' | 'year' | 'all';
+import { DateFilterType } from './dateFilterUtils';
 
 interface RevenueDateFiltersProps {
   selectedFilter: DateFilterType;
