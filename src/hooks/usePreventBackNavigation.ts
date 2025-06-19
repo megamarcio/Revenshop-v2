@@ -1,33 +1,131 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useIsMobile } from './use-mobile';
 
 export const usePreventBackNavigation = () => {
   const isMobile = useIsMobile();
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [exitAttempts, setExitAttempts] = useState(0);
 
   useEffect(() => {
     if (!isMobile) return;
 
+    let isModalOpen = false;
+
     const handleBackButton = (event: PopStateEvent) => {
-      // Add a new entry to history to prevent going back
+      event.preventDefault();
+      
+      // Sempre adiciona uma nova entrada no histórico para capturar o próximo back
       window.history.pushState(null, '', window.location.href);
       
-      // Optionally show a confirmation dialog
-      const confirmExit = window.confirm('Tem certeza que deseja sair do sistema?');
-      if (confirmExit) {
-        // If user confirms, allow them to leave by going back twice
-        window.history.go(-2);
+      if (isModalOpen) return;
+      
+      setExitAttempts(prev => prev + 1);
+      
+      // Primeira tentativa - mostra modal customizado
+      if (exitAttempts === 0) {
+        isModalOpen = true;
+        setShowExitModal(true);
+        return;
+      }
+      
+      // Segunda tentativa - confirmação final
+      if (exitAttempts === 1) {
+        const confirmExit = window.confirm(
+          'ÚLTIMA CONFIRMAÇÃO: Tem certeza que deseja sair do REVENSHOP?\n\nEsta é sua última chance antes de sair do sistema.'
+        );
+        
+        if (confirmExit) {
+          // Permite a saída removendo os listeners e indo para trás
+          window.removeEventListener('popstate', handleBackButton);
+          window.removeEventListener('beforeunload', handleBeforeUnload);
+          
+          // Limpa o histórico artificial e sai
+          window.history.go(-3);
+          return;
+        } else {
+          setExitAttempts(0);
+          isModalOpen = false;
+        }
       }
     };
 
-    // Push an initial state
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = 'Tem certeza que deseja sair do REVENSHOP?';
+      return 'Tem certeza que deseja sair do REVENSHOP?';
+    };
+
+    const handleModalCancel = () => {
+      setShowExitModal(false);
+      setExitAttempts(0);
+      isModalOpen = false;
+    };
+
+    const handleModalConfirm = () => {
+      setShowExitModal(false);
+      setExitAttempts(1);
+      isModalOpen = false;
+      
+      // Simula um back para ativar a segunda confirmação
+      window.history.back();
+    };
+
+    // Adiciona múltiplas entradas no histórico para criar "buffer"
+    window.history.pushState(null, '', window.location.href);
+    window.history.pushState(null, '', window.location.href);
     window.history.pushState(null, '', window.location.href);
     
-    // Listen for back button
+    // Adiciona os listeners
     window.addEventListener('popstate', handleBackButton);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    // Previne gestos de navegação no iOS
+    document.addEventListener('touchstart', (e) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+
+    // Previne pull-to-refresh
+    let lastTouchY = 0;
+    document.addEventListener('touchstart', (e) => {
+      lastTouchY = e.touches[0].clientY;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      const touchY = e.touches[0].clientY;
+      const touchYDelta = touchY - lastTouchY;
+      lastTouchY = touchY;
+
+      if (touchYDelta > 0 && window.scrollY === 0) {
+        e.preventDefault();
+      }
+    }, { passive: false });
 
     return () => {
       window.removeEventListener('popstate', handleBackButton);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      setShowExitModal(false);
+      setExitAttempts(0);
     };
-  }, [isMobile]);
+  }, [isMobile, exitAttempts]);
+
+  const handleModalCancel = () => {
+    setShowExitModal(false);
+    setExitAttempts(0);
+  };
+
+  const handleModalConfirm = () => {
+    setShowExitModal(false);
+    setExitAttempts(1);
+    // Simula um back para ativar a segunda confirmação
+    setTimeout(() => window.history.back(), 100);
+  };
+
+  return {
+    showExitModal,
+    handleModalCancel,
+    handleModalConfirm
+  };
 };
