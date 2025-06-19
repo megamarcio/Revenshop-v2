@@ -9,7 +9,7 @@ import {
   useSidebar 
 } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ChevronRight, DollarSign } from 'lucide-react';
+import { ChevronDown, DollarSign, TrendingUp, TrendingDown, FileText, Settings, Monitor } from 'lucide-react';
 
 interface FinancialMenuProps {
   activeTab: string;
@@ -20,47 +20,47 @@ const FinancialMenu: React.FC<FinancialMenuProps> = ({ activeTab, setActiveTab }
   const { state } = useSidebar();
   
   const financialSubmenuItems = [
-    { id: 'financial', label: 'Dashboard' },
-    { id: 'revenues', label: 'Receitas' },
-    { id: 'expenses', label: 'Despesas' },
-    { id: 'bank-statements', label: 'Extratos' },
-    { id: 'software', label: 'Software' },
-    { id: 'financial-config', label: 'Configurações' },
+    { id: 'financial', label: 'Dashboard', icon: DollarSign },
+    { id: 'revenues', label: 'Receitas', icon: TrendingUp },
+    { id: 'expenses', label: 'Despesas', icon: TrendingDown },
+    { id: 'bank-statements', label: 'Extratos', icon: FileText },
+    { id: 'software', label: 'Software', icon: Monitor },
+    { id: 'financial-config', label: 'Configurações', icon: Settings },
   ];
 
   const isFinancialActive = financialSubmenuItems.some(item => activeTab === item.id);
 
   return (
     <SidebarMenuItem>
-      <Collapsible asChild defaultOpen={isFinancialActive}>
-        <div>
-          <CollapsibleTrigger asChild>
-            <SidebarMenuButton 
-              tooltip={state === "collapsed" ? "Financeiro" : undefined}
-              isActive={isFinancialActive}
-            >
-              <DollarSign />
-              <span>Financeiro</span>
-              <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-            </SidebarMenuButton>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              {financialSubmenuItems.map((item) => (
+      <Collapsible defaultOpen={isFinancialActive} className="group/collapsible">
+        <CollapsibleTrigger asChild>
+          <SidebarMenuButton 
+            tooltip={state === "collapsed" ? "Financeiro" : undefined}
+            isActive={isFinancialActive}
+          >
+            <DollarSign className="h-4 w-4" />
+            <span>Financeiro</span>
+            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+          </SidebarMenuButton>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <SidebarMenuSub>
+            {financialSubmenuItems.map((item) => {
+              const Icon = item.icon;
+              return (
                 <SidebarMenuSubItem key={item.id}>
                   <SidebarMenuSubButton 
-                    asChild
+                    onClick={() => setActiveTab(item.id)}
                     isActive={activeTab === item.id}
                   >
-                    <button onClick={() => setActiveTab(item.id)}>
-                      <span>{item.label}</span>
-                    </button>
+                    <Icon className="h-4 w-4" />
+                    <span>{item.label}</span>
                   </SidebarMenuSubButton>
                 </SidebarMenuSubItem>
-              ))}
-            </SidebarMenuSub>
-          </CollapsibleContent>
-        </div>
+              );
+            })}
+          </SidebarMenuSub>
+        </CollapsibleContent>
       </Collapsible>
     </SidebarMenuItem>
   );

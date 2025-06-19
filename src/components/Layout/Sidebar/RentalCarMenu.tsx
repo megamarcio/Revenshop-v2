@@ -23,55 +23,47 @@ interface RentalCarMenuProps {
 const RentalCarMenu = ({ activeTab, setActiveTab }: RentalCarMenuProps) => {
   const { state } = useSidebar();
   
-  const isAnySubMenuActive = ['acompanhar-reservas', 'lista-reservas', 'logistica'].includes(activeTab);
+  const rentalCarSubmenuItems = [
+    { id: 'acompanhar-reservas', label: 'Acompanhar Reservas', icon: Search },
+    { id: 'lista-reservas', label: 'Lista de Reservas', icon: List },
+    { id: 'logistica', label: 'Logística', icon: Truck },
+  ];
+
+  const isRentalCarActive = rentalCarSubmenuItems.some(item => activeTab === item.id);
 
   return (
-    <Collapsible defaultOpen={isAnySubMenuActive} className="group/collapsible">
-      <SidebarMenuItem>
+    <SidebarMenuItem>
+      <Collapsible defaultOpen={isRentalCarActive} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
             tooltip={state === "collapsed" ? "Rental Car" : undefined}
-            className="w-full hover:bg-muted"
-            isActive={isAnySubMenuActive}
+            isActive={isRentalCarActive}
           >
             <Car className="h-4 w-4" />
-            <span className="text-sm px-0 mx-0">Rental Car</span>
+            <span>Rental Car</span>
             <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                onClick={() => setActiveTab('acompanhar-reservas')}
-                isActive={activeTab === 'acompanhar-reservas'}
-              >
-                <Search className="h-4 w-4" />
-                <span>Acompanhar Reservas</span>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                onClick={() => setActiveTab('lista-reservas')}
-                isActive={activeTab === 'lista-reservas'}
-              >
-                <List className="h-4 w-4" />
-                <span>Lista de Reservas</span>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
-            <SidebarMenuSubItem>
-              <SidebarMenuSubButton
-                onClick={() => setActiveTab('logistica')}
-                isActive={activeTab === 'logistica'}
-              >
-                <Truck className="h-4 w-4" />
-                <span>Logística</span>
-              </SidebarMenuSubButton>
-            </SidebarMenuSubItem>
+            {rentalCarSubmenuItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <SidebarMenuSubItem key={item.id}>
+                  <SidebarMenuSubButton
+                    onClick={() => setActiveTab(item.id)}
+                    isActive={activeTab === item.id}
+                  >
+                    <Icon className="h-4 w-4" />
+                    <span>{item.label}</span>
+                  </SidebarMenuSubButton>
+                </SidebarMenuSubItem>
+              );
+            })}
           </SidebarMenuSub>
         </CollapsibleContent>
-      </SidebarMenuItem>
-    </Collapsible>
+      </Collapsible>
+    </SidebarMenuItem>
   );
 };
 
