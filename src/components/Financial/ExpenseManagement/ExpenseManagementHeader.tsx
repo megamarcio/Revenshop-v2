@@ -2,22 +2,27 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, EyeOff, List, Grid, Minus } from 'lucide-react';
+import ExpenseDateFilters, { DateFilterType } from './ExpenseDateFilters';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
 interface ExpenseManagementHeaderProps {
   showPaid: boolean;
   viewMode: ViewMode;
+  dateFilter: DateFilterType;
   onToggleShowPaid: () => void;
   onToggleViewMode: () => void;
+  onDateFilterChange: (filter: DateFilterType) => void;
   onNewExpense: () => void;
 }
 
 const ExpenseManagementHeader: React.FC<ExpenseManagementHeaderProps> = ({
   showPaid,
   viewMode,
+  dateFilter,
   onToggleShowPaid,
   onToggleViewMode,
+  onDateFilterChange,
   onNewExpense,
 }) => {
   const getViewModeIcon = () => {
@@ -78,6 +83,13 @@ const ExpenseManagementHeader: React.FC<ExpenseManagementHeaderProps> = ({
             Nova Despesa
           </Button>
         </div>
+      </div>
+
+      <div className="flex justify-center">
+        <ExpenseDateFilters
+          selectedFilter={dateFilter}
+          onFilterChange={onDateFilterChange}
+        />
       </div>
     </div>
   );

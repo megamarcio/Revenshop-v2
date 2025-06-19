@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useExpenses } from '@/hooks/useExpenses';
@@ -10,6 +9,7 @@ import ExpenseListView from './ExpenseListView';
 import ExpenseCompactView from './ExpenseCompactView';
 import ExpenseUltraCompactView from './ExpenseUltraCompactView';
 import { useExpenseManagementUtils } from './useExpenseManagementUtils';
+import { DateFilterType, getDateRangeForFilter, filterExpensesByDateRange, getFilterLabel } from './dateFilterUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
@@ -21,14 +21,22 @@ const ExpenseManagement = () => {
   const [expenseToReplicate, setExpenseToReplicate] = useState(null);
   const [showPaid, setShowPaid] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
 
   const { formatCurrency, getTypeColor, canReplicate } = useExpenseManagementUtils();
 
   const filteredExpenses = useMemo(() => {
-    return expenses.filter(expense => 
+    // Primeiro aplica o filtro de pagamento
+    let filtered = expenses.filter(expense => 
       showPaid ? true : !expense.is_paid
     );
-  }, [expenses, showPaid]);
+
+    // Depois aplica o filtro de data
+    const dateRange = getDateRangeForFilter(dateFilter);
+    filtered = filterExpensesByDateRange(filtered, dateRange);
+
+    return filtered;
+  }, [expenses, showPaid, dateFilter]);
 
   const handleEdit = (expense: any) => {
     setSelectedExpense(expense);
@@ -76,6 +84,10 @@ const ExpenseManagement = () => {
     });
   };
 
+  const handleDateFilterChange = (filter: DateFilterType) => {
+    setDateFilter(filter);
+  };
+
   const renderExpenseView = () => {
     const commonProps = {
       expenses: filteredExpenses,
@@ -104,13 +116,18 @@ const ExpenseManagement = () => {
       <ExpenseManagementHeader
         showPaid={showPaid}
         viewMode={viewMode}
+        dateFilter={dateFilter}
         onToggleShowPaid={handleToggleShowPaid}
         onToggleViewMode={handleToggleViewMode}
+        onDateFilterChange={handleDateFilterChange}
         onNewExpense={handleNewExpense}
       />
 
       <div className="text-center text-sm text-muted-foreground">
-        {filteredExpenses.length} {filteredExpenses.length === 1 ? 'despesa' : 'despesas'} {showPaid ? 'total' : 'não pagas'}
+        {dateFilter !== 'all' && (
+          <div>{getFilterLabel(dateFilter)}</div>
+        )}
+        {filteredExpenses.length} {filteredExpenses.length === 1 ? 'despesa' : 'despesas'} {showPaid ? 'encontradas' : 'não pagas'}
       </div>
 
       {renderExpenseView()}
@@ -119,7 +136,10 @@ const ExpenseManagement = () => {
         <Card className="text-sm">
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">
-              {showPaid ? 'Nenhuma despesa encontrada' : 'Nenhuma despesa pendente encontrada'}
+              {dateFilter === 'all' 
+                ? (showPaid ? 'Nenhuma despesa encontrada' : 'Nenhuma despesa pendente encontrada')
+                : 'Nenhuma despesa encontrada para o período selecionado'
+              }
             </p>
           </CardContent>
         </Card>
