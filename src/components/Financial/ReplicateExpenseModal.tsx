@@ -53,9 +53,12 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
 
       await Promise.all(promises);
       
+      const expenseTypeLabel = expense.type === 'fixa' ? 'despesa fixa' : 
+                              expense.type === 'investimento' ? 'investimento' : 'despesa';
+      
       toast({
         title: 'Sucesso',
-        description: `Despesa replicada para ${months} ${months === 1 ? 'mês' : 'meses'}`,
+        description: `${expenseTypeLabel.charAt(0).toUpperCase() + expenseTypeLabel.slice(1)} replicada para ${months} ${months === 1 ? 'mês' : 'meses'}`,
       });
 
       onOpenChange(false);
@@ -77,11 +80,21 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
     onOpenChange(false);
   };
 
+  const getExpenseTypeLabel = (type: string) => {
+    switch (type) {
+      case 'fixa': return 'Despesa Fixa';
+      case 'investimento': return 'Investimento';
+      default: return 'Despesa';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Replicar Despesa Fixa</DialogTitle>
+          <DialogTitle>
+            Replicar {expense ? getExpenseTypeLabel(expense.type) : 'Despesa'}
+          </DialogTitle>
         </DialogHeader>
         
         {expense && (
@@ -92,6 +105,7 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
                 style: 'currency',
                 currency: 'USD',
               }).format(expense.amount)}</p>
+              <p><strong>Tipo:</strong> {getExpenseTypeLabel(expense.type)}</p>
             </div>
 
             <div className="space-y-2">

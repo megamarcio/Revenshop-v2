@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +18,7 @@ interface ExpenseFormProps {
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel }) => {
   const { createExpense, updateExpense } = useExpenses();
-  const { categories } = useFinancialCategories();
+  const { categories, createCategory } = useFinancialCategories();
   
   const [formData, setFormData] = useState({
     description: expense?.description || '',
@@ -33,6 +32,28 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
   });
 
   const [isLoading, setIsLoading] = useState(false);
+
+  // Create "Parcela Carro" category if it doesn't exist
+  React.useEffect(() => {
+    const createCarInstallmentCategory = async () => {
+      const carCategory = categories.find(cat => cat.name === 'Parcela Carro' && cat.type === 'despesa');
+      if (!carCategory) {
+        try {
+          await createCategory({
+            name: 'Parcela Carro',
+            type: 'despesa',
+            is_default: true,
+          });
+        } catch (error) {
+          console.error('Error creating Parcela Carro category:', error);
+        }
+      }
+    };
+
+    if (categories.length > 0) {
+      createCarInstallmentCategory();
+    }
+  }, [categories, createCategory]);
 
   const expenseCategories = categories.filter(cat => cat.type === 'despesa');
 
