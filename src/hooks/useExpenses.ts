@@ -9,7 +9,7 @@ export interface Expense {
   amount: number;
   category_id?: string;
   type: 'fixa' | 'variavel' | 'sazonal' | 'investimento';
-  date?: string; // Opcional, usado como fallback
+  date: string; // Obrigatório para compatibilidade com banco
   due_date: string; // Data de vencimento - principal referência
   is_paid: boolean;
   notes?: string;
@@ -34,7 +34,7 @@ export const useExpenses = () => {
           *,
           category:financial_categories(name, type)
         `)
-        .order('due_date', { ascending: false, nullsLast: true })
+        .order('due_date', { ascending: false })
         .order('date', { ascending: false });
 
       if (error) throw error;
@@ -53,9 +53,15 @@ export const useExpenses = () => {
 
   const createExpense = async (expense: Omit<Expense, 'id' | 'created_at' | 'updated_at' | 'category'>) => {
     try {
+      // Garantir que date tenha o mesmo valor de due_date para compatibilidade
+      const expenseData = {
+        ...expense,
+        date: expense.due_date, // Usar due_date como valor para date
+      };
+
       const { data, error } = await supabase
         .from('expenses')
-        .insert([expense])
+        .insert([expenseData])
         .select(`
           *,
           category:financial_categories(name, type)
@@ -83,9 +89,15 @@ export const useExpenses = () => {
 
   const updateExpense = async (id: string, updates: Partial<Expense>) => {
     try {
+      // Se due_date foi atualizado, atualizar date também para compatibilidade
+      const updateData = {
+        ...updates,
+        ...(updates.due_date && { date: updates.due_date }),
+      };
+
       const { data, error } = await supabase
         .from('expenses')
-        .update(updates)
+        .update(updateData)
         .eq('id', id)
         .select(`
           *,

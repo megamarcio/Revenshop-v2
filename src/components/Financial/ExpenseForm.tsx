@@ -42,8 +42,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
     try {
       const dataToSubmit = {
         ...formData,
-        // Manter date igual a due_date para compatibilidade com banco
-        date: formData.due_date,
+        date: formData.due_date, // Manter compatibilidade com banco
       };
 
       if (expense) {
