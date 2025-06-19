@@ -11,7 +11,10 @@ import ConsultaReservasResultsCard from './components/ConsultaReservasResultsCar
 
 const ConsultaReservas = () => {
   const state = useConsultaReservasState();
-  const actions = useConsultaReservasActions(state);
+  const actions = useConsultaReservasActions({
+    ...state,
+    lastRequestLog: state.lastRequestLog,
+  });
 
   const {
     selectedReservation,

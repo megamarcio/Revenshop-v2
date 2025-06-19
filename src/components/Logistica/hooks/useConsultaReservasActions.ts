@@ -17,6 +17,7 @@ interface UseConsultaReservasActionsProps {
   setRowKommoLeadIds: (ids: { [r: string]: string }) => void;
   setColumnType: (type: "pick_up_date" | "return_date") => void;
   reservations: Reservation[];
+  lastRequestLog: any;
 }
 
 export const useConsultaReservasActions = ({
@@ -31,6 +32,7 @@ export const useConsultaReservasActions = ({
   setRowKommoLeadIds,
   setColumnType,
   reservations,
+  lastRequestLog,
 }: UseConsultaReservasActionsProps) => {
   const { fetchReservas } = useReservationFetch();
 
