@@ -18,7 +18,13 @@ export function useIsMobile() {
     // Listener para mudanças
     mql.addEventListener("change", onChange)
     
-    return () => mql.removeEventListener("change", onChange)
+    // Listener para redimensionamento (fallback)
+    window.addEventListener("resize", onChange)
+    
+    return () => {
+      mql.removeEventListener("change", onChange)
+      window.removeEventListener("resize", onChange)
+    }
   }, [])
 
   return !!isMobile

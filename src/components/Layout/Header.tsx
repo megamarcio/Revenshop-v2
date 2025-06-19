@@ -5,6 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LogOut, Settings } from 'lucide-react';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import ThemeToggle from './ThemeToggle';
 import QuickLinksMenu from './QuickLinksMenu';
 
@@ -25,9 +26,9 @@ const Header: React.FC<HeaderProps> = ({ onNavigateToProfile }) => {
   return (
     <header className="bg-card shadow-sm border-b border-border px-2 sm:px-4 py-3 sticky top-0 z-40">
       <div className="flex items-center justify-between w-full">
-        {/* Logo/Brand - Left side */}
-        <div className="flex-shrink-0">
-          {/* Logo space reserved for future use */}
+        {/* Left side - Sidebar trigger on mobile */}
+        <div className="flex items-center space-x-2">
+          <SidebarTrigger className="md:hidden" />
         </div>
 
         {/* Center section - Hidden on mobile, shown on larger screens */}

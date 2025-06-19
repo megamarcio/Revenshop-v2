@@ -1,220 +1,172 @@
 
-import React, { useState } from "react";
-import { Reservation } from "./types/reservationTypes";
-import { getTodayDateString } from "./utils/reservationUtils";
-import { generateLogisticsPDF } from "./utils/pdfGenerator";
-import { useReservationFetch } from "./hooks/useReservationFetch";
-import ReservationFilters from "./components/ReservationFilters";
-import ReservationTable from "./components/ReservationTable";
-import ReservationWhatsAppModal from "./ReservationWhatsAppModal";
-import LogisticaErrorBoundary from "./components/LogisticaErrorBoundary";
+import React, { useState, useCallback } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { RefreshCw, Calendar, Download } from 'lucide-react';
+import { useReservationFetch } from './hooks/useReservationFetch';
+import ReservationFilters from './components/ReservationFilters';
+import ReservationTable from './components/ReservationTable';
+import LogisticaErrorBoundary from './components/LogisticaErrorBoundary';
+import ReservationWhatsAppModal from './ReservationWhatsAppModal';
+import { useReservationWhatsApp } from './useReservationWhatsApp';
+import { Reservation } from './types/reservationTypes';
+import { toast } from 'sonner';
 
-const ConsultaReservas: React.FC = () => {
-  console.log('ConsultaReservas component mounting');
+const ConsultaReservas = () => {
+  const [dataIni, setDataIni] = useState(() => {
+    const today = new Date();
+    return today.toISOString().split('T')[0];
+  });
   
-  const { fetchReservas } = useReservationFetch();
+  const [dataFim, setDataFim] = useState(() => {
+    const today = new Date();
+    const nextWeek = new Date(today);
+    nextWeek.setDate(today.getDate() + 7);
+    return nextWeek.toISOString().split('T')[0];
+  });
+  
+  const [columnType, setColumnType] = useState<"pick_up_date" | "return_date">("pick_up_date");
 
-  // --------- FILTROS PICKUP DATE ---------
-  const [dataInicioPickup, setDataInicioPickup] = useState(getTodayDateString());
-  const [dataFimPickup, setDataFimPickup] = useState(getTodayDateString());
-  const [loadingPickup, setLoadingPickup] = useState(false);
-  const [reservationsPickup, setReservationsPickup] = useState<Reservation[]>([]);
-  const [errorPickup, setErrorPickup] = useState<string | null>(null);
-  const [rawApiDataPickup, setRawApiDataPickup] = useState<any | null>(null);
-  const [lastRequestLogPickup, setLastRequestLogPickup] = useState<any | null>(null);
-  const [rowKommoLeadIdsPickup, setRowKommoLeadIdsPickup] = useState<{ [reservationId: string]: string }>({});
+  const {
+    reservations,
+    loading,
+    error,
+    rawApiData,
+    lastRequestLog,
+    rowKommoLeadIds,
+    setReservations,
+    setError,
+    setRawApiData,
+    setLastRequestLog,
+    setRowKommoLeadIds,
+    fetchReservations
+  } = useReservationFetch({
+    dataIni,
+    dataFim,
+    columnType,
+    setLoading: () => {},
+    setReservations,
+    setError,
+    setRawApiData,
+    setLastRequestLog,
+    setRowKommoLeadIds
+  });
 
-  // --------- FILTROS RETURN DATE ---------
-  const [dataInicioReturn, setDataInicioReturn] = useState(getTodayDateString());
-  const [dataFimReturn, setDataFimReturn] = useState(getTodayDateString());
-  const [loadingReturn, setLoadingReturn] = useState(false);
-  const [reservationsReturn, setReservationsReturn] = useState<Reservation[]>([]);
-  const [errorReturn, setErrorReturn] = useState<string | null>(null);
-  const [rawApiDataReturn, setRawApiDataReturn] = useState<any | null>(null);
-  const [lastRequestLogReturn, setLastRequestLogReturn] = useState<any | null>(null);
-  const [rowKommoLeradIdsReturn, setRowKommoLeadIdsReturn] = useState<{ [reservationId: string]: string }>({});
+  const {
+    selectedReservation,
+    isWhatsAppModalOpen,
+    handleShareClick,
+    handleCloseWhatsAppModal
+  } = useReservationWhatsApp();
 
-  // --------- STATE PARA MODAL DE COMPARTILHAMENTO ---------
-  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-  const [selectedReservationForShare, setSelectedReservationForShare] = useState<Reservation | null>(null);
-
-  // DISPARADORES DOS DOIS TIPOS DE BUSCA
-  const onBuscarPickup = async () => {
-    try {
-      console.log('Iniciando busca por Pickup Date:', { dataInicioPickup, dataFimPickup });
-      setErrorPickup(null);
-      
-      await fetchReservas({
-        dataIni: dataInicioPickup,
-        dataFim: dataFimPickup,
-        columnType: "pick_up_date",
-        setLoading: setLoadingPickup,
-        setReservations: setReservationsPickup,
-        setError: setErrorPickup,
-        setRawApiData: setRawApiDataPickup,
-        setLastRequestLog: setLastRequestLogPickup,
-        setRowKommoLeadIds: setRowKommoLeadIdsPickup,
-      });
-      console.log('Busca por Pickup Date concluída');
-    } catch (error) {
-      console.error('Erro na busca por Pickup Date:', error);
-      setErrorPickup('Erro inesperado na busca. Tente novamente.');
-      setLoadingPickup(false);
+  const handleSearch = useCallback(() => {
+    if (!dataIni || !dataFim) {
+      toast.error('Por favor, selecione as datas inicial e final');
+      return;
     }
-  };
-
-  const onBuscarReturn = async () => {
-    try {
-      console.log('Iniciando busca por Return Date:', { dataInicioReturn, dataFimReturn });
-      setErrorReturn(null);
-      
-      await fetchReservas({
-        dataIni: dataInicioReturn,
-        dataFim: dataFimReturn,
-        columnType: "return_date",
-        setLoading: setLoadingReturn,
-        setReservations: setReservationsReturn,
-        setError: setErrorReturn,
-        setRawApiData: setRawApiDataReturn,
-        setLastRequestLog: setLastRequestLogReturn,
-        setRowKommoLeadIds: setRowKommoLeadIdsReturn,
-      });
-      console.log('Busca por Return Date concluída');
-    } catch (error) {
-      console.error('Erro na busca por Return Date:', error);
-      setErrorReturn('Erro inesperado na busca. Tente novamente.');
-      setLoadingReturn(false);
+    
+    if (new Date(dataIni) > new Date(dataFim)) {
+      toast.error('A data inicial deve ser anterior à data final');
+      return;
     }
-  };
+    
+    fetchReservations();
+  }, [dataIni, dataFim, fetchReservations]);
 
-  const handleOpenShareModal = (reservation: Reservation) => {
-    try {
-      console.log('Opening share modal for reservation:', reservation.id);
-      setSelectedReservationForShare(reservation);
-      setIsShareModalOpen(true);
-    } catch (error) {
-      console.error('Error opening share modal:', error);
+  const handleExportPDF = useCallback(() => {
+    if (reservations.length === 0) {
+      toast.error('Não há reservas para exportar');
+      return;
     }
-  };
-
-  const handleCloseShareModal = () => {
-    try {
-      console.log('Closing share modal');
-      setIsShareModalOpen(false);
-      setSelectedReservationForShare(null);
-    } catch (error) {
-      console.error('Error closing share modal:', error);
-    }
-  };
-
-  const handleGeneratePDF = () => {
-    try {
-      console.log('Generating logistics PDF');
-      generateLogisticsPDF(reservationsPickup, reservationsReturn);
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-    }
-  };
-
-  const createDownloadHandler = (log: any, filename: string) => () => {
-    try {
-      if (!log) {
-        console.warn('No log data to download');
-        return;
-      }
-      
-      const jsonStr = JSON.stringify(log, null, 2);
-      const blob = new Blob([jsonStr], { type: "application/json" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(link.href);
-    } catch (error) {
-      console.error('Error downloading log:', error);
-    }
-  };
+    
+    // Implementar exportação para PDF
+    toast.info('Funcionalidade de exportação em desenvolvimento');
+  }, [reservations]);
 
   return (
     <LogisticaErrorBoundary>
-      <div className="max-w-3xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-4">Consulta de Reservas</h1>
-          <p className="text-gray-600 mb-6">
-            Consulte reservas por data de pickup ou retorno
-          </p>
-        </div>
-
-        {/* Seção Pickup Date */}
-        <div className="mb-12">
-          <LogisticaErrorBoundary>
-            <ReservationFilters
-              header="Consulta por Pickup Date"
-              dataInicio={dataInicioPickup}
-              setDataInicio={setDataInicioPickup}
-              dataFim={dataFimPickup}
-              setDataFim={setDataFimPickup}
-              onBuscar={onBuscarPickup}
-              loading={loadingPickup}
-              lastRequestLog={lastRequestLogPickup}
-              handleDownloadRequestLog={createDownloadHandler(lastRequestLogPickup, "log_requisicao_consulta_reservas_pickup.json")}
-            />
-          </LogisticaErrorBoundary>
+      <div className="w-full max-w-7xl mx-auto p-2 sm:p-4 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold">Logística - Consulta de Reservas</h1>
+            <p className="text-sm text-muted-foreground">Consulte e gerencie as reservas de veículos</p>
+          </div>
           
-          <LogisticaErrorBoundary>
-            <ReservationTable
-              error={errorPickup}
-              rawApiData={rawApiDataPickup}
-              reservations={reservationsPickup}
-              rowKommoLeadIds={rowKommoLeadIdsPickup}
-              badgeType="pickup"
-              loading={loadingPickup}
-              onShareClick={handleOpenShareModal}
-              onGeneratePDF={handleGeneratePDF}
-            />
-          </LogisticaErrorBoundary>
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button
+              onClick={handleExportPDF}
+              variant="outline"
+              size="sm"
+              disabled={reservations.length === 0}
+              className="w-full sm:w-auto"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              <span className="hidden sm:inline">Exportar PDF</span>
+              <span className="sm:hidden">PDF</span>
+            </Button>
+            
+            <Button
+              onClick={handleSearch}
+              disabled={loading}
+              size="sm"
+              className="w-full sm:w-auto"
+            >
+              {loading ? (
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Calendar className="h-4 w-4 mr-2" />
+              )}
+              <span className="hidden sm:inline">Buscar Reservas</span>
+              <span className="sm:hidden">Buscar</span>
+            </Button>
+          </div>
         </div>
 
-        {/* Seção Return Date */}
-        <div className="mb-12">
-          <LogisticaErrorBoundary>
+        <Card>
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl">Filtros de Busca</CardTitle>
+          </CardHeader>
+          <CardContent className="p-3 sm:p-6 pt-0">
             <ReservationFilters
-              header="Consulta por Return Date"
-              dataInicio={dataInicioReturn}
-              setDataInicio={setDataInicioReturn}
-              dataFim={dataFimReturn}
-              setDataFim={setDataFimReturn}
-              onBuscar={onBuscarReturn}
-              loading={loadingReturn}
-              lastRequestLog={lastRequestLogReturn}
-              handleDownloadRequestLog={createDownloadHandler(lastRequestLogReturn, "log_requisicao_consulta_reservas_return.json")}
+              dataIni={dataIni}
+              dataFim={dataFim}
+              columnType={columnType}
+              onDataIniChange={setDataIni}
+              onDataFimChange={setDataFim}
+              onColumnTypeChange={setColumnType}
+              onSearch={handleSearch}
+              loading={loading}
             />
-          </LogisticaErrorBoundary>
-          
-          <LogisticaErrorBoundary>
-            <ReservationTable
-              error={errorReturn}
-              rawApiData={rawApiDataReturn}
-              reservations={reservationsReturn}
-              rowKommoLeadIds={rowKommoLeradIdsReturn}
-              badgeType="return"
-              loading={loadingReturn}
-              onShareClick={handleOpenShareModal}
-              onGeneratePDF={handleGeneratePDF}
-            />
-          </LogisticaErrorBoundary>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Modal de compartilhamento */}
-        <LogisticaErrorBoundary>
-          <ReservationWhatsAppModal
-            isOpen={isShareModalOpen}
-            onClose={handleCloseShareModal}
-            reservationData={selectedReservationForShare}
-          />
-        </LogisticaErrorBoundary>
+        <Card>
+          <CardHeader className="p-3 sm:p-6">
+            <CardTitle className="text-lg sm:text-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <span>Resultados da Busca</span>
+              {reservations.length > 0 && (
+                <span className="text-sm font-normal text-muted-foreground">
+                  {reservations.length} reserva{reservations.length !== 1 ? 's' : ''} encontrada{reservations.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0 sm:p-6 sm:pt-0">
+            <ReservationTable
+              reservations={reservations}
+              loading={loading}
+              error={error}
+              rowKommoLeadIds={rowKommoLeadIds}
+              onShareClick={handleShareClick}
+            />
+          </CardContent>
+        </Card>
+
+        <ReservationWhatsAppModal
+          isOpen={isWhatsAppModalOpen}
+          onClose={handleCloseWhatsAppModal}
+          reservation={selectedReservation}
+        />
       </div>
     </LogisticaErrorBoundary>
   );

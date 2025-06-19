@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useEffect } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
@@ -35,7 +36,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
     isInternalSeller,
     isAdmin
   } = useAuth();
-  const { state, setOpen, isMobile } = useSidebar();
+  const { state, setOpen, isMobile, setOpenMobile } = useSidebar();
 
   // Track if the sidebar was collapsed before hover (only on desktop)
   const wasCollapsedOnHover = useRef(false);
@@ -51,13 +52,15 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
 
   const handleMenuItemClick = (itemId: string) => {
     setActiveTab(itemId);
-    // Agora, colapsa automaticamente se autoHideEnabled estiver true
-    if (autoHideEnabled && state !== "collapsed") {
+    // No mobile, sempre fecha o sidebar após clicar
+    if (isMobile) {
+      setOpenMobile(false);
+    } else if (autoHideEnabled && state !== "collapsed") {
       setOpen(false);
     }
   };
 
-  // Handlers to expand/collapse on mouse hover
+  // Handlers to expand/collapse on mouse hover (desktop only)
   const handleMouseEnter = () => {
     if (!isMobile && state === "collapsed") {
       wasCollapsedOnHover.current = true;
@@ -70,12 +73,6 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
       setOpen(false);
       wasCollapsedOnHover.current = false;
     }
-  };
-
-  // Handler para painel logística
-  const openLogistica = () => {
-    setActiveTab("logistica");
-    if (autoHideEnabled && state !== "collapsed") setOpen(false);
   };
 
   return (
@@ -109,39 +106,57 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
               {/* Outros menus */}
               <FinancingMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (autoHideEnabled && state !== "collapsed") setOpen(false);
+                if (isMobile) {
+                  setOpenMobile(false);
+                } else if (autoHideEnabled && state !== "collapsed") {
+                  setOpen(false);
+                }
               }} />
               
               <FinancialMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (autoHideEnabled && state !== "collapsed") setOpen(false);
+                if (isMobile) {
+                  setOpenMobile(false);
+                } else if (autoHideEnabled && state !== "collapsed") {
+                  setOpen(false);
+                }
               }} />
               
               <RentalCarMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (autoHideEnabled && state !== "collapsed") setOpen(false);
+                if (isMobile) {
+                  setOpenMobile(false);
+                } else if (autoHideEnabled && state !== "collapsed") {
+                  setOpen(false);
+                }
               }} />
               
               <SettingsMenu activeTab={activeTab} setActiveTab={(tab) => {
                 setActiveTab(tab);
-                if (autoHideEnabled && state !== "collapsed") setOpen(false);
+                if (isMobile) {
+                  setOpenMobile(false);
+                } else if (autoHideEnabled && state !== "collapsed") {
+                  setOpen(false);
+                }
               }} />
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: switch sozinho, minúsculo, para ativar auto ocultar */}
-      <SidebarFooter>
-        <div className="flex items-center justify-center w-full px-1 py-[6px]">
-          <Switch
-            checked={autoHideEnabled}
-            onCheckedChange={setAutoHideEnabled}
-            aria-label="Ativar auto-ocultar sidebar"
-            className="h-5 w-8" // diminui o switch ao menor tamanho aceitável
-          />
-        </div>
-      </SidebarFooter>
+      {/* Footer: switch sozinho, minúsculo, para ativar auto ocultar - apenas no desktop */}
+      {!isMobile && (
+        <SidebarFooter>
+          <div className="flex items-center justify-center w-full px-1 py-[6px]">
+            <Switch
+              checked={autoHideEnabled}
+              onCheckedChange={setAutoHideEnabled}
+              aria-label="Ativar auto-ocultar sidebar"
+              className="h-5 w-8"
+            />
+          </div>
+        </SidebarFooter>
+      )}
     </Sidebar>
   );
 };

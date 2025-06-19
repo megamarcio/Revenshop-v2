@@ -31,15 +31,15 @@ const LogisticaCompactReservationItem = ({
       variant="outline"
       size="sm"
       onClick={() => onShareClick(reservation)}
-      className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700"
+      className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 shrink-0"
     >
       <Share className="h-3 w-3" />
     </Button>
   );
 
   return (
-    <Card>
-      <CardContent className="p-3">
+    <Card className="w-full">
+      <CardContent className="p-2 sm:p-3 space-y-1">
         <ReservationFirstLine 
           data={mappedReservation.data} 
           temperature={mappedReservation.temperature} 
