@@ -43,8 +43,8 @@ const RevenueUltraCompactView: React.FC<RevenueUltraCompactViewProps> = ({
           <CardContent className="p-1 px-2">
             <div className="flex items-center justify-between gap-2 text-xs">
               {/* Data */}
-              <div className="text-muted-foreground min-w-12 text-center">
-                {format(new Date(revenue.date), 'dd/MM', { locale: ptBR })}
+              <div className="text-muted-foreground min-w-16 text-center">
+                {format(new Date(revenue.date), 'dd/MM/yy', { locale: ptBR })}
               </div>
 
               {/* Descrição e categoria */}

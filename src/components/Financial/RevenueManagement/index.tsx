@@ -26,18 +26,19 @@ const RevenueManagement = () => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'BRL',
     }).format(value);
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'venda': return 'bg-green-100 text-green-800';
-      case 'comissao': return 'bg-blue-100 text-blue-800';
-      case 'servico': return 'bg-purple-100 text-purple-800';
-      case 'financiamento': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+    const colors = {
+      'mensal': 'bg-blue-100 text-blue-800',
+      'avulsa': 'bg-green-100 text-green-800',
+      'comissao': 'bg-purple-100 text-purple-800',
+      'extra': 'bg-orange-100 text-orange-800',
+      'investimento': 'bg-indigo-100 text-indigo-800',
+    };
+    return colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
   const filteredRevenues = useMemo(() => {
@@ -53,7 +54,7 @@ const RevenueManagement = () => {
     // Por último aplica a ordenação
     filtered = sortRevenues(filtered, sortField, sortOrder);
 
-    console.log('Filtros e ordenação aplicados nas receitas:', {
+    console.log('Filtros e ordenação aplicados (receitas):', {
       totalRevenues: revenues.length,
       afterConfirmationFilter: revenues.filter(revenue => showConfirmed ? true : !revenue.is_confirmed).length,
       afterDateFilter: filtered.length,
@@ -110,11 +111,6 @@ const RevenueManagement = () => {
     setSortOrder(order);
   };
 
-  const getFilterLabelForRevenues = (filter: DateFilterType): string => {
-    const label = getFilterLabel(filter);
-    return label;
-  };
-
   const renderRevenueView = () => {
     const commonProps = {
       revenues: filteredRevenues,
@@ -151,11 +147,12 @@ const RevenueManagement = () => {
         onNewRevenue={handleNewRevenue}
       />
 
-      {dateFilter !== 'all' && (
-        <div className="text-center text-sm text-muted-foreground">
-          {getFilterLabelForRevenues(dateFilter)} • {filteredRevenues.length} {filteredRevenues.length === 1 ? 'receita' : 'receitas'}
-        </div>
-      )}
+      <div className="text-center text-sm text-muted-foreground">
+        {dateFilter !== 'all' && (
+          <div>{getFilterLabel(dateFilter)}</div>
+        )}
+        {filteredRevenues.length} {filteredRevenues.length === 1 ? 'receita' : 'receitas'} {showConfirmed ? 'encontradas' : 'não confirmadas'}
+      </div>
 
       {renderRevenueView()}
 
@@ -163,7 +160,10 @@ const RevenueManagement = () => {
         <Card className="text-sm">
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">
-              {dateFilter === 'all' ? 'Nenhuma receita encontrada' : 'Nenhuma receita encontrada para o período selecionado'}
+              {dateFilter === 'all' 
+                ? (showConfirmed ? 'Nenhuma receita encontrada' : 'Nenhuma receita pendente encontrada')
+                : 'Nenhuma receita encontrada para o período selecionado'
+              }
             </p>
           </CardContent>
         </Card>

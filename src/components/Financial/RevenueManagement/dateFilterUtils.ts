@@ -1,150 +1,85 @@
 
-import { format, startOfDay, endOfDay, startOfMonth, endOfMonth, startOfYear, endOfYear, addDays, isSameDay, isSameMonth, isSameYear, isWithinInterval, parseISO, isValid } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { startOfToday, startOfWeek, startOfMonth, startOfYear, endOfToday, endOfWeek, endOfMonth, endOfYear, subDays, endOfDay } from 'date-fns';
 
-export type DateFilterType = 'day' | 'week' | 'biweekly' | 'month' | 'year' | 'all';
+export type DateFilterType = 'today' | 'week' | 'fortnight' | 'month' | 'year' | 'all';
 
 export interface DateRange {
   start: Date;
   end: Date;
 }
 
-export const getDateRangeForFilter = (filter: DateFilterType): DateRange | null => {
-  const now = new Date();
-  
+export const getDateRangeForFilter = (filter: DateFilterType): DateRange => {
+  const today = new Date();
+
   switch (filter) {
-    case 'day':
+    case 'today':
       return {
-        start: startOfDay(now),
-        end: endOfDay(now)
+        start: startOfToday(),
+        end: endOfToday()
       };
-    
     case 'week':
       return {
-        start: startOfDay(now),
-        end: endOfDay(addDays(now, 7))
+        start: startOfWeek(today, { weekStartsOn: 1 }), // Segunda-feira
+        end: endOfWeek(today, { weekStartsOn: 1 })
       };
-    
-    case 'biweekly':
+    case 'fortnight':
+      const fortnightStart = subDays(today, 14);
       return {
-        start: startOfDay(now),
-        end: endOfDay(addDays(now, 14))
+        start: fortnightStart,
+        end: endOfDay(today)
       };
-    
     case 'month':
       return {
-        start: startOfMonth(now),
-        end: endOfMonth(now)
+        start: startOfMonth(today),
+        end: endOfMonth(today)
       };
-    
     case 'year':
       return {
-        start: startOfYear(now),
-        end: endOfYear(now)
+        start: startOfYear(today),
+        end: endOfYear(today)
       };
-    
     case 'all':
     default:
-      return null;
+      return {
+        start: new Date(2000, 0, 1), // Data muito antiga
+        end: new Date(2099, 11, 31)  // Data muito futura
+      };
   }
 };
 
-export const filterRevenuesByDateRange = (revenues: any[], dateRange: DateRange | null, filter: DateFilterType) => {
-  if (!dateRange) {
+export const filterRevenuesByDateRange = (revenues: any[], dateRange: DateRange, filterType: DateFilterType) => {
+  if (filterType === 'all') {
     return revenues;
   }
 
-  const now = new Date();
-
   return revenues.filter(revenue => {
-    // Parse da data da receita
-    let revenueDate: Date;
-    try {
-      // Tenta diferentes formatos de data
-      if (revenue.date.includes('T')) {
-        revenueDate = parseISO(revenue.date);
-      } else if (revenue.date.includes('/')) {
-        // Formato dd/MM/yyyy
-        const [day, month, year] = revenue.date.split('/');
-        revenueDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-      } else {
-        revenueDate = new Date(revenue.date);
-      }
-
-      if (!isValid(revenueDate)) {
-        console.warn('Data inválida encontrada:', revenue.date);
-        return false;
-      }
-    } catch (error) {
-      console.warn('Erro ao parsear data:', revenue.date, error);
-      return false;
-    }
-
-    // Lógica específica para cada filtro
-    switch (filter) {
-      case 'day':
-        return isSameDay(revenueDate, now);
-      
-      case 'week':
-        // Próximos 7 dias a partir de hoje
-        return isWithinInterval(revenueDate, {
-          start: startOfDay(now),
-          end: endOfDay(addDays(now, 7))
-        });
-      
-      case 'biweekly':
-        // Próximos 14 dias a partir de hoje
-        return isWithinInterval(revenueDate, {
-          start: startOfDay(now),
-          end: endOfDay(addDays(now, 14))
-        });
-      
-      case 'month':
-        // Mesmo mês, mas aceita anos diferentes se necessário
-        if (isSameMonth(revenueDate, now) && isSameYear(revenueDate, now)) {
-          return true;
-        }
-        // Se não há receitas no mês atual, aceita próximo ano
-        return isSameMonth(revenueDate, now);
-      
-      case 'year':
-        // Mesmo ano ou próximo ano se necessário
-        if (isSameYear(revenueDate, now)) {
-          return true;
-        }
-        // Aceita próximo ano se a diferença for pequena
-        const yearDiff = revenueDate.getFullYear() - now.getFullYear();
-        return yearDiff === 1;
-      
-      default:
-        return true;
-    }
+    const revenueDate = new Date(revenue.date);
+    return revenueDate >= dateRange.start && revenueDate <= dateRange.end;
   });
 };
 
+export const getFilterButtonLabel = (filter: DateFilterType): string => {
+  const labels = {
+    'today': 'Hoje',
+    'week': 'Semana',
+    'fortnight': 'Quinzena',
+    'month': 'Mês',
+    'year': 'Ano',
+    'all': 'Todos'
+  };
+
+  return labels[filter];
+};
+
 export const getFilterLabel = (filter: DateFilterType): string => {
-  const now = new Date();
-  
-  switch (filter) {
-    case 'day':
-      return `Receitas de hoje - ${format(now, 'dd/MM/yyyy', { locale: ptBR })}`;
-    
-    case 'week':
-      const weekEnd = addDays(now, 7);
-      return `Próximos 7 dias - ${format(now, 'dd/MM', { locale: ptBR })} à ${format(weekEnd, 'dd/MM', { locale: ptBR })}`;
-    
-    case 'biweekly':
-      const biweeklyEnd = addDays(now, 14);
-      return `Próximos 14 dias - ${format(now, 'dd/MM', { locale: ptBR })} à ${format(biweeklyEnd, 'dd/MM', { locale: ptBR })}`;
-    
-    case 'month':
-      return `Este mês - ${format(now, 'MMMM yyyy', { locale: ptBR })}`;
-    
-    case 'year':
-      return `Este ano - ${format(now, 'yyyy', { locale: ptBR })}`;
-    
-    case 'all':
-    default:
-      return 'Todas as receitas';
-  }
+  const labels = {
+    'today': 'Receitas de hoje',
+    'week': 'Receitas desta semana',
+    'fortnight': 'Receitas dos últimos 15 dias',
+    'month': 'Receitas deste mês',
+    'year': 'Receitas deste ano',
+    'all': 'Todas as receitas'
+  };
+
+  return labels[filter];
 };
