@@ -93,26 +93,24 @@
     @apply bg-background text-foreground;
   }
   
-  /* Mobile optimizations */
+  /* Mobile optimizations - permitir scroll vertical natural */
   @media (max-width: 768px) {
     html, body {
       height: 100%;
       width: 100%;
-      overflow: hidden;
-      position: fixed;
       -webkit-overflow-scrolling: touch;
-      overscroll-behavior: none;
-      touch-action: pan-x pan-y;
+      /* Remover overflow: hidden e position: fixed para permitir scroll */
+      overscroll-behavior-x: none; /* Previne bounce horizontal */
+      overscroll-behavior-y: auto; /* Permite scroll vertical natural */
     }
     
     #root {
-      height: 100vh;
+      min-height: 100vh;
       width: 100vw;
-      overflow: hidden;
-      position: relative;
+      /* Permitir overflow para scroll natural */
     }
     
-    /* Hide scrollbars */
+    /* Hide scrollbars mas permitir scroll */
     ::-webkit-scrollbar {
       display: none;
     }
@@ -122,7 +120,7 @@
       scrollbar-width: none;
     }
     
-    /* Prevent text selection on mobile */
+    /* Prevent text selection on mobile mas permitir em inputs */
     * {
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -143,12 +141,9 @@
       font-size: 16px !important;
     }
     
-    /* Prevent bounce scroll effect on iOS */
+    /* Prevenir apenas pull-to-refresh sem bloquear scroll */
     body {
-      position: fixed;
-      overflow: hidden;
-      width: 100%;
-      height: 100%;
+      overscroll-behavior-y: contain;
     }
   }
   

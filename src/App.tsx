@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/Sidebar';
@@ -75,9 +76,9 @@ function App() {
     <SidebarProvider defaultOpen>
       <div className="min-h-screen flex w-full">
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-h-screen">
           <Header onNavigateToProfile={() => setActiveTab('profile')} />
-          <main className="flex-1 overflow-auto bg-background">
+          <main className="flex-1 bg-background overflow-y-auto">
             {renderContent()}
           </main>
         </div>
