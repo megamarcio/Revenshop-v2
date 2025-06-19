@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
@@ -17,6 +17,7 @@ interface FinancialManagementProps {
 
 const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 'dashboard' }) => {
   const { data: monthlyData, isLoading } = useFinancialChartData();
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
 
   // Calcular totais a partir dos dados mensais
   const totalRevenue = monthlyData.reduce((sum, month) => sum + month.receitasConfirmadas, 0);
@@ -30,23 +31,27 @@ const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 
     }).format(value);
   };
 
-  // Determinar a aba ativa baseada no initialTab
-  const getActiveTab = () => {
-    switch (initialTab) {
-      case 'expenses':
-        return 'expenses';
-      case 'revenues':
-        return 'revenues';
-      case 'bank-statements':
-        return 'bank-statements';
-      case 'software':
-        return 'software';
-      case 'financial-config':
-        return 'settings';
-      default:
-        return 'dashboard';
-    }
-  };
+  // Determinar a aba ativa baseada no initialTab e sincronizar
+  useEffect(() => {
+    const getActiveTab = () => {
+      switch (initialTab) {
+        case 'expenses':
+          return 'expenses';
+        case 'revenues':
+          return 'revenues';
+        case 'bank-statements':
+          return 'bank-statements';
+        case 'software':
+          return 'software';
+        case 'financial-config':
+          return 'settings';
+        default:
+          return 'dashboard';
+      }
+    };
+    
+    setActiveTab(getActiveTab());
+  }, [initialTab]);
 
   return (
     <div className="p-6 space-y-6">
@@ -103,7 +108,7 @@ const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 
         </Card>
       </div>
 
-      <Tabs defaultValue={getActiveTab()} className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList>
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="revenues">Receitas</TabsTrigger>

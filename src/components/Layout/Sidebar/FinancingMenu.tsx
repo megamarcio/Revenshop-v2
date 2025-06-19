@@ -24,7 +24,7 @@ const FinancingMenu = ({
 
   return (
     <SidebarMenuItem>
-      <Collapsible defaultOpen={isFinancingActive} className="group/collapsible">
+      <Collapsible open={isFinancingActive} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton 
             tooltip={state === "collapsed" ? "Simulação" : undefined} 

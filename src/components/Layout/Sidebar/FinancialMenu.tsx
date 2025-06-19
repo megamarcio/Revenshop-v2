@@ -32,7 +32,7 @@ const FinancialMenu: React.FC<FinancialMenuProps> = ({ activeTab, setActiveTab }
 
   return (
     <SidebarMenuItem>
-      <Collapsible defaultOpen={isFinancialActive} className="group/collapsible">
+      <Collapsible open={isFinancialActive} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton 
             tooltip={state === "collapsed" ? "Financeiro" : undefined}

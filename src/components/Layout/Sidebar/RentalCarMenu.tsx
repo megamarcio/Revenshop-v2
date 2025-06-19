@@ -33,7 +33,7 @@ const RentalCarMenu = ({ activeTab, setActiveTab }: RentalCarMenuProps) => {
 
   return (
     <SidebarMenuItem>
-      <Collapsible defaultOpen={isRentalCarActive} className="group/collapsible">
+      <Collapsible open={isRentalCarActive} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
             tooltip={state === "collapsed" ? "Rental Car" : undefined}

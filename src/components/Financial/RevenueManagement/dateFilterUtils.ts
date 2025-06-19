@@ -11,39 +11,38 @@ export interface DateRange {
 
 export const getDateRangeForFilter = (filter: DateFilterType): DateRange => {
   // Usar uma nova instância de Date() para garantir horário local
-  const today = new Date();
-  // Ajustar para fuso horário local
-  const localToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
   switch (filter) {
     case 'day':
       return {
-        start: startOfDay(localToday),
-        end: endOfDay(localToday),
+        start: startOfDay(today),
+        end: endOfDay(today),
       };
 
     case 'week':
       return {
-        start: startOfWeek(localToday, { locale: ptBR }),
-        end: endOfWeek(localToday, { locale: ptBR }),
+        start: startOfWeek(today, { locale: ptBR }),
+        end: endOfWeek(today, { locale: ptBR }),
       };
 
     case 'biweekly':
       return {
-        start: startOfDay(subDays(localToday, 14)),
-        end: endOfDay(localToday),
+        start: startOfDay(subDays(today, 14)),
+        end: endOfDay(today),
       };
 
     case 'month':
       return {
-        start: startOfMonth(localToday),
-        end: endOfMonth(localToday),
+        start: startOfMonth(today),
+        end: endOfMonth(today),
       };
 
     case 'year':
       return {
-        start: startOfYear(localToday),
-        end: endOfYear(localToday),
+        start: startOfYear(today),
+        end: endOfYear(today),
       };
 
     case 'all':
@@ -61,12 +60,15 @@ export const filterRevenuesByDateRange = (revenues: any[], dateRange: DateRange)
   }
 
   return revenues.filter(revenue => {
-    // Para receitas, usar sempre date
+    // Para receitas, usar sempre o campo 'date' (não 'due_date')
     const revenueDate = new Date(revenue.date);
-    // Garantir que a comparação seja feita em horário local
-    const localRevenueDate = new Date(revenueDate.getFullYear(), revenueDate.getMonth(), revenueDate.getDate());
     
-    return localRevenueDate >= dateRange.start! && localRevenueDate <= dateRange.end!;
+    // Normalizar para comparação apenas de data (sem horário)
+    const normalizedDate = new Date(revenueDate.getFullYear(), revenueDate.getMonth(), revenueDate.getDate());
+    const normalizedStart = new Date(dateRange.start!.getFullYear(), dateRange.start!.getMonth(), dateRange.start!.getDate());
+    const normalizedEnd = new Date(dateRange.end!.getFullYear(), dateRange.end!.getMonth(), dateRange.end!.getDate());
+    
+    return normalizedDate >= normalizedStart && normalizedDate <= normalizedEnd;
   });
 };
 
@@ -82,16 +84,16 @@ export const getFilterLabel = (filter: DateFilterType): string => {
   
   switch (filter) {
     case 'day':
-      return `Hoje (${start})`;
+      return `Receitas de hoje (${start})`;
     case 'week':
-      return `Esta semana (${start} - ${end})`;
+      return `Receitas desta semana (${start} - ${end})`;
     case 'biweekly':
-      return `Últimos 14 dias (${start} - ${end})`;
+      return `Receitas dos últimos 14 dias (${start} - ${end})`;
     case 'month':
-      return `Este mês (${format(dateRange.start, 'MMM/yyyy', { locale: ptBR })})`;
+      return `Receitas deste mês (${format(dateRange.start, 'MMM/yyyy', { locale: ptBR })})`;
     case 'year':
-      return `Este ano (${format(dateRange.start, 'yyyy', { locale: ptBR })})`;
+      return `Receitas deste ano (${format(dateRange.start, 'yyyy', { locale: ptBR })})`;
     default:
-      return 'Período personalizado';
+      return 'Receitas do período personalizado';
   }
 };
