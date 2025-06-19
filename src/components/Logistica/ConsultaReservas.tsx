@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -72,6 +73,14 @@ const ConsultaReservas = () => {
     fetchReservations();
   }, [dataIni, dataFim, fetchReservations]);
 
+  const handleDateTypeChange = useCallback((newDateType: "pick_up_date" | "return_date") => {
+    setColumnType(newDateType);
+    // Limpar resultados quando trocar o tipo de filtro
+    setReservations([]);
+    setError(null);
+    setRawApiData(null);
+  }, []);
+
   const handleExportPDF = useCallback(() => {
     if (reservations.length === 0) {
       toast.error('Não há reservas para exportar');
@@ -98,6 +107,9 @@ const ConsultaReservas = () => {
       console.error('Error downloading request log:', error);
     }
   }, [lastRequestLog]);
+
+  // Definir badgeType baseado no columnType para mostrar a data correta nos resultados
+  const badgeType = columnType === "pick_up_date" ? "pickup" : "return";
 
   return (
     <LogisticaErrorBoundary>
@@ -153,6 +165,8 @@ const ConsultaReservas = () => {
               loading={loading}
               lastRequestLog={lastRequestLog}
               handleDownloadRequestLog={handleDownloadRequestLog}
+              dateType={columnType}
+              onDateTypeChange={handleDateTypeChange}
             />
           </CardContent>
         </Card>
@@ -160,7 +174,9 @@ const ConsultaReservas = () => {
         <Card>
           <CardHeader className="p-3 sm:p-6">
             <CardTitle className="text-base sm:text-lg md:text-xl flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <span>Resultados da Busca</span>
+              <span>
+                Resultados da Busca {columnType === "pick_up_date" ? "(por Check-in)" : "(por Return)"}
+              </span>
               {reservations.length > 0 && (
                 <span className="text-xs sm:text-sm font-normal text-muted-foreground">
                   {reservations.length} reserva{reservations.length !== 1 ? 's' : ''} encontrada{reservations.length !== 1 ? 's' : ''}
@@ -175,7 +191,7 @@ const ConsultaReservas = () => {
               error={error}
               rawApiData={rawApiData}
               rowKommoLeadIds={rowKommoLeadIds}
-              badgeType="pickup"
+              badgeType={badgeType}
               onShareClick={handleShareClick}
             />
           </CardContent>

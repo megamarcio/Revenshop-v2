@@ -2,7 +2,8 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Download } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Download, Calendar, CalendarDays } from "lucide-react";
 
 interface ReservationFiltersProps {
   header: string;
@@ -14,6 +15,8 @@ interface ReservationFiltersProps {
   loading: boolean;
   lastRequestLog: any;
   handleDownloadRequestLog: () => void;
+  dateType: "pick_up_date" | "return_date";
+  onDateTypeChange: (type: "pick_up_date" | "return_date") => void;
 }
 
 const ReservationFilters: React.FC<ReservationFiltersProps> = ({
@@ -26,10 +29,32 @@ const ReservationFilters: React.FC<ReservationFiltersProps> = ({
   loading,
   lastRequestLog,
   handleDownloadRequestLog,
+  dateType,
+  onDateTypeChange,
 }) => {
   return (
     <div className="border-[2px] border-muted mb-8 rounded-lg p-5 shadow-sm bg-background">
       <h2 className="text-xl font-bold mb-3">{header}</h2>
+      
+      {/* Novo filtro de tipo de data */}
+      <div className="mb-4">
+        <label className="block text-sm font-medium mb-2">Filtrar por:</label>
+        <Select value={dateType} onValueChange={onDateTypeChange}>
+          <SelectTrigger className="w-[200px]">
+            {dateType === "pick_up_date" ? (
+              <Calendar className="h-4 w-4 mr-2" />
+            ) : (
+              <CalendarDays className="h-4 w-4 mr-2" />
+            )}
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="pick_up_date">Data de Check-in</SelectItem>
+            <SelectItem value="return_date">Data de Return</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div>
           <label htmlFor="dataInicio" className="block text-sm font-medium mb-1">
