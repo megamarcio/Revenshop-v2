@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useExpenses } from '@/hooks/useExpenses';
@@ -10,6 +11,7 @@ import ExpenseCompactView from './ExpenseCompactView';
 import ExpenseUltraCompactView from './ExpenseUltraCompactView';
 import { useExpenseManagementUtils } from './useExpenseManagementUtils';
 import { DateFilterType, getDateRangeForFilter, filterExpensesByDateRange, getFilterLabel } from './dateFilterUtils';
+import { ExpenseSortField, SortOrder, sortExpenses } from './ExpenseSortingUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
@@ -22,6 +24,8 @@ const ExpenseManagement = () => {
   const [showPaid, setShowPaid] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
+  const [sortField, setSortField] = useState<ExpenseSortField>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const { formatCurrency, getTypeColor, canReplicate } = useExpenseManagementUtils();
 
@@ -31,21 +35,25 @@ const ExpenseManagement = () => {
       showPaid ? true : !expense.is_paid
     );
 
-    // Depois aplica o filtro de data com a nova lógica
+    // Depois aplica o filtro de data
     const dateRange = getDateRangeForFilter(dateFilter);
     filtered = filterExpensesByDateRange(filtered, dateRange, dateFilter);
 
-    console.log('Filtros aplicados:', {
+    // Por último aplica a ordenação
+    filtered = sortExpenses(filtered, sortField, sortOrder);
+
+    console.log('Filtros e ordenação aplicados:', {
       totalExpenses: expenses.length,
       afterPaymentFilter: expenses.filter(expense => showPaid ? true : !expense.is_paid).length,
       afterDateFilter: filtered.length,
       dateFilter,
       dateRange,
-      sampleDates: expenses.slice(0, 3).map(e => ({ id: e.id, due_date: e.due_date }))
+      sortField,
+      sortOrder
     });
 
     return filtered;
-  }, [expenses, showPaid, dateFilter]);
+  }, [expenses, showPaid, dateFilter, sortField, sortOrder]);
 
   const handleEdit = (expense: any) => {
     setSelectedExpense(expense);
@@ -97,6 +105,11 @@ const ExpenseManagement = () => {
     setDateFilter(filter);
   };
 
+  const handleSortChange = (field: ExpenseSortField, order: SortOrder) => {
+    setSortField(field);
+    setSortOrder(order);
+  };
+
   const renderExpenseView = () => {
     const commonProps = {
       expenses: filteredExpenses,
@@ -126,9 +139,12 @@ const ExpenseManagement = () => {
         showPaid={showPaid}
         viewMode={viewMode}
         dateFilter={dateFilter}
+        sortField={sortField}
+        sortOrder={sortOrder}
         onToggleShowPaid={handleToggleShowPaid}
         onToggleViewMode={handleToggleViewMode}
         onDateFilterChange={handleDateFilterChange}
+        onSortChange={handleSortChange}
         onNewExpense={handleNewExpense}
       />
 

@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRevenues } from '@/hooks/useRevenues';
@@ -8,6 +9,7 @@ import RevenueListView from './RevenueListView';
 import RevenueCompactView from './RevenueCompactView';
 import RevenueUltraCompactView from './RevenueUltraCompactView';
 import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from './dateFilterUtils';
+import { RevenueSortField, SortOrder, sortRevenues } from './RevenueSortingUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
@@ -18,6 +20,8 @@ const RevenueManagement = () => {
   const [showConfirmed, setShowConfirmed] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
+  const [sortField, setSortField] = useState<RevenueSortField>('date');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -42,21 +46,25 @@ const RevenueManagement = () => {
       showConfirmed ? true : !revenue.is_confirmed
     );
 
-    // Depois aplica o filtro de data com a nova lógica
+    // Depois aplica o filtro de data
     const dateRange = getDateRangeForFilter(dateFilter);
     filtered = filterRevenuesByDateRange(filtered, dateRange, dateFilter);
 
-    console.log('Filtros aplicados nas receitas:', {
+    // Por último aplica a ordenação
+    filtered = sortRevenues(filtered, sortField, sortOrder);
+
+    console.log('Filtros e ordenação aplicados nas receitas:', {
       totalRevenues: revenues.length,
       afterConfirmationFilter: revenues.filter(revenue => showConfirmed ? true : !revenue.is_confirmed).length,
       afterDateFilter: filtered.length,
       dateFilter,
       dateRange,
-      sampleDates: revenues.slice(0, 3).map(r => ({ id: r.id, date: r.date }))
+      sortField,
+      sortOrder
     });
 
     return filtered;
-  }, [revenues, showConfirmed, dateFilter]);
+  }, [revenues, showConfirmed, dateFilter, sortField, sortOrder]);
 
   const handleEdit = (revenue: any) => {
     setSelectedRevenue(revenue);
@@ -97,6 +105,11 @@ const RevenueManagement = () => {
     setDateFilter(filter);
   };
 
+  const handleSortChange = (field: RevenueSortField, order: SortOrder) => {
+    setSortField(field);
+    setSortOrder(order);
+  };
+
   const getFilterLabelForRevenues = (filter: DateFilterType): string => {
     const label = getFilterLabel(filter);
     return label;
@@ -129,9 +142,12 @@ const RevenueManagement = () => {
         showConfirmed={showConfirmed}
         viewMode={viewMode}
         dateFilter={dateFilter}
+        sortField={sortField}
+        sortOrder={sortOrder}
         onToggleShowConfirmed={handleToggleShowConfirmed}
         onToggleViewMode={handleToggleViewMode}
         onDateFilterChange={handleDateFilterChange}
+        onSortChange={handleSortChange}
         onNewRevenue={handleNewRevenue}
       />
 
