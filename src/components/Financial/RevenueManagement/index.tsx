@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRevenues } from '@/hooks/useRevenues';
@@ -43,9 +42,18 @@ const RevenueManagement = () => {
       showConfirmed ? true : !revenue.is_confirmed
     );
 
-    // Depois aplica o filtro de data
+    // Depois aplica o filtro de data com a nova lógica
     const dateRange = getDateRangeForFilter(dateFilter);
-    filtered = filterRevenuesByDateRange(filtered, dateRange);
+    filtered = filterRevenuesByDateRange(filtered, dateRange, dateFilter);
+
+    console.log('Filtros aplicados nas receitas:', {
+      totalRevenues: revenues.length,
+      afterConfirmationFilter: revenues.filter(revenue => showConfirmed ? true : !revenue.is_confirmed).length,
+      afterDateFilter: filtered.length,
+      dateFilter,
+      dateRange,
+      sampleDates: revenues.slice(0, 3).map(r => ({ id: r.id, date: r.date }))
+    });
 
     return filtered;
   }, [revenues, showConfirmed, dateFilter]);
@@ -91,7 +99,7 @@ const RevenueManagement = () => {
 
   const getFilterLabelForRevenues = (filter: DateFilterType): string => {
     const label = getFilterLabel(filter);
-    return label.replace('despesas', 'receitas');
+    return label;
   };
 
   const renderRevenueView = () => {
