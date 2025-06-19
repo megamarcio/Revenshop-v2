@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -32,17 +32,26 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
   });
 
   const [isLoading, setIsLoading] = useState(false);
+  const categoryCreationAttempted = useRef(false);
 
   // Create "Parcela Carro" category if it doesn't exist - only once
-  React.useEffect(() => {
+  useEffect(() => {
     const createCarInstallmentCategory = async () => {
-      // Only try to create if we have categories loaded and "Parcela Carro" doesn't exist
+      // Prevent multiple attempts
+      if (categoryCreationAttempted.current) return;
+      
+      // Only try to create if we have categories loaded
       if (categories.length === 0) return;
       
+      // Check if category already exists
       const carCategory = categories.find(cat => cat.name === 'Parcela Carro' && cat.type === 'despesa');
-      if (carCategory) return; // Category already exists, don't create
+      if (carCategory) {
+        categoryCreationAttempted.current = true;
+        return;
+      }
       
       try {
+        categoryCreationAttempted.current = true;
         await createCategory({
           name: 'Parcela Carro',
           type: 'despesa',
@@ -50,11 +59,13 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
         });
       } catch (error) {
         console.error('Error creating Parcela Carro category:', error);
+        // Reset the flag on error so it can be retried
+        categoryCreationAttempted.current = false;
       }
     };
 
     createCarInstallmentCategory();
-  }, [categories.length]); // Only depend on categories.length to avoid multiple executions
+  }, [categories, createCategory]);
 
   const expenseCategories = categories.filter(cat => cat.type === 'despesa');
 
