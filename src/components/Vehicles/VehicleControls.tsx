@@ -36,12 +36,12 @@ const VehicleControls = ({
   ];
 
   const filterOptions = [
-    { value: 'all', label: 'Todos' },
-    { value: 'forSale', label: 'À Venda' },
-    { value: 'sold', label: 'Vendidos' },
+    { value: 'all', label: 'Todos os Usos' },
+    { value: 'forSale', label: 'Venda' },
     { value: 'rental', label: 'Aluguel' },
+    { value: 'consigned', label: 'Consignado' },
     { value: 'maintenance', label: 'Manutenção' },
-    { value: 'consigned', label: 'Consignado' }
+    { value: 'sold', label: 'Vendidos' }
   ];
 
   return (
@@ -65,11 +65,11 @@ const VehicleControls = ({
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {/* Filter */}
+        {/* Filter by Vehicle Usage */}
         <Select value={filterBy} onValueChange={onFilterChange}>
-          <SelectTrigger className="w-32">
+          <SelectTrigger className="w-40">
             <Filter className="h-4 w-4 mr-2" />
-            <SelectValue />
+            <SelectValue placeholder="Filtrar por uso" />
           </SelectTrigger>
           <SelectContent>
             {filterOptions.map((option) => (

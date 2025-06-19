@@ -47,7 +47,24 @@ export const useVehicleListLogic = () => {
         vehicle.color.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesCategory = selectedCategory === 'all' || vehicle.category === selectedCategory;
-      const matchesFilter = filterBy === 'all' || vehicle.category === filterBy;
+      
+      // Correção do filtro: mapear filterBy para a categoria correta do veículo
+      let matchesFilter = true;
+      if (filterBy !== 'all') {
+        // Mapear os valores do filtro para as categorias do veículo
+        const filterMapping: { [key: string]: string } = {
+          'forSale': 'forSale',
+          'sold': 'sold', 
+          'rental': 'rental',
+          'maintenance': 'maintenance',
+          'consigned': 'consigned'
+        };
+        
+        const mappedFilter = filterMapping[filterBy];
+        if (mappedFilter) {
+          matchesFilter = vehicle.category === mappedFilter;
+        }
+      }
       
       return matchesSearch && matchesCategory && matchesFilter;
     });
