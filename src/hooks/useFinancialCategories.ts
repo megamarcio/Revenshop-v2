@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 
@@ -12,9 +12,14 @@ export interface FinancialCategory {
   updated_at: string;
 }
 
+const DEFAULT_EXPENSE_CATEGORIES = [
+  { name: 'Parcela Carro', type: 'despesa' as const, is_default: true },
+];
+
 export const useFinancialCategories = () => {
   const [categories, setCategories] = useState<FinancialCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const defaultCategoriesCreated = useRef(false);
 
   const fetchCategories = async () => {
     try {
@@ -34,6 +39,30 @@ export const useFinancialCategories = () => {
       });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const createDefaultCategories = async () => {
+    if (defaultCategoriesCreated.current) return;
+
+    try {
+      const promises = DEFAULT_EXPENSE_CATEGORIES.map(async (category) => {
+        // Verificar se a categoria já existe
+        const existingCategory = categories.find(
+          cat => cat.name === category.name && cat.type === category.type
+        );
+        
+        if (!existingCategory) {
+          console.log(`Creating default category: ${category.name}`);
+          return createCategory(category);
+        }
+        return null;
+      });
+
+      await Promise.all(promises);
+      defaultCategoriesCreated.current = true;
+    } catch (error) {
+      console.error('Error creating default categories:', error);
     }
   };
 
@@ -120,6 +149,13 @@ export const useFinancialCategories = () => {
   useEffect(() => {
     fetchCategories();
   }, []);
+
+  // Criar categorias padrão após carregar as categorias existentes
+  useEffect(() => {
+    if (!isLoading && categories.length >= 0 && !defaultCategoriesCreated.current) {
+      createDefaultCategories();
+    }
+  }, [isLoading, categories.length]);
 
   return {
     categories,
