@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAISettings } from './useAISettings';
 
 interface VehicleData {
   marca: string;
@@ -21,11 +22,32 @@ interface GenerationOptions {
 
 export const useAIGeneration = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const { descriptionInstructions } = useAISettings();
 
   const generateDescription = async (vehicleData: VehicleData, options?: GenerationOptions): Promise<string> => {
     setIsLoading(true);
     try {
-      // Formato específico solicitado
+      // Se há instruções personalizadas, usar elas; senão usar formato padrão
+      if (descriptionInstructions && descriptionInstructions.trim()) {
+        // Aplicar as instruções personalizadas usando os dados do veículo
+        let customDescription = descriptionInstructions;
+        
+        // Substituir placeholders com dados reais do veículo
+        customDescription = customDescription
+          .replace(/\{ano\}/g, vehicleData.ano || '')
+          .replace(/\{marca\}/g, vehicleData.marca || '')
+          .replace(/\{modelo\}/g, vehicleData.modelo || '')
+          .replace(/\{cor\}/g, vehicleData.cor || '')
+          .replace(/\{preco\}/g, vehicleData.precoVenda || '0.00')
+          .replace(/\{quilometragem\}/g, vehicleData.quilometragem || '0')
+          .replace(/\{vin\}/g, vehicleData.vin || 'N/A')
+          .replace(/\{equipamentos\}/g, vehicleData.equipamentos || '')
+          .replace(/\{motor\}/g, vehicleData.motor || '');
+
+        return customDescription;
+      }
+      
+      // Formato padrão se não há instruções personalizadas
       const description = `🚗 ${vehicleData.ano} ${vehicleData.marca.toUpperCase()} ${vehicleData.modelo.toUpperCase()} – Clean - In Hands 🚗
 
 📍 Located in Orlando, FL

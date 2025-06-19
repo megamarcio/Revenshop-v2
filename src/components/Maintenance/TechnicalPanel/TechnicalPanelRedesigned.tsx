@@ -7,7 +7,7 @@ import MainItemsSection from './MainItemsSection';
 import OtherItemsSection from './OtherItemsSection';
 import LoadingTechnicalState from './LoadingTechnicalState';
 import EmptyTechnicalState from './EmptyTechnicalState';
-import NoVehicleSelected from './NoVehicleSelected';
+import VehicleSelector from './VehicleSelector';
 
 interface TechnicalPanelRedesignedProps {
   isOpen: boolean;
@@ -19,9 +19,11 @@ interface TechnicalPanelRedesignedProps {
 const TechnicalPanelRedesigned = ({
   isOpen,
   onClose,
-  vehicleId,
-  vehicleName
+  vehicleId: initialVehicleId,
+  vehicleName: initialVehicleName
 }: TechnicalPanelRedesignedProps) => {
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | undefined>(initialVehicleId);
+  const [selectedVehicleName, setSelectedVehicleName] = useState<string | undefined>(initialVehicleName);
   const [editingItem, setEditingItem] = useState<string | null>(null);
   
   const {
@@ -33,7 +35,7 @@ const TechnicalPanelRedesigned = ({
     createItem,
     deleteItem,
     isCreatingDefaultItems
-  } = useTechnicalItems(vehicleId || undefined);
+  } = useTechnicalItems(selectedVehicleId);
 
   const handleEdit = useCallback((itemId: string) => {
     setEditingItem(itemId);
@@ -52,39 +54,36 @@ const TechnicalPanelRedesigned = ({
   }, [updateItem]);
 
   const handleAddItem = useCallback((name: string, type: string) => {
-    if (vehicleId) {
-      createItem({ vehicleId, name, type });
+    if (selectedVehicleId) {
+      createItem({ vehicleId: selectedVehicleId, name, type });
     }
-  }, [vehicleId, createItem]);
+  }, [selectedVehicleId, createItem]);
 
   const handleDeleteItem = useCallback((itemId: string) => {
     deleteItem(itemId);
   }, [deleteItem]);
 
   const handleCreateDefaults = useCallback(() => {
-    if (vehicleId) {
-      createDefaultItems(vehicleId);
+    if (selectedVehicleId) {
+      createDefaultItems(selectedVehicleId);
     }
-  }, [vehicleId, createDefaultItems]);
+  }, [selectedVehicleId, createDefaultItems]);
 
   const handleRefresh = useCallback(() => {
     refetch();
   }, [refetch]);
 
-  if (!vehicleId) {
-    return (
-      <NoVehicleSelected 
-        isOpen={isOpen}
-        onClose={onClose}
-      />
-    );
-  }
+  const handleVehicleSelect = (vehicleId: string, vehicleName: string) => {
+    setSelectedVehicleId(vehicleId);
+    setSelectedVehicleName(vehicleName);
+    setEditingItem(null); // Reset editing state when changing vehicle
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
         <TechnicalPanelHeader
-          vehicleName={vehicleName}
+          vehicleName={selectedVehicleName}
           loading={isLoading}
           itemsCount={items.length}
           onRefresh={handleRefresh}
@@ -92,7 +91,18 @@ const TechnicalPanelRedesigned = ({
         />
 
         <div className="space-y-6 p-1">
-          {isLoading ? (
+          <VehicleSelector
+            selectedVehicleId={selectedVehicleId}
+            onVehicleSelect={handleVehicleSelect}
+          />
+
+          {!selectedVehicleId ? (
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">
+                Selecione um veículo para visualizar os itens técnicos.
+              </p>
+            </div>
+          ) : isLoading ? (
             <LoadingTechnicalState />
           ) : items.length === 0 ? (
             <EmptyTechnicalState 
