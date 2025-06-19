@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Car, Search, List, Truck, ChevronDown } from 'lucide-react';
 import {
   SidebarMenuItem,
@@ -22,6 +22,7 @@ interface RentalCarMenuProps {
 
 const RentalCarMenu = ({ activeTab, setActiveTab }: RentalCarMenuProps) => {
   const { state } = useSidebar();
+  const [isOpen, setIsOpen] = useState(false);
   
   const rentalCarSubmenuItems = [
     { id: 'acompanhar-reservas', label: 'Acompanhar Reservas', icon: Search },
@@ -31,9 +32,16 @@ const RentalCarMenu = ({ activeTab, setActiveTab }: RentalCarMenuProps) => {
 
   const isRentalCarActive = rentalCarSubmenuItems.some(item => activeTab === item.id);
 
+  // Auto-open when a submenu is active
+  React.useEffect(() => {
+    if (isRentalCarActive && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [isRentalCarActive, isOpen]);
+
   return (
     <SidebarMenuItem>
-      <Collapsible open={isRentalCarActive} className="group/collapsible">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton
             tooltip={state === "collapsed" ? "Rental Car" : undefined}

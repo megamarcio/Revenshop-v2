@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { DollarSign, CreditCard, Calculator, ChevronDown } from 'lucide-react';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -14,6 +14,7 @@ const FinancingMenu = ({
   setActiveTab
 }: FinancingMenuProps) => {
   const { state } = useSidebar();
+  const [isOpen, setIsOpen] = useState(false);
   
   const financingSubmenuItems = [
     { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
@@ -22,9 +23,16 @@ const FinancingMenu = ({
 
   const isFinancingActive = financingSubmenuItems.some(item => activeTab === item.id);
 
+  // Auto-open when a submenu is active
+  React.useEffect(() => {
+    if (isFinancingActive && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [isFinancingActive, isOpen]);
+
   return (
     <SidebarMenuItem>
-      <Collapsible open={isFinancingActive} className="group/collapsible">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton 
             tooltip={state === "collapsed" ? "Simulação" : undefined} 

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   SidebarMenuButton, 
   SidebarMenuItem, 
@@ -18,6 +18,7 @@ interface FinancialMenuProps {
 
 const FinancialMenu: React.FC<FinancialMenuProps> = ({ activeTab, setActiveTab }) => {
   const { state } = useSidebar();
+  const [isOpen, setIsOpen] = useState(false);
   
   const financialSubmenuItems = [
     { id: 'financial', label: 'Dashboard', icon: DollarSign },
@@ -30,9 +31,16 @@ const FinancialMenu: React.FC<FinancialMenuProps> = ({ activeTab, setActiveTab }
 
   const isFinancialActive = financialSubmenuItems.some(item => activeTab === item.id);
 
+  // Auto-open when a submenu is active
+  React.useEffect(() => {
+    if (isFinancialActive && !isOpen) {
+      setIsOpen(true);
+    }
+  }, [isFinancialActive, isOpen]);
+
   return (
     <SidebarMenuItem>
-      <Collapsible open={isFinancialActive} className="group/collapsible">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group/collapsible">
         <CollapsibleTrigger asChild>
           <SidebarMenuButton 
             tooltip={state === "collapsed" ? "Financeiro" : undefined}
