@@ -47,6 +47,8 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
           is_paid: false, // Nova despesa sempre não paga
           notes: expense.notes,
           created_by: expense.created_by,
+          is_recurring: false,
+          is_active_recurring: false,
         };
 
         promises.push(createExpense(replicatedExpense));

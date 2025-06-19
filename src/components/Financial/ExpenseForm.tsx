@@ -46,6 +46,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
       const dataToSubmit = {
         ...formData,
         date: formData.due_date,
+        is_recurring: false,
+        is_active_recurring: false,
       };
 
       if (expense) {

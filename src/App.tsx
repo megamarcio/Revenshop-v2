@@ -57,10 +57,11 @@ function App() {
       case 'financial':
       case 'revenues':
       case 'expenses':
+      case 'fixed-expenses':
       case 'bank-statements':
       case 'software':
       case 'financial-config':
-        return <FinancialManagement initialTab={activeTab} />;
+        return <FinancialManagement activeSubTab={activeTab} />;
       case 'users':
         return <UserManagement />;
       case 'admin':
