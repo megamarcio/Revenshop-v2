@@ -58,8 +58,21 @@ export const filterExpensesByDateRange = (expenses: any[], dateRange: DateRange)
   }
 
   return expenses.filter(expense => {
-    const expenseDate = new Date(expense.date);
-    return expenseDate >= dateRange.start! && expenseDate <= dateRange.end!;
+    // Para despesas, usar due_date como prioridade, fallback para date
+    const referenceDate = expense.due_date ? new Date(expense.due_date) : new Date(expense.date);
+    return referenceDate >= dateRange.start! && referenceDate <= dateRange.end!;
+  });
+};
+
+export const filterRevenuesByDateRange = (revenues: any[], dateRange: DateRange) => {
+  if (!dateRange.start || !dateRange.end) {
+    return revenues;
+  }
+
+  return revenues.filter(revenue => {
+    // Para receitas, usar sempre date
+    const revenueDate = new Date(revenue.date);
+    return revenueDate >= dateRange.start! && revenueDate <= dateRange.end!;
   });
 };
 

@@ -68,10 +68,7 @@ const PendingExpenses: React.FC<PendingExpensesProps> = ({ onEdit, onDelete }) =
                 </div>
                 
                 <div className="text-xs text-muted-foreground space-y-0.5">
-                  <p>Data: {format(new Date(expense.date), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                  {expense.due_date && (
-                    <p>Vencimento: {format(new Date(expense.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                  )}
+                  <p>Vencimento: {format(new Date(expense.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p>
                   {expense.category && <p>Categoria: {expense.category.name}</p>}
                 </div>
               </div>

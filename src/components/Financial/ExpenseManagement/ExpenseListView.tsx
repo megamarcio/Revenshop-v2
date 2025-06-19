@@ -12,9 +12,9 @@ interface Expense {
   description: string;
   amount: number;
   type: 'fixa' | 'variavel' | 'sazonal' | 'investimento';
-  date: string;
+  date?: string;
+  due_date: string;
   is_paid: boolean;
-  due_date?: string;
   notes?: string;
   category?: {
     name: string;
@@ -61,10 +61,7 @@ const ExpenseListView: React.FC<ExpenseListViewProps> = ({
                 </div>
                 
                 <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Data: {format(new Date(expense.date), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                  {expense.due_date && (
-                    <p>Vencimento: {format(new Date(expense.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p>
-                  )}
+                  <p>Vencimento: {format(new Date(expense.due_date), 'dd/MM/yyyy', { locale: ptBR })}</p>
                   {expense.category && <p>Categoria: {expense.category.name}</p>}
                   {expense.notes && <p>Obs: {expense.notes}</p>}
                 </div>

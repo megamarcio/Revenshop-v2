@@ -26,9 +26,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
     amount: expense?.amount || 0,
     category_id: expense?.category_id || '',
     type: expense?.type || 'variavel' as const,
-    date: expense?.date || format(new Date(), 'yyyy-MM-dd'),
+    due_date: expense?.due_date || format(new Date(), 'yyyy-MM-dd'),
     is_paid: expense?.is_paid || false,
-    due_date: expense?.due_date || '',
     notes: expense?.notes || '',
   });
 
@@ -43,7 +42,8 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
     try {
       const dataToSubmit = {
         ...formData,
-        due_date: formData.due_date || null,
+        // Manter date igual a due_date para compatibilidade com banco
+        date: formData.due_date,
       };
 
       if (expense) {
@@ -130,24 +130,14 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
               </Select>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="date">Data</Label>
-              <Input
-                id="date"
-                type="date"
-                value={formData.date}
-                onChange={(e) => handleInputChange('date', e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
+            <div className="space-y-2 md:col-span-2">
               <Label htmlFor="due_date">Data de Vencimento</Label>
               <Input
                 id="due_date"
                 type="date"
                 value={formData.due_date}
                 onChange={(e) => handleInputChange('due_date', e.target.value)}
+                required
               />
             </div>
           </div>

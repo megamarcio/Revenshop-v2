@@ -12,9 +12,9 @@ interface Expense {
   description: string;
   amount: number;
   type: 'fixa' | 'variavel' | 'sazonal' | 'investimento';
-  date: string;
+  date?: string;
+  due_date: string;
   is_paid: boolean;
-  due_date?: string;
   notes?: string;
   category?: {
     name: string;
@@ -60,9 +60,8 @@ const ExpenseCompactView: React.FC<ExpenseCompactViewProps> = ({
                   )}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {format(new Date(expense.date), 'dd/MM', { locale: ptBR })} • 
+                  {format(new Date(expense.due_date), 'dd/MM', { locale: ptBR })} • 
                   {expense.category ? ` ${expense.category.name}` : ' Sem categoria'}
-                  {expense.due_date && ` • Venc: ${format(new Date(expense.due_date), 'dd/MM', { locale: ptBR })}`}
                 </div>
               </div>
 

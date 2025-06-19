@@ -12,9 +12,9 @@ interface Expense {
   description: string;
   amount: number;
   type: 'fixa' | 'variavel' | 'sazonal' | 'investimento';
-  date: string;
+  date?: string;
+  due_date: string;
   is_paid: boolean;
-  due_date?: string;
   notes?: string;
   category?: {
     name: string;
@@ -47,9 +47,9 @@ const ExpenseUltraCompactView: React.FC<ExpenseUltraCompactViewProps> = ({
         <Card key={expense.id} className="border-l-2 border-l-red-200">
           <CardContent className="p-1 px-2">
             <div className="flex items-center justify-between gap-2 text-xs">
-              {/* Data */}
+              {/* Data de Vencimento */}
               <div className="text-muted-foreground min-w-12 text-center">
-                {format(new Date(expense.date), 'dd/MM', { locale: ptBR })}
+                {format(new Date(expense.due_date), 'dd/MM', { locale: ptBR })}
               </div>
 
               {/* Descrição e categoria */}

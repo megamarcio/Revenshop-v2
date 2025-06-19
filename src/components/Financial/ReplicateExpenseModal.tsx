@@ -33,17 +33,18 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
       const promises = [];
       
       for (let i = 1; i <= months; i++) {
-        const newDate = addMonths(new Date(expense.date), i);
-        const newDueDate = expense.due_date ? addMonths(new Date(expense.due_date), i) : null;
+        // Usar due_date como referência principal, fallback para date
+        const referenceDate = expense.due_date ? new Date(expense.due_date) : new Date(expense.date || expense.due_date);
+        const newDueDate = addMonths(referenceDate, i);
         
         const replicatedExpense = {
           description: expense.description,
           amount: expense.amount,
           category_id: expense.category_id,
           type: expense.type,
-          date: format(newDate, 'yyyy-MM-dd'),
+          due_date: format(newDueDate, 'yyyy-MM-dd'),
+          date: format(newDueDate, 'yyyy-MM-dd'), // Manter compatibilidade
           is_paid: false, // Nova despesa sempre não paga
-          due_date: newDueDate ? format(newDueDate, 'yyyy-MM-dd') : null,
           notes: expense.notes,
           created_by: expense.created_by,
         };
@@ -106,6 +107,7 @@ const ReplicateExpenseModal: React.FC<ReplicateExpenseModalProps> = ({
                 currency: 'USD',
               }).format(expense.amount)}</p>
               <p><strong>Tipo:</strong> {getExpenseTypeLabel(expense.type)}</p>
+              <p><strong>Vencimento:</strong> {format(new Date(expense.due_date), 'dd/MM/yyyy')}</p>
             </div>
 
             <div className="space-y-2">
