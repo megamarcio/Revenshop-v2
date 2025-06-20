@@ -1,8 +1,13 @@
+
 import { Reservation } from '../types/reservationTypes';
 import { formatToFloridaDateTime } from './dateFormatter';
+import { getOrderedReservationsByDateTime } from './reservationUtils';
 
 export const exportLogisticaReservationsToPDF = (reservations: Reservation[], dateRange: { start: string; end: string }) => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
+  
+  // Ordena as reservas por data e hora antes de gerar o PDF
+  const orderedReservations = getOrderedReservationsByDateTime(reservations);
   
   const generateTableRows = (reservations: Reservation[]) => {
     return reservations.map(reservation => `
@@ -86,12 +91,12 @@ export const exportLogisticaReservationsToPDF = (reservations: Reservation[], da
       </div>
 
       <div class="summary">
-        <div class="summary-item">Total de Reservas: ${reservations.length}</div>
+        <div class="summary-item">Total de Reservas: ${orderedReservations.length}</div>
       </div>
 
       <div class="section">
-        <h2>📋 Reservas Encontradas</h2>
-        ${reservations.length > 0 ? `
+        <h2>📋 Reservas Encontradas (Ordenadas por Data/Hora)</h2>
+        ${orderedReservations.length > 0 ? `
           <table>
             <thead>
               <tr>
@@ -105,7 +110,7 @@ export const exportLogisticaReservationsToPDF = (reservations: Reservation[], da
               </tr>
             </thead>
             <tbody>
-              ${generateTableRows(reservations)}
+              ${generateTableRows(orderedReservations)}
             </tbody>
           </table>
         ` : '<p style="color: #666; font-style: italic;">Nenhuma reserva encontrada para o período selecionado.</p>'}

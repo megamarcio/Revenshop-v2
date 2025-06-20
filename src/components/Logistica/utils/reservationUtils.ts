@@ -1,3 +1,4 @@
+
 export const getTodayDateString = (): string => {
   return new Date().toISOString().split('T')[0];
 };
@@ -121,7 +122,7 @@ export const parseReservationList = (apiData: any): any[] => {
   });
 };
 
-// Função para ordenar reservas
+// Função para ordenar reservas por data e hora de forma consistente
 export const getOrderedReservations = (reservations: any[], badgeType: "pickup" | "return"): any[] => {
   if (!reservations || reservations.length === 0) return [];
   
@@ -129,10 +130,46 @@ export const getOrderedReservations = (reservations: any[], badgeType: "pickup" 
     const dateA = badgeType === "pickup" ? a.pick_up_date : a.return_date;
     const dateB = badgeType === "pickup" ? b.pick_up_date : b.return_date;
     
+    // Reservas sem data vão para o final
     if (!dateA && !dateB) return 0;
     if (!dateA) return 1;
     if (!dateB) return -1;
     
-    return new Date(dateA).getTime() - new Date(dateB).getTime();
+    // Converte para timestamp para comparação precisa
+    const timestampA = new Date(dateA).getTime();
+    const timestampB = new Date(dateB).getTime();
+    
+    // Ordem crescente (mais antiga primeiro)
+    return timestampA - timestampB;
+  });
+};
+
+// Nova função para ordenar todas as reservas por data/hora independente do tipo
+export const getOrderedReservationsByDateTime = (reservations: any[]): any[] => {
+  if (!reservations || reservations.length === 0) return [];
+  
+  return [...reservations].sort((a, b) => {
+    // Usa pick_up_date como critério principal de ordenação
+    const dateA = a.pick_up_date;
+    const dateB = b.pick_up_date;
+    
+    // Reservas sem data vão para o final
+    if (!dateA && !dateB) return 0;
+    if (!dateA) return 1;
+    if (!dateB) return -1;
+    
+    // Converte para timestamp para comparação precisa
+    const timestampA = new Date(dateA).getTime();
+    const timestampB = new Date(dateB).getTime();
+    
+    // Se as datas de pickup são iguais, ordena por return_date
+    if (timestampA === timestampB) {
+      const returnA = a.return_date ? new Date(a.return_date).getTime() : 0;
+      const returnB = b.return_date ? new Date(b.return_date).getTime() : 0;
+      return returnA - returnB;
+    }
+    
+    // Ordem crescente (mais antiga primeiro)
+    return timestampA - timestampB;
   });
 };
