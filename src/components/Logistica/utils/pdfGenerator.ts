@@ -1,17 +1,11 @@
-
 import { Reservation } from "../types/reservationTypes";
 import { formatToFloridaDateTime } from "./dateFormatter";
-import { getOrderedReservations } from "./reservationUtils";
 
 export const generateLogisticsPDF = (
   pickupReservations: Reservation[], 
   returnReservations: Reservation[]
 ) => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
-  
-  // Ordena ambas as listas por data e hora
-  const orderedPickupReservations = getOrderedReservations(pickupReservations, "pickup");
-  const orderedReturnReservations = getOrderedReservations(returnReservations, "return");
   
   const generateTableRows = (reservations: Reservation[]) => {
     return reservations.map(reservation => `
@@ -93,14 +87,14 @@ export const generateLogisticsPDF = (
       </div>
 
       <div class="summary">
-        <div class="summary-item">Total Pickup: ${orderedPickupReservations.length}</div>
-        <div class="summary-item">Total Return: ${orderedReturnReservations.length}</div>
-        <div class="summary-item">Total Geral: ${orderedPickupReservations.length + orderedReturnReservations.length}</div>
+        <div class="summary-item">Total Pickup: ${pickupReservations.length}</div>
+        <div class="summary-item">Total Return: ${returnReservations.length}</div>
+        <div class="summary-item">Total Geral: ${pickupReservations.length + returnReservations.length}</div>
       </div>
 
       <div class="section">
-        <h2>📅 Consulta por Pickup Date (${orderedPickupReservations.length} reservas - Ordenadas por Data/Hora)</h2>
-        ${orderedPickupReservations.length > 0 ? `
+        <h2>📅 Consulta por Pickup Date (${pickupReservations.length} reservas)</h2>
+        ${pickupReservations.length > 0 ? `
           <table>
             <thead>
               <tr>
@@ -113,15 +107,15 @@ export const generateLogisticsPDF = (
               </tr>
             </thead>
             <tbody>
-              ${generateTableRows(orderedPickupReservations)}
+              ${generateTableRows(pickupReservations)}
             </tbody>
           </table>
         ` : '<p style="color: #666; font-style: italic;">Nenhuma reserva encontrada para pickup.</p>'}
       </div>
 
       <div class="section">
-        <h2>🔄 Consulta por Return Date (${orderedReturnReservations.length} reservas - Ordenadas por Data/Hora)</h2>
-        ${orderedReturnReservations.length > 0 ? `
+        <h2>🔄 Consulta por Return Date (${returnReservations.length} reservas)</h2>
+        ${returnReservations.length > 0 ? `
           <table>
             <thead>
               <tr>
@@ -134,7 +128,7 @@ export const generateLogisticsPDF = (
               </tr>
             </thead>
             <tbody>
-              ${generateTableRows(orderedReturnReservations)}
+              ${generateTableRows(returnReservations)}
             </tbody>
           </table>
         ` : '<p style="color: #666; font-style: italic;">Nenhuma reserva encontrada para retorno.</p>'}

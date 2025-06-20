@@ -1,4 +1,3 @@
-
 import { ReservationListItem } from '@/hooks/useReservationsList';
 import { formatToFloridaDateTime } from '@/components/Logistica/utils/dateFormatter';
 
@@ -41,34 +40,6 @@ const extractFirstLocationName = (locationLabel: string): string => {
   return locationLabel.split(' ')[0];
 };
 
-// Função para ordenar reservas por data e hora
-const orderReservationsByDateTime = (reservations: ReservationListItem[]): ReservationListItem[] => {
-  return [...reservations].sort((a, b) => {
-    if (!a.data || !b.data) return 0;
-    
-    const dateA = a.data.reservation.pick_up_date;
-    const dateB = b.data.reservation.pick_up_date;
-    
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
-    
-    // Converte para timestamp para comparação precisa
-    const timestampA = new Date(dateA).getTime();
-    const timestampB = new Date(dateB).getTime();
-    
-    // Se as datas de pickup são iguais, ordena por return_date
-    if (timestampA === timestampB) {
-      const returnA = a.data.reservation.return_date ? new Date(a.data.reservation.return_date).getTime() : 0;
-      const returnB = b.data.reservation.return_date ? new Date(b.data.reservation.return_date).getTime() : 0;
-      return returnA - returnB;
-    }
-    
-    // Ordem crescente (mais antiga primeiro)
-    return timestampA - timestampB;
-  });
-};
-
 export const generateReservationsListPDF = (reservations: ReservationListItem[]) => {
   const validReservations = reservations.filter(r => r.data && !r.loading && !r.error);
   
@@ -76,9 +47,6 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
     alert('Nenhuma reserva válida encontrada para gerar o PDF.');
     return;
   }
-
-  // Ordena as reservas por data e hora antes de gerar o PDF
-  const orderedReservations = orderReservationsByDateTime(validReservations);
 
   const printWindow = window.open('', '_blank');
   if (!printWindow) {
@@ -90,7 +58,7 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
   const currentTime = new Date().toLocaleTimeString('pt-BR');
 
   let tableRows = '';
-  orderedReservations.forEach((reservation) => {
+  validReservations.forEach((reservation) => {
     const data = reservation.data!;
     const tempColor = getTemperatureColor(reservation.temperature || '');
     const tempEmoji = getTemperatureEmoji(reservation.temperature || '');
@@ -174,9 +142,9 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
       </head>
       <body>
         <div class="header">
-          <h1>Lista de Reservas (Ordenadas por Data/Hora)</h1>
+          <h1>Lista de Reservas</h1>
           <p>Gerado em: ${currentDate} às ${currentTime}</p>
-          <p>Total de reservas: ${orderedReservations.length}</p>
+          <p>Total de reservas: ${validReservations.length}</p>
         </div>
 
         <table>
@@ -202,7 +170,7 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
 
         <div class="summary">
           <h3>Resumo por Temperatura:</h3>
-          ${generateTemperatureSummary(orderedReservations)}
+          ${generateTemperatureSummary(validReservations)}
         </div>
       </body>
     </html>
