@@ -47,7 +47,7 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
 
   return (
     <TooltipProvider>
-      <Card className="hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden">
+      <Card className="hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden h-full">
         <VehicleCardHeader
           vehicle={vehicle}
           onDownloadSingle={handleDownloadSingleWithLoading}
@@ -55,7 +55,7 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
           downloading={downloading}
         />
         
-        <CardContent className="p-3 space-y-2">
+        <CardContent className="p-2 sm:p-3 space-y-2 flex flex-col h-full">
           <VehicleCardContent
             vehicle={vehicle}
             formatCurrency={formatCurrency}
@@ -63,6 +63,8 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
             showMinNegotiable={showMinNegotiable}
             minNegotiable={vehicle.minNegotiable}
           />
+
+          <div className="flex-1" />
 
           <VehicleCardButtons
             vehicle={vehicle}

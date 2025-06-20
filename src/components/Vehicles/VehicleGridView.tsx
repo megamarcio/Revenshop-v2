@@ -12,7 +12,7 @@ interface VehicleGridViewProps {
 
 const VehicleGridView = ({ vehicles, onEdit, onDuplicate, onDelete }: VehicleGridViewProps) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-2 sm:gap-3 md:gap-4 p-1 sm:p-0">
       {vehicles.map((vehicle) => (
         <VehicleCard
           key={vehicle.id}

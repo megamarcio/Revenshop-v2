@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Edit, Copy, Trash2, Eye } from 'lucide-react';
+import { Edit, Copy, Trash2 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Vehicle as VehicleCardType } from './VehicleCardTypes';
 
@@ -89,57 +89,77 @@ const VehicleListView = ({
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-1 sm:space-y-2">
       {vehicles.map(vehicle => (
         <Card key={vehicle.id} className="hover:shadow-md transition-shadow">
-          <CardContent className="p-4 px-[9px] py-0">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 grid grid-cols-1 md:grid-cols-6 gap-4">
-                {/* Vehicle Info */}
-                <div className="md:col-span-2">
-                  <h3 className="text-xs font-bold">{vehicle.name}</h3>
-                  <p className="text-xs text-[#fa002a] font-medium">
-                    Código: {formatInternalCode(vehicle.internalCode)}
-                  </p>
-                </div>
+          <CardContent className="p-2 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4">
+              <div className="flex-1">
+                {/* Mobile: Layout vertical / Desktop: Layout horizontal */}
+                <div className="flex flex-col sm:grid sm:grid-cols-6 gap-2 sm:gap-4">
+                  {/* Vehicle Info */}
+                  <div className="sm:col-span-2">
+                    <h3 className="text-sm sm:text-xs font-bold">{vehicle.name}</h3>
+                    <p className="text-sm sm:text-xs text-[#fa002a] font-medium">
+                      Código: {formatInternalCode(vehicle.internalCode)}
+                    </p>
+                  </div>
 
-                {/* VIN and Category */}
-                <div className="md:col-span-1">
-                  <p className="text-gray-600 text-xs text-center">VIN: {vehicle.vin}</p>
-                  <span className={`inline-block px-2 py-1 text-xs rounded-full ${getCategoryColor(vehicle)}`}>
-                    {getCategoryLabel(vehicle)}
-                  </span>
-                </div>
+                  {/* VIN and Category */}
+                  <div className="sm:col-span-1 flex flex-col sm:items-center gap-1">
+                    <p className="text-gray-600 text-sm sm:text-xs">VIN: {vehicle.vin}</p>
+                    <span className={`inline-block px-2 py-1 text-xs rounded-full w-fit ${getCategoryColor(vehicle)}`}>
+                      {getCategoryLabel(vehicle)}
+                    </span>
+                  </div>
 
-                {/* Prices */}
-                <div className="md:col-span-1 my-0">
-                  <p className="font-semibold text-green-600 text-xs">
-                    Venda: {formatCurrency(vehicle.salePrice)}
-                  </p>
-                  {vehicle.profitMargin}
+                  {/* Prices */}
+                  <div className="sm:col-span-2">
+                    <p className="font-semibold text-green-600 text-sm sm:text-xs">
+                      Venda: {formatCurrency(vehicle.salePrice)}
+                    </p>
+                    {vehicle.profitMargin && (
+                      <div className="text-xs text-muted-foreground">
+                        {vehicle.profitMargin}
+                      </div>
+                    )}
+                  </div>
                 </div>
+              </div>
 
-                {/* Actions */}
-                <div className="md:col-span-1 flex items-center gap-2">
-                  {canEditVehicles && (
-                    <>
-                      <Button variant="outline" size="sm" onClick={() => onEdit(vehicle)}>
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={() => onDuplicate(vehicle)}>
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={() => onDelete(vehicle)} 
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </>
-                  )}
-                </div>
+              {/* Actions */}
+              <div className="flex items-center gap-1 sm:gap-2 justify-end">
+                {canEditVehicles && (
+                  <>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onEdit(vehicle)}
+                      className="h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2"
+                    >
+                      <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="sr-only sm:not-sr-only sm:ml-1">Editar</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onDuplicate(vehicle)}
+                      className="h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2"
+                    >
+                      <Copy className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="sr-only sm:not-sr-only sm:ml-1">Duplicar</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onDelete(vehicle)} 
+                      className="h-8 w-8 sm:h-auto sm:w-auto p-1 sm:p-2 text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                      <span className="sr-only sm:not-sr-only sm:ml-1">Excluir</span>
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           </CardContent>
