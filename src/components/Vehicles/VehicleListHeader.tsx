@@ -5,7 +5,6 @@ import { Plus, Upload } from 'lucide-react';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
 import VehicleImportModal from './VehicleImport/VehicleImportModal';
-import QuickLinksMenu from '../Layout/QuickLinksMenu';
 
 interface VehicleListHeaderProps {
   onAddVehicle: () => void;
@@ -31,28 +30,25 @@ const VehicleListHeader = ({ onAddVehicle, onImportComplete }: VehicleListHeader
           <h1 className="text-2xl font-bold text-gray-900">{t('vehicles')}</h1>
           <p className="text-gray-600">{t('subtitle')}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <QuickLinksMenu />
-          {canEditVehicles && (
-            <>
-              <Button 
-                onClick={() => setShowImportModal(true)}
-                variant="outline"
-                className="flex items-center gap-2"
-              >
-                <Upload className="h-4 w-4" />
-                Importar Veículos
-              </Button>
-              <Button 
-                onClick={onAddVehicle}
-                className="bg-revenshop-primary hover:bg-revenshop-primary/90"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                {t('addVehicle')}
-              </Button>
-            </>
-          )}
-        </div>
+        {canEditVehicles && (
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => setShowImportModal(true)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Upload className="h-4 w-4" />
+              Importar Veículos
+            </Button>
+            <Button 
+              onClick={onAddVehicle}
+              className="bg-revenshop-primary hover:bg-revenshop-primary/90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t('addVehicle')}
+            </Button>
+          </div>
+        )}
       </div>
 
       <VehicleImportModal
