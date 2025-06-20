@@ -26,6 +26,15 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
     isInternalSeller, 
     isSeller 
   });
+
+  // Debug adicional para verificar se o useAuth está funcionando
+  console.log('🔐 AUTH DEBUG - useAuth result:', {
+    canEditVehicles,
+    canViewCostPrices,
+    isInternalSeller,
+    isSeller,
+    hasAllPermissions: canEditVehicles !== undefined && canViewCostPrices !== undefined
+  });
   
   const {
     formatCurrency,
@@ -58,6 +67,14 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
     setShowMaintenanceModal(true);
   };
 
+  // Debug: verificar se todos os handlers estão definidos
+  console.log('🔧 HANDLERS DEBUG:', {
+    onEdit: !!onEdit,
+    handleCopyDescription: !!handleCopyDescription,
+    handleCarfaxLookup: !!handleCarfaxLookup,
+    handleViewMaintenance: !!handleViewMaintenance
+  });
+
   return (
     <TooltipProvider>
       <Card className="hover:shadow-lg transition-all duration-300 border-gray-200 overflow-hidden h-full">
@@ -79,23 +96,29 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
 
           <div className="flex-1" />
 
-          <VehicleCardButtons
-            vehicle={vehicle}
-            canEditVehicles={canEditVehicles}
-            canViewCostPrices={canViewCostPrices}
-            isInternalSeller={isInternalSeller}
-            isSeller={isSeller}
-            showMinNegotiable={showMinNegotiable}
-            downloading={downloading}
-            formatCurrency={formatCurrency}
-            onEdit={() => onEdit(vehicle)}
-            onCopyDescription={() => handleCopyDescription(vehicle.description)}
-            onCarfaxLookup={() => handleCarfaxLookup(vehicle.vin)}
-            onDownloadAll={handleDownloadAllWithLoading}
-            onToggleMinNegotiable={() => setShowMinNegotiable(!showMinNegotiable)}
-            onDelete={onDelete ? () => onDelete(vehicle) : undefined}
-            onViewMaintenance={handleViewMaintenance}
-          />
+          {/* DEBUG: Container com border para verificar se está sendo renderizado */}
+          <div className="border-2 border-red-300 border-dashed p-1 bg-red-50">
+            <div className="text-xs text-red-600 text-center mb-1">
+              CONTAINER BOTÕES DEBUG
+            </div>
+            <VehicleCardButtons
+              vehicle={vehicle}
+              canEditVehicles={canEditVehicles}
+              canViewCostPrices={canViewCostPrices}
+              isInternalSeller={isInternalSeller}
+              isSeller={isSeller}
+              showMinNegotiable={showMinNegotiable}
+              downloading={downloading}
+              formatCurrency={formatCurrency}
+              onEdit={() => onEdit(vehicle)}
+              onCopyDescription={() => handleCopyDescription(vehicle.description)}
+              onCarfaxLookup={() => handleCarfaxLookup(vehicle.vin)}
+              onDownloadAll={handleDownloadAllWithLoading}
+              onToggleMinNegotiable={() => setShowMinNegotiable(!showMinNegotiable)}
+              onDelete={onDelete ? () => onDelete(vehicle) : undefined}
+              onViewMaintenance={handleViewMaintenance}
+            />
+          </div>
         </CardContent>
       </Card>
 
