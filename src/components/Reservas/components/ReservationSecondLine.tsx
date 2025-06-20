@@ -39,7 +39,7 @@ const ReservationSecondLine = ({
         {vehicleName !== 'N/A' && (
           <div className="flex items-center gap-1">
             <Car className="h-3 w-3 text-purple-600" />
-            <span className="text-purple-700 font-medium truncate max-w-[120px]">{vehicleName}</span>
+            <span className="text-purple-700 font-medium">{vehicleName}</span>
           </div>
         )}
       </div>
