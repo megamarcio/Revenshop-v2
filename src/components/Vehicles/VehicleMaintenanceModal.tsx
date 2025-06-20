@@ -40,16 +40,32 @@ const VehicleMaintenanceModal = ({
     return new Date(dateString).toLocaleDateString('pt-BR');
   };
 
+  // Calculate status based on dates
+  const getMaintenanceStatus = (maintenance: any) => {
+    if (maintenance.repair_date) {
+      return 'completed';
+    }
+    if (maintenance.promised_date) {
+      const promisedDate = new Date(maintenance.promised_date);
+      const today = new Date();
+      if (promisedDate < today) {
+        return 'overdue';
+      }
+      return 'pending';
+    }
+    return 'open';
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed':
         return 'bg-green-100 text-green-800';
-      case 'in_progress':
-        return 'bg-blue-100 text-blue-800';
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'cancelled':
+        return 'bg-blue-100 text-blue-800';
+      case 'overdue':
         return 'bg-red-100 text-red-800';
+      case 'open':
+        return 'bg-yellow-100 text-yellow-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
@@ -59,15 +75,30 @@ const VehicleMaintenanceModal = ({
     switch (status) {
       case 'completed':
         return 'Concluída';
-      case 'in_progress':
-        return 'Em Andamento';
       case 'pending':
         return 'Pendente';
-      case 'cancelled':
-        return 'Cancelada';
+      case 'overdue':
+        return 'Vencida';
+      case 'open':
+        return 'Em Aberto';
       default:
         return status;
     }
+  };
+
+  // Calculate costs from parts and labor arrays
+  const calculateCosts = (maintenance: any) => {
+    const partsCost = maintenance.parts?.reduce((total: number, part: any) => {
+      return total + (part.priceQuotes?.reduce((partTotal: number, quote: any) => {
+        return quote.purchased ? partTotal + quote.estimatedPrice : partTotal;
+      }, 0) || 0);
+    }, 0) || 0;
+
+    const laborCost = maintenance.labor?.reduce((total: number, labor: any) => {
+      return total + (labor.value || 0);
+    }, 0) || 0;
+
+    return { partsCost, laborCost };
   };
 
   return (
@@ -108,50 +139,57 @@ const VehicleMaintenanceModal = ({
               </div>
             ) : (
               <div className="space-y-3">
-                {vehicleMaintenances.map((maintenance) => (
-                  <div
-                    key={maintenance.id}
-                    className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{maintenance.description}</h3>
-                        <Badge className={getStatusColor(maintenance.status)}>
-                          {getStatusText(maintenance.status)}
-                        </Badge>
-                      </div>
-                      <span className="font-bold text-lg text-red-600">
-                        {formatCurrency(maintenance.total_amount)}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
-                      <div className="flex items-center gap-1">
-                        <Calendar className="h-4 w-4" />
-                        <span>{formatDate(maintenance.maintenance_date)}</span>
-                      </div>
-                      {maintenance.mechanic_name && (
-                        <div className="flex items-center gap-1">
-                          <User className="h-4 w-4" />
-                          <span>{maintenance.mechanic_name}</span>
+                {vehicleMaintenances.map((maintenance) => {
+                  const status = getMaintenanceStatus(maintenance);
+                  const { partsCost, laborCost } = calculateCosts(maintenance);
+                  
+                  return (
+                    <div
+                      key={maintenance.id}
+                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-semibold">
+                            {maintenance.maintenance_items?.join(', ') || 'Manutenção'}
+                          </h3>
+                          <Badge className={getStatusColor(status)}>
+                            {getStatusText(status)}
+                          </Badge>
                         </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <DollarSign className="h-4 w-4" />
-                        <span>
-                          Labor: {formatCurrency(maintenance.labor_cost)} | 
-                          Peças: {formatCurrency(maintenance.parts_cost)}
+                        <span className="font-bold text-lg text-red-600">
+                          {formatCurrency(maintenance.total_amount)}
                         </span>
                       </div>
-                    </div>
 
-                    {maintenance.notes && (
-                      <div className="mt-2 p-2 bg-gray-100 rounded text-sm">
-                        <strong>Observações:</strong> {maintenance.notes}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(maintenance.detection_date)}</span>
+                        </div>
+                        {maintenance.mechanic_name && (
+                          <div className="flex items-center gap-1">
+                            <User className="h-4 w-4" />
+                            <span>{maintenance.mechanic_name}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="h-4 w-4" />
+                          <span>
+                            Labor: {formatCurrency(laborCost)} | 
+                            Peças: {formatCurrency(partsCost)}
+                          </span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {maintenance.details && (
+                        <div className="mt-2 p-2 bg-gray-100 rounded text-sm">
+                          <strong>Observações:</strong> {maintenance.details}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             )}
           </ScrollArea>
