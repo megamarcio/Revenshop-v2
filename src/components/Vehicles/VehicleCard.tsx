@@ -7,17 +7,25 @@ import { useVehicleCardActions } from './VehicleCardActions';
 import VehicleCardHeader from './VehicleCardHeader';
 import VehicleCardContent from './VehicleCardContent';
 import VehicleCardButtons from './VehicleCardButtons';
+import VehicleMaintenanceModal from './VehicleMaintenanceModal';
 import { VehicleCardProps } from './VehicleCardTypes';
 
 const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProps) => {
   const { canEditVehicles, canViewCostPrices, isInternalSeller, isSeller } = useAuth();
   const [showMinNegotiable, setShowMinNegotiable] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
   
   console.log('🎯 VEHICLE CARD DEBUG - Vehicle recebido:', vehicle);
   console.log('🎯 VEHICLE CARD DEBUG - Vehicle ID:', vehicle.id);
   console.log('🎯 VEHICLE CARD DEBUG - Vehicle name:', vehicle.name);
   console.log('🎯 VEHICLE CARD DEBUG - Vehicle photos:', vehicle.photos);
+  console.log('🎯 VEHICLE CARD DEBUG - Permissions:', { 
+    canEditVehicles, 
+    canViewCostPrices, 
+    isInternalSeller, 
+    isSeller 
+  });
   
   const {
     formatCurrency,
@@ -43,6 +51,11 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
     } finally {
       setDownloading(false);
     }
+  };
+
+  const handleViewMaintenance = () => {
+    console.log('🔧 Opening maintenance modal for vehicle:', vehicle.id);
+    setShowMaintenanceModal(true);
   };
 
   return (
@@ -81,9 +94,17 @@ const VehicleCard = ({ vehicle, onEdit, onDuplicate, onDelete }: VehicleCardProp
             onDownloadAll={handleDownloadAllWithLoading}
             onToggleMinNegotiable={() => setShowMinNegotiable(!showMinNegotiable)}
             onDelete={onDelete ? () => onDelete(vehicle) : undefined}
+            onViewMaintenance={handleViewMaintenance}
           />
         </CardContent>
       </Card>
+
+      <VehicleMaintenanceModal
+        isOpen={showMaintenanceModal}
+        onClose={() => setShowMaintenanceModal(false)}
+        vehicleId={vehicle.id}
+        vehicleName={vehicle.name}
+      />
     </TooltipProvider>
   );
 };

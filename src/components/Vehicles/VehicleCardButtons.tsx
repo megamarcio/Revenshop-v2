@@ -46,14 +46,29 @@ const VehicleCardButtons = ({
   onDelete,
   onViewMaintenance
 }: VehicleCardButtonsProps) => {
+  
+  console.log('🎛️ BUTTONS DEBUG - Rendering buttons for vehicle:', vehicle.id);
+  console.log('🎛️ BUTTONS DEBUG - Permissions:', { 
+    canEditVehicles, 
+    canViewCostPrices, 
+    isInternalSeller, 
+    isSeller 
+  });
+  
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 mt-auto">
       {/* Linha única de botões centralizados */}
-      <div className="flex justify-center gap-1">
+      <div className="flex justify-center gap-1 flex-wrap">
+        {/* Botão de Editar - apenas se tem permissão */}
         {canEditVehicles && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onEdit} size="sm" variant="outline" className="h-8 w-8 p-0">
+              <Button 
+                onClick={onEdit} 
+                size="sm" 
+                variant="outline" 
+                className="h-8 w-8 p-0 flex-shrink-0"
+              >
                 <Edit className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
@@ -61,23 +76,30 @@ const VehicleCardButtons = ({
           </Tooltip>
         )}
 
+        {/* Botão de Copiar Descrição - sempre visível */}
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button onClick={onCopyDescription} size="sm" variant="outline" className="h-8 w-8 p-0">
+            <Button 
+              onClick={onCopyDescription} 
+              size="sm" 
+              variant="outline" 
+              className="h-8 w-8 p-0 flex-shrink-0"
+            >
               <Copy className="h-3 w-3" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>Copiar Descrição</TooltipContent>
         </Tooltip>
 
-        {(canViewCostPrices || isInternalSeller) && (
+        {/* Botão de Mostrar/Ocultar Preço Mínimo Negociável */}
+        {(canViewCostPrices || isInternalSeller) && vehicle.minNegotiable && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
                 onClick={onToggleMinNegotiable} 
                 size="sm" 
                 variant="outline" 
-                className="h-8 w-8 p-0"
+                className="h-8 w-8 p-0 flex-shrink-0"
               >
                 {showMinNegotiable ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               </Button>
@@ -88,10 +110,16 @@ const VehicleCardButtons = ({
           </Tooltip>
         )}
 
+        {/* Botão de Manutenção */}
         {(isInternalSeller || canEditVehicles) && onViewMaintenance && (
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button onClick={onViewMaintenance} size="sm" variant="outline" className="h-8 w-8 p-0">
+              <Button 
+                onClick={onViewMaintenance} 
+                size="sm" 
+                variant="outline" 
+                className="h-8 w-8 p-0 flex-shrink-0"
+              >
                 <Wrench className="h-3 w-3" />
               </Button>
             </TooltipTrigger>
@@ -99,14 +127,14 @@ const VehicleCardButtons = ({
           </Tooltip>
         )}
 
-        {/* Botão do Carfax apenas com ícone */}
+        {/* Botão do Carfax - sempre visível */}
         <Tooltip>
           <TooltipTrigger asChild>
             <Button 
               onClick={onCarfaxLookup} 
               size="sm" 
               variant="outline" 
-              className="h-8 w-8 p-0"
+              className="h-8 w-8 p-0 flex-shrink-0"
             >
               <img 
                 src="/lovable-uploads/f4315c70-bf51-4461-916d-f4f2c3305516.png" 
