@@ -1,6 +1,5 @@
-
 import { Reservation } from '../types/reservationTypes';
-import { formatToAmericanDateTime } from './dateFormatter';
+import { formatToFloridaDateTime } from './dateFormatter';
 
 export const exportLogisticaReservationsToPDF = (reservations: Reservation[], dateRange: { start: string; end: string }) => {
   const currentDate = new Date().toLocaleDateString('pt-BR');
@@ -11,8 +10,8 @@ export const exportLogisticaReservationsToPDF = (reservations: Reservation[], da
         <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.id || 'N/A'}</td>
         <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.customer?.label || 'N/A'}</td>
         <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.customer?.phone_number || 'N/A'}</td>
-        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${formatToAmericanDateTime(reservation.pick_up_date)}</td>
-        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${formatToAmericanDateTime(reservation.return_date)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${formatToFloridaDateTime(reservation.pick_up_date)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${formatToFloridaDateTime(reservation.return_date)}</td>
         <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.vehicle_name || 'N/A'}</td>
         <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.reservation_vehicle_information?.plate || 'N/A'}</td>
       </tr>
