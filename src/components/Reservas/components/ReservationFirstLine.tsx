@@ -2,9 +2,10 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { User, DollarSign, Trash2 } from 'lucide-react';
+import { User, Trash2, Calendar } from 'lucide-react';
 import { ReservationDetails } from '@/hooks/useReservationById';
 import { getStatusColor, getTemperatureIndicator, getChildEquipmentInfo } from '../utils/reservationHelpers';
+import { formatToCompactBrazilianDateTime } from '@/components/Logistica/utils/dateFormatter';
 
 interface ReservationFirstLineProps {
   data: ReservationDetails;
@@ -17,6 +18,10 @@ const ReservationFirstLine = ({ data, temperature, onRemove }: ReservationFirstL
   const childEquipments = getChildEquipmentInfo(data.customer.last_name);
   const shouldShowNoSign = !data.reservation.signed_at && data.reservation.status.toLowerCase() !== 'quote';
   const temperatureIndicator = getTemperatureIndicator(temperature || '');
+
+  // Format compact dates
+  const checkInDate = formatToCompactBrazilianDateTime(data.reservation.pick_up_date);
+  const returnDate = formatToCompactBrazilianDateTime(data.reservation.return_date);
 
   return (
     <div className="flex items-center justify-between mb-2">
@@ -45,12 +50,28 @@ const ReservationFirstLine = ({ data, temperature, onRemove }: ReservationFirstL
         {hasPhoneNumber && (
           <span className="text-xs text-muted-foreground">({data.customer.phone_number})</span>
         )}
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-1">
-          <DollarSign className="h-3 w-3 text-muted-foreground" />
-          <span className="text-sm font-semibold">{data.reservation.outstanding_balance}</span>
+        
+        {/* Compact Check-in and Return dates */}
+        <div className="hidden sm:flex items-center gap-2 ml-2">
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-green-600" />
+            <span className="text-xs text-green-700">{checkInDate}</span>
+          </div>
+          <span className="text-xs text-muted-foreground">/</span>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3 w-3 text-red-600" />
+            <span className="text-xs text-red-700">{returnDate}</span>
+          </div>
         </div>
+        
+        {/* Mobile: Show dates in a more compact way */}
+        <div className="sm:hidden flex items-center gap-1 ml-2">
+          <Calendar className="h-3 w-3 text-blue-600" />
+          <span className="text-xs text-blue-700">{checkInDate} / {returnDate}</span>
+        </div>
+      </div>
+      
+      <div className="flex items-center gap-2">
         <Button
           variant="outline"
           size="sm"

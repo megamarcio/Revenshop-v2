@@ -22,3 +22,26 @@ export const formatToAmericanDateTime = (dateString: string): string => {
     return 'Error';
   }
 };
+
+export const formatToCompactBrazilianDateTime = (dateString: string): string => {
+  if (!dateString) return 'N/A';
+  
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return 'Invalid Date';
+    }
+    
+    // Format as dd/mm hh:mm
+    return date.toLocaleString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+  } catch (error) {
+    console.error('Error formatting date:', error);
+    return 'Error';
+  }
+};
