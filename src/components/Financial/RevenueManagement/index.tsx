@@ -3,15 +3,12 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useRevenues } from '@/hooks/useRevenues';
 import RevenueForm from '../RevenueForm';
-import ReplicateRevenueModal from '../ReplicateRevenueModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import RevenueManagementHeader from './RevenueManagementHeader';
 import RevenueListView from './RevenueListView';
 import RevenueCompactView from './RevenueCompactView';
 import RevenueUltraCompactView from './RevenueUltraCompactView';
-import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from './dateFilterUtils';
-import { RevenueSortField, SortOrder, sortRevenues } from './RevenueSortingUtils';
-import { useRevenueManagementUtils } from './useRevenueManagementUtils';
+import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from '../ExpenseManagement/dateFilterUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
@@ -19,15 +16,26 @@ const RevenueManagement = () => {
   const { revenues, deleteRevenue, refetch } = useRevenues();
   const [selectedRevenue, setSelectedRevenue] = useState(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [isReplicateOpen, setIsReplicateOpen] = useState(false);
-  const [revenueToReplicate, setRevenueToReplicate] = useState(null);
   const [showConfirmed, setShowConfirmed] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
-  const [sortField, setSortField] = useState<RevenueSortField>('date');
-  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  const { formatCurrency, getTypeColor, canReplicate } = useRevenueManagementUtils();
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(value);
+  };
+
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'venda': return 'bg-green-100 text-green-800';
+      case 'comissao': return 'bg-blue-100 text-blue-800';
+      case 'servico': return 'bg-purple-100 text-purple-800';
+      case 'financiamento': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   const filteredRevenues = useMemo(() => {
     // Primeiro aplica o filtro de confirmação
@@ -37,32 +45,14 @@ const RevenueManagement = () => {
 
     // Depois aplica o filtro de data
     const dateRange = getDateRangeForFilter(dateFilter);
-    filtered = filterRevenuesByDateRange(filtered, dateRange, dateFilter);
-
-    // Por último aplica a ordenação
-    filtered = sortRevenues(filtered, sortField, sortOrder);
-
-    console.log('Filtros e ordenação aplicados (receitas):', {
-      totalRevenues: revenues.length,
-      afterConfirmationFilter: revenues.filter(revenue => showConfirmed ? true : !revenue.is_confirmed).length,
-      afterDateFilter: filtered.length,
-      dateFilter,
-      dateRange,
-      sortField,
-      sortOrder
-    });
+    filtered = filterRevenuesByDateRange(filtered, dateRange);
 
     return filtered;
-  }, [revenues, showConfirmed, dateFilter, sortField, sortOrder]);
+  }, [revenues, showConfirmed, dateFilter]);
 
   const handleEdit = (revenue: any) => {
     setSelectedRevenue(revenue);
     setIsFormOpen(true);
-  };
-
-  const handleReplicate = (revenue: any) => {
-    setRevenueToReplicate(revenue);
-    setIsReplicateOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -74,12 +64,6 @@ const RevenueManagement = () => {
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedRevenue(null);
-    refetch();
-  };
-
-  const handleReplicateSuccess = () => {
-    setIsReplicateOpen(false);
-    setRevenueToReplicate(null);
     refetch();
   };
 
@@ -105,20 +89,18 @@ const RevenueManagement = () => {
     setDateFilter(filter);
   };
 
-  const handleSortChange = (field: RevenueSortField, order: SortOrder) => {
-    setSortField(field);
-    setSortOrder(order);
+  const getFilterLabelForRevenues = (filter: DateFilterType): string => {
+    const label = getFilterLabel(filter);
+    return label.replace('despesas', 'receitas');
   };
 
   const renderRevenueView = () => {
     const commonProps = {
       revenues: filteredRevenues,
       onEdit: handleEdit,
-      onReplicate: handleReplicate,
       onDelete: handleDelete,
       formatCurrency,
       getTypeColor,
-      canReplicate,
     };
 
     switch (viewMode) {
@@ -139,21 +121,17 @@ const RevenueManagement = () => {
         showConfirmed={showConfirmed}
         viewMode={viewMode}
         dateFilter={dateFilter}
-        sortField={sortField}
-        sortOrder={sortOrder}
         onToggleShowConfirmed={handleToggleShowConfirmed}
         onToggleViewMode={handleToggleViewMode}
         onDateFilterChange={handleDateFilterChange}
-        onSortChange={handleSortChange}
         onNewRevenue={handleNewRevenue}
       />
 
-      <div className="text-center text-sm text-muted-foreground">
-        {dateFilter !== 'all' && (
-          <div>{getFilterLabel(dateFilter)}</div>
-        )}
-        {filteredRevenues.length} {filteredRevenues.length === 1 ? 'receita' : 'receitas'} {showConfirmed ? 'encontradas' : 'não confirmadas'}
-      </div>
+      {dateFilter !== 'all' && (
+        <div className="text-center text-sm text-muted-foreground">
+          {getFilterLabelForRevenues(dateFilter)} • {filteredRevenues.length} {filteredRevenues.length === 1 ? 'receita' : 'receitas'}
+        </div>
+      )}
 
       {renderRevenueView()}
 
@@ -161,10 +139,7 @@ const RevenueManagement = () => {
         <Card className="text-sm">
           <CardContent className="p-6 text-center">
             <p className="text-muted-foreground">
-              {dateFilter === 'all' 
-                ? (showConfirmed ? 'Nenhuma receita encontrada' : 'Nenhuma receita pendente encontrada')
-                : 'Nenhuma receita encontrada para o período selecionado'
-              }
+              {dateFilter === 'all' ? 'Nenhuma receita encontrada' : 'Nenhuma receita encontrada para o período selecionado'}
             </p>
           </CardContent>
         </Card>
@@ -187,13 +162,6 @@ const RevenueManagement = () => {
           />
         </DialogContent>
       </Dialog>
-
-      <ReplicateRevenueModal
-        revenue={revenueToReplicate}
-        open={isReplicateOpen}
-        onOpenChange={setIsReplicateOpen}
-        onSuccess={handleReplicateSuccess}
-      />
     </div>
   );
 };

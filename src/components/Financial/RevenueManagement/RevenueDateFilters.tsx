@@ -1,7 +1,8 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { type DateFilterType, getFilterButtonLabel } from './dateFilterUtils';
+import { Filter } from 'lucide-react';
+import { DateFilterType } from './dateFilterUtils';
 
 interface RevenueDateFiltersProps {
   selectedFilter: DateFilterType;
@@ -12,19 +13,27 @@ const RevenueDateFilters: React.FC<RevenueDateFiltersProps> = ({
   selectedFilter,
   onFilterChange,
 }) => {
-  const filters: DateFilterType[] = ['today', 'week', 'fortnight', 'month', 'year', 'all'];
+  const filters = [
+    { key: 'day' as DateFilterType, label: 'Hoje' },
+    { key: 'week' as DateFilterType, label: 'Semana' },
+    { key: 'biweekly' as DateFilterType, label: 'Quinzena' },
+    { key: 'month' as DateFilterType, label: 'Mês' },
+    { key: 'year' as DateFilterType, label: 'Ano' },
+    { key: 'all' as DateFilterType, label: 'Total' },
+  ];
 
   return (
-    <div className="flex flex-wrap gap-2 justify-center">
+    <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg">
+      <Filter className="h-3 w-3 text-muted-foreground mx-1" />
       {filters.map((filter) => (
         <Button
-          key={filter}
-          variant={selectedFilter === filter ? 'default' : 'outline'}
+          key={filter.key}
+          variant={selectedFilter === filter.key ? "default" : "ghost"}
           size="sm"
-          onClick={() => onFilterChange(filter)}
-          className="text-xs"
+          className="h-6 px-2 text-xs"
+          onClick={() => onFilterChange(filter.key)}
         >
-          {getFilterButtonLabel(filter)}
+          {filter.label}
         </Button>
       ))}
     </div>
@@ -32,4 +41,3 @@ const RevenueDateFilters: React.FC<RevenueDateFiltersProps> = ({
 };
 
 export default RevenueDateFilters;
-export type { DateFilterType };

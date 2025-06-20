@@ -57,11 +57,10 @@ function App() {
       case 'financial':
       case 'revenues':
       case 'expenses':
-      case 'fixed-expenses':
       case 'bank-statements':
       case 'software':
       case 'financial-config':
-        return <FinancialManagement activeSubTab={activeTab} />;
+        return <FinancialManagement initialTab={activeTab} />;
       case 'users':
         return <UserManagement />;
       case 'admin':
@@ -79,10 +78,8 @@ function App() {
         <AppSidebar activeTab={activeTab} setActiveTab={setActiveTab} />
         <div className="flex-1 flex flex-col min-h-screen">
           <Header onNavigateToProfile={() => setActiveTab('profile')} />
-          <main className="flex-1 bg-background p-2 sm:p-4 md:p-6 overflow-x-hidden">
-            <div className="h-full overflow-y-auto -webkit-overflow-scrolling-touch">
-              {renderContent()}
-            </div>
+          <main className="flex-1 bg-background overflow-y-auto">
+            {renderContent()}
           </main>
         </div>
         

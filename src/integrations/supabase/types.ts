@@ -597,14 +597,8 @@ export type Database = {
           description: string
           due_date: string | null
           id: string
-          is_active_recurring: boolean
           is_paid: boolean
-          is_recurring: boolean
           notes: string | null
-          parent_expense_id: string | null
-          recurring_end_date: string | null
-          recurring_interval: number | null
-          recurring_start_date: string | null
           type: string
           updated_at: string
         }
@@ -617,14 +611,8 @@ export type Database = {
           description: string
           due_date?: string | null
           id?: string
-          is_active_recurring?: boolean
           is_paid?: boolean
-          is_recurring?: boolean
           notes?: string | null
-          parent_expense_id?: string | null
-          recurring_end_date?: string | null
-          recurring_interval?: number | null
-          recurring_start_date?: string | null
           type: string
           updated_at?: string
         }
@@ -637,14 +625,8 @@ export type Database = {
           description?: string
           due_date?: string | null
           id?: string
-          is_active_recurring?: boolean
           is_paid?: boolean
-          is_recurring?: boolean
           notes?: string | null
-          parent_expense_id?: string | null
-          recurring_end_date?: string | null
-          recurring_interval?: number | null
-          recurring_start_date?: string | null
           type?: string
           updated_at?: string
         }
@@ -654,13 +636,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "financial_categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "expenses_parent_expense_id_fkey"
-            columns: ["parent_expense_id"]
-            isOneToOne: false
-            referencedRelation: "expenses"
             referencedColumns: ["id"]
           },
         ]

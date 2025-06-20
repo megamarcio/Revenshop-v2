@@ -3,8 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Eye, EyeOff, List, Grid, Minus } from 'lucide-react';
 import ExpenseDateFilters, { DateFilterType } from './ExpenseDateFilters';
-import ExpenseSortSelector from './ExpenseSortSelector';
-import { ExpenseSortField, SortOrder } from './ExpenseSortingUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
@@ -12,12 +10,9 @@ interface ExpenseManagementHeaderProps {
   showPaid: boolean;
   viewMode: ViewMode;
   dateFilter: DateFilterType;
-  sortField: ExpenseSortField;
-  sortOrder: SortOrder;
   onToggleShowPaid: () => void;
   onToggleViewMode: () => void;
   onDateFilterChange: (filter: DateFilterType) => void;
-  onSortChange: (field: ExpenseSortField, order: SortOrder) => void;
   onNewExpense: () => void;
 }
 
@@ -25,12 +20,9 @@ const ExpenseManagementHeader: React.FC<ExpenseManagementHeaderProps> = ({
   showPaid,
   viewMode,
   dateFilter,
-  sortField,
-  sortOrder,
   onToggleShowPaid,
   onToggleViewMode,
   onDateFilterChange,
-  onSortChange,
   onNewExpense,
 }) => {
   const getViewModeIcon = () => {
@@ -93,16 +85,10 @@ const ExpenseManagementHeader: React.FC<ExpenseManagementHeaderProps> = ({
         </div>
       </div>
 
-      <div className="flex flex-col sm:flex-row justify-center items-center gap-3">
+      <div className="flex justify-center">
         <ExpenseDateFilters
           selectedFilter={dateFilter}
           onFilterChange={onDateFilterChange}
-        />
-        
-        <ExpenseSortSelector
-          selectedSortField={sortField}
-          selectedSortOrder={sortOrder}
-          onSortChange={onSortChange}
         />
       </div>
     </div>

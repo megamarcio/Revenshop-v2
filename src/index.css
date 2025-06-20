@@ -93,43 +93,26 @@
     @apply bg-background text-foreground;
   }
   
-  /* Mobile optimizations - melhorar scroll e responsividade */
+  /* Mobile optimizations - permitir scroll vertical natural */
   @media (max-width: 768px) {
-    html {
+    html, body {
       height: 100%;
       width: 100%;
-      /* Permitir scroll natural com momentum */
       -webkit-overflow-scrolling: touch;
-      overflow-x: hidden;
-      overflow-y: auto;
-    }
-    
-    body {
-      height: 100%;
-      width: 100%;
-      /* Configurações otimizadas para mobile scroll */
-      -webkit-overflow-scrolling: touch;
-      overflow-x: hidden;
-      overflow-y: auto;
-      /* Previne bounce horizontal, permite vertical */
-      overscroll-behavior-x: none;
-      overscroll-behavior-y: auto;
-      /* Otimizações de touch */
-      touch-action: pan-y pinch-zoom;
+      /* Remover overflow: hidden e position: fixed para permitir scroll */
+      overscroll-behavior-x: none; /* Previne bounce horizontal */
+      overscroll-behavior-y: auto; /* Permite scroll vertical natural */
     }
     
     #root {
       min-height: 100vh;
       width: 100vw;
-      overflow-x: hidden;
-      /* Permitir scroll vertical natural */
-      overflow-y: auto;
+      /* Permitir overflow para scroll natural */
     }
     
-    /* Scrollbars ocultas mas funcionais */
+    /* Hide scrollbars mas permitir scroll */
     ::-webkit-scrollbar {
-      width: 0px;
-      background: transparent;
+      display: none;
     }
     
     * {
@@ -137,7 +120,7 @@
       scrollbar-width: none;
     }
     
-    /* Configurações de seleção de texto otimizadas */
+    /* Prevent text selection on mobile mas permitir em inputs */
     * {
       -webkit-user-select: none;
       -moz-user-select: none;
@@ -145,47 +128,26 @@
       user-select: none;
     }
     
-    /* Permitir seleção em inputs e áreas editáveis */
-    input, textarea, [contenteditable], button {
+    /* Allow text selection in inputs and text areas */
+    input, textarea, [contenteditable] {
       -webkit-user-select: text;
       -moz-user-select: text;
       -ms-user-select: text;
       user-select: text;
     }
     
-    /* Prevenir zoom em inputs */
+    /* Prevent zoom on input focus */
     input, select, textarea {
       font-size: 16px !important;
-      /* Melhorar hit areas para touch */
-      min-height: 44px;
     }
     
-    /* Melhorar área de toque para botões */
-    button {
-      min-height: 44px;
-      min-width: 44px;
-    }
-    
-    /* Otimizar scroll behavior */
-    * {
-      scroll-behavior: smooth;
-    }
-  }
-  
-  /* Configurações específicas para telas muito pequenas */
-  @media (max-width: 375px) {
+    /* Prevenir apenas pull-to-refresh sem bloquear scroll */
     body {
-      font-size: 14px;
-    }
-    
-    /* Reduzir padding para telas pequenas */
-    .container {
-      padding-left: 0.75rem;
-      padding-right: 0.75rem;
+      overscroll-behavior-y: contain;
     }
   }
   
-  /* Desktop mantém comportamento normal */
+  /* Desktop keeps normal behavior */
   @media (min-width: 769px) {
     html, body {
       height: auto;

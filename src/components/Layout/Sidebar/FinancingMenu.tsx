@@ -1,69 +1,44 @@
-
-import React, { useState } from 'react';
-import { DollarSign, CreditCard, Calculator, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { DollarSign, CreditCard, Calculator, ChevronRight } from 'lucide-react';
 import { SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, useSidebar } from '@/components/ui/sidebar';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-
 interface FinancingMenuProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
-
 const FinancingMenu = ({
   activeTab,
   setActiveTab
 }: FinancingMenuProps) => {
-  const { state } = useSidebar();
-  const [isOpen, setIsOpen] = useState(false);
-  
-  const financingSubmenuItems = [
-    { id: 'bhph', label: 'Buy Here Pay Here', icon: CreditCard },
-    { id: 'financing', label: 'Simulação de Financiamento', icon: Calculator },
-  ];
-
-  const isFinancingActive = financingSubmenuItems.some(item => activeTab === item.id);
-
-  // Auto-open when a submenu is active
-  React.useEffect(() => {
-    if (isFinancingActive && !isOpen) {
-      setIsOpen(true);
-    }
-  }, [isFinancingActive, isOpen]);
-
-  return (
-    <SidebarMenuItem>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="group/collapsible">
+  const {
+    state
+  } = useSidebar();
+  return <SidebarMenuItem>
+      <Collapsible className="group/collapsible">
         <CollapsibleTrigger asChild>
-          <SidebarMenuButton 
-            tooltip={state === "collapsed" ? "Simulação" : undefined} 
-            isActive={isFinancingActive}
-          >
+          <SidebarMenuButton tooltip={state === "collapsed" ? "Financiamento" : undefined} className="w-full hover:bg-muted data-[state=open]:bg-muted">
             <DollarSign className="h-4 w-4" />
-            <span>Simulação</span>
-            <ChevronDown className="ml-auto h-4 w-4 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-180" />
+            <span className="text-sm px-0 mx-0">Simulação</span>
+            <ChevronRight className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-90" />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <SidebarMenuSub>
-            {financingSubmenuItems.map((item) => {
-              const Icon = item.icon;
-              return (
-                <SidebarMenuSubItem key={item.id}>
-                  <SidebarMenuSubButton 
-                    onClick={() => setActiveTab(item.id)}
-                    isActive={activeTab === item.id}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{item.label}</span>
-                  </SidebarMenuSubButton>
-                </SidebarMenuSubItem>
-              );
-            })}
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton onClick={() => setActiveTab('bhph')} className={`cursor-pointer ${activeTab === 'bhph' ? 'bg-revenshop-primary text-white' : ''}`}>
+                <CreditCard className="h-4 w-4" />
+                <span>Buy Here Pay Here</span>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
+            <SidebarMenuSubItem>
+              <SidebarMenuSubButton onClick={() => setActiveTab('financing')} className={`cursor-pointer ${activeTab === 'financing' ? 'bg-revenshop-primary text-white' : ''}`}>
+                <Calculator className="h-4 w-4" />
+                <span>Simulação de Financiamento</span>
+              </SidebarMenuSubButton>
+            </SidebarMenuSubItem>
           </SidebarMenuSub>
         </CollapsibleContent>
       </Collapsible>
-    </SidebarMenuItem>
-  );
+    </SidebarMenuItem>;
 };
-
 export default FinancingMenu;

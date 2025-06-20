@@ -6,9 +6,11 @@ import { Wrench } from 'lucide-react';
 import MaintenanceForm from './MaintenanceForm';
 import MaintenanceList from './MaintenanceList';
 import MaintenanceViewModal from './MaintenanceViewModal';
+import VehicleSelectionModal from './VehicleSelectionModal';
 import TechnicalPanelRedesigned from './TechnicalPanel/TechnicalPanelRedesigned';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
 import { useVehiclesOptimized } from '../../hooks/useVehiclesOptimized';
+import { useVehicleSelectionModal } from '../../hooks/useVehicleSelectionModal';
 import UrgentMaintenanceAlert from './components/UrgentMaintenanceAlert';
 import MaintenanceStats from './components/MaintenanceStats';
 import MaintenanceHeader from './components/MaintenanceHeader';
@@ -20,7 +22,15 @@ const MaintenanceManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
-  const [showTechnicalPanel, setShowTechnicalPanel] = useState(false);
+
+  const {
+    isVehicleSelectionOpen,
+    selectedVehicleForTechnical,
+    openVehicleSelection,
+    closeVehicleSelection,
+    handleVehicleSelect,
+    closeTechnicalPanel,
+  } = useVehicleSelectionModal();
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -60,14 +70,6 @@ const MaintenanceManagement = () => {
     setSelectedVehicleModal({ vehicleId, vehicleName });
   };
 
-  const handleOpenTechnicalPanel = () => {
-    setShowTechnicalPanel(true);
-  };
-
-  const handleCloseTechnicalPanel = () => {
-    setShowTechnicalPanel(false);
-  };
-
   // Calculate statistics from real data
   const openMaintenances = maintenances.filter(m => {
     const today = new Date();
@@ -99,7 +101,7 @@ const MaintenanceManagement = () => {
         openMaintenances={openMaintenances}
         totalCost={totalCost}
         onNewMaintenance={handleNewMaintenance}
-        onOpenTechnicalPanel={handleOpenTechnicalPanel}
+        onOpenTechnicalPanel={openVehicleSelection}
       />
 
       {/* Alert for urgent maintenances */}
@@ -112,9 +114,9 @@ const MaintenanceManagement = () => {
 
       <MaintenanceStats
         openMaintenances={openMaintenances}
-        vehiclesWithIssues={0}
+        vehiclesWithIssues={0} // Removido o sistema anterior
         totalVehicles={vehicles.length}
-        technicalItemsCount={0}
+        technicalItemsCount={0} // Removido o sistema anterior
       />
 
       <MaintenanceList 
@@ -138,11 +140,22 @@ const MaintenanceManagement = () => {
         />
       )}
 
-      {/* Painel técnico com dropdown de veículos */}
-      <TechnicalPanelRedesigned
-        isOpen={showTechnicalPanel}
-        onClose={handleCloseTechnicalPanel}
+      {/* Modal de seleção de veículo para painel técnico */}
+      <VehicleSelectionModal
+        isOpen={isVehicleSelectionOpen}
+        onClose={closeVehicleSelection}
+        onSelectVehicle={handleVehicleSelect}
       />
+
+      {/* Painel técnico do veículo selecionado */}
+      {selectedVehicleForTechnical && (
+        <TechnicalPanelRedesigned
+          isOpen={true}
+          onClose={closeTechnicalPanel}
+          vehicleId={selectedVehicleForTechnical.vehicleId}
+          vehicleName={selectedVehicleForTechnical.vehicleName}
+        />
+      )}
     </div>
   );
 };

@@ -7,11 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/badge';
 import { useExpenses, Expense } from '@/hooks/useExpenses';
 import { useFinancialCategories } from '@/hooks/useFinancialCategories';
 import { format } from 'date-fns';
-import { Calendar, Repeat } from 'lucide-react';
 
 interface ExpenseFormProps {
   expense?: Expense;
@@ -20,7 +18,7 @@ interface ExpenseFormProps {
 }
 
 const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel }) => {
-  const { createExpense, updateExpense, cancelRecurring } = useExpenses();
+  const { createExpense, updateExpense } = useExpenses();
   const { categories } = useFinancialCategories();
   
   const [formData, setFormData] = useState({
@@ -36,7 +34,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
   const [isLoading, setIsLoading] = useState(false);
 
   const expenseCategories = categories.filter(cat => cat.type === 'despesa');
-  const isGeneratedExpense = expense?.parent_expense_id;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +42,7 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
     try {
       const dataToSubmit = {
         ...formData,
-        date: formData.due_date,
-        is_recurring: false,
-        is_active_recurring: false,
+        date: formData.due_date, // Manter compatibilidade com banco
       };
 
       if (expense) {
@@ -63,15 +58,6 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
     }
   };
 
-  const handleCancelRecurring = async () => {
-    if (!expense?.parent_expense_id) return;
-    
-    if (confirm('Deseja cancelar a recorrência desta despesa fixa? Isso impedirá a geração de novas despesas.')) {
-      await cancelRecurring(expense.parent_expense_id);
-      onSuccess?.();
-    }
-  };
-
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -79,35 +65,9 @@ const ExpenseForm: React.FC<ExpenseFormProps> = ({ expense, onSuccess, onCancel 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          {expense ? 'Editar Despesa' : 'Nova Despesa'}
-          {isGeneratedExpense && (
-            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
-              <Repeat className="h-3 w-3 mr-1" />
-              Gerada Automaticamente
-            </Badge>
-          )}
-        </CardTitle>
+        <CardTitle>{expense ? 'Editar Despesa' : 'Nova Despesa'}</CardTitle>
       </CardHeader>
       <CardContent>
-        {isGeneratedExpense && (
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <div className="flex items-center gap-2 text-sm text-blue-800">
-              <Calendar className="h-4 w-4" />
-              <span>Esta despesa foi gerada automaticamente a partir de uma despesa fixa.</span>
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="mt-2 text-red-600 hover:text-red-700"
-              onClick={handleCancelRecurring}
-            >
-              Cancelar Recorrência
-            </Button>
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">

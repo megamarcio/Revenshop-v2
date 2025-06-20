@@ -1,5 +1,6 @@
+
 import { Reservation } from "../types/reservationTypes";
-import { formatToFloridaDateTime } from "./dateFormatter";
+import { formatToAmericanDateTime } from "./dateFormatter";
 
 export const generateLogisticsPDF = (
   pickupReservations: Reservation[], 
@@ -13,8 +14,8 @@ export const generateLogisticsPDF = (
         <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.id || 'N/A'}</td>
         <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.customer?.label || 'N/A'}</td>
         <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.customer?.phone_number || 'N/A'}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${formatToFloridaDateTime(reservation.pick_up_date)}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${formatToFloridaDateTime(reservation.return_date)}</td>
+        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${formatToAmericanDateTime(reservation.pick_up_date)}</td>
+        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${formatToAmericanDateTime(reservation.return_date)}</td>
         <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.vehicle_name || 'N/A'}</td>
       </tr>
     `).join('');

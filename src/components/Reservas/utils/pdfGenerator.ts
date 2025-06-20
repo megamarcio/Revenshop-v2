@@ -1,5 +1,5 @@
+
 import { ReservationListItem } from '@/hooks/useReservationsList';
-import { formatToFloridaDateTime } from '@/components/Logistica/utils/dateFormatter';
 
 const getTemperatureColor = (temperature: string) => {
   switch (temperature.toLowerCase()) {
@@ -72,8 +72,8 @@ export const generateReservationsListPDF = (reservations: ReservationListItem[])
         <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">#${data.reservation.id}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${data.customer.first_name}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${data.customer.phone_number || 'N/A'}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${formatToFloridaDateTime(data.reservation.pick_up_date)}</td>
-        <td style="padding: 8px; border: 1px solid #ddd;">${formatToFloridaDateTime(data.reservation.return_date)}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${new Date(data.reservation.pick_up_date).toLocaleDateString('pt-BR')}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${new Date(data.reservation.return_date).toLocaleDateString('pt-BR')}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${pickupLocationShort}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${returnLocationShort}</td>
         <td style="padding: 8px; border: 1px solid #ddd;">${data.selected_vehicle_class?.vehicle_class?.label || 'N/A'}</td>
