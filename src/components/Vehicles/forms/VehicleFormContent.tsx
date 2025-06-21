@@ -2,8 +2,7 @@ import React from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import SaleInfoForm from './SaleInfoForm';
 import CustomerSaleInfoForm from './CustomerSaleInfoForm';
-import MediaUploadForm from './MediaUpload';
-import DescriptionForm from './DescriptionForm';
+import AnuncioContainer from './AnuncioContainer';
 import FinancingInfoForm from './FinancingInfoForm';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
@@ -148,20 +147,17 @@ const VehicleFormContent = ({
         onNavigateToCustomers={onNavigateToCustomers}
       />
 
-      <MediaUploadForm
+      <AnuncioContainer
         vehicleId={isEditing ? editingVehicle?.id : undefined}
         photos={photos}
         videos={videos}
         setPhotos={setPhotos}
         setVideos={setVideos}
-        vehicleData={vehicleDataForPlaceholders}
-      />
-
-      <DescriptionForm
         description={formData.description}
         onDescriptionChange={(value) => onInputChange('description', value)}
         generateDescription={generateDescription}
-        isGenerating={isGeneratingDescription}
+        isGeneratingDescription={isGeneratingDescription}
+        vehicleData={vehicleDataForPlaceholders}
       />
     </div>
   );
