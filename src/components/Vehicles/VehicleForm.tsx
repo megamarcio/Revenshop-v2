@@ -39,8 +39,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
     calculateProfitMargin
   } = useVehicleForm(editingVehicle);
 
-  const [showFinancingInfo, setShowFinancingInfo] = useState(isEditing);
-  const [showSaleInfo, setShowSaleInfo] = useState(isEditing);
+  const [showFinancingInfo, setShowFinancingInfo] = useState(false);
+  const [showSaleInfo, setShowSaleInfo] = useState(false);
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);

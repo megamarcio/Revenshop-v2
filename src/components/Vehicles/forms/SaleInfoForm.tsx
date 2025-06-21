@@ -73,14 +73,14 @@ const SaleInfoForm = ({
       <CollapsibleTrigger asChild>
         <Button
           variant="outline"
-          className="w-full justify-between p-4 h-auto"
+          className="w-full justify-between"
           type="button"
         >
-          <div className="flex items-center space-x-2">
-            <Calculator className="h-5 w-5" />
-            <span className="text-lg font-semibold">À Venda</span>
+          <div className="flex items-center gap-2">
+            <Calculator className="h-4 w-4" />
+            À Venda
           </div>
-          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+          <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
         </Button>
       </CollapsibleTrigger>
 
