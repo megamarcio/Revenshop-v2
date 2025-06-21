@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MaintenanceRecord } from '../../types/maintenance';
 import { useMaintenance } from '../../hooks/useMaintenance/index';
@@ -11,18 +10,31 @@ import MaintenanceFilters from './components/MaintenanceFilters';
 import MaintenanceCard from './components/MaintenanceCard';
 import MaintenanceCompactTable from './components/MaintenanceCompactTable';
 import EmptyMaintenanceState from './components/EmptyMaintenanceState';
+import { RefreshCw } from 'lucide-react';
 
 interface MaintenanceListProps {
   onEdit: (maintenance: any) => void;
+  onReopen?: (maintenance: any) => void;
 }
 
-const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
+const MaintenanceList = ({ onEdit, onReopen }: MaintenanceListProps) => {
   const { maintenances, loading, deleteMaintenance } = useMaintenance();
   const { canEditVehicles } = useAuth();
   const { getMaintenanceStatus } = useMaintenanceStatus();
   const { printReport, downloadPDF } = useMaintenancePrint();
   const [statusFilter, setStatusFilter] = useState<'open' | 'pending' | 'completed' | 'all'>('open');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Indicador de atualização automática
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIsRefreshing(true);
+      setTimeout(() => setIsRefreshing(false), 1000);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const sortedMaintenances = sortMaintenances(maintenances);
 
@@ -76,8 +88,16 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
 
   return (
     <TooltipProvider>
-      <div className="space-y-6">
-        <MaintenanceFilters 
+      <div className="space-y-4 sm:space-y-6">
+        {/* Indicador de atualização automática */}
+        {isRefreshing && (
+          <div className="flex items-center justify-center py-2 text-xs text-gray-500">
+            <RefreshCw className="h-3 w-3 mr-1 animate-spin" />
+            Atualizando dados...
+          </div>
+        )}
+
+        <MaintenanceFilters
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
           viewMode={viewMode}
@@ -86,32 +106,36 @@ const MaintenanceList = ({ onEdit }: MaintenanceListProps) => {
           onDownloadPDF={handleDownloadPDF}
         />
 
-        <div className="space-y-4">
-          {loading ? (
-            <div className="text-center py-12">
-              <p className="text-gray-600">Carregando manutenções...</p>
-            </div>
-          ) : filteredMaintenances.length === 0 ? (
-            <EmptyMaintenanceState statusFilter={statusFilter} />
-          ) : viewMode === 'table' ? (
-            <MaintenanceCompactTable
-              maintenances={filteredMaintenances}
-              canEditVehicles={canEditVehicles}
-              onEdit={onEdit}
-              onDelete={handleDelete}
-            />
-          ) : (
-            filteredMaintenances.map((maintenance) => (
-              <MaintenanceCard
-                key={maintenance.id}
-                maintenance={maintenance}
-                canEditVehicles={canEditVehicles}
-                onEdit={onEdit}
-                onDelete={handleDelete}
-              />
-            ))
-          )}
-        </div>
+        {filteredMaintenances.length === 0 ? (
+          <EmptyMaintenanceState statusFilter={statusFilter} />
+        ) : (
+          <>
+            {viewMode === 'cards' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-6">
+                {filteredMaintenances.map((maintenance) => (
+                  <MaintenanceCard
+                    key={maintenance.id}
+                    maintenance={maintenance}
+                    canEditVehicles={canEditVehicles}
+                    onEdit={onEdit}
+                    onDelete={handleDelete}
+                    onReopen={onReopen}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <MaintenanceCompactTable
+                  maintenances={filteredMaintenances}
+                  canEditVehicles={canEditVehicles}
+                  onEdit={onEdit}
+                  onDelete={handleDelete}
+                  onReopen={onReopen}
+                />
+              </div>
+            )}
+          </>
+        )}
       </div>
     </TooltipProvider>
   );

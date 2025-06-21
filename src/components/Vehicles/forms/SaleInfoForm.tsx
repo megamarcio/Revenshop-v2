@@ -61,11 +61,9 @@ const SaleInfoForm = ({
 
   const formatProfitMargin = () => {
     const margin = calculateProfitMargin();
-    // Convert from "2.5x" format to "150%" format
-    const numericValue = parseFloat(margin.replace('x', ''));
-    if (isNaN(numericValue)) return '0%';
-    const percentage = ((numericValue - 1) * 100).toFixed(1);
-    return `${percentage}%`;
+    // A função calculateProfitMargin agora retorna porcentagem diretamente
+    if (margin === '0.00') return '0%';
+    return `${margin}%`;
   };
 
   return (

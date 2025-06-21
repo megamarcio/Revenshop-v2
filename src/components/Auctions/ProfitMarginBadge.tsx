@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 
@@ -10,7 +9,7 @@ interface ProfitMarginBadgeProps {
 const ProfitMarginBadge = ({ carfaxValue, mmrValue }: ProfitMarginBadgeProps) => {
   const calculateProfitMargin = () => {
     if (!carfaxValue || !mmrValue || mmrValue === 0) return null;
-    return ((carfaxValue - mmrValue) / mmrValue * 100).toFixed(1);
+    return (carfaxValue / mmrValue - 1) * 100;
   };
 
   const profitMargin = calculateProfitMargin();
@@ -19,10 +18,10 @@ const ProfitMarginBadge = ({ carfaxValue, mmrValue }: ProfitMarginBadgeProps) =>
 
   return (
     <Badge 
-      variant={parseFloat(profitMargin) > 0 ? "default" : "destructive"}
-      className={`text-lg px-3 py-1 ${parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}`}
+      variant={profitMargin > 0 ? "default" : "destructive"}
+      className={`text-lg px-3 py-1 ${profitMargin > 0 ? "bg-green-500" : ""}`}
     >
-      Margem de Lucro: {profitMargin}%
+      Margem de Lucro: {profitMargin.toFixed(1)}%
     </Badge>
   );
 };

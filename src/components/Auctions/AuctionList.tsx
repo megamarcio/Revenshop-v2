@@ -39,7 +39,7 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
 
   const calculateProfitMargin = (carfaxValue: number, mmrValue: number) => {
     if (!carfaxValue || !mmrValue || mmrValue === 0) return null;
-    return ((carfaxValue - mmrValue) / mmrValue * 100).toFixed(1);
+    return (carfaxValue / mmrValue - 1) * 100;
   };
 
   const handleViewDetails = (auction: any) => {
@@ -124,10 +124,10 @@ const AuctionList = ({ onEditAuction }: AuctionListProps) => {
                   <TableCell className="py-1 px-2">
                     {profitMargin !== null ? (
                       <Badge 
-                        variant={parseFloat(profitMargin) > 0 ? "default" : "destructive"}
-                        className={`text-[10px] px-1 py-0 ${parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}`}
+                        variant={profitMargin > 0 ? "default" : "destructive"}
+                        className={`text-[10px] px-1 py-0 ${profitMargin > 0 ? "bg-green-500" : ""}`}
                       >
-                        {profitMargin}%
+                        {profitMargin.toFixed(1)}%
                       </Badge>
                     ) : '-'}
                   </TableCell>

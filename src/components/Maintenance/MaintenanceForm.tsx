@@ -1,5 +1,6 @@
 import React from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '../../contexts/AuthContext';
 import { useVehicles } from '../../hooks/useVehicles';
 import VehicleMaintenanceSelector from './VehicleMaintenanceSelector';
@@ -15,6 +16,7 @@ import { useMaintenanceFormData } from './hooks/useMaintenanceFormData';
 import { useMaintenanceFormStatus } from './hooks/useMaintenanceFormStatus';
 import { useMaintenanceFormSubmit } from './hooks/useMaintenanceFormSubmit';
 import { useMaintenanceQuotes } from './hooks/useMaintenanceQuotes';
+import { RotateCcw } from 'lucide-react';
 
 interface MaintenanceFormProps {
   open: boolean;
@@ -34,6 +36,7 @@ const MaintenanceForm = ({
   const {
     formData,
     setFormData,
+    updateVehicleId,
     detectionDate,
     setDetectionDate,
     repairDate,
@@ -45,12 +48,23 @@ const MaintenanceForm = ({
   // Se não há manutenção sendo editada e há um vehicleId pré-selecionado, definir o veículo
   React.useEffect(() => {
     if (!editingMaintenance && preSelectedVehicleId && !formData.vehicle_id) {
-      setFormData(prev => ({
-        ...prev,
-        vehicle_id: preSelectedVehicleId
-      }));
+      updateVehicleId(preSelectedVehicleId);
     }
-  }, [preSelectedVehicleId, editingMaintenance, formData.vehicle_id, setFormData]);
+  }, [preSelectedVehicleId, editingMaintenance, formData.vehicle_id, updateVehicleId]);
+  
+  // Efeito adicional para garantir que o vehicleId seja aplicado quando o formulário abrir
+  React.useEffect(() => {
+    if (open && !editingMaintenance && preSelectedVehicleId) {
+      updateVehicleId(preSelectedVehicleId);
+    }
+  }, [open, preSelectedVehicleId, editingMaintenance, updateVehicleId]);
+  
+  // Efeito para garantir que o vehicleId da manutenção sendo editada seja aplicado
+  React.useEffect(() => {
+    if (open && editingMaintenance && editingMaintenance.vehicle_id && !formData.vehicle_id) {
+      updateVehicleId(editingMaintenance.vehicle_id);
+    }
+  }, [open, editingMaintenance, formData.vehicle_id, updateVehicleId]);
   
   const {
     getMaintenanceStatus,
@@ -93,18 +107,31 @@ const MaintenanceForm = ({
   const status = getMaintenanceStatus();
   const statusColor = getStatusColor();
   const statusText = getStatusText();
+  
+  // Detectar se a manutenção foi reaberta (tem ID mas não tem data de reparo)
+  const isReopened = isEditing && editingMaintenance?.id && !editingMaintenance?.repair_date;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-[16px] my-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-[16px] my-0 p-4 sm:p-6">
         <MaintenanceFormHeader 
           isEditing={isEditing} 
           status={status} 
           statusColor={statusColor} 
-          statusText={statusText} 
+          statusText={statusText}
+          isReopened={isReopened}
         />
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+          {isReopened && (
+            <Alert className="border-green-200 bg-green-50">
+              <RotateCcw className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800 text-sm">
+                Esta manutenção foi reaberta. Você pode editar todos os valores, adicionar novos serviços e peças, e definir uma nova data de conclusão.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <VehicleMaintenanceSelector 
             selectedVehicleId={formData.vehicle_id} 
             onVehicleChange={vehicleId => setFormData(prev => ({
@@ -175,7 +202,7 @@ const MaintenanceForm = ({
             }))} 
           />
 
-          <MaintenancePartsManager
+          <MaintenancePartsManager 
             formData={formData}
             setFormData={setFormData}
             onAddQuote={handleAddQuote}
@@ -195,8 +222,8 @@ const MaintenanceForm = ({
           <MaintenanceFormActions 
             onCancel={onClose} 
             loading={loading} 
-            vehiclesLoading={vehiclesLoading} 
-            isEditing={isEditing} 
+            vehiclesLoading={vehiclesLoading}
+            isEditing={isEditing}
           />
         </form>
       </DialogContent>

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { mapFormToDbData } from '../utils/formToDbMapper';
 
@@ -18,7 +17,22 @@ export const createVehicle = async (vehicleData: any) => {
 
   if (error) {
     console.error('Supabase error creating vehicle:', error);
-    throw error;
+    console.error('Error details:', error.details);
+    console.error('Error hint:', error.hint);
+    console.error('Error message:', error.message);
+    
+    // Criar mensagem de erro mais específica
+    let errorMessage = error.message || 'Erro ao criar veículo';
+    
+    if (error.details) {
+      errorMessage = `${errorMessage} - ${error.details}`;
+    }
+    
+    if (error.hint) {
+      errorMessage = `${errorMessage} - Dica: ${error.hint}`;
+    }
+    
+    throw new Error(errorMessage);
   }
 
   console.log('Vehicle created successfully:', data);

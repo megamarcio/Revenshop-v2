@@ -46,9 +46,9 @@ const AuctionDetailsModal = ({ auction, onClose }: AuctionDetailsModalProps) => 
     },
   });
 
-  const calculateProfitMargin = () => {
+  const calculateProfitMargin = (): number | null => {
     if (!auction.carfax_value || !auction.mmr_value || auction.mmr_value === 0) return null;
-    return ((auction.carfax_value - auction.mmr_value) / auction.mmr_value * 100).toFixed(1);
+    return (auction.carfax_value / auction.mmr_value - 1) * 100;
   };
 
   const handleDelete = () => {
@@ -96,10 +96,10 @@ const AuctionDetailsModal = ({ auction, onClose }: AuctionDetailsModalProps) => 
           {profitMargin !== null && (
             <div className="text-center">
               <Badge 
-                variant={parseFloat(profitMargin) > 0 ? "default" : "destructive"}
-                className={`text-xl px-6 py-3 ${parseFloat(profitMargin) > 0 ? "bg-green-500" : ""}`}
+                variant={profitMargin > 0 ? "default" : "destructive"}
+                className={`text-xl px-6 py-3 ${profitMargin > 0 ? "bg-green-500" : ""}`}
               >
-                Margem de Lucro: {profitMargin}%
+                Margem de Lucro: {profitMargin.toFixed(1)}%
               </Badge>
             </div>
           )}

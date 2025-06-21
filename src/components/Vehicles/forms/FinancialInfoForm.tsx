@@ -78,7 +78,7 @@ const FinancialInfoForm = ({
           <Label>Margem de Lucro</Label>
           <div className="p-3 bg-gray-50 rounded-md">
             <span className="text-lg font-bold text-green-600">
-              {calculateProfitMargin()}x
+              {calculateProfitMargin()}%
             </span>
           </div>
         </div>

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { UseFormRegister, UseFormWatch } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
@@ -19,7 +18,7 @@ const AuctionPurchaseForm = ({ register, watch }: AuctionPurchaseFormProps) => {
 
   const totalCosts = purchaseValue + actualAuctionFees + actualFreightFee;
   const profitMarginValue = carfaxValue - totalCosts;
-  const profitMarginPercentage = totalCosts > 0 ? (profitMarginValue / totalCosts) * 100 : 0;
+  const profitMarginPercentage = totalCosts > 0 ? (carfaxValue / totalCosts - 1) * 100 : 0;
 
   return (
     <div className="border-t pt-6">

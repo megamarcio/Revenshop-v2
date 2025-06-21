@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 import { useVehicleFormCalculations } from './utils/vehicleFormCalculations';
 import { getInitialFormData } from './utils/vehicleFormInitialData';
+import { validateForm } from '../utils/vehicleFormUtils';
 import { toast } from '@/hooks/use-toast';
 
 export const useVehicleForm = (editingVehicle?: any) => {
@@ -56,17 +57,9 @@ export const useVehicleForm = (editingVehicle?: any) => {
   };
 
   const validateFormData = (): boolean => {
-    const newErrors: Partial<VehicleFormData> = {};
-
-    if (!formData.name.trim()) newErrors.name = 'Nome é obrigatório';
-    if (!formData.vin.trim()) newErrors.vin = 'VIN é obrigatório';
-    if (!formData.year.trim()) newErrors.year = 'Ano é obrigatório';
-    if (!formData.color.trim()) newErrors.color = 'Cor é obrigatória';
-    if (!formData.purchasePrice.trim()) newErrors.purchasePrice = 'Valor de compra é obrigatório';
-    if (!formData.salePrice.trim()) newErrors.salePrice = 'Valor de venda é obrigatório';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    const validationErrors = validateForm(formData);
+    setErrors(validationErrors);
+    return Object.keys(validationErrors).length === 0;
   };
 
   const generateDescription = async () => {

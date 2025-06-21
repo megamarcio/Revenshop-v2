@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Wrench } from 'lucide-react';
@@ -14,6 +13,7 @@ import { useVehicleSelectionModal } from '../../hooks/useVehicleSelectionModal';
 import UrgentMaintenanceAlert from './components/UrgentMaintenanceAlert';
 import MaintenanceStats from './components/MaintenanceStats';
 import MaintenanceHeader from './components/MaintenanceHeader';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 const MaintenanceManagement = () => {
   const { isAdmin, isInternalSeller } = useAuth();
@@ -22,6 +22,7 @@ const MaintenanceManagement = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingMaintenance, setEditingMaintenance] = useState(null);
   const [selectedVehicleModal, setSelectedVehicleModal] = useState<{vehicleId: string, vehicleName: string} | null>(null);
+  const [reopenDialog, setReopenDialog] = useState<{open: boolean, maintenance: any}>({open: false, maintenance: null});
 
   const {
     isVehicleSelectionOpen,
@@ -31,6 +32,8 @@ const MaintenanceManagement = () => {
     handleVehicleSelect,
     closeTechnicalPanel,
   } = useVehicleSelectionModal();
+
+  const maintenanceHook = useMaintenance();
 
   if (!isAdmin && !isInternalSeller) {
     return (
@@ -64,10 +67,60 @@ const MaintenanceManagement = () => {
   const handleCloseForm = () => {
     setShowForm(false);
     setEditingMaintenance(null);
+    if (maintenanceHook.refresh) {
+      maintenanceHook.refresh();
+    }
   };
 
   const handleViewVehicleMaintenance = (vehicleId: string, vehicleName: string) => {
-    setSelectedVehicleModal({ vehicleId, vehicleName });
+    if (vehicleId && vehicleName) {
+      setSelectedVehicleModal({ vehicleId, vehicleName });
+    } else {
+      // Se não há vehicleId específico, mostrar todas as manutenções urgentes
+      // Pode implementar uma visualização especial aqui
+    }
+  };
+
+  const handleNewMaintenanceWithVehicle = (vehicleId?: string) => {
+    setEditingMaintenance(null);
+    setShowForm(true);
+    if (vehicleId) {
+      // O formulário irá receber o preSelectedVehicleId
+    }
+  };
+
+  const handleCreateNewMaintenance = (vehicleId: string, vehicleName: string) => {
+    if (vehicleId && vehicleName) {
+      setEditingMaintenance(null);
+      setShowForm(true);
+      // O formulário irá receber o preSelectedVehicleId
+    } else {
+      // Se não há vehicleId específico, abrir formulário normal
+      setEditingMaintenance(null);
+      setShowForm(true);
+    }
+  };
+
+  const handleReopenMaintenance = (maintenance: any) => {
+    setReopenDialog({open: true, maintenance});
+  };
+
+  const confirmReopenMaintenance = () => {
+    if (reopenDialog.maintenance) {
+      // Criar uma cópia da manutenção sem a data de reparo para reabrir
+      const reopenedMaintenance = {
+        ...reopenDialog.maintenance,
+        repair_date: '',
+        promised_date: reopenDialog.maintenance.promised_date || null
+      };
+      setEditingMaintenance(reopenedMaintenance);
+      setShowForm(true);
+    }
+    setReopenDialog({open: false, maintenance: null});
+  };
+
+  const cancelReopenMaintenance = () => {
+    setReopenDialog({open: false, maintenance: null});
   };
 
   // Calculate statistics from real data
@@ -94,8 +147,15 @@ const MaintenanceManagement = () => {
 
   const totalCost = maintenances.reduce((sum, m) => sum + m.total_amount, 0);
 
+  // Forçar atualização quando o componente montar ou quando houver mudanças
+  useEffect(() => {
+    if (maintenanceHook.refresh) {
+      maintenanceHook.refresh();
+    }
+  }, [maintenanceHook.refresh]);
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 sm:p-6 space-y-4 sm:space-y-6">
       <MaintenanceHeader
         totalMaintenances={maintenances.length}
         openMaintenances={openMaintenances}
@@ -109,6 +169,7 @@ const MaintenanceManagement = () => {
         <UrgentMaintenanceAlert
           urgentMaintenances={urgentMaintenances}
           onViewDetails={handleViewVehicleMaintenance}
+          onCreateNewMaintenance={handleCreateNewMaintenance}
         />
       )}
 
@@ -121,6 +182,7 @@ const MaintenanceManagement = () => {
 
       <MaintenanceList 
         onEdit={handleEditMaintenance}
+        onReopen={handleReopenMaintenance}
       />
 
       {showForm && (
@@ -128,6 +190,7 @@ const MaintenanceManagement = () => {
           open={showForm}
           onClose={handleCloseForm}
           editingMaintenance={editingMaintenance}
+          preSelectedVehicleId={editingMaintenance?.vehicle_id}
         />
       )}
 
@@ -156,6 +219,32 @@ const MaintenanceManagement = () => {
           vehicleName={selectedVehicleForTechnical.vehicleName}
         />
       )}
+
+      {/* Modal de confirmação para reabrir manutenção */}
+      <AlertDialog open={reopenDialog.open} onOpenChange={() => setReopenDialog({open: false, maintenance: null})}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reabrir Manutenção</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja reabrir a manutenção do veículo{' '}
+              <strong>{reopenDialog.maintenance?.vehicle_internal_code} - {reopenDialog.maintenance?.vehicle_name}</strong>?
+              <br /><br />
+              Esta ação irá:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Remover a data de conclusão</li>
+                <li>Permitir edição dos valores e serviços</li>
+                <li>Marcar a manutenção como "Em Aberto"</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelReopenMaintenance}>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReopenMaintenance} className="bg-green-600 hover:bg-green-700">
+              Reabrir Manutenção
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

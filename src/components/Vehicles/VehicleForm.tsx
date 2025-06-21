@@ -9,6 +9,7 @@ import { useVehicleForm } from './hooks/useVehicleForm';
 import WhatsAppSendModal from './WhatsAppSendModal';
 import { X } from 'lucide-react';
 import MaintenanceForm from '../Maintenance/MaintenanceForm';
+import { validateForm } from './utils/vehicleFormUtils';
 
 interface ExtendedVehicleFormProps extends VehicleFormProps {
   onDelete?: (id: string) => Promise<void>;
@@ -76,10 +77,21 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validateFormData()) {
+    
+    // Usar a validação detalhada do vehicleFormUtils
+    const validationErrors = validateForm(formData);
+    
+    if (Object.keys(validationErrors).length > 0) {
+      // Criar mensagem detalhada com os campos que falharam
+      const errorFields = Object.keys(validationErrors);
+      const errorMessages = errorFields.map(field => `• ${validationErrors[field]}`);
+      
+      let errorDescription = 'Por favor, corrija os seguintes campos obrigatórios:\n\n';
+      errorDescription += errorMessages.join('\n');
+      
       toast({
         title: t('error'),
-        description: t('fixRequiredFields') || 'Por favor, corrija os campos obrigatórios.',
+        description: errorDescription,
         variant: 'destructive',
       });
       return;
@@ -142,6 +154,11 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
       console.log('VehicleForm - vehicleData.plate being sent:', vehicleData.plate);
       console.log('VehicleForm - vehicleData.sunpass being sent:', vehicleData.sunpass);
+      console.log('VehicleForm - vehicleData.vehicleUsage being sent:', vehicleData.vehicleUsage);
+      console.log('VehicleForm - vehicleData.consignmentStore being sent:', vehicleData.consignmentStore);
+      console.log('VehicleForm - vehicleData.category being sent:', vehicleData.category);
+      console.log('VehicleForm - vehicleData.photos being sent:', vehicleData.photos);
+      console.log('VehicleForm - vehicleData.videos being sent:', vehicleData.videos);
 
       await onSave(vehicleData);
       
@@ -154,9 +171,32 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       onClose();
     } catch (error) {
       console.error('Error saving vehicle:', error);
+      
+      // Extrair mensagem de erro específica
+      let errorMessage = 'Erro desconhecido ao salvar veículo';
+      
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = String(error.message);
+      }
+      
+      // Verificar se é um erro do Supabase
+      if (error && typeof error === 'object' && 'details' in error) {
+        const supabaseError = error as any;
+        if (supabaseError.details) {
+          errorMessage = `${errorMessage} - Detalhes: ${supabaseError.details}`;
+        }
+        if (supabaseError.hint) {
+          errorMessage = `${errorMessage} - Dica: ${supabaseError.hint}`;
+        }
+      }
+      
       toast({
         title: t('error'),
-        description: 'Erro ao salvar veículo. Verifique os logs do console.',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {

@@ -6,7 +6,7 @@ export const mapDbDataToAppData = (dbData: any) => {
   
   // Calculate profit margin
   const profitMargin = dbData.purchase_price && dbData.sale_price 
-    ? ((dbData.sale_price - dbData.purchase_price) / dbData.purchase_price * 100)
+    ? (dbData.sale_price / dbData.purchase_price - 1) * 100
     : 0;
   
   // Extract vehicle usage and consignment store from description

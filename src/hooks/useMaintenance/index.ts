@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { MaintenanceRecord } from '../../types/maintenance';
@@ -16,17 +15,44 @@ export const useMaintenance = (vehicleId?: string): MaintenanceOperations => {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    loadMaintenanceData();
+  const loadMaintenanceData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await loadMaintenances(vehicleId);
+      setMaintenances(data);
+    } catch (error) {
+      console.error('Erro ao carregar manutenções:', error);
+    } finally {
+      setLoading(false);
+    }
   }, [vehicleId]);
 
-  const loadMaintenanceData = async () => {
-    setLoading(true);
-    const data = await loadMaintenances(vehicleId);
-    setMaintenances(data);
-    setLoading(false);
-  };
+  // Carregar dados iniciais
+  useEffect(() => {
+    loadMaintenanceData();
+  }, [loadMaintenanceData]);
+
+  // Sistema de polling para atualização automática
+  useEffect(() => {
+    // Limpar intervalo anterior se existir
+    if (pollingIntervalRef.current) {
+      clearInterval(pollingIntervalRef.current);
+    }
+
+    // Configurar novo intervalo de polling (a cada 5 segundos)
+    pollingIntervalRef.current = setInterval(() => {
+      loadMaintenanceData();
+    }, 5000);
+
+    // Cleanup ao desmontar
+    return () => {
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
+    };
+  }, [loadMaintenanceData]);
 
   const getTotalMaintenanceCost = (vehicleId: string) => {
     return maintenances
@@ -36,31 +62,76 @@ export const useMaintenance = (vehicleId?: string): MaintenanceOperations => {
 
   const addMaintenance = async (maintenance: Omit<MaintenanceRecord, 'id' | 'created_at' | 'vehicle_name' | 'vehicle_internal_code'>) => {
     if (!user?.id) {
-      return;
+      throw new Error('Usuário não autenticado');
     }
 
-    const newMaintenance = await addMaintenanceRecord(maintenance, user.id);
-    if (newMaintenance) {
-      setMaintenances(prev => [newMaintenance, ...prev]);
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    try {
+      const newMaintenance = await addMaintenanceRecord(maintenance, user.id);
+      if (newMaintenance) {
+        // Atualizar estado local imediatamente
+        setMaintenances(prev => [newMaintenance, ...prev]);
+        
+        // Invalidar queries relacionadas
+        queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+        queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        
+        // Recarregar dados para garantir sincronização
+        await loadMaintenanceData();
+      } else {
+        throw new Error('Falha ao adicionar manutenção');
+      }
+    } catch (error) {
+      console.error('Erro ao adicionar manutenção:', error);
+      throw error;
     }
   };
 
   const updateMaintenance = async (id: string, updates: Partial<MaintenanceRecord>) => {
-    const success = await updateMaintenanceRecord(id, updates);
-    if (success) {
-      setMaintenances(prev => 
-        prev.map(m => m.id === id ? { ...m, ...updates } : m)
-      );
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    try {
+      const success = await updateMaintenanceRecord(id, updates);
+      if (success) {
+        // Atualizar estado local imediatamente
+        setMaintenances(prev => 
+          prev.map(m => m.id === id ? { ...m, ...updates } : m)
+        );
+        
+        // Invalidar queries relacionadas
+        queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+        queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        
+        // Recarregar dados para garantir sincronização
+        await loadMaintenanceData();
+      } else {
+        throw new Error('Falha ao atualizar manutenção');
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar manutenção:', error);
+      throw error;
     }
   };
 
   const deleteMaintenance = async (id: string) => {
-    const success = await deleteMaintenanceRecord(id);
-    if (success) {
-      setMaintenances(prev => prev.filter(m => m.id !== id));
-      queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+    try {
+      const success = await deleteMaintenanceRecord(id);
+      if (success) {
+        // Atualizar estado local imediatamente
+        setMaintenances(prev => prev.filter(m => m.id !== id));
+        
+        // Invalidar queries relacionadas
+        queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+        queryClient.invalidateQueries({ queryKey: ['maintenances'] });
+        queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+        
+        // Recarregar dados para garantir sincronização
+        await loadMaintenanceData();
+      } else {
+        throw new Error('Falha ao excluir manutenção');
+      }
+    } catch (error) {
+      console.error('Erro ao excluir manutenção:', error);
+      throw error;
     }
   };
 

@@ -48,7 +48,19 @@ export const updateVehicle = async (vehicleData: any) => {
     console.error('Error details:', error.details);
     console.error('Error hint:', error.hint);
     console.error('Error message:', error.message);
-    throw error;
+    
+    // Criar mensagem de erro mais específica
+    let errorMessage = error.message || 'Erro ao atualizar veículo';
+    
+    if (error.details) {
+      errorMessage = `${errorMessage} - ${error.details}`;
+    }
+    
+    if (error.hint) {
+      errorMessage = `${errorMessage} - Dica: ${error.hint}`;
+    }
+    
+    throw new Error(errorMessage);
   }
 
   console.log('Vehicle updated successfully:', data);

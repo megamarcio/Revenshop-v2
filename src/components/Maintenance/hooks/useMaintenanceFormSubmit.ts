@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
@@ -31,42 +30,57 @@ export const useMaintenanceFormSubmit = ({
   const [loading, setLoading] = useState(false);
   const { addMaintenance, updateMaintenance } = useMaintenance();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  // Detectar se é uma manutenção reaberta (tem ID mas não tem data de reparo)
+  const isReopenedMaintenance = editingMaintenance?.id && !editingMaintenance?.repair_date;
+
+  const validateForm = () => {
+    const errors: string[] = [];
+
     if (!formData.vehicle_id) {
-      toast({
-        title: 'Erro',
-        description: 'Selecione um veículo',
-        variant: 'destructive'
-      });
-      return;
+      errors.push('Selecione um veículo');
     }
 
     if (!detectionDate) {
-      toast({
-        title: 'Erro',
-        description: 'Informe a data de detecção',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    // Validar se data de reparo é obrigatória apenas quando existe
-    // A data prometida nunca é obrigatória
-    if (repairDate && !repairDate) {
-      toast({
-        title: 'Erro',
-        description: 'Data de reparo inválida',
-        variant: 'destructive'
-      });
-      return;
+      errors.push('Informe a data de detecção');
     }
 
     if (formData.maintenance_items.length === 0 && !formData.custom_maintenance) {
+      errors.push('Selecione pelo menos um item de manutenção ou especifique uma manutenção customizada');
+    }
+
+    if (!formData.mechanic_name?.trim()) {
+      errors.push('Informe o nome do mecânico');
+    }
+
+    // Validar se há pelo menos uma peça ou mão de obra apenas para manutenções novas
+    if (!isReopenedMaintenance && formData.parts.length === 0 && formData.labor.length === 0) {
+      errors.push('Adicione pelo menos uma peça ou serviço de mão de obra');
+    }
+
+    // Validar se as peças têm nome
+    const partsWithoutName = formData.parts.filter(part => !part.name?.trim());
+    if (partsWithoutName.length > 0) {
+      errors.push('Todas as peças devem ter um nome');
+    }
+
+    // Validar se os serviços de mão de obra têm descrição
+    const laborWithoutDescription = formData.labor.filter(labor => !labor.description?.trim());
+    if (laborWithoutDescription.length > 0) {
+      errors.push('Todos os serviços de mão de obra devem ter uma descrição');
+    }
+
+    return errors;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const errors = validateForm();
+    
+    if (errors.length > 0) {
       toast({
-        title: 'Erro',
-        description: 'Selecione pelo menos um item de manutenção',
+        title: 'Campos obrigatórios não preenchidos',
+        description: errors.join('. '),
         variant: 'destructive'
       });
       return;
@@ -88,9 +102,9 @@ export const useMaintenanceFormSubmit = ({
       console.log('Dados da manutenção antes de enviar:', maintenanceData);
 
       if (editingMaintenance) {
-        updateMaintenance(editingMaintenance.id, maintenanceData);
+        await updateMaintenance(editingMaintenance.id, maintenanceData);
       } else {
-        addMaintenance(maintenanceData);
+        await addMaintenance(maintenanceData);
       }
       
       toast({
@@ -103,7 +117,7 @@ export const useMaintenanceFormSubmit = ({
       console.error('Erro ao salvar manutenção:', error);
       toast({
         title: 'Erro',
-        description: 'Erro ao salvar manutenção',
+        description: 'Erro ao salvar manutenção. Verifique os dados e tente novamente.',
         variant: 'destructive'
       });
     } finally {

@@ -1,4 +1,3 @@
-
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
 export const validateRequiredFields = (formData: VehicleFormData): { [key: string]: string } => {
@@ -28,11 +27,13 @@ export const validateRequiredFields = (formData: VehicleFormData): { [key: strin
     console.log('validateRequiredFields - year is empty:', formData.year);
   }
 
-  // Model is not required anymore - removing from validation
-  // Many vehicles might not have a specific model filled
+  if (isEmpty(formData.model)) {
+    errors.model = 'Modelo é obrigatório';
+    console.log('validateRequiredFields - model is empty:', formData.model);
+  }
 
   if (isEmpty(formData.miles)) {
-    errors.miles = 'Milhas é obrigatório';
+    errors.miles = 'Milhagem é obrigatória';
     console.log('validateRequiredFields - miles is empty:', formData.miles);
   }
 
@@ -95,6 +96,6 @@ export const calculateProfitMargin = (purchasePrice: string, salePrice: string):
   
   if (purchase === 0 || sale === 0) return '0.00';
   
-  const margin = ((sale - purchase) / purchase) * 100;
+  const margin = (sale / purchase - 1) * 100;
   return margin.toFixed(2);
 };

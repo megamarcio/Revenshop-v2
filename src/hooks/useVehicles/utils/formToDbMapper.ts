@@ -4,6 +4,9 @@ export const mapFormToDbData = (formData: any) => {
   console.log('mapFormToDbData - consignmentStore from formData:', formData.consignmentStore);
   console.log('mapFormToDbData - plate from formData:', formData.plate);
   console.log('mapFormToDbData - sunpass from formData:', formData.sunpass);
+  console.log('mapFormToDbData - category from formData:', formData.category);
+  console.log('mapFormToDbData - photos from formData:', formData.photos);
+  console.log('mapFormToDbData - videos from formData:', formData.videos);
   
   // Prepare the description with vehicle usage and store info
   let description = formData.description || '';
