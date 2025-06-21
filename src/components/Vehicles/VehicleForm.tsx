@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '../../contexts/LanguageContext';
 import { useAuth } from '../../contexts/AuthContext';
@@ -8,6 +7,8 @@ import VehicleFormModal from './forms/VehicleFormModal';
 import { VehicleFormProps } from './types/vehicleFormTypes';
 import { useVehicleForm } from './hooks/useVehicleForm';
 import WhatsAppSendModal from './WhatsAppSendModal';
+import { X } from 'lucide-react';
+import MaintenanceForm from '../Maintenance/MaintenanceForm';
 
 interface ExtendedVehicleFormProps extends VehicleFormProps {
   onDelete?: (id: string) => Promise<void>;
@@ -17,9 +18,8 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
   const { t } = useLanguage();
   const { isAdmin, isInternalSeller, canEditVehicles } = useAuth();
   const [showMaintenanceModal, setShowMaintenanceModal] = useState(false);
-  const [showFinancingInfo, setShowFinancingInfo] = useState(false);
-  const [showSaleInfo, setShowSaleInfo] = useState(false);
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [showNewMaintenanceModal, setShowNewMaintenanceModal] = useState(false);
   
   const {
     formData,
@@ -39,12 +39,15 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
     calculateProfitMargin
   } = useVehicleForm(editingVehicle);
 
-  console.log('VehicleForm - editingVehicle:', editingVehicle);
-  console.log('VehicleForm - isEditing:', isEditing);
-  console.log('VehicleForm - current formData.vehicleUsage:', formData.vehicleUsage);
+  const [showFinancingInfo, setShowFinancingInfo] = useState(isEditing);
+  const [showSaleInfo, setShowSaleInfo] = useState(isEditing);
 
   const handleViewMaintenance = () => {
     setShowMaintenanceModal(true);
+  };
+
+  const handleNewMaintenance = () => {
+    setShowNewMaintenanceModal(true);
   };
 
   const handleWhatsAppSend = () => {
@@ -73,10 +76,6 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    console.log('VehicleForm - handleSubmit - formData before validation:', formData);
-    console.log('VehicleForm - handleSubmit - vehicleUsage:', formData.vehicleUsage);
-    
     if (!validateFormData()) {
       toast({
         title: t('error'),
@@ -88,6 +87,10 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
 
     setIsLoading(true);
     try {
+      console.log('VehicleForm - handleSubmit - START');
+      console.log('VehicleForm - handleSubmit - formData.plate:', formData.plate);
+      console.log('VehicleForm - handleSubmit - formData.sunpass:', formData.sunpass);
+      
       const vehicleData: any = {
         ...formData,
         year: parseInt(formData.year),
@@ -117,7 +120,7 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         interestRate: formData.interestRate ? parseFloat(formData.interestRate) : undefined,
         customFinancingBank: formData.customFinancingBank,
         
-        // Add plate and sunpass
+        // CRITICAL: Explicitly ensure plate and sunpass are included
         plate: formData.plate,
         sunpass: formData.sunpass,
         
@@ -136,13 +139,14 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
         console.log('VehicleForm - handleSubmit - adding ID for update:', editingVehicle.id);
       }
 
-      console.log('VehicleForm - submitting vehicleData with vehicleUsage:', vehicleData.vehicleUsage);
       console.log('VehicleForm - submitting vehicleData:', vehicleData);
+      console.log('VehicleForm - vehicleData.plate being sent:', vehicleData.plate);
+      console.log('VehicleForm - vehicleData.sunpass being sent:', vehicleData.sunpass);
 
       await onSave(vehicleData);
       
       const successMessage = `Veículo ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`;
-        
+      
       toast({
         title: t('success'),
         description: successMessage,
@@ -150,64 +154,81 @@ const VehicleForm = ({ onClose, onSave, editingVehicle, onNavigateToCustomers, o
       onClose();
     } catch (error) {
       console.error('Error saving vehicle:', error);
+      toast({
+        title: t('error'),
+        description: 'Erro ao salvar veículo. Verifique os logs do console.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <>
-      <VehicleFormModal
-        isOpen={true}
-        isEditing={isEditing}
-        isLoading={isLoading}
-        isAdmin={isAdmin}
-        isInternalSeller={isInternalSeller}
-        canEditVehicles={canEditVehicles}
-        isGeneratingDescription={isGeneratingDescription}
-        showFinancingInfo={showFinancingInfo}
-        showSaleInfo={showSaleInfo}
-        formData={formData}
-        errors={errors}
-        photos={photos}
-        videos={videos}
-        editingVehicle={editingVehicle}
-        onClose={onClose}
-        onSubmit={handleSubmit}
-        onDelete={onDelete ? handleDelete : undefined}
-        onInputChange={handleInputChange}
-        setPhotos={setPhotos}
-        setVideos={setVideos}
-        onViewMaintenance={handleViewMaintenance}
-        onCarfaxClick={handleCarfaxClick}
-        onToggleFinancing={() => setShowFinancingInfo(!showFinancingInfo)}
-        onToggleSaleInfo={() => setShowSaleInfo(!showSaleInfo)}
-        onNavigateToCustomers={onNavigateToCustomers}
-        calculateProfitMargin={calculateProfitMargin}
-        generateDescription={generateDescription}
-        onWhatsAppSend={isEditing ? handleWhatsAppSend : undefined}
-      />
-
-      {showMaintenanceModal && (
-        <MaintenanceViewModal
-          isOpen={showMaintenanceModal}
-          onClose={() => setShowMaintenanceModal(false)}
-          vehicleId={editingVehicle?.id}
-          vehicleName={formData.name}
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl h-full max-h-[90vh] overflow-hidden">
+        <VehicleFormModal
+          isOpen={true}
+          isEditing={isEditing}
+          isLoading={isLoading}
+          isAdmin={isAdmin}
+          isInternalSeller={isInternalSeller}
+          canEditVehicles={canEditVehicles}
+          isGeneratingDescription={isGeneratingDescription}
+          showFinancingInfo={showFinancingInfo}
+          showSaleInfo={showSaleInfo}
+          formData={formData}
+          errors={errors}
+          photos={photos}
+          videos={videos}
+          editingVehicle={editingVehicle}
+          onClose={onClose}
+          onSubmit={handleSubmit}
+          onDelete={onDelete ? handleDelete : undefined}
+          onInputChange={handleInputChange}
+          setPhotos={setPhotos}
+          setVideos={setVideos}
+          onViewMaintenance={handleViewMaintenance}
+          onNewMaintenance={handleNewMaintenance}
+          onCarfaxClick={handleCarfaxClick}
+          onToggleFinancing={() => setShowFinancingInfo(!showFinancingInfo)}
+          onToggleSaleInfo={() => setShowSaleInfo(!showSaleInfo)}
+          onNavigateToCustomers={onNavigateToCustomers}
+          calculateProfitMargin={calculateProfitMargin}
+          generateDescription={generateDescription}
+          onWhatsAppSend={isEditing ? handleWhatsAppSend : undefined}
         />
-      )}
 
-      {showWhatsAppModal && editingVehicle && (
-        <WhatsAppSendModal
-          isOpen={showWhatsAppModal}
-          onClose={() => setShowWhatsAppModal(false)}
-          vehicleData={{
-            ...editingVehicle,
-            photos: photos
-          }}
-        />
-      )}
-    </>
+        {showMaintenanceModal && (
+          <MaintenanceViewModal
+            isOpen={showMaintenanceModal}
+            onClose={() => setShowMaintenanceModal(false)}
+            vehicleId={editingVehicle?.id}
+            vehicleName={formData.name}
+          />
+        )}
+
+        {showNewMaintenanceModal && editingVehicle?.id && (
+          <MaintenanceForm
+            open={showNewMaintenanceModal}
+            onClose={() => setShowNewMaintenanceModal(false)}
+            editingMaintenance={null}
+            preSelectedVehicleId={editingVehicle.id}
+          />
+        )}
+
+        {showWhatsAppModal && editingVehicle && (
+          <WhatsAppSendModal
+            isOpen={showWhatsAppModal}
+            onClose={() => setShowWhatsAppModal(false)}
+            vehicleData={{
+              ...editingVehicle,
+              photos: photos
+            }}
+          />
+        )}
+      </div>
+    </div>
   );
 };
 

@@ -1,7 +1,8 @@
-
 export const mapDbDataToAppData = (dbData: any) => {
   console.log('mapDbDataToAppData - input dbData:', dbData);
   console.log('mapDbDataToAppData - dbData.description:', dbData.description);
+  console.log('mapDbDataToAppData - dbData.plate:', dbData.plate);
+  console.log('mapDbDataToAppData - dbData.sunpass:', dbData.sunpass);
   
   // Calculate profit margin
   const profitMargin = dbData.purchase_price && dbData.sale_price 
@@ -24,8 +25,10 @@ export const mapDbDataToAppData = (dbData: any) => {
     miles: dbData.miles,
     internal_code: dbData.internal_code,
     color: dbData.color,
-    plate: dbData.plate,
-    sunpass: dbData.sunpass,
+    
+    // CRITICAL: Ensure plate and sunpass are properly mapped
+    plate: dbData.plate || '',
+    sunpass: dbData.sunpass || '',
     
     // Financial fields - use snake_case to match Vehicle type
     purchase_price: dbData.purchase_price,
@@ -124,6 +127,8 @@ export const mapDbDataToAppData = (dbData: any) => {
   
   console.log('mapDbDataToAppData - final mapped vehicleUsage:', mappedData.vehicleUsage);
   console.log('mapDbDataToAppData - final mapped usage (compatibility):', mappedData.usage);
+  console.log('mapDbDataToAppData - final mapped plate:', mappedData.plate);
+  console.log('mapDbDataToAppData - final mapped sunpass:', mappedData.sunpass);
   console.log('mapDbDataToAppData - final output data:', mappedData);
   return mappedData;
 };

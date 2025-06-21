@@ -1,8 +1,9 @@
-
 export const mapFormToDbData = (formData: any) => {
   console.log('mapFormToDbData - START - input formData:', formData);
   console.log('mapFormToDbData - vehicleUsage from formData:', formData.vehicleUsage);
   console.log('mapFormToDbData - consignmentStore from formData:', formData.consignmentStore);
+  console.log('mapFormToDbData - plate from formData:', formData.plate);
+  console.log('mapFormToDbData - sunpass from formData:', formData.sunpass);
   
   // Prepare the description with vehicle usage and store info
   let description = formData.description || '';
@@ -34,8 +35,10 @@ export const mapFormToDbData = (formData: any) => {
     miles: parseInt(formData.miles) || 0,
     internal_code: formData.internalCode,
     color: formData.color,
-    plate: formData.plate || null,
-    sunpass: formData.sunpass || null,
+    
+    // CRITICAL: Explicitly handle plate and sunpass fields
+    plate: formData.plate !== undefined ? (formData.plate || null) : null,
+    sunpass: formData.sunpass !== undefined ? (formData.sunpass || null) : null,
     
     // Financial fields
     purchase_price: parseFloat(formData.purchasePrice) || 0,
@@ -72,5 +75,7 @@ export const mapFormToDbData = (formData: any) => {
   console.log('mapFormToDbData - END - output dbData with encoded usage/store:', dbData);
   console.log('mapFormToDbData - final description in dbData:', dbData.description);
   console.log('mapFormToDbData - vehicleUsage encoded in description:', formData.vehicleUsage);
+  console.log('mapFormToDbData - plate in final dbData:', dbData.plate);
+  console.log('mapFormToDbData - sunpass in final dbData:', dbData.sunpass);
   return dbData;
 };

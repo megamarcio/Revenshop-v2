@@ -1,4 +1,3 @@
-
 export interface Vehicle {
   id: string;
   name: string;
@@ -8,6 +7,8 @@ export interface Vehicle {
   miles: number; // Corrigido: de string para number e mantido como miles
   internalCode: string;
   color: string;
+  plate?: string;
+  sunpass?: string;
   purchasePrice: number;
   salePrice: number;
   profitMargin: number;

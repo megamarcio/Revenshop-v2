@@ -1,9 +1,9 @@
-
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Loader2, Trash2, MessageCircle } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import VehicleFormContent from './VehicleFormContent';
+import VehicleFormHeader from './VehicleFormHeader';
 import { VehicleFormData } from '../types/vehicleFormTypes';
 
 interface VehicleFormModalProps {
@@ -28,6 +28,7 @@ interface VehicleFormModalProps {
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
   setVideos: React.Dispatch<React.SetStateAction<string[]>>;
   onViewMaintenance: () => void;
+  onNewMaintenance?: () => void;
   onCarfaxClick: () => void;
   onToggleFinancing: () => void;
   onToggleSaleInfo: () => void;
@@ -59,6 +60,7 @@ const VehicleFormModal = ({
   setPhotos,
   setVideos,
   onViewMaintenance,
+  onNewMaintenance,
   onCarfaxClick,
   onToggleFinancing,
   onToggleSaleInfo,
@@ -70,37 +72,18 @@ const VehicleFormModal = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center justify-between">
-            <span>{isEditing ? 'Editar Veículo' : 'Cadastrar Novo Veículo'}</span>
-            <div className="flex gap-2">
-              {isEditing && onWhatsAppSend && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={onWhatsAppSend}
-                  className="flex items-center gap-2"
-                >
-                  <MessageCircle className="h-4 w-4" />
-                  WhatsApp
-                </Button>
-              )}
-              {isEditing && onDelete && (isAdmin || isInternalSeller) && (
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  onClick={onDelete}
-                  className="flex items-center gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Excluir
-                </Button>
-              )}
-            </div>
-          </DialogTitle>
-        </DialogHeader>
+        <VehicleFormHeader
+          isEditing={isEditing}
+          isAdmin={isAdmin}
+          isInternalSeller={isInternalSeller}
+          isLoading={isLoading}
+          vehicleVin={editingVehicle?.vin}
+          onClose={onClose}
+          onViewMaintenance={onViewMaintenance}
+          onNewMaintenance={onNewMaintenance}
+          onCarfaxClick={onCarfaxClick}
+          onWhatsAppSend={onWhatsAppSend}
+        />
 
         <form onSubmit={onSubmit} className="space-y-6">
           <VehicleFormContent
@@ -117,6 +100,7 @@ const VehicleFormModal = ({
             setPhotos={setPhotos}
             setVideos={setVideos}
             onViewMaintenance={onViewMaintenance}
+            onNewMaintenance={onNewMaintenance}
             onToggleFinancing={onToggleFinancing}
             onToggleSaleInfo={onToggleSaleInfo}
             onNavigateToCustomers={onNavigateToCustomers}

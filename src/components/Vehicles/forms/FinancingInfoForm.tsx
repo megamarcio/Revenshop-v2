@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -67,7 +66,7 @@ const FinancingInfoForm = ({
           <Button variant="outline" className="w-full justify-between">
             <div className="flex items-center gap-2">
               <CreditCard className="h-4 w-4" />
-              Informações de Financiamento
+              Financiado
             </div>
             <ChevronDown className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
           </Button>

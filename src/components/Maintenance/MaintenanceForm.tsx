@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { useAuth } from '../../contexts/AuthContext';
@@ -21,12 +20,14 @@ interface MaintenanceFormProps {
   open: boolean;
   onClose: () => void;
   editingMaintenance?: any;
+  preSelectedVehicleId?: string;
 }
 
 const MaintenanceForm = ({
   open,
   onClose,
-  editingMaintenance
+  editingMaintenance,
+  preSelectedVehicleId
 }: MaintenanceFormProps) => {
   const { vehicles, loading: vehiclesLoading } = useVehicles();
   
@@ -40,6 +41,16 @@ const MaintenanceForm = ({
     promisedDate,
     setPromisedDate
   } = useMaintenanceFormData(editingMaintenance);
+  
+  // Se não há manutenção sendo editada e há um vehicleId pré-selecionado, definir o veículo
+  React.useEffect(() => {
+    if (!editingMaintenance && preSelectedVehicleId && !formData.vehicle_id) {
+      setFormData(prev => ({
+        ...prev,
+        vehicle_id: preSelectedVehicleId
+      }));
+    }
+  }, [preSelectedVehicleId, editingMaintenance, formData.vehicle_id, setFormData]);
   
   const {
     getMaintenanceStatus,

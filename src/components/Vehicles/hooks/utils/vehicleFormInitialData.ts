@@ -1,4 +1,3 @@
-
 import { VehicleFormData } from '../../types/vehicleFormTypes';
 
 export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
@@ -7,11 +6,15 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
   console.log('getInitialFormData - editingVehicle.vehicleUsage:', editingVehicle?.vehicleUsage);
   console.log('getInitialFormData - editingVehicle.usage:', editingVehicle?.usage);
   console.log('getInitialFormData - editingVehicle.description:', editingVehicle?.description);
+  console.log('getInitialFormData - editingVehicle.plate:', editingVehicle?.plate);
+  console.log('getInitialFormData - editingVehicle.sunpass:', editingVehicle?.sunpass);
 
   // Only use editing vehicle data if it has a valid ID (indicating it's actually being edited)
   if (editingVehicle && editingVehicle.id) {
     console.log('getInitialFormData - editing existing vehicle with ID:', editingVehicle.id);
     console.log('getInitialFormData - miles from editingVehicle:', editingVehicle.miles);
+    console.log('getInitialFormData - plate from editingVehicle:', editingVehicle.plate);
+    console.log('getInitialFormData - sunpass from editingVehicle:', editingVehicle.sunpass);
     
     // CRÍTICO: Tentar múltiplas fontes para vehicleUsage para garantir que encontremos o valor
     let vehicleUsage = 'sale'; // Default
@@ -58,8 +61,11 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
       miles: editingVehicle.miles?.toString() || '0',
       internalCode: editingVehicle.internalCode || editingVehicle.internal_code || '',
       color: editingVehicle.color || '',
+      
+      // CRITICAL: Ensure plate and sunpass are properly loaded
       plate: editingVehicle.plate || '',
       sunpass: editingVehicle.sunpass || '',
+      
       purchasePrice: editingVehicle.purchasePrice?.toString() || editingVehicle.purchase_price?.toString() || '',
       salePrice: editingVehicle.salePrice?.toString() || editingVehicle.sale_price?.toString() || '',
       minNegotiable: editingVehicle.minNegotiable?.toString() || editingVehicle.min_negotiable?.toString() || '',
@@ -109,6 +115,8 @@ export const getInitialFormData = (editingVehicle?: any): VehicleFormData => {
     console.log('getInitialFormData - miles converted to string:', initialData.miles);
     console.log('getInitialFormData - FINAL vehicleUsage mapped:', initialData.vehicleUsage);
     console.log('getInitialFormData - FINAL consignmentStore mapped:', initialData.consignmentStore);
+    console.log('getInitialFormData - FINAL plate mapped:', initialData.plate);
+    console.log('getInitialFormData - FINAL sunpass mapped:', initialData.sunpass);
     console.log('getInitialFormData - final initialData for editing:', initialData);
     
     return initialData;

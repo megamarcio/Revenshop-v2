@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -79,7 +78,7 @@ const SaleInfoForm = ({
         >
           <div className="flex items-center space-x-2">
             <Calculator className="h-5 w-5" />
-            <span className="text-lg font-semibold">Informações de Venda</span>
+            <span className="text-lg font-semibold">À Venda</span>
           </div>
           {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
         </Button>
@@ -160,30 +159,17 @@ const SaleInfoForm = ({
             />
           </div>
 
-          {/* Custo Total de Manutenções - agora em USD */}
+          {/* Custo Total de Manutenções - apenas exibição */}
           {(isAdmin || isInternalSeller) && vehicleId && (
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
                 <Wrench className="h-4 w-4" />
                 Custo Total Manutenções
               </Label>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 p-3 bg-orange-50 border border-orange-200 rounded-md">
-                  <span className="text-lg font-bold text-orange-600">
-                    {formatCurrency(maintenanceCost)}
-                  </span>
-                </div>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={onViewMaintenance}
-                  className="flex items-center gap-1"
-                  title="Ver Manutenções"
-                >
-                  <Eye className="h-4 w-4" />
-                  Ver
-                </Button>
+              <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+                <span className="text-lg font-bold text-orange-600">
+                  {formatCurrency(maintenanceCost)}
+                </span>
               </div>
             </div>
           )}

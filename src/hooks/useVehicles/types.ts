@@ -1,4 +1,3 @@
-
 export interface Vehicle {
   id: string;
   name: string;
@@ -8,6 +7,8 @@ export interface Vehicle {
   miles: number;
   internal_code: string;
   color: string;
+  plate?: string;
+  sunpass?: string;
   purchase_price: number;
   sale_price: number;
   profit_margin: number;

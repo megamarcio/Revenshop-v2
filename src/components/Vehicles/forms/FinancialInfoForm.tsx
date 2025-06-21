@@ -1,9 +1,7 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Calculator, Wrench, Eye } from 'lucide-react';
+import { Calculator, Wrench } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { useMaintenance } from '../../../hooks/useMaintenance';
 
@@ -19,7 +17,6 @@ interface FinancialInfoFormProps {
   onInputChange: (field: string, value: string) => void;
   calculateProfitMargin: () => string;
   vehicleId?: string;
-  onViewMaintenance?: () => void;
 }
 
 const FinancialInfoForm = ({ 
@@ -27,8 +24,7 @@ const FinancialInfoForm = ({
   errors, 
   onInputChange, 
   calculateProfitMargin, 
-  vehicleId,
-  onViewMaintenance
+  vehicleId
 }: FinancialInfoFormProps) => {
   const { isAdmin, isInternalSeller } = useAuth();
   const { getTotalMaintenanceCost } = useMaintenance();
@@ -123,30 +119,17 @@ const FinancialInfoForm = ({
           />
         </div>
 
-        {/* Custo Total de Manutenções - agora em USD */}
+        {/* Custo Total de Manutenções - apenas exibição */}
         {(isAdmin || isInternalSeller) && vehicleId && (
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Wrench className="h-4 w-4" />
               Custo Total Manutenções
             </Label>
-            <div className="flex items-center gap-2">
-              <div className="flex-1 p-3 bg-orange-50 border border-orange-200 rounded-md">
-                <span className="text-lg font-bold text-orange-600">
-                  {formatCurrency(maintenanceCost)}
-                </span>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={onViewMaintenance}
-                className="flex items-center gap-1"
-                title="Ver Manutenções"
-              >
-                <Eye className="h-4 w-4" />
-                Ver
-              </Button>
+            <div className="p-3 bg-orange-50 border border-orange-200 rounded-md">
+              <span className="text-lg font-bold text-orange-600">
+                {formatCurrency(maintenanceCost)}
+              </span>
             </div>
           </div>
         )}

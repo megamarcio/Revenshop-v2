@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -12,6 +11,8 @@ export interface VehicleMinimal {
   miles: number;
   internal_code: string;
   color: string;
+  plate?: string;
+  sunpass?: string;
   purchase_price: number;
   sale_price: number;
   profit_margin: number;
@@ -67,6 +68,8 @@ export const useVehiclesUltraMinimal = () => {
           miles,
           internal_code,
           color,
+          plate,
+          sunpass,
           purchase_price,
           sale_price,
           profit_margin,
@@ -132,6 +135,8 @@ export const useVehiclesUltraMinimal = () => {
         miles: vehicle.miles,
         internal_code: vehicle.internal_code,
         color: vehicle.color,
+        plate: vehicle.plate,
+        sunpass: vehicle.sunpass,
         purchase_price: vehicle.purchase_price,
         sale_price: vehicle.sale_price,
         profit_margin: vehicle.profit_margin,

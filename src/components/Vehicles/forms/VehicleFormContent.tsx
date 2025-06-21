@@ -1,4 +1,3 @@
-
 import React from 'react';
 import BasicInfoForm from './BasicInfoForm';
 import SaleInfoForm from './SaleInfoForm';
@@ -22,6 +21,7 @@ interface VehicleFormContentProps {
   setPhotos: React.Dispatch<React.SetStateAction<string[]>>;
   setVideos: React.Dispatch<React.SetStateAction<string[]>>;
   onViewMaintenance: () => void;
+  onNewMaintenance?: () => void;
   onToggleFinancing: () => void;
   onToggleSaleInfo: () => void;
   onNavigateToCustomers?: () => void;
@@ -43,6 +43,7 @@ const VehicleFormContent = ({
   setPhotos,
   setVideos,
   onViewMaintenance,
+  onNewMaintenance,
   onToggleFinancing,
   onToggleSaleInfo,
   onNavigateToCustomers,
@@ -112,24 +113,33 @@ const VehicleFormContent = ({
         onInputChange={onInputChange}
       />
 
-      <SaleInfoForm
-        formData={formData}
-        errors={errors}
-        onInputChange={onInputChange}
-        calculateProfitMargin={calculateProfitMargin}
-        vehicleId={isEditing ? editingVehicle?.id : undefined}
-        onViewMaintenance={onViewMaintenance}
-        isOpen={showSaleInfo}
-        onToggle={onToggleSaleInfo}
-      />
+      {/* Container para menus de Venda e Financiamento */}
+      <div className="space-y-4">
+        <div className="border-b pb-2">
+          <h3 className="text-lg font-semibold text-gray-800">Informações Comerciais</h3>
+          <p className="text-sm text-gray-600">Dados de venda e financiamento do veículo</p>
+        </div>
+        
+        <div className="space-y-4">
+          <SaleInfoForm
+            formData={formData}
+            errors={errors}
+            onInputChange={onInputChange}
+            calculateProfitMargin={calculateProfitMargin}
+            vehicleId={isEditing ? editingVehicle?.id : undefined}
+            isOpen={showSaleInfo}
+            onToggle={onToggleSaleInfo}
+          />
 
-      <FinancingInfoForm
-        formData={formData}
-        errors={errors}
-        onInputChange={onInputChange}
-        isOpen={showFinancingInfo}
-        onToggle={onToggleFinancing}
-      />
+          <FinancingInfoForm
+            formData={formData}
+            errors={errors}
+            onInputChange={onInputChange}
+            isOpen={showFinancingInfo}
+            onToggle={onToggleFinancing}
+          />
+        </div>
+      </div>
 
       <CustomerSaleInfoForm
         formData={formData}

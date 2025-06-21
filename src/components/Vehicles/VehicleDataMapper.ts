@@ -1,4 +1,3 @@
-
 import { Vehicle as HookVehicle } from '../../hooks/useVehicles/types';
 import { Vehicle as VehicleCardType } from './VehicleCardTypes';
 
@@ -21,6 +20,8 @@ export class VehicleDataMapper {
       miles: vehicle.miles || 0,
       internalCode: vehicle.internal_code,
       color: vehicle.color,
+      plate: vehicle.plate || '',
+      sunpass: vehicle.sunpass || '',
       purchasePrice: vehicle.purchase_price,
       salePrice: vehicle.sale_price,
       profitMargin: vehicle.profit_margin,
@@ -66,6 +67,8 @@ export class VehicleDataMapper {
         miles: vehicle.miles || 0,
         internal_code: vehicle.internalCode,
         color: vehicle.color,
+        plate: vehicle.plate || '',
+        sunpass: vehicle.sunpass || '',
         purchase_price: vehicle.purchasePrice,
         sale_price: vehicle.salePrice,
         profit_margin: vehicle.profitMargin,

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { mapDbDataToAppData } from './useVehicles/utils/dbToAppMapper';
@@ -72,6 +71,8 @@ export const useVehiclesOptimized = (options: UseVehiclesOptimizedOptions = {}) 
             miles,
             internal_code,
             color,
+            plate,
+            sunpass,
             purchase_price,
             sale_price,
             profit_margin,
