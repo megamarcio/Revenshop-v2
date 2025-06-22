@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -39,11 +38,12 @@ const LogisticaCompactReservationItem = ({
 
   return (
     <Card className="w-full">
-      <CardContent className="p-2 sm:p-3 space-y-1">
+      <CardContent className="p-2 sm:p-3 space-y-1.5 sm:space-y-1">
         <ReservationFirstLine 
           data={mappedReservation.data} 
           temperature={mappedReservation.temperature} 
-          onRemove={handleRemove} 
+          onRemove={handleRemove}
+          isLogistica={true}
         />
         
         <ReservationSecondLine 

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -53,7 +52,7 @@ const RevenueForm: React.FC<RevenueFormProps> = ({ revenue, onSuccess, onCancel 
     }
   };
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: string, value: string | number | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -118,6 +117,10 @@ const RevenueForm: React.FC<RevenueFormProps> = ({ revenue, onSuccess, onCancel 
                 <SelectContent>
                   <SelectItem value="padrao">Padrão</SelectItem>
                   <SelectItem value="estimada">Estimada</SelectItem>
+                  <SelectItem value="venda">Venda</SelectItem>
+                  <SelectItem value="comissao">Comissão</SelectItem>
+                  <SelectItem value="servico">Serviço</SelectItem>
+                  <SelectItem value="financiamento">Financiamento</SelectItem>
                 </SelectContent>
               </Select>
             </div>

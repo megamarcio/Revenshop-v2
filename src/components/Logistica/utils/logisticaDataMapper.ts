@@ -1,4 +1,3 @@
-
 import { Reservation } from '../types/reservationTypes';
 import { ReservationDetails } from '@/hooks/useReservationById';
 
@@ -17,7 +16,9 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
   // Split the full name into first and last name
   const nameParts = customerFullName.trim().split(' ');
   const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
+  const lastNameFromLabel = nameParts.slice(1).join(' ') || '';
+  // Preferir o last_name do JSON, se existir
+  const lastName = reservation.customer.last_name || lastNameFromLabel;
   
   // Create clean label without the customer name
   const labelParts = reservation.customer.label.split(' - ');
@@ -45,6 +46,10 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
     }
   });
 
+  // Check if dates contain time information
+  const pickUpDateTime = reservation.pick_up_date || '';
+  const returnDateTime = reservation.return_date || '';
+
   return {
     id: reservation.id.toString(),
     loading: false,
@@ -53,8 +58,8 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
     data: {
       reservation: {
         id: reservation.id.toString(),
-        pick_up_date: reservation.pick_up_date,
-        return_date: reservation.return_date,
+        pick_up_date: pickUpDateTime,
+        return_date: returnDateTime,
         pick_up_location_label: 'MCO', // Default from typical pattern
         return_location_label: 'MCO', // Default from typical pattern  
         status: reservation.status || 'Open', // Use the actual status from JSON
@@ -66,6 +71,7 @@ export const mapLogisticaToReservationFormat = (reservation: Reservation, kommoL
         last_name: lastName,
         phone_number: reservation.customer.phone_number || '',
         f855: kommoLeadId || '',
+        label: reservation.customer.label || '',
       },
       selected_vehicle_class: vehicleClass ? {
         vehicle_class: {

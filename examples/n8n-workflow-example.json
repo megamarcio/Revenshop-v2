@@ -1,0 +1,229 @@
+{
+  "name": "Revenshop WhatsApp Integration",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "revenshop-webhook",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Revenshop Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "webhookId": "revenshop-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "vehicle-share",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "vehicle_share",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-vehicle",
+      "name": "Is Vehicle Share?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "whatsAppBusinessApi",
+        "operation": "sendMessage",
+        "to": "={{ $json.recipient.groupPhone }}",
+        "message": "🚗 *Novo Veículo Disponível!*\n\n*{{ $json.vehicle.name }} {{ $json.vehicle.year }}*\nModelo: {{ $json.vehicle.model }}\nCor: {{ $json.vehicle.color }}\nQuilometragem: {{ $json.vehicle.miles }} km\nVIN: {{ $json.vehicle.vin }}\n\n💰 *Preço: R$ {{ $json.vehicle.salePrice }}*\n\n📝 {{ $json.vehicle.description }}\n\n📞 Entre em contato para mais informações!",
+        "options": {}
+      },
+      "id": "whatsapp-vehicle",
+      "name": "Send Vehicle WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "reservation-share",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "reservation_share",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if-reservation",
+      "name": "Is Reservation Share?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "whatsAppBusinessApi",
+        "operation": "sendMessage",
+        "to": "={{ $json.recipient.groupPhone }}",
+        "message": "📅 *Nova Reserva Confirmada!*\n\n👤 *Cliente:* {{ $json.reservation.customer_full_name }}\n📱 *Telefone:* {{ $json.reservation.phone_number }}\n🚗 *Placa:* {{ $json.reservation.plate }}\n\n📅 *Datas:*\nRetirada: {{ $json.reservation.pickup_date }}\nDevolução: {{ $json.reservation.return_date }}\n\n✅ Reserva processada com sucesso!",
+        "options": {}
+      },
+      "id": "whatsapp-reservation",
+      "name": "Send Reservation WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "authentication": "whatsAppBusinessApi",
+        "operation": "sendMessage",
+        "to": "={{ $json.recipient.groupPhone }}",
+        "message": "❓ *Mensagem Desconhecida*\n\nTipo de mensagem não reconhecido: {{ $json.type }}\n\nDados recebidos:\n{{ JSON.stringify($json, null, 2) }}",
+        "options": {}
+      },
+      "id": "whatsapp-unknown",
+      "name": "Send Unknown Type WhatsApp",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [900, 600]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"Message processed successfully\",\n  \"timestamp\": \"{{ new Date().toISOString() }}\"\n}",
+        "options": {}
+      },
+      "id": "response-success",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 300]
+    }
+  ],
+  "connections": {
+    "Revenshop Webhook": {
+      "main": [
+        [
+          {
+            "node": "Is Vehicle Share?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Vehicle Share?": {
+      "main": [
+        [
+          {
+            "node": "Send Vehicle WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Is Reservation Share?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Is Reservation Share?": {
+      "main": [
+        [
+          {
+            "node": "Send Reservation WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send Unknown Type WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Vehicle WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Reservation WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Unknown Type WhatsApp": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2024-01-01T00:00:00.000Z",
+      "updatedAt": "2024-01-01T00:00:00.000Z",
+      "id": "revenshop-integration",
+      "name": "Revenshop"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2024-01-01T00:00:00.000Z",
+  "versionId": "1"
+} 

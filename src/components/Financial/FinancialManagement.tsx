@@ -1,11 +1,10 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, TrendingUp, TrendingDown, PieChart } from 'lucide-react';
 import FinancialDashboard from './FinancialDashboard';
 import ExpenseManagement from './ExpenseManagement';
-import RevenueManagement from './RevenueManagement';
+import RevenueManagement from './RevenueManagement/index';
 import FinancialSettings from './FinancialSettings';
 import BankStatementImport from './BankStatementImport';
 import SoftwareManagement from './SoftwareManagement';
@@ -17,6 +16,9 @@ interface FinancialManagementProps {
 
 const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 'dashboard' }) => {
   const { data: monthlyData, isLoading } = useFinancialChartData();
+
+  // Debug: verificar se o componente está sendo renderizado
+  console.log('FinancialManagement rendered with initialTab:', initialTab);
 
   // Calcular totais a partir dos dados mensais
   const totalRevenue = monthlyData.reduce((sum, month) => sum + month.receitasConfirmadas, 0);
@@ -48,10 +50,21 @@ const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 
     }
   };
 
+  // Controle de tab sincronizado com prop
+  const [tabValue, setTabValue] = useState(getActiveTab());
+  useEffect(() => {
+    setTabValue(getActiveTab());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialTab]);
+
+  const handleTabChange = (value: string) => {
+    setTabValue(value);
+  };
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-4 sm:p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Gestão Financeira</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Gestão Financeira</h1>
         <p className="text-muted-foreground">
           Gerencie receitas, despesas e acompanhe a performance financeira
         </p>
@@ -103,14 +116,44 @@ const FinancialManagement: React.FC<FinancialManagementProps> = ({ initialTab = 
         </Card>
       </div>
 
-      <Tabs defaultValue={getActiveTab()} className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-          <TabsTrigger value="revenues">Receitas</TabsTrigger>
-          <TabsTrigger value="expenses">Despesas</TabsTrigger>
-          <TabsTrigger value="bank-statements">Extratos</TabsTrigger>
-          <TabsTrigger value="software">Software</TabsTrigger>
-          <TabsTrigger value="settings">Configurações</TabsTrigger>
+      <Tabs value={tabValue} onValueChange={handleTabChange} className="space-y-4">
+        <TabsList className="flex w-full gap-1 p-1">
+          <TabsTrigger 
+            value="dashboard" 
+            className="text-xs sm:text-sm px-2 sm:px-3 min-h-[44px] touch-manipulation flex-1"
+          >
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger 
+            value="revenues" 
+            className="text-xs sm:text-sm px-2 sm:px-3 min-h-[44px] touch-manipulation flex-1"
+          >
+            Receitas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="expenses" 
+            className="text-xs sm:text-sm px-2 sm:px-3 min-h-[44px] touch-manipulation flex-1"
+          >
+            Despesas
+          </TabsTrigger>
+          <TabsTrigger 
+            value="bank-statements" 
+            className="text-xs sm:text-sm px-2 sm:px-3 min-h-[44px] touch-manipulation hidden sm:inline-flex"
+          >
+            Extratos
+          </TabsTrigger>
+          <TabsTrigger 
+            value="software" 
+            className="text-xs sm:text-sm px-2 sm:px-3 min-h-[44px] touch-manipulation hidden sm:inline-flex"
+          >
+            Software
+          </TabsTrigger>
+          <TabsTrigger 
+            value="settings" 
+            className="text-xs sm:text-sm px-2 sm:px-3 min-h-[44px] touch-manipulation hidden sm:inline-flex"
+          >
+            Config
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard">

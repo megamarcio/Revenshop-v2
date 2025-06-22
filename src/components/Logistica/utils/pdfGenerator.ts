@@ -1,4 +1,3 @@
-
 import { Reservation } from "../types/reservationTypes";
 import { formatToAmericanDateTime } from "./dateFormatter";
 
@@ -11,12 +10,11 @@ export const generateLogisticsPDF = (
   const generateTableRows = (reservations: Reservation[]) => {
     return reservations.map(reservation => `
       <tr>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.id || 'N/A'}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.customer?.label || 'N/A'}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.customer?.phone_number || 'N/A'}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${formatToAmericanDateTime(reservation.pick_up_date)}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${formatToAmericanDateTime(reservation.return_date)}</td>
-        <td style="border: 1px solid #ddd; padding: 6px; font-size: 10px;">${reservation.vehicle_name || 'N/A'}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px; text-align: center;">${reservation.id || 'N/A'}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.customer?.label || 'N/A'}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${reservation.customer?.phone_number || 'N/A'}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${formatToAmericanDateTime(reservation.pick_up_date)}</td>
+        <td style="border: 1px solid #ddd; padding: 8px; font-size: 11px;">${formatToAmericanDateTime(reservation.return_date)}</td>
       </tr>
     `).join('');
   };
@@ -30,54 +28,93 @@ export const generateLogisticsPDF = (
       <style>
         body {
           font-family: Arial, sans-serif;
-          margin: 20px;
+          margin: 15px;
           color: #333;
+          line-height: 1.4;
         }
         .header {
           text-align: center;
-          margin-bottom: 30px;
+          margin-bottom: 25px;
           border-bottom: 2px solid #4CAF50;
-          padding-bottom: 20px;
+          padding-bottom: 15px;
         }
         .header h1 {
           color: #4CAF50;
           margin-bottom: 5px;
+          font-size: 24px;
         }
         .section {
-          margin-bottom: 40px;
+          margin-bottom: 30px;
+          page-break-inside: avoid;
         }
         .section h2 {
           background-color: #f5f5f5;
-          padding: 10px;
+          padding: 12px;
           border-left: 4px solid #4CAF50;
           margin-bottom: 15px;
+          font-size: 16px;
         }
         table {
           width: 100%;
           border-collapse: collapse;
           margin-bottom: 20px;
+          page-break-inside: avoid;
         }
         th {
           background-color: #4CAF50;
           color: white;
-          padding: 8px;
+          padding: 10px 8px;
           text-align: left;
-          font-size: 11px;
+          font-size: 12px;
+          font-weight: bold;
+        }
+        td {
+          vertical-align: top;
         }
         .summary {
           background-color: #f9f9f9;
           padding: 15px;
           border-radius: 5px;
           margin-bottom: 20px;
+          border: 1px solid #ddd;
         }
         .summary-item {
           display: inline-block;
           margin-right: 30px;
           font-weight: bold;
+          color: #4CAF50;
+        }
+        .no-data {
+          color: #666;
+          font-style: italic;
+          text-align: center;
+          padding: 20px;
+          background-color: #f9f9f9;
+          border-radius: 5px;
         }
         @media print {
-          body { margin: 10px; }
-          .section { page-break-inside: avoid; }
+          body { 
+            margin: 10px; 
+            font-size: 10px;
+          }
+          .section { 
+            page-break-inside: avoid; 
+            margin-bottom: 20px;
+          }
+          table { 
+            page-break-inside: avoid; 
+            font-size: 9px;
+          }
+          th, td {
+            padding: 6px 4px;
+          }
+          .header h1 {
+            font-size: 20px;
+          }
+          .section h2 {
+            font-size: 14px;
+            padding: 8px;
+          }
         }
       </style>
     </head>
@@ -88,9 +125,9 @@ export const generateLogisticsPDF = (
       </div>
 
       <div class="summary">
-        <div class="summary-item">Total Pickup: ${pickupReservations.length}</div>
-        <div class="summary-item">Total Return: ${returnReservations.length}</div>
-        <div class="summary-item">Total Geral: ${pickupReservations.length + returnReservations.length}</div>
+        <div class="summary-item">📅 Total Pickup: ${pickupReservations.length}</div>
+        <div class="summary-item">🔄 Total Return: ${returnReservations.length}</div>
+        <div class="summary-item">📊 Total Geral: ${pickupReservations.length + returnReservations.length}</div>
       </div>
 
       <div class="section">
@@ -99,19 +136,18 @@ export const generateLogisticsPDF = (
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Telefone</th>
-                <th>Data Pickup</th>
-                <th>Data Retorno</th>
-                <th>Veículo</th>
+                <th style="width: 10%;">ID</th>
+                <th style="width: 35%;">Cliente</th>
+                <th style="width: 15%;">Telefone</th>
+                <th style="width: 20%;">Data Pickup</th>
+                <th style="width: 20%;">Data Retorno</th>
               </tr>
             </thead>
             <tbody>
               ${generateTableRows(pickupReservations)}
             </tbody>
           </table>
-        ` : '<p style="color: #666; font-style: italic;">Nenhuma reserva encontrada para pickup.</p>'}
+        ` : '<div class="no-data">Nenhuma reserva encontrada para pickup.</div>'}
       </div>
 
       <div class="section">
@@ -120,22 +156,21 @@ export const generateLogisticsPDF = (
           <table>
             <thead>
               <tr>
-                <th>ID</th>
-                <th>Cliente</th>
-                <th>Telefone</th>
-                <th>Data Pickup</th>
-                <th>Data Retorno</th>
-                <th>Veículo</th>
+                <th style="width: 10%;">ID</th>
+                <th style="width: 35%;">Cliente</th>
+                <th style="width: 15%;">Telefone</th>
+                <th style="width: 20%;">Data Pickup</th>
+                <th style="width: 20%;">Data Retorno</th>
               </tr>
             </thead>
             <tbody>
               ${generateTableRows(returnReservations)}
             </tbody>
           </table>
-        ` : '<p style="color: #666; font-style: italic;">Nenhuma reserva encontrada para retorno.</p>'}
+        ` : '<div class="no-data">Nenhuma reserva encontrada para retorno.</div>'}
       </div>
 
-      <div style="margin-top: 40px; text-align: center; color: #666; font-size: 12px;">
+      <div style="margin-top: 30px; text-align: center; color: #666; font-size: 11px; border-top: 1px solid #ddd; padding-top: 15px;">
         <p>Relatório gerado automaticamente pelo sistema de logística</p>
       </div>
     </body>

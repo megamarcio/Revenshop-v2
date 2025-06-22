@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -24,17 +23,21 @@ interface Revenue {
 interface RevenueListViewProps {
   revenues: Revenue[];
   onEdit: (revenue: Revenue) => void;
+  onReplicate: (revenue: Revenue) => void;
   onDelete: (id: string) => void;
   formatCurrency: (value: number) => string;
   getTypeColor: (type: string) => string;
+  canReplicate: (revenue: Revenue) => boolean;
 }
 
 const RevenueListView: React.FC<RevenueListViewProps> = ({
   revenues,
   onEdit,
+  onReplicate,
   onDelete,
   formatCurrency,
   getTypeColor,
+  canReplicate,
 }) => {
   return (
     <div className="grid gap-3">
@@ -78,6 +81,18 @@ const RevenueListView: React.FC<RevenueListViewProps> = ({
                   >
                     <Edit className="h-3 w-3" />
                   </Button>
+                  
+                  {canReplicate(revenue) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 w-7 p-0"
+                      onClick={() => onReplicate(revenue)}
+                      title={`Replicar ${revenue.type === 'estimada' ? 'receita estimada' : 'receita padrão'} para próximos meses`}
+                    >
+                      <Copy className="h-3 w-3" />
+                    </Button>
+                  )}
                   
                   <Button
                     variant="outline"

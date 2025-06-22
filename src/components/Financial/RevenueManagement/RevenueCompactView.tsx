@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
@@ -24,17 +23,21 @@ interface Revenue {
 interface RevenueCompactViewProps {
   revenues: Revenue[];
   onEdit: (revenue: Revenue) => void;
+  onReplicate: (revenue: Revenue) => void;
   onDelete: (id: string) => void;
   formatCurrency: (value: number) => string;
   getTypeColor: (type: string) => string;
+  canReplicate: (revenue: Revenue) => boolean;
 }
 
 const RevenueCompactView: React.FC<RevenueCompactViewProps> = ({
   revenues,
   onEdit,
+  onReplicate,
   onDelete,
   formatCurrency,
   getTypeColor,
+  canReplicate,
 }) => {
   return (
     <div className="grid gap-2">
@@ -74,6 +77,17 @@ const RevenueCompactView: React.FC<RevenueCompactViewProps> = ({
                   >
                     <Edit className="h-2.5 w-2.5" />
                   </Button>
+                  
+                  {canReplicate(revenue) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-6 w-6 p-0"
+                      onClick={() => onReplicate(revenue)}
+                    >
+                      <Copy className="h-2.5 w-2.5" />
+                    </Button>
+                  )}
                   
                   <Button
                     variant="outline"

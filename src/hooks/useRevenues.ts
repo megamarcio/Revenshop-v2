@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
@@ -8,7 +7,7 @@ export interface Revenue {
   description: string;
   amount: number;
   category_id?: string;
-  type: 'padrao' | 'estimada';
+  type: 'padrao' | 'estimada' | 'venda' | 'comissao' | 'servico' | 'financiamento';
   date: string;
   is_confirmed: boolean;
   notes?: string;

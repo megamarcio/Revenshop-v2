@@ -95,39 +95,82 @@ export const convertUTCToFloridaTime = (utcDateTime: string): string => {
   }
 };
 
+interface ApiReservationItem {
+  id?: string;
+  reservation_id?: string;
+  custom_reservation_number?: string;
+  prefixed_id?: string;
+  customer?: {
+    label?: string;
+    first_name?: string;
+    last_name?: string;
+    phone_number?: string;
+  };
+  pick_up_date?: string;
+  pickup_date?: string;
+  pick_up_datetime?: string;
+  return_date?: string;
+  return_datetime?: string;
+  reservation_vehicle_information?: {
+    plate?: string;
+  };
+  plate?: string;
+  vehicle?: {
+    plate?: string;
+    label?: string;
+    name?: string;
+  };
+  active_vehicle_information?: {
+    vehicle?: {
+      label?: string;
+    };
+  };
+  status?: string;
+}
+
 // Função para processar lista de reservas da API
-export const parseReservationList = (apiData: any): any[] => {
+export const parseReservationList = (apiData: unknown): unknown[] => {
   if (!apiData) return [];
   
-  const list = Array.isArray(apiData) ? apiData : apiData?.data || [];
+  const list = Array.isArray(apiData) ? apiData : (apiData as { data?: unknown[] })?.data || [];
   
-  return list.map((item: any) => {
+  return list.map((item: unknown) => {
     console.log('Processing reservation item:', item);
+    
+    const reservationItem = item as ApiReservationItem;
     
     return {
       // Primary fields from the specification
-      id: item.id || item.reservation_id || item.custom_reservation_number || item.prefixed_id || "-",
+      id: reservationItem.id || reservationItem.reservation_id || reservationItem.custom_reservation_number || reservationItem.prefixed_id || "-",
       customer: {
-        label: item.customer?.label || `${item.customer?.first_name || ''} ${item.customer?.last_name || ''}`.trim() || 'N/A',
-        phone_number: item.customer?.phone_number || 'N/A'
+        label: reservationItem.customer?.label || `${reservationItem.customer?.first_name || ''} ${reservationItem.customer?.last_name || ''}`.trim() || 'N/A',
+        phone_number: reservationItem.customer?.phone_number || 'N/A'
       },
-      pick_up_date: item.pick_up_date || '',
-      return_date: item.return_date || '',
+      pick_up_date: reservationItem.pick_up_date || reservationItem.pickup_date || reservationItem.pick_up_datetime || '',
+      return_date: reservationItem.return_date || reservationItem.return_datetime || '',
       reservation_vehicle_information: {
-        plate: item.reservation_vehicle_information?.plate || item.plate || item.vehicle?.plate || 'N/A'
+        plate: reservationItem.reservation_vehicle_information?.plate || reservationItem.plate || reservationItem.vehicle?.plate || 'N/A'
       },
-      vehicle_name: item.active_vehicle_information?.vehicle?.label || item.vehicle?.label || item.vehicle?.name || 'N/A'
+      vehicle_name: reservationItem.active_vehicle_information?.vehicle?.label || reservationItem.vehicle?.label || reservationItem.vehicle?.name || 'N/A',
+      status: reservationItem.status || 'Open'
     };
   });
 };
 
+interface ReservationWithDates {
+  pick_up_date?: string;
+  return_date?: string;
+}
+
 // Função para ordenar reservas
-export const getOrderedReservations = (reservations: any[], badgeType: "pickup" | "return"): any[] => {
+export const getOrderedReservations = (reservations: unknown[], badgeType: "pickup" | "return"): unknown[] => {
   if (!reservations || reservations.length === 0) return [];
   
   return [...reservations].sort((a, b) => {
-    const dateA = badgeType === "pickup" ? a.pick_up_date : a.return_date;
-    const dateB = badgeType === "pickup" ? b.pick_up_date : b.return_date;
+    const reservationA = a as ReservationWithDates;
+    const reservationB = b as ReservationWithDates;
+    const dateA = badgeType === "pickup" ? reservationA.pick_up_date : reservationA.return_date;
+    const dateB = badgeType === "pickup" ? reservationB.pick_up_date : reservationB.return_date;
     
     if (!dateA && !dateB) return 0;
     if (!dateA) return 1;

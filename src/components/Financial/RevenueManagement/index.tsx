@@ -1,41 +1,29 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
-import { useRevenues } from '@/hooks/useRevenues';
+import { useRevenues, Revenue } from '@/hooks/useRevenues';
 import RevenueForm from '../RevenueForm';
+import ReplicateRevenueModal from '../ReplicateRevenueModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import RevenueManagementHeader from './RevenueManagementHeader';
 import RevenueListView from './RevenueListView';
 import RevenueCompactView from './RevenueCompactView';
 import RevenueUltraCompactView from './RevenueUltraCompactView';
-import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from '../ExpenseManagement/dateFilterUtils';
+import { useRevenueManagementUtils } from './useRevenueManagementUtils';
+import { DateFilterType, getDateRangeForFilter, filterRevenuesByDateRange, getFilterLabel } from './dateFilterUtils';
 
 type ViewMode = 'list' | 'compact' | 'ultra-compact';
 
 const RevenueManagement = () => {
   const { revenues, deleteRevenue, refetch } = useRevenues();
-  const [selectedRevenue, setSelectedRevenue] = useState(null);
+  const [selectedRevenue, setSelectedRevenue] = useState<Revenue | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isReplicateOpen, setIsReplicateOpen] = useState(false);
+  const [revenueToReplicate, setRevenueToReplicate] = useState<Revenue | null>(null);
   const [showConfirmed, setShowConfirmed] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [dateFilter, setDateFilter] = useState<DateFilterType>('all');
 
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat('pt-BR', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(value);
-  };
-
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'venda': return 'bg-green-100 text-green-800';
-      case 'comissao': return 'bg-blue-100 text-blue-800';
-      case 'servico': return 'bg-purple-100 text-purple-800';
-      case 'financiamento': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const { formatCurrency, getTypeColor, canReplicate } = useRevenueManagementUtils();
 
   const filteredRevenues = useMemo(() => {
     // Primeiro aplica o filtro de confirmação
@@ -50,9 +38,14 @@ const RevenueManagement = () => {
     return filtered;
   }, [revenues, showConfirmed, dateFilter]);
 
-  const handleEdit = (revenue: any) => {
+  const handleEdit = (revenue: Revenue) => {
     setSelectedRevenue(revenue);
     setIsFormOpen(true);
+  };
+
+  const handleReplicate = (revenue: Revenue) => {
+    setRevenueToReplicate(revenue);
+    setIsReplicateOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -64,6 +57,12 @@ const RevenueManagement = () => {
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedRevenue(null);
+    refetch();
+  };
+
+  const handleReplicateSuccess = () => {
+    setIsReplicateOpen(false);
+    setRevenueToReplicate(null);
     refetch();
   };
 
@@ -89,18 +88,15 @@ const RevenueManagement = () => {
     setDateFilter(filter);
   };
 
-  const getFilterLabelForRevenues = (filter: DateFilterType): string => {
-    const label = getFilterLabel(filter);
-    return label.replace('despesas', 'receitas');
-  };
-
   const renderRevenueView = () => {
     const commonProps = {
       revenues: filteredRevenues,
       onEdit: handleEdit,
+      onReplicate: handleReplicate,
       onDelete: handleDelete,
       formatCurrency,
       getTypeColor,
+      canReplicate,
     };
 
     switch (viewMode) {
@@ -129,7 +125,7 @@ const RevenueManagement = () => {
 
       {dateFilter !== 'all' && (
         <div className="text-center text-sm text-muted-foreground">
-          {getFilterLabelForRevenues(dateFilter)} • {filteredRevenues.length} {filteredRevenues.length === 1 ? 'receita' : 'receitas'}
+          {getFilterLabel(dateFilter)} • {filteredRevenues.length} {filteredRevenues.length === 1 ? 'receita' : 'receitas'}
         </div>
       )}
 
@@ -162,6 +158,13 @@ const RevenueManagement = () => {
           />
         </DialogContent>
       </Dialog>
+
+      <ReplicateRevenueModal
+        revenue={revenueToReplicate}
+        open={isReplicateOpen}
+        onOpenChange={setIsReplicateOpen}
+        onSuccess={handleReplicateSuccess}
+      />
     </div>
   );
 };

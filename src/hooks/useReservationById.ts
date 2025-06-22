@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -8,6 +7,7 @@ export interface ReservationDetails {
     last_name: string;
     f855: string; // Kommo Lead ID
     phone_number?: string;
+    label?: string; // Customer label for logistica badges
   };
   reservation: {
     id?: string | number;
