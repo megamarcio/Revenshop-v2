@@ -154,7 +154,7 @@ const MaintenanceForm = ({
           />
         </div>
 
-        {/* Conteúdo scrollável */}
+        {/* Conteúdo scrollável com botões incluídos */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 pt-2 sm:pt-4 -webkit-overflow-scrolling-touch">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {isReopened && (
@@ -253,19 +253,16 @@ const MaintenanceForm = ({
               }))} 
             />
 
-            {/* Espaço extra no final para garantir que os botões sejam visíveis */}
-            <div className="h-20 sm:h-24"></div>
+            {/* Botões no final do formulário, dentro da área scrollável */}
+            <div className="pt-6 pb-4 border-t bg-background">
+              <MaintenanceFormActions 
+                onCancel={onClose} 
+                loading={loading} 
+                vehiclesLoading={vehiclesLoading}
+                isEditing={isEditing}
+              />
+            </div>
           </form>
-        </div>
-
-        {/* Footer fixo com botões */}
-        <div className="flex-shrink-0 p-4 sm:p-6 pt-2 sm:pt-4 border-t bg-background">
-          <MaintenanceFormActions 
-            onCancel={onClose} 
-            loading={loading} 
-            vehiclesLoading={vehiclesLoading}
-            isEditing={isEditing}
-          />
         </div>
       </DialogContent>
     </Dialog>

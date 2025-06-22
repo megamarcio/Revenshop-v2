@@ -139,6 +139,14 @@
       overscroll-behavior: contain;
     }
     
+    /* Melhorar scroll em containers específicos */
+    .overflow-y-auto, .overflow-auto {
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior: contain;
+      /* Garantir que o scroll funcione naturalmente */
+      scroll-behavior: smooth;
+    }
+    
     /* Melhorar toque em botões */
     button, [role="button"], input[type="button"], input[type="submit"] {
       min-height: 44px;
@@ -185,12 +193,6 @@
       font-size: 16px !important;
     }
     
-    /* Melhorar scroll em containers */
-    .overflow-y-auto, .overflow-auto {
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-    }
-    
     /* Prevenir apenas pull-to-refresh sem bloquear scroll */
     body {
       overscroll-behavior-y: contain;
@@ -200,6 +202,21 @@
     * {
       -webkit-transform: translateZ(0);
       transform: translateZ(0);
+    }
+    
+    /* Garantir que modais não interfiram no scroll */
+    [data-radix-dialog-overlay] {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 50;
+    }
+    
+    /* Melhorar scroll em formulários */
+    form {
+      -webkit-overflow-scrolling: touch;
     }
   }
   
