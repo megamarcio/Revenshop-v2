@@ -1,8 +1,9 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { AlertTriangle } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UrgentMaintenanceSectionProps {
   isUrgent: boolean;
@@ -13,15 +14,25 @@ const UrgentMaintenanceSection = ({
   isUrgent,
   onUrgentChange
 }: UrgentMaintenanceSectionProps) => {
+  const isMobile = useIsMobile();
   return (
     <div className="space-y-3">
       <Label className="text-base font-medium">Prioridade da Manutenção</Label>
       <div className="flex items-center space-x-3 p-3 border rounded-lg bg-orange-50 border-orange-200">
-        <Checkbox
-          id="urgent-maintenance"
-          checked={isUrgent}
-          onCheckedChange={onUrgentChange}
-        />
+        {isMobile ? (
+          <Switch
+            id="urgent-maintenance"
+            checked={isUrgent}
+            onCheckedChange={onUrgentChange}
+            className="h-5 w-9"
+          />
+        ) : (
+          <Checkbox
+            id="urgent-maintenance"
+            checked={isUrgent}
+            onCheckedChange={onUrgentChange}
+          />
+        )}
         <div className="flex items-center gap-2">
           <AlertTriangle className="h-5 w-5 text-orange-600" />
           <Label 

@@ -4,7 +4,7 @@
 export const APP_VERSION = {
   major: 2,
   minor: 0,
-  patch: 3, // Incrementar a cada alteração
+  patch: 4, // Incrementar a cada alteração
   build: Date.now(), // Timestamp do build
   toString: function() {
     return `v${this.major}.${this.minor.toString().padStart(3, '0')}`;
@@ -30,6 +30,11 @@ export const VERSION_HISTORY = [
     version: 'v2.002',
     date: '2024-01-20',
     description: 'Melhorias de responsividade mobile'
+  },
+  {
+    version: 'v2.004',
+    date: '2025-06-22',
+    description: 'Atualização automática - patch 4'
   },
   {
     version: 'v2.003',
