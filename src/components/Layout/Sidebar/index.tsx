@@ -1,5 +1,4 @@
-
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useLanguage } from '../../../contexts/LanguageContext';
 import { useAuth } from '../../../contexts/AuthContext';
 import {
@@ -13,20 +12,18 @@ import {
   SidebarFooter,
   useSidebar,
 } from '@/components/ui/sidebar';
-import { Switch } from '@/components/ui/switch';
 import { getMenuItems } from './menuItems';
 import AppSidebarHeader from './SidebarHeader';
 import FinancingMenu from './FinancingMenu';
 import FinancialMenu from './FinancialMenu';
 import RentalCarMenu from './RentalCarMenu';
 import SettingsMenu from './SettingsMenu';
+import APP_VERSION from '../../../config/version';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
 }
-
-const AUTOHIDE_ENABLED_LOCALSTORAGE_KEY = "sidebar:autoHideEnabled";
 
 const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   const { t } = useLanguage();
@@ -41,22 +38,11 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
   // Track if the sidebar was collapsed before hover (only on desktop)
   const wasCollapsedOnHover = useRef(false);
 
-  // Inverte: agora salva se o auto ocultar está ativado!
-  const [autoHideEnabled, setAutoHideEnabled] = useState(
-    () => localStorage.getItem(AUTOHIDE_ENABLED_LOCALSTORAGE_KEY) === "true"
-  );
-
-  useEffect(() => {
-    localStorage.setItem(AUTOHIDE_ENABLED_LOCALSTORAGE_KEY, autoHideEnabled ? "true" : "false");
-  }, [autoHideEnabled]);
-
   const handleMenuItemClick = (itemId: string) => {
     setActiveTab(itemId);
     // No mobile, sempre fecha o sidebar após clicar
     if (isMobile) {
       setOpenMobile(false);
-    } else if (autoHideEnabled && state !== "collapsed") {
-      setOpen(false);
     }
   };
 
@@ -108,8 +94,6 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 setActiveTab(tab);
                 if (isMobile) {
                   setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
                 }
               }} />
               
@@ -117,8 +101,6 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 setActiveTab(tab);
                 if (isMobile) {
                   setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
                 }
               }} />
               
@@ -126,8 +108,6 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 setActiveTab(tab);
                 if (isMobile) {
                   setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
                 }
               }} />
               
@@ -135,8 +115,6 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
                 setActiveTab(tab);
                 if (isMobile) {
                   setOpenMobile(false);
-                } else if (autoHideEnabled && state !== "collapsed") {
-                  setOpen(false);
                 }
               }} />
             </SidebarMenu>
@@ -144,19 +122,14 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: switch sozinho, minúsculo, para ativar auto ocultar - apenas no desktop */}
-      {!isMobile && (
-        <SidebarFooter>
-          <div className="flex items-center justify-center w-full px-1 py-[6px]">
-            <Switch
-              checked={autoHideEnabled}
-              onCheckedChange={setAutoHideEnabled}
-              aria-label="Ativar auto-ocultar sidebar"
-              className="h-5 w-8"
-            />
-          </div>
-        </SidebarFooter>
-      )}
+      {/* Footer: Versão do sistema */}
+      <SidebarFooter>
+        <div className="flex items-center justify-center w-full px-2 py-2">
+          <span className="text-xs text-sidebar-foreground/60 font-mono">
+            {APP_VERSION.toString()}
+          </span>
+        </div>
+      </SidebarFooter>
     </Sidebar>
   );
 };
