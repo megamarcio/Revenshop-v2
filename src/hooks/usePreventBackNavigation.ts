@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useIsMobile } from './use-mobile';
 
@@ -56,21 +55,6 @@ export const usePreventBackNavigation = () => {
       return 'Tem certeza que deseja sair do REVENSHOP?';
     };
 
-    const handleModalCancel = () => {
-      setShowExitModal(false);
-      setExitAttempts(0);
-      isModalOpen = false;
-    };
-
-    const handleModalConfirm = () => {
-      setShowExitModal(false);
-      setExitAttempts(1);
-      isModalOpen = false;
-      
-      // Simula um back para ativar a segunda confirmação
-      window.history.back();
-    };
-
     // Adiciona múltiplas entradas no histórico para criar "buffer"
     window.history.pushState(null, '', window.location.href);
     window.history.pushState(null, '', window.location.href);
@@ -80,40 +64,9 @@ export const usePreventBackNavigation = () => {
     window.addEventListener('popstate', handleBackButton);
     window.addEventListener('beforeunload', handleBeforeUnload);
 
-    // Otimizar eventos de touch para não interferir com scroll
-    document.addEventListener('touchstart', (e) => {
-      // Prevenir apenas gestos de navegação com múltiplos toques
-      if (e.touches.length > 1) {
-        e.preventDefault();
-      }
-    }, { passive: false });
-
-    // Prevenir pull-to-refresh apenas no topo da página
-    let lastTouchY = 0;
-    const handleTouchStart = (e: TouchEvent) => {
-      lastTouchY = e.touches[0].clientY;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      const touchY = e.touches[0].clientY;
-      const touchYDelta = touchY - lastTouchY;
-      lastTouchY = touchY;
-
-      // Prevenir pull-to-refresh apenas quando no topo da página
-      const scrollableElement = document.documentElement || document.body;
-      if (touchYDelta > 0 && scrollableElement.scrollTop === 0) {
-        e.preventDefault();
-      }
-    };
-
-    document.addEventListener('touchstart', handleTouchStart, { passive: true });
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-
     return () => {
       window.removeEventListener('popstate', handleBackButton);
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('touchstart', handleTouchStart);
-      document.removeEventListener('touchmove', handleTouchMove);
       setShowExitModal(false);
       setExitAttempts(0);
     };

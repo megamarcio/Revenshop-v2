@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import AppSidebar from '@/components/Layout/Sidebar';
 import Header from '@/components/Layout/Header';
 import { usePreventBackNavigation } from '@/hooks/usePreventBackNavigation';
+import { useMobileScrollOptimization } from '@/hooks/use-mobile';
 import ExitConfirmationModal from '@/components/Mobile/ExitConfirmationModal';
 import Dashboard from '@/components/Dashboard/Dashboard';
 import VehicleListContainer from '@/components/Vehicles/VehicleListContainer';
@@ -27,6 +27,9 @@ function App() {
 
   // Prevent back navigation on mobile with custom modal
   const { showExitModal, handleModalCancel, handleModalConfirm } = usePreventBackNavigation();
+  
+  // Otimizar scroll mobile
+  useMobileScrollOptimization();
 
   const renderContent = () => {
     switch (activeTab) {

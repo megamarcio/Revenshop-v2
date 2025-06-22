@@ -121,30 +121,38 @@
       width: 100%;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-x: none;
-      overscroll-behavior-y: auto;
+      overscroll-behavior-y: contain;
       /* Permitir scroll natural */
       position: relative;
       overflow-x: hidden;
+      /* Prevenir conflitos de scroll */
+      touch-action: pan-y;
     }
     
     #root {
       min-height: 100vh;
       width: 100vw;
       position: relative;
+      /* Garantir que o root não interfira no scroll */
+      overflow-x: hidden;
     }
     
     /* Melhorar scroll em modais */
     [data-radix-dialog-content] {
       -webkit-overflow-scrolling: touch !important;
-      overscroll-behavior: contain;
+      overscroll-behavior: contain !important;
+      /* Garantir que modais tenham scroll próprio */
+      touch-action: pan-y;
     }
     
     /* Melhorar scroll em containers específicos */
     .overflow-y-auto, .overflow-auto {
       -webkit-overflow-scrolling: touch !important;
-      overscroll-behavior: contain;
+      overscroll-behavior: contain !important;
       /* Garantir que o scroll funcione naturalmente */
       scroll-behavior: smooth;
+      /* Prevenir conflitos de touch */
+      touch-action: pan-y;
     }
     
     /* Melhorar toque em botões */
@@ -193,11 +201,6 @@
       font-size: 16px !important;
     }
     
-    /* Prevenir apenas pull-to-refresh sem bloquear scroll */
-    body {
-      overscroll-behavior-y: contain;
-    }
-    
     /* Melhorar performance de scroll */
     * {
       -webkit-transform: translateZ(0);
@@ -212,11 +215,33 @@
       right: 0;
       bottom: 0;
       z-index: 50;
+      /* Prevenir scroll no overlay */
+      touch-action: none;
     }
     
     /* Melhorar scroll em formulários */
     form {
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+    }
+    
+    /* Prevenir conflitos em containers aninhados */
+    .overflow-y-auto .overflow-y-auto {
+      overscroll-behavior: contain !important;
+    }
+    
+    /* Garantir que elementos com scroll próprio funcionem */
+    [data-radix-select-content],
+    [data-radix-dialog-content] {
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior: contain !important;
+      touch-action: pan-y;
+    }
+    
+    /* Prevenir scroll duplo em elementos com altura fixa */
+    .max-h-60, .max-h-96, .max-h-\[80vh\], .max-h-\[90vh\], .max-h-\[95vh\] {
+      overscroll-behavior: contain !important;
+      -webkit-overflow-scrolling: touch !important;
     }
   }
   

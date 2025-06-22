@@ -155,7 +155,7 @@ const MaintenanceForm = ({
         </div>
 
         {/* Conteúdo scrollável com botões incluídos */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 pt-2 sm:pt-4 -webkit-overflow-scrolling-touch">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 pt-2 sm:pt-4 -webkit-overflow-scrolling-touch overscroll-behavior-contain">
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
             {isReopened && (
               <Alert className="border-green-200 bg-green-50">
