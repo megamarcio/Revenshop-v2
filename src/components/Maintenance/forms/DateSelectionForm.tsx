@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -72,7 +71,7 @@ const DateSelectionForm = ({
           Datas da Manutenção
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-gray-100 px-[6px]">
+              <Button variant="ghost" size="sm" className="h-5 w-5 p-0 hover:bg-gray-100 px-[6px] min-h-[44px] touch-manipulation">
                 <Info className="h-3 w-3 text-gray-500" />
               </Button>
             </TooltipTrigger>
@@ -97,13 +96,19 @@ const DateSelectionForm = ({
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 rounded-sm bg-slate-50 px-0 mx-0 py-0 my-[8px]">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {/* Data de Detecção */}
           <div className="space-y-2">
             <Label>Data de Detecção *</Label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !detectionDate && "text-muted-foreground")}>
+                <Button 
+                  variant="outline" 
+                  className={cn(
+                    "w-full justify-start text-left font-normal min-h-[44px] touch-manipulation", 
+                    !detectionDate && "text-muted-foreground"
+                  )}
+                >
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {detectionDate ? format(detectionDate, 'dd/MM/yyyy', {
                     locale: ptBR
@@ -122,7 +127,13 @@ const DateSelectionForm = ({
             <div className="flex gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !promisedDate && "text-muted-foreground")}>
+                  <Button 
+                    variant="outline" 
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal min-h-[44px] touch-manipulation", 
+                      !promisedDate && "text-muted-foreground"
+                    )}
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {promisedDate ? format(promisedDate, 'dd/MM/yyyy', {
                       locale: ptBR
@@ -134,7 +145,12 @@ const DateSelectionForm = ({
                 </PopoverContent>
               </Popover>
               {promisedDate && (
-                <Button variant="outline" size="icon" onClick={() => handlePromisedDateChange(undefined)} className="h-10 w-10 text-red-600 hover:text-red-700 hover:bg-red-50">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => handlePromisedDateChange(undefined)} 
+                  className="h-10 w-10 text-red-600 hover:text-red-700 hover:bg-red-50 min-h-[44px] min-w-[44px] touch-manipulation"
+                >
                   <X className="h-4 w-4" />
                 </Button>
               )}
@@ -147,7 +163,13 @@ const DateSelectionForm = ({
             <div className="flex gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("flex-1 justify-start text-left font-normal", !repairDate && "text-muted-foreground")}>
+                  <Button 
+                    variant="outline" 
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal min-h-[44px] touch-manipulation", 
+                      !repairDate && "text-muted-foreground"
+                    )}
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {repairDate ? format(repairDate, 'dd/MM/yyyy', {
                       locale: ptBR
@@ -159,7 +181,12 @@ const DateSelectionForm = ({
                 </PopoverContent>
               </Popover>
               {repairDate && (
-                <Button variant="outline" size="icon" onClick={() => handleRepairDateChange(undefined)} className="h-10 w-10 text-red-600 hover:text-red-700 hover:bg-red-50">
+                <Button 
+                  variant="outline" 
+                  size="icon" 
+                  onClick={() => handleRepairDateChange(undefined)} 
+                  className="h-10 w-10 text-red-600 hover:text-red-700 hover:bg-red-50 min-h-[44px] min-w-[44px] touch-manipulation"
+                >
                   <X className="h-4 w-4" />
                 </Button>
               )}

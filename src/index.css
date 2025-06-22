@@ -114,21 +114,44 @@
     -webkit-line-clamp: 3;
   }
   
-  /* Mobile optimizations - permitir scroll vertical natural */
+  /* Mobile optimizations - melhorar scroll e toque */
   @media (max-width: 768px) {
     html, body {
       height: 100%;
       width: 100%;
       -webkit-overflow-scrolling: touch;
-      /* Remover overflow: hidden e position: fixed para permitir scroll */
-      overscroll-behavior-x: none; /* Previne bounce horizontal */
-      overscroll-behavior-y: auto; /* Permite scroll vertical natural */
+      overscroll-behavior-x: none;
+      overscroll-behavior-y: auto;
+      /* Permitir scroll natural */
+      position: relative;
+      overflow-x: hidden;
     }
     
     #root {
       min-height: 100vh;
       width: 100vw;
-      /* Permitir overflow para scroll natural */
+      position: relative;
+    }
+    
+    /* Melhorar scroll em modais */
+    [data-radix-dialog-content] {
+      -webkit-overflow-scrolling: touch !important;
+      overscroll-behavior: contain;
+    }
+    
+    /* Melhorar toque em botões */
+    button, [role="button"], input[type="button"], input[type="submit"] {
+      min-height: 44px;
+      min-width: 44px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    /* Melhorar toque em inputs */
+    input, select, textarea {
+      min-height: 44px;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     
     /* Hide scrollbars mas permitir scroll */
@@ -162,9 +185,21 @@
       font-size: 16px !important;
     }
     
+    /* Melhorar scroll em containers */
+    .overflow-y-auto, .overflow-auto {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+    }
+    
     /* Prevenir apenas pull-to-refresh sem bloquear scroll */
     body {
       overscroll-behavior-y: contain;
+    }
+    
+    /* Melhorar performance de scroll */
+    * {
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
     }
   }
   

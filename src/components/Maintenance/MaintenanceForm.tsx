@@ -113,119 +113,160 @@ const MaintenanceForm = ({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto mx-2 sm:mx-[16px] my-0 p-4 sm:p-6">
-        <MaintenanceFormHeader 
-          isEditing={isEditing} 
-          status={status} 
-          statusColor={statusColor} 
-          statusText={statusText}
-          isReopened={isReopened}
-        />
-
-        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {isReopened && (
-            <Alert className="border-green-200 bg-green-50">
-              <RotateCcw className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-800 text-sm">
-                Esta manutenção foi reaberta. Você pode editar todos os valores, adicionar novos serviços e peças, e definir uma nova data de conclusão.
-              </AlertDescription>
-            </Alert>
-          )}
-
-          <VehicleMaintenanceSelector 
-            selectedVehicleId={formData.vehicle_id} 
-            onVehicleChange={vehicleId => setFormData(prev => ({
-              ...prev,
-              vehicle_id: vehicleId
-            }))} 
+      <DialogContent className="
+        max-w-4xl 
+        w-[95vw] 
+        max-h-[95vh] 
+        sm:max-h-[90vh] 
+        overflow-hidden 
+        mx-2 
+        sm:mx-[16px] 
+        my-2 
+        sm:my-0 
+        p-0 
+        sm:p-6
+        flex 
+        flex-col
+        rounded-lg
+        sm:rounded-lg
+        bg-background
+        border
+        shadow-lg
+        data-[state=open]:animate-in 
+        data-[state=closed]:animate-out 
+        data-[state=closed]:fade-out-0 
+        data-[state=open]:fade-in-0 
+        data-[state=closed]:zoom-out-95 
+        data-[state=open]:zoom-in-95 
+        data-[state=closed]:slide-out-to-left-1/2 
+        data-[state=closed]:slide-out-to-top-[48%] 
+        data-[state=open]:slide-in-from-left-1/2 
+        data-[state=open]:slide-in-from-top-[48%]
+      ">
+        {/* Header fixo */}
+        <div className="flex-shrink-0 p-4 sm:p-6 pb-2 sm:pb-4 border-b">
+          <MaintenanceFormHeader 
+            isEditing={isEditing} 
+            status={status} 
+            statusColor={statusColor} 
+            statusText={statusText}
+            isReopened={isReopened}
           />
+        </div>
 
-          <DateSelectionForm 
-            detectionDate={detectionDate} 
-            repairDate={repairDate} 
-            promisedDate={promisedDate} 
-            onDetectionDateChange={setDetectionDate} 
-            onRepairDateChange={setRepairDate} 
-            onPromisedDateChange={setPromisedDate} 
-          />
+        {/* Conteúdo scrollável */}
+        <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 pt-2 sm:pt-4 -webkit-overflow-scrolling-touch">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+            {isReopened && (
+              <Alert className="border-green-200 bg-green-50">
+                <RotateCcw className="h-4 w-4 text-green-600" />
+                <AlertDescription className="text-green-800 text-sm">
+                  Esta manutenção foi reaberta. Você pode editar todos os valores, adicionar novos serviços e peças, e definir uma nova data de conclusão.
+                </AlertDescription>
+              </Alert>
+            )}
 
-          <MaintenanceItemsSelector 
-            maintenanceType={formData.maintenance_type} 
-            maintenanceItems={formData.maintenance_items} 
-            customMaintenance={formData.custom_maintenance} 
-            onMaintenanceTypeChange={type => setFormData(prev => ({
-              ...prev,
-              maintenance_type: type
-            }))} 
-            onMaintenanceItemChange={(item, checked) => {
-              if (checked) {
-                setFormData(prev => ({
-                  ...prev,
-                  maintenance_items: [...prev.maintenance_items, item]
-                }));
-              } else {
-                setFormData(prev => ({
-                  ...prev,
-                  maintenance_items: prev.maintenance_items.filter(i => i !== item)
-                }));
-              }
-            }} 
-            onCustomMaintenanceChange={custom => setFormData(prev => ({
-              ...prev,
-              custom_maintenance: custom
-            }))} 
-          />
+            <VehicleMaintenanceSelector 
+              selectedVehicleId={formData.vehicle_id} 
+              onVehicleChange={vehicleId => setFormData(prev => ({
+                ...prev,
+                vehicle_id: vehicleId
+              }))} 
+            />
 
-          <UrgentMaintenanceSection
-            isUrgent={formData.is_urgent}
-            onUrgentChange={urgent => setFormData(prev => ({
-              ...prev,
-              is_urgent: urgent
-            }))}
-          />
+            <DateSelectionForm 
+              detectionDate={detectionDate} 
+              repairDate={repairDate} 
+              promisedDate={promisedDate} 
+              onDetectionDateChange={setDetectionDate} 
+              onRepairDateChange={setRepairDate} 
+              onPromisedDateChange={setPromisedDate} 
+            />
 
-          <MechanicInfoForm 
-            mechanicName={formData.mechanic_name} 
-            mechanicPhone={formData.mechanic_phone} 
-            details={formData.details} 
-            onMechanicNameChange={name => setFormData(prev => ({
-              ...prev,
-              mechanic_name: name
-            }))} 
-            onMechanicPhoneChange={phone => setFormData(prev => ({
-              ...prev,
-              mechanic_phone: phone
-            }))} 
-            onDetailsChange={details => setFormData(prev => ({
-              ...prev,
-              details: details
-            }))} 
-          />
+            <MaintenanceItemsSelector 
+              maintenanceType={formData.maintenance_type} 
+              maintenanceItems={formData.maintenance_items} 
+              customMaintenance={formData.custom_maintenance} 
+              onMaintenanceTypeChange={type => setFormData(prev => ({
+                ...prev,
+                maintenance_type: type
+              }))} 
+              onMaintenanceItemChange={(item, checked) => {
+                if (checked) {
+                  setFormData(prev => ({
+                    ...prev,
+                    maintenance_items: [...prev.maintenance_items, item]
+                  }));
+                } else {
+                  setFormData(prev => ({
+                    ...prev,
+                    maintenance_items: prev.maintenance_items.filter(i => i !== item)
+                  }));
+                }
+              }} 
+              onCustomMaintenanceChange={custom => setFormData(prev => ({
+                ...prev,
+                custom_maintenance: custom
+              }))} 
+            />
 
-          <MaintenancePartsManager 
-            formData={formData}
-            setFormData={setFormData}
-            onAddQuote={handleAddQuote}
-            onUpdateQuote={handleUpdateQuote}
-            onRemoveQuote={handleRemoveQuote}
-          />
+            <UrgentMaintenanceSection
+              isUrgent={formData.is_urgent}
+              onUrgentChange={urgent => setFormData(prev => ({
+                ...prev,
+                is_urgent: urgent
+              }))}
+            />
 
-          <ReceiptUploadForm 
-            maintenanceId={editingMaintenance?.id}
-            receiptUrls={formData.receipt_urls} 
-            onReceiptUrlsChange={urls => setFormData(prev => ({
-              ...prev,
-              receipt_urls: urls
-            }))} 
-          />
+            <MechanicInfoForm 
+              mechanicName={formData.mechanic_name} 
+              mechanicPhone={formData.mechanic_phone} 
+              details={formData.details} 
+              onMechanicNameChange={name => setFormData(prev => ({
+                ...prev,
+                mechanic_name: name
+              }))} 
+              onMechanicPhoneChange={phone => setFormData(prev => ({
+                ...prev,
+                mechanic_phone: phone
+              }))} 
+              onDetailsChange={details => setFormData(prev => ({
+                ...prev,
+                details: details
+              }))} 
+            />
 
+            <MaintenancePartsManager 
+              formData={formData}
+              setFormData={setFormData}
+              onAddQuote={handleAddQuote}
+              onUpdateQuote={handleUpdateQuote}
+              onRemoveQuote={handleRemoveQuote}
+            />
+
+            <ReceiptUploadForm 
+              maintenanceId={editingMaintenance?.id}
+              receiptUrls={formData.receipt_urls} 
+              onReceiptUrlsChange={urls => setFormData(prev => ({
+                ...prev,
+                receipt_urls: urls
+              }))} 
+            />
+
+            {/* Espaço extra no final para garantir que os botões sejam visíveis */}
+            <div className="h-20 sm:h-24"></div>
+          </form>
+        </div>
+
+        {/* Footer fixo com botões */}
+        <div className="flex-shrink-0 p-4 sm:p-6 pt-2 sm:pt-4 border-t bg-background">
           <MaintenanceFormActions 
             onCancel={onClose} 
             loading={loading} 
             vehiclesLoading={vehiclesLoading}
             isEditing={isEditing}
           />
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
