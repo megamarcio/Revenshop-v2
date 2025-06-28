@@ -18,7 +18,7 @@ import FinancingMenu from './FinancingMenu';
 import FinancialMenu from './FinancialMenu';
 import RentalCarMenu from './RentalCarMenu';
 import SettingsMenu from './SettingsMenu';
-import APP_VERSION from '../../../config/version';
+import APP_VERSION, { DEVELOPER_INFO } from '../../../config/version';
 
 interface SidebarProps {
   activeTab: string;
@@ -122,12 +122,16 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer: Versão do sistema */}
+      {/* Footer: Versão do sistema e desenvolvedor */}
       <SidebarFooter>
-        <div className="flex items-center justify-center w-full px-2 py-2">
+        <div className="flex flex-col items-center justify-center w-full px-2 py-2 space-y-1">
           <span className="text-xs text-sidebar-foreground/60 font-mono">
             {APP_VERSION.getFullVersion()}
           </span>
+          <div className="text-xs text-sidebar-foreground/50 text-center">
+            <div>Dev: {DEVELOPER_INFO.name}</div>
+            <div>{DEVELOPER_INFO.instagram}</div>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>

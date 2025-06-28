@@ -33,6 +33,10 @@ const FluxoCaixaExport: React.FC<FluxoCaixaExportProps> = ({ data, month, year }
     try {
       const headers = ['Data', 'Descrição', 'Categoria', 'Tipo', 'Valor'];
       const csvContent = [
+        '# REVENSHOP - Fluxo de Caixa',
+        '# Desenvolvido por Marcio Cavs (@marcio_r3)',
+        '# Todos os direitos reservados',
+        '',
         headers.join(','),
         ...data.map(item => [
           formatDate(item.date),
@@ -91,6 +95,7 @@ const FluxoCaixaExport: React.FC<FluxoCaixaExportProps> = ({ data, month, year }
           <style>
             body { font-family: Arial, sans-serif; margin: 20px; }
             .header { text-align: center; margin-bottom: 30px; }
+            .developer-info { text-align: center; margin-bottom: 20px; font-size: 12px; color: #666; }
             .summary { display: flex; justify-content: space-around; margin-bottom: 30px; }
             .summary-card { text-align: center; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
             .summary-card.receitas { border-color: #10b981; color: #10b981; }
@@ -101,13 +106,18 @@ const FluxoCaixaExport: React.FC<FluxoCaixaExportProps> = ({ data, month, year }
             th { background-color: #f5f5f5; }
             .receita { color: #10b981; }
             .despesa { color: #ef4444; }
+            .footer { margin-top: 30px; text-align: center; font-size: 10px; color: #999; }
             @media print { body { margin: 0; } }
           </style>
         </head>
         <body>
           <div class="header">
-            <h1>Fluxo de Caixa</h1>
-            <h2>${monthName}</h2>
+            <h1>REVENSHOP</h1>
+            <h2>Fluxo de Caixa - ${monthName}</h2>
+          </div>
+          
+          <div class="developer-info">
+            <p>Desenvolvido por <strong>Marcio Cavs</strong> | Instagram: @marcio_r3</p>
           </div>
           
           <div class="summary">
@@ -149,6 +159,11 @@ const FluxoCaixaExport: React.FC<FluxoCaixaExportProps> = ({ data, month, year }
               `).join('')}
             </tbody>
           </table>
+          
+          <div class="footer">
+            <p>© ${new Date().getFullYear()} REVENSHOP - Todos os direitos reservados</p>
+            <p>Sistema desenvolvido por Marcio Cavs | @marcio_r3</p>
+          </div>
         </body>
         </html>
       `;

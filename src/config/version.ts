@@ -1,5 +1,6 @@
 // Sistema de versionamento do REVENSHOP
 // A versão é incrementada automaticamente a cada alteração
+// Desenvolvido por Marcio Cavs (@marcio_r3)
 
 export const APP_VERSION = {
   major: 2,
@@ -14,12 +15,20 @@ export const APP_VERSION = {
   }
 };
 
+// Informações do desenvolvedor
+export const DEVELOPER_INFO = {
+  name: 'Marcio Cavs',
+  instagram: '@marcio_r3',
+  instagramUrl: 'https://instagram.com/marcio_r3',
+  copyright: `© ${new Date().getFullYear()} REVENSHOP - Todos os direitos reservados`
+};
+
 // Histórico de versões
 export const VERSION_HISTORY = [
   {
     version: 'v2.012',
     date: '2024-07-07',
-    description: 'Atualização automática - patch 12'
+    description: 'Implementação completa do módulo Fluxo de Caixa com funcionalidades avançadas'
   },
   {
     version: 'v2.000',

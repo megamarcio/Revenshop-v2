@@ -22,6 +22,7 @@ import FinancialManagement from '@/components/Financial/FinancialManagement';
 import FluxoCaixa from '@/components/Financial/FluxoCaixa';
 import AcompanharReservas from '@/components/Reservas/AcompanharReservas';
 import ListaReservas from '@/components/Reservas/ListaReservas';
+import Footer from '@/components/Layout/Footer';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -87,6 +88,7 @@ function App() {
           <main className="flex-1 bg-background overflow-y-auto">
             {renderContent()}
           </main>
+          <Footer />
         </div>
         
         <ExitConfirmationModal
