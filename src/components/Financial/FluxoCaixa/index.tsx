@@ -3,11 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, TrendingUp, TrendingDown, DollarSign, Download } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, DollarSign } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import FluxoCaixaChart from './FluxoCaixaChart';
 import FluxoCaixaTable from './FluxoCaixaTable';
+import FluxoCaixaExport from './FluxoCaixaExport';
+import FluxoCaixaAlerts from './FluxoCaixaAlerts';
+import FluxoCaixaComparison from './FluxoCaixaComparison';
+import FluxoCaixaPieChart from './FluxoCaixaPieChart';
 import { FluxoCaixaData, FluxoCaixaFilters } from './types';
 
 const FluxoCaixa: React.FC = () => {
@@ -84,7 +88,6 @@ const FluxoCaixa: React.FC = () => {
 
   const processFluxoCaixaData = (revenues: any[], expenses: any[]): FluxoCaixaData[] => {
     const processedData: FluxoCaixaData[] = [];
-    const daysInMonth = new Date(filters.year, filters.month, 0).getDate();
 
     // Processar receitas
     revenues.forEach(revenue => {
@@ -130,14 +133,6 @@ const FluxoCaixa: React.FC = () => {
   };
 
   const { totalReceitas, totalDespesas, saldoFinal } = calculateTotals();
-
-  const exportData = () => {
-    // Implementar exportação para Excel/PDF
-    toast({
-      title: "Exportação",
-      description: "Funcionalidade de exportação será implementada em breve",
-    });
-  };
 
   if (loading) {
     return (
@@ -191,12 +186,20 @@ const FluxoCaixa: React.FC = () => {
             </SelectContent>
           </Select>
           
-          <Button onClick={exportData} variant="outline" size="sm">
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
+          <FluxoCaixaExport 
+            data={data} 
+            month={filters.month} 
+            year={filters.year} 
+          />
         </div>
       </div>
+
+      {/* Alertas */}
+      <FluxoCaixaAlerts 
+        data={data} 
+        month={filters.month} 
+        year={filters.year} 
+      />
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -240,6 +243,13 @@ const FluxoCaixa: React.FC = () => {
         </Card>
       </div>
 
+      {/* Comparação com Período Anterior */}
+      <FluxoCaixaComparison 
+        currentData={data} 
+        month={filters.month} 
+        year={filters.year} 
+      />
+
       {/* Gráfico */}
       <Card>
         <CardHeader>
@@ -249,6 +259,9 @@ const FluxoCaixa: React.FC = () => {
           <FluxoCaixaChart data={data} />
         </CardContent>
       </Card>
+
+      {/* Gráfico de Pizza - Distribuição por Categoria */}
+      <FluxoCaixaPieChart data={data} />
 
       {/* Tabela */}
       <Card>
