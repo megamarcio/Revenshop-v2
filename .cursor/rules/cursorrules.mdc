@@ -11,21 +11,38 @@ Database & Supabase Integration
 - When generating a new feature or entity:
   - First, confirm and create the necessary Supabase tables and permissions.
   - Confirm that the schema matches business rules before using it in the code.
-- Use Supabase Auth for authentication and Storage for file uploads.
+- Use Supabase Auth for authentication and Supabase Storage for file uploads.
+- Use Supabase **buckets** to store all images and uploaded files.
+- Always optimize uploaded assets to avoid slowing down the application:
+  - Resize images before upload to an appropriate resolution for mobile display.
+  - Avoid uploading uncompressed or unnecessarily large files.
 
 GitHub & Versioning
-- Automatically create meaningful commits to GitHub **only at major milestones**, such as when completing a feature, adding a model, or refactoring UI flow.
+- At the **end of every completed task**, ask the user:
+  - “Do you want to commit and version this task now?”
+  - Only proceed with Git commit **after** receiving explicit confirmation from the user.
+- Automatically create meaningful commits **only after user approval**, typically at major milestones.
 - Always summarize changes in the commit message clearly and concisely.
 
 UI Patterns & Responsiveness
 - Always generate components optimized for mobile use (responsive).
-- Default UI behavior should include:
+- Default UI behavior must include:
   - Compact, clean, and elegant layout
   - Search functionality
   - Display in both list (table) and card formats
   - Buttons for Save and Delete actions, with confirmation prompts
-- Use Tailwind CSS and follow utility-first design patterns.
-- All UI must be accessible, with correct ARIA roles and responsive breakpoints.
+- Use Tailwind CSS with utility-first patterns.
+- All UI must be accessible, with proper ARIA roles and responsive breakpoints.
+- Prefer creating and reusing shared components like:
+  - `SaveButton`, `DeleteButton`
+  - `CurrencyInput`, `SearchInput`
+  - `MobileCardList`, `ResponsiveTable`
+
+Currency Formatting
+- All currency values in the system must be in **US Dollars (USD)**.
+- Use the **$** symbol as the currency marker.
+- Format values with 2 decimal places using standard US formatting (e.g., `$1,499.00`).
+- Apply formatting masks in input fields (e.g., `$ 0.00`) when capturing monetary values.
 
 Process & Communication
 - Before executing **important actions** (e.g., database schema creation, deleting data, publishing builds), confirm with the user and ask for context or clarification if needed.
@@ -41,10 +58,18 @@ Vercel & Deployment
 Code Practices
 - Use TypeScript for all files.
 - Prefer modular and functional components.
-- Follow these structure patterns: exportable component, subcomponents, helpers, types.
+- Follow this file structure: exported component, subcomponents, helpers, types.
 - Avoid the use of enums; prefer union types or object maps.
-- Use `use client` only when strictly needed.
-- Use Zod for form validation and Supabase schema validation.
+- Use `use client` only when strictly necessary.
+- Use Zod for all schema validation (forms and Supabase responses).
+- Validate inputs and outputs in both client and server actions.
+
+Routing & Page Generation
+- For every new feature, auto-generate:
+  - `/entity`: Listagem
+  - `/entity/new`: Cadastro
+  - `/entity/:id/edit`: Edição
+  - `/entity/:id/view`: Visualização detalhada
 
 Naming & Structure
 - Use lowercase with dashes for directory names (e.g., `components/vehicle-card`)
@@ -59,6 +84,18 @@ Error Handling & Safety
 
 Testing & Finalization
 - Execute basic runtime checks to avoid committing broken code.
-- Do not leave TODOs or incomplete implementations.
+- Do not leave TODOs, placeholders, ou implementações incompletas.
 - Ensure every created component has all required imports, validations, and action handlers.
 
+Logging & Monitoring
+- Use meaningful logs for creation, updates, deletes, and errors.
+- Optionally integrate a logging service (e.g., Supabase logs or Sentry) to capture runtime errors.
+- Avoid silent failures; always give feedback in the UI on what happened.
+
+Optional Generators
+- If using code generators, standardize to always include:
+  - Supabase integration
+  - Hooks (useXxx)
+  - Forms with validation
+  - Responsive UI components
+  - Commit automático apenas após confirmação do usuário

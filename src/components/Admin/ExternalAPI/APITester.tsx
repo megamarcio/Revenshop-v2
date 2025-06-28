@@ -55,7 +55,24 @@ export const APITester: React.FC<APITesterProps> = ({
   // Carregar endpoints da API
   useEffect(() => {
     setEndpoints(endpointsProp || []);
+    // Se há endpoints disponíveis e nenhum está selecionado, selecionar o primeiro
+    if (endpointsProp && endpointsProp.length > 0 && !selectedEndpoint) {
+      const firstEndpoint = endpointsProp[0];
+      setSelectedEndpoint(firstEndpoint);
+      setCustomMethod(firstEndpoint.method);
+      setCustomUrl(''); // Limpar URL customizada quando selecionar endpoint
+    }
   }, [endpointsProp]);
+
+  // Resetar estado quando a API mudar
+  useEffect(() => {
+    setSelectedEndpoint(null);
+    setCustomUrl('');
+    setCustomMethod('GET');
+    setCustomHeaders([]);
+    setCustomBody('');
+    setTestResult(null);
+  }, [api.id]);
 
   const handleTest = async () => {
     if (!customUrl && !selectedEndpoint) {
@@ -217,11 +234,30 @@ export const APITester: React.FC<APITesterProps> = ({
                 <Select
                   value={selectedEndpoint?.id || ''}
                   onValueChange={(value) => {
-                    const endpoint = endpoints.find(e => e.id === value);
-                    setSelectedEndpoint(endpoint || null);
-                    if (endpoint) {
+                    if (value === '') {
+                      // Opção "URL Customizada" selecionada
+                      setSelectedEndpoint(null);
                       setCustomUrl('');
-                      setCustomMethod(endpoint.method);
+                      setCustomMethod('GET');
+                    } else {
+                      const endpoint = endpoints.find(e => e.id === value);
+                      setSelectedEndpoint(endpoint || null);
+                      if (endpoint) {
+                        setCustomUrl('');
+                        setCustomMethod(endpoint.method);
+                        // Pré-preencher headers se o endpoint tiver
+                        if (endpoint.headers && Object.keys(endpoint.headers).length > 0) {
+                          const endpointHeaders = Object.entries(endpoint.headers).map(([name, value]) => ({
+                            name,
+                            value: String(value)
+                          }));
+                          setCustomHeaders(endpointHeaders);
+                        }
+                        // Pré-preencher body se o endpoint tiver
+                        if (endpoint.body) {
+                          setCustomBody(typeof endpoint.body === 'string' ? endpoint.body : JSON.stringify(endpoint.body, null, 2));
+                        }
+                      }
                     }
                   }}
                 >
@@ -229,24 +265,49 @@ export const APITester: React.FC<APITesterProps> = ({
                     <SelectValue placeholder="Selecione um endpoint ou use URL customizada" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">URL Customizada</SelectItem>
                     {endpoints.map((endpoint) => (
                       <SelectItem key={endpoint.id} value={endpoint.id}>
-                        {endpoint.name} ({endpoint.method})
+                        {endpoint.name} ({endpoint.method}) - {endpoint.path}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {selectedEndpoint && (
+                  <div className="mt-2 p-2 bg-muted rounded text-sm">
+                    <div><strong>Caminho:</strong> {selectedEndpoint.path}</div>
+                    {selectedEndpoint.description && (
+                      <div><strong>Descrição:</strong> {selectedEndpoint.description}</div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* URL Customizada */}
               <div>
-                <Label>URL Customizada (opcional)</Label>
+                <Label>URL Customizada {selectedEndpoint ? '(desabilitada - endpoint selecionado)' : ''}</Label>
                 <Input
                   value={customUrl}
                   onChange={(e) => setCustomUrl(e.target.value)}
                   placeholder="https://api.exemplo.com/v1/endpoint"
                   disabled={!!selectedEndpoint}
                 />
+                {!selectedEndpoint && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Use este campo para testar URLs que não estão cadastradas como endpoints
+                  </p>
+                )}
+              </div>
+
+              {/* URL Final que será testada */}
+              <div>
+                <Label>URL Final</Label>
+                <div className="p-2 bg-muted rounded font-mono text-sm">
+                  {selectedEndpoint 
+                    ? `${api.base_url}${selectedEndpoint.path}` 
+                    : customUrl || 'Nenhuma URL definida'
+                  }
+                </div>
               </div>
 
               {/* Método HTTP */}

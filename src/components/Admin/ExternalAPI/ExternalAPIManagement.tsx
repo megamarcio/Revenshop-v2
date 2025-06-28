@@ -38,6 +38,9 @@ import { TestHistory } from './TestHistory';
 import { CurlImportModal } from './CurlImportModal';
 import { JsonImportModal } from './JsonImportModal';
 import { DeleteConfirmationModal } from './DeleteConfirmationModal';
+import { useViewPreferences } from '@/hooks/useViewPreferences';
+import ViewModeSelector from './ViewModeSelector';
+import APIListView from './APIListView';
 
 export const ExternalAPIManagement: React.FC = () => {
   const {
@@ -60,6 +63,12 @@ export const ExternalAPIManagement: React.FC = () => {
     getMCPServers,
     clearError
   } = useExternalAPIs();
+
+  // Hook para preferências de visualização
+  const { viewMode, setViewMode } = useViewPreferences('external_apis', 'card', {
+    sortBy: 'name',
+    sortOrder: 'asc'
+  });
 
   const [activeTab, setActiveTab] = useState('apis');
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -163,17 +172,17 @@ export const ExternalAPIManagement: React.FC = () => {
     }
   };
 
-  const handleTestAPI = async (data: TestAPIRequest): Promise<TestAPIResponse | null> => {
+  const handleTestAPI = async (api: ExternalAPI) => {
     try {
-      const result = await testAPI(data);
-      return result;
+      setSelectedAPI(api);
+      await fetchEndpoints(api.id);
+      setShowTester(true);
     } catch (error) {
       toast({
         title: 'Erro',
-        description: 'Erro ao testar API',
+        description: 'Erro ao carregar endpoints da API',
         variant: 'destructive'
       });
-      return null;
     }
   };
 
@@ -320,6 +329,11 @@ export const ExternalAPIManagement: React.FC = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleEditAPI = (api: ExternalAPI) => {
+    setSelectedAPI(api);
+    setShowEditForm(true);
+  };
+
   useEffect(() => {
     fetchAPIs();
   }, [fetchAPIs]);
@@ -346,6 +360,12 @@ export const ExternalAPIManagement: React.FC = () => {
           </p>
         </div>
         <div className="flex gap-2">
+          {/* Seletor de modo de visualização */}
+          <ViewModeSelector
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
+          />
+          
           {/* Seletor de estilo de formulário */}
           <div className="flex items-center gap-2 mr-4">
             <span className="text-sm text-muted-foreground">Estilo:</span>
@@ -524,93 +544,117 @@ export const ExternalAPIManagement: React.FC = () => {
 
         <TabsContent value="apis" className="space-y-4">
           {filteredAPIs.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAPIs.map((api) => (
-                <Card key={api.id} className="hover:shadow-md transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-2">
-                        {getStatusIcon(api)}
-                        <div>
-                          <CardTitle className="text-lg">{api.name}</CardTitle>
-                          <CardDescription className="font-mono text-sm">
-                            {api.base_url}
-                          </CardDescription>
+            <>
+              {viewMode === 'card' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {filteredAPIs.map((api) => (
+                    <Card key={api.id} className="hover:shadow-md transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-2">
+                            {getStatusIcon(api)}
+                            <div>
+                              <CardTitle className="text-lg">{api.name}</CardTitle>
+                              <CardDescription className="font-mono text-sm">
+                                {api.base_url}
+                              </CardDescription>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            {getStatusBadge(api)}
+                            {getAuthBadge(api)}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        {getStatusBadge(api)}
-                        {getAuthBadge(api)}
-                      </div>
-                    </div>
-                  </CardHeader>
-                  
-                  <CardContent className="space-y-4">
-                    {/* Informações da API */}
-                    <div className="space-y-2">
-                      {api.observations && (
-                        <p className="text-sm text-muted-foreground">
-                          {api.observations}
-                        </p>
-                      )}
+                      </CardHeader>
                       
-                      {/* Informação de IA desabilitada */}
-                      <div className="flex items-center gap-2 text-sm text-blue-600 opacity-50 pointer-events-none">
-                        <Brain className="h-4 w-4" />
-                        Análise de IA (em breve)
-                      </div>
-                    </div>
+                      <CardContent className="space-y-4">
+                        {/* Informações da API */}
+                        <div className="space-y-2">
+                          {api.observations && (
+                            <p className="text-sm text-muted-foreground">
+                              {api.observations}
+                            </p>
+                          )}
+                          
+                          {/* Informação de IA desabilitada */}
+                          <div className="flex items-center gap-2 text-sm text-blue-600 opacity-50 pointer-events-none">
+                            <Brain className="h-4 w-4" />
+                            Análise de IA (em breve)
+                          </div>
+                        </div>
 
-                    {/* Ações */}
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => {
-                          setSelectedAPI(api);
-                          setShowTester(true);
-                        }}
-                      >
-                        <Play className="h-4 w-4 mr-1" />
-                        Testar
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleViewHistory(api)}
-                      >
-                        <History className="h-4 w-4 mr-1" />
-                        Histórico
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedAPI(api);
-                          setShowEditForm(true);
-                        }}
-                      >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                      
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedAPI(api);
-                          setShowDeleteConfirm(true);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4 mr-1" />
-                        Excluir
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                        {/* Ações */}
+                        <div className="flex flex-wrap gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleTestAPI(api)}
+                          >
+                            <Play className="h-4 w-4 mr-1" />
+                            Testar
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleViewHistory(api)}
+                          >
+                            <History className="h-4 w-4 mr-1" />
+                            Histórico
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleEditAPI(api)}
+                          >
+                            <Edit className="h-4 w-4 mr-1" />
+                            Editar
+                          </Button>
+                          
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              setSelectedAPI(api);
+                              setShowDeleteConfirm(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Excluir
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+                             {viewMode === 'list' && (
+                 <APIListView
+                   apis={filteredAPIs}
+                   onTest={handleTestAPI}
+                   onViewHistory={handleViewHistory}
+                   onEdit={handleEditAPI}
+                   onDelete={(api) => {
+                     setSelectedAPI(api);
+                     setShowDeleteConfirm(true);
+                   }}
+                 />
+               )}
+
+                             {viewMode === 'table' && (
+                 <APIListView
+                   apis={filteredAPIs}
+                   onTest={handleTestAPI}
+                   onViewHistory={handleViewHistory}
+                   onEdit={handleEditAPI}
+                   onDelete={(api) => {
+                     setSelectedAPI(api);
+                     setShowDeleteConfirm(true);
+                   }}
+                 />
+               )}
+            </>
           ) : (
             <Card>
               <CardContent className="p-8 text-center">
@@ -757,16 +801,34 @@ export const ExternalAPIManagement: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {showTester && selectedAPI && (
-        <APITester
-          api={selectedAPI}
-          onTest={handleTestAPI}
-          onClose={() => {
-            setShowTester(false);
-            setSelectedAPI(null);
-          }}
-        />
-      )}
+      <Dialog open={showTester} onOpenChange={setShowTester}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Testar API: {selectedAPI?.name}</DialogTitle>
+          </DialogHeader>
+          {selectedAPI && (
+            <APITester
+              api={selectedAPI}
+              endpoints={endpoints}
+              onTest={async (data) => {
+                try {
+                  const result = await testAPI(data);
+                  return result;
+                } catch (error) {
+                  toast({
+                    title: 'Erro',
+                    description: 'Erro ao testar API',
+                    variant: 'destructive'
+                  });
+                  return null;
+                }
+              }}
+              onEditEndpoint={() => {}}
+              onDeleteEndpoint={() => {}}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {showHistory && selectedAPI && (
         <TestHistory
