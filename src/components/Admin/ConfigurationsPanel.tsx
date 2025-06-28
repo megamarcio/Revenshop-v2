@@ -6,8 +6,7 @@ import { Bot, MessageCircle, Users, Mail, ExternalLink, Code } from 'lucide-reac
 import IASettings from './IASettings';
 import WhatsAppIntegration from './WhatsAppIntegration';
 import EmailSettings from './EmailSettings';
-import ExternalAPITester from './ExternalAPITester';
-import ExternalAPITesterAdvanced from "./ExternalAPITesterAdvanced";
+import { ExternalAPIManagement } from './ExternalAPI/ExternalAPIManagement';
 import APITester from './APITester';
 
 interface ConfigurationsPanelProps {
@@ -103,7 +102,7 @@ const ConfigurationsPanel = ({ onNavigateToUsers }: ConfigurationsPanelProps) =>
         </TabsContent>
 
         <TabsContent value="external-api" className="mt-6">
-          <ExternalAPITesterAdvanced />
+          <ExternalAPIManagement />
         </TabsContent>
 
         <TabsContent value="rest-api" className="mt-6">

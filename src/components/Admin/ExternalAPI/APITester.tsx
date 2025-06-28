@@ -1,0 +1,536 @@
+import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Play, 
+  Stop, 
+  Copy, 
+  Download,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Zap,
+  Brain,
+  FileText,
+  Settings,
+  Eye,
+  EyeOff
+} from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { ExternalAPI, ExternalAPIEndpoint, TestAPIRequest, TestAPIResponse } from '@/types/externalApi';
+
+interface APITesterProps {
+  api: ExternalAPI;
+  onTest: (data: TestAPIRequest) => Promise<TestAPIResponse | null>;
+  onClose: () => void;
+}
+
+export const APITester: React.FC<APITesterProps> = ({ api, onTest, onClose }) => {
+  const [endpoints, setEndpoints] = useState<ExternalAPIEndpoint[]>([]);
+  const [selectedEndpoint, setSelectedEndpoint] = useState<ExternalAPIEndpoint | null>(null);
+  const [customUrl, setCustomUrl] = useState('');
+  const [customMethod, setCustomMethod] = useState('GET');
+  const [customHeaders, setCustomHeaders] = useState<Array<{ name: string; value: string }>>([]);
+  const [customBody, setCustomBody] = useState('');
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<TestAPIResponse | null>(null);
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [newHeader, setNewHeader] = useState({ name: '', value: '' });
+
+  // Carregar endpoints da API
+  useEffect(() => {
+    // Aqui você faria a chamada para carregar os endpoints
+    // Por enquanto, vamos simular
+    setEndpoints([]);
+  }, [api.id]);
+
+  const handleTest = async () => {
+    if (!customUrl && !selectedEndpoint) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione um endpoint ou digite uma URL customizada',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setIsTesting(true);
+    setTestResult(null);
+
+    try {
+      const testData: TestAPIRequest = {
+        api_id: api.id,
+        endpoint_id: selectedEndpoint?.id,
+        custom_url: customUrl || undefined,
+        custom_method: customMethod,
+        custom_headers: customHeaders.reduce((acc, header) => {
+          if (header.name && header.value) {
+            acc[header.name] = header.value;
+          }
+          return acc;
+        }, {} as Record<string, string>),
+        custom_body: customBody || undefined
+      };
+
+      const result = await onTest(testData);
+      setTestResult(result);
+      
+      if (result?.success) {
+        toast({
+          title: 'Sucesso',
+          description: 'Teste realizado com sucesso!'
+        });
+      } else {
+        toast({
+          title: 'Erro',
+          description: result?.error || 'Erro ao testar API',
+          variant: 'destructive'
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Erro',
+        description: 'Erro ao executar teste',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
+  const addHeader = () => {
+    if (newHeader.name && newHeader.value) {
+      setCustomHeaders(prev => [...prev, { ...newHeader }]);
+      setNewHeader({ name: '', value: '' });
+    }
+  };
+
+  const removeHeader = (index: number) => {
+    setCustomHeaders(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copiado',
+      description: 'Conteúdo copiado para a área de transferência!'
+    });
+  };
+
+  const downloadResult = () => {
+    if (!testResult) return;
+
+    const data = {
+      api: api.name,
+      test_date: new Date().toISOString(),
+      request: {
+        url: testResult.url,
+        method: testResult.method,
+        headers: testResult.headers,
+      },
+      response: {
+        status: testResult.status,
+        body: testResult.body,
+        response_time: testResult.response_time_ms,
+        success: testResult.success
+      }
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `test-result-${api.name}-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const getStatusIcon = () => {
+    if (!testResult) return null;
+    
+    if (testResult.success) {
+      return <CheckCircle className="h-5 w-5 text-green-500" />;
+    } else {
+      return <XCircle className="h-5 w-5 text-red-500" />;
+    }
+  };
+
+  const getStatusBadge = () => {
+    if (!testResult) return null;
+    
+    if (testResult.success) {
+      return <Badge variant="default" className="bg-green-500">Sucesso</Badge>;
+    } else {
+      return <Badge variant="destructive">Erro</Badge>;
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold">Testar API</h2>
+          <p className="text-muted-foreground">
+            {api.name} - {api.base_url}
+          </p>
+        </div>
+        <Button variant="outline" onClick={onClose}>
+          Fechar
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Configuração do Teste */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Configuração do Teste
+              </CardTitle>
+              <CardDescription>
+                Configure os parâmetros do teste
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Seleção de Endpoint */}
+              <div>
+                <Label>Endpoint</Label>
+                <Select
+                  value={selectedEndpoint?.id || ''}
+                  onValueChange={(value) => {
+                    const endpoint = endpoints.find(e => e.id === value);
+                    setSelectedEndpoint(endpoint || null);
+                    if (endpoint) {
+                      setCustomUrl('');
+                      setCustomMethod(endpoint.method);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione um endpoint ou use URL customizada" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {endpoints.map((endpoint) => (
+                      <SelectItem key={endpoint.id} value={endpoint.id}>
+                        {endpoint.name} ({endpoint.method})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* URL Customizada */}
+              <div>
+                <Label>URL Customizada (opcional)</Label>
+                <Input
+                  value={customUrl}
+                  onChange={(e) => setCustomUrl(e.target.value)}
+                  placeholder="https://api.exemplo.com/v1/endpoint"
+                  disabled={!!selectedEndpoint}
+                />
+              </div>
+
+              {/* Método HTTP */}
+              <div>
+                <Label>Método HTTP</Label>
+                <Select
+                  value={customMethod}
+                  onValueChange={setCustomMethod}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="GET">GET</SelectItem>
+                    <SelectItem value="POST">POST</SelectItem>
+                    <SelectItem value="PUT">PUT</SelectItem>
+                    <SelectItem value="DELETE">DELETE</SelectItem>
+                    <SelectItem value="PATCH">PATCH</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Headers Customizados */}
+              <div>
+                <Label>Headers Customizados</Label>
+                <div className="space-y-2">
+                  {customHeaders.map((header, index) => (
+                    <div key={index} className="flex gap-2">
+                      <Input
+                        value={header.name}
+                        onChange={(e) => {
+                          const newHeaders = [...customHeaders];
+                          newHeaders[index].name = e.target.value;
+                          setCustomHeaders(newHeaders);
+                        }}
+                        placeholder="Nome do header"
+                        className="flex-1"
+                      />
+                      <Input
+                        value={header.value}
+                        onChange={(e) => {
+                          const newHeaders = [...customHeaders];
+                          newHeaders[index].value = e.target.value;
+                          setCustomHeaders(newHeaders);
+                        }}
+                        placeholder="Valor do header"
+                        className="flex-1"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeHeader(index)}
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ))}
+                  
+                  <div className="flex gap-2">
+                    <Input
+                      value={newHeader.name}
+                      onChange={(e) => setNewHeader(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Nome do header"
+                      className="flex-1"
+                    />
+                    <Input
+                      value={newHeader.value}
+                      onChange={(e) => setNewHeader(prev => ({ ...prev, value: e.target.value }))}
+                      placeholder="Valor do header"
+                      className="flex-1"
+                    />
+                    <Button onClick={addHeader}>
+                      Adicionar
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Body */}
+              {['POST', 'PUT', 'PATCH'].includes(customMethod) && (
+                <div>
+                  <Label>Body da Requisição</Label>
+                  <Textarea
+                    value={customBody}
+                    onChange={(e) => setCustomBody(e.target.value)}
+                    placeholder='{"key": "value"}'
+                    rows={4}
+                    className="font-mono text-sm"
+                  />
+                </div>
+              )}
+
+              {/* Botão de Teste */}
+              <Button 
+                onClick={handleTest} 
+                disabled={isTesting}
+                className="w-full"
+              >
+                {isTesting ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                    Testando...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4 mr-2" />
+                    Executar Teste
+                  </>
+                )}
+              </Button>
+            </CardContent>
+          </Card>
+
+          {/* Informações da API */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Zap className="h-5 w-5" />
+                Informações da API
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <span className="font-medium">Nome:</span> {api.name}
+              </div>
+              <div>
+                <span className="font-medium">URL Base:</span>
+                <p className="text-sm font-mono bg-muted p-2 rounded mt-1">{api.base_url}</p>
+              </div>
+              <div>
+                <span className="font-medium">Autenticação:</span> {api.auth_type}
+              </div>
+              {api.auth_type !== 'none' && (
+                <div>
+                  <span className="font-medium">API Key:</span>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Input
+                      value={api.api_key || ''}
+                      readOnly
+                      type={showApiKey ? 'text' : 'password'}
+                      className="font-mono text-sm"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowApiKey(!showApiKey)}
+                    >
+                      {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {api.ai_analysis_enabled && (
+                <div className="flex items-center gap-2">
+                  <Brain className="h-4 w-4 text-blue-500" />
+                  <span className="text-sm text-blue-600">Análise de IA habilitada</span>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Resultado do Teste */}
+        <div className="space-y-6">
+          {testResult ? (
+            <>
+              {/* Resumo do Resultado */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    {getStatusIcon()}
+                    Resultado do Teste
+                    {getStatusBadge()}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <span className="font-medium">Status:</span> {testResult.status}
+                    </div>
+                    <div>
+                      <span className="font-medium">Tempo:</span> {testResult.response_time_ms}ms
+                    </div>
+                    <div>
+                      <span className="font-medium">Método:</span> {testResult.method}
+                    </div>
+                    <div>
+                      <span className="font-medium">Sucesso:</span> {testResult.success ? 'Sim' : 'Não'}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <span className="font-medium">URL:</span>
+                    <p className="text-sm font-mono bg-muted p-2 rounded mt-1">{testResult.url}</p>
+                  </div>
+
+                  {testResult.error && (
+                    <Alert variant="destructive">
+                      <AlertDescription>{testResult.error}</AlertDescription>
+                    </Alert>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => copyToClipboard(JSON.stringify(testResult, null, 2))}
+                    >
+                      <Copy className="h-4 w-4 mr-2" />
+                      Copiar Resultado
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={downloadResult}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar JSON
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Detalhes da Resposta */}
+              <Tabs defaultValue="response" className="w-full">
+                <TabsList>
+                  <TabsTrigger value="response">Resposta</TabsTrigger>
+                  <TabsTrigger value="headers">Headers</TabsTrigger>
+                  <TabsTrigger value="request">Requisição</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="response" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Body da Resposta</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="text-sm bg-muted p-4 rounded overflow-x-auto max-h-96">
+                        {testResult.body}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="headers" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Headers da Resposta</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="text-sm bg-muted p-4 rounded overflow-x-auto">
+                        {JSON.stringify(testResult.headers, null, 2)}
+                      </pre>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="request" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Detalhes da Requisição</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <div>
+                        <span className="font-medium">URL:</span>
+                        <p className="text-sm font-mono bg-muted p-2 rounded mt-1">{testResult.url}</p>
+                      </div>
+                      <div>
+                        <span className="font-medium">Método:</span> {testResult.method}
+                      </div>
+                      <div>
+                        <span className="font-medium">Headers:</span>
+                        <pre className="text-sm bg-muted p-2 rounded mt-1 overflow-x-auto">
+                          {JSON.stringify(testResult.headers, null, 2)}
+                        </pre>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="p-8 text-center">
+                <FileText className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <h3 className="text-lg font-medium mb-2">Nenhum teste executado</h3>
+                <p className="text-muted-foreground">
+                  Configure os parâmetros e execute um teste para ver os resultados aqui.
+                </p>
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}; 
