@@ -90,7 +90,7 @@ export const APITester: React.FC<APITesterProps> = ({
     try {
       const testData: TestAPIRequest = {
         api_id: api.id,
-        endpoint_id: selectedEndpoint?.id,
+        endpoint_id: selectedEndpoint?.id || undefined,
         custom_url: customUrl || undefined,
         custom_method: customMethod,
         custom_headers: customHeaders.reduce((acc, header) => {
@@ -102,8 +102,28 @@ export const APITester: React.FC<APITesterProps> = ({
         custom_body: customBody || undefined
       };
 
+      console.log('Dados do teste sendo enviados:', testData);
+      console.log('URL que será testada:', selectedEndpoint 
+        ? `${api.base_url}${selectedEndpoint.path}` 
+        : customUrl
+      );
+
       const result = await onTest(testData);
-      setTestResult(result);
+      if (result) {
+        setTestResult(result);
+      } else {
+        // Garantir que algo seja exibido
+        setTestResult({
+          success: false,
+          url: testData.custom_url || (selectedEndpoint ? `${api.base_url}${selectedEndpoint.path}` : api.base_url),
+          method: customMethod,
+          headers: {},
+          response_time_ms: 0,
+          status: 0,
+          body: '',
+          error: 'Sem resposta da função'
+        } as TestAPIResponse);
+      }
       
       if (result?.success) {
         toast({
@@ -118,11 +138,24 @@ export const APITester: React.FC<APITesterProps> = ({
         });
       }
     } catch (error) {
+      console.error('Erro ao executar teste:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao executar teste',
         variant: 'destructive'
       });
+
+      const errorMessage = error instanceof Error ? error.message : 'Erro ao executar teste';
+      setTestResult({
+        success: false,
+        url: customUrl || (selectedEndpoint ? `${api.base_url}${selectedEndpoint.path}` : api.base_url),
+        method: customMethod,
+        headers: {},
+        response_time_ms: 0,
+        status: 0,
+        body: '',
+        error: errorMessage
+      } as TestAPIResponse);
     } finally {
       setIsTesting(false);
     }
@@ -232,9 +265,9 @@ export const APITester: React.FC<APITesterProps> = ({
               <div>
                 <Label>Endpoint</Label>
                 <Select
-                  value={selectedEndpoint?.id || ''}
+                  value={selectedEndpoint?.id || 'custom'}
                   onValueChange={(value) => {
-                    if (value === '') {
+                    if (value === 'custom') {
                       // Opção "URL Customizada" selecionada
                       setSelectedEndpoint(null);
                       setCustomUrl('');
@@ -265,7 +298,7 @@ export const APITester: React.FC<APITesterProps> = ({
                     <SelectValue placeholder="Selecione um endpoint ou use URL customizada" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">URL Customizada</SelectItem>
+                    <SelectItem value="custom">URL Customizada</SelectItem>
                     {endpoints.map((endpoint) => (
                       <SelectItem key={endpoint.id} value={endpoint.id}>
                         {endpoint.name} ({endpoint.method}) - {endpoint.path}
@@ -302,12 +335,22 @@ export const APITester: React.FC<APITesterProps> = ({
               {/* URL Final que será testada */}
               <div>
                 <Label>URL Final</Label>
-                <div className="p-2 bg-muted rounded font-mono text-sm">
-                  {selectedEndpoint 
-                    ? `${api.base_url}${selectedEndpoint.path}` 
-                    : customUrl || 'Nenhuma URL definida'
-                  }
+                <div className="p-2 bg-muted rounded font-mono text-sm break-all">
+                  {(() => {
+                    if (customUrl) {
+                      return customUrl;
+                    } else if (selectedEndpoint) {
+                      const baseUrl = api.base_url.endsWith('/') ? api.base_url.slice(0, -1) : api.base_url;
+                      const path = selectedEndpoint.path.startsWith('/') ? selectedEndpoint.path : '/' + selectedEndpoint.path;
+                      return baseUrl + path;
+                    } else {
+                      return api.base_url || 'Nenhuma URL definida';
+                    }
+                  })()}
                 </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Esta é a URL que será testada quando você clicar em "Executar Teste"
+                </p>
               </div>
 
               {/* Método HTTP */}
@@ -534,6 +577,7 @@ export const APITester: React.FC<APITesterProps> = ({
                   <TabsTrigger value="response">Resposta</TabsTrigger>
                   <TabsTrigger value="headers">Headers</TabsTrigger>
                   <TabsTrigger value="request">Requisição</TabsTrigger>
+                  <TabsTrigger value="json">JSON Completo</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="response" className="space-y-4">
@@ -542,9 +586,31 @@ export const APITester: React.FC<APITesterProps> = ({
                       <CardTitle>Body da Resposta</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <pre className="text-sm bg-muted p-4 rounded overflow-x-auto max-h-96">
-                        {testResult.body}
-                      </pre>
+                      {(() => {
+                        // Tentar parsear como JSON
+                        try {
+                          const json = JSON.parse(testResult.body);
+                          return (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              {/* Coluna JSON formatado */}
+                              <pre className="text-sm bg-muted p-4 rounded overflow-x-auto max-h-96">
+                                {JSON.stringify(json, null, 2)}
+                              </pre>
+                              {/* Coluna Texto bruto */}
+                              <pre className="text-sm bg-muted p-4 rounded overflow-x-auto max-h-96">
+                                {testResult.body}
+                              </pre>
+                            </div>
+                          );
+                        } catch {
+                          // Se não for JSON, mostrar apenas texto bruto
+                          return (
+                            <pre className="text-sm bg-muted p-4 rounded overflow-x-auto max-h-96">
+                              {testResult.body}
+                            </pre>
+                          );
+                        }
+                      })()}
                     </CardContent>
                   </Card>
                 </TabsContent>
@@ -581,6 +647,19 @@ export const APITester: React.FC<APITesterProps> = ({
                           {JSON.stringify(testResult.headers, null, 2)}
                         </pre>
                       </div>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="json" className="space-y-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>JSON Completo do Teste</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <pre className="text-sm bg-muted p-4 rounded overflow-x-auto max-h-96">
+                        {JSON.stringify(testResult, null, 2)}
+                      </pre>
                     </CardContent>
                   </Card>
                 </TabsContent>

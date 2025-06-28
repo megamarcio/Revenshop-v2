@@ -32,11 +32,12 @@ export const useViewPreferences = (
   const [viewMode, setViewModeState] = useState<ViewMode>(defaultViewMode);
   const [preferences, setPreferencesState] = useState<Record<string, any>>(defaultPreferences);
   const [loading, setLoading] = useState(true);
+  const [useDatabase, setUseDatabase] = useState(true);
 
-  // Carregar preferências do usuário
+  // Carregar preferências (banco de dados com fallback para localStorage)
   useEffect(() => {
     if (!user?.id) {
-      setLoading(false);
+      loadPreferencesFromStorage();
       return;
     }
 
@@ -47,6 +48,7 @@ export const useViewPreferences = (
     try {
       setLoading(true);
       
+      // Tentar carregar do banco de dados
       const { data, error } = await supabase
         .from('view_preferences')
         .select('*')
@@ -55,7 +57,11 @@ export const useViewPreferences = (
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = not found
-        throw error;
+        // Se houve erro (ex: tabela não existe), usar localStorage
+        console.warn('Erro ao acessar banco de dados, usando localStorage:', error.message);
+        setUseDatabase(false);
+        loadPreferencesFromStorage();
+        return;
       }
 
       if (data) {
@@ -66,8 +72,32 @@ export const useViewPreferences = (
         await createDefaultPreferences();
       }
     } catch (error) {
-      console.error('Erro ao carregar preferências:', error);
-      // Usar valores padrão em caso de erro
+      console.error('Erro ao carregar preferências do banco:', error);
+      // Fallback para localStorage
+      setUseDatabase(false);
+      loadPreferencesFromStorage();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPreferencesFromStorage = () => {
+    try {
+      setLoading(true);
+      
+      const storageKey = `view_preferences_${user?.id || 'anonymous'}_${componentName}`;
+      const stored = localStorage.getItem(storageKey);
+      
+      if (stored) {
+        const data = JSON.parse(stored);
+        setViewModeState(data.view_mode || defaultViewMode);
+        setPreferencesState(data.preferences || defaultPreferences);
+      } else {
+        setViewModeState(defaultViewMode);
+        setPreferencesState(defaultPreferences);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar preferências do localStorage:', error);
       setViewModeState(defaultViewMode);
       setPreferencesState(defaultPreferences);
     } finally {
@@ -89,29 +119,51 @@ export const useViewPreferences = (
       if (error) throw error;
     } catch (error) {
       console.error('Erro ao criar preferências padrão:', error);
+      // Fallback para localStorage
+      setUseDatabase(false);
+      savePreferencesToStorage(defaultViewMode, defaultPreferences);
+    }
+  };
+
+  const savePreferencesToStorage = (mode: ViewMode, prefs: Record<string, any>) => {
+    try {
+      const storageKey = `view_preferences_${user?.id || 'anonymous'}_${componentName}`;
+      const data = {
+        view_mode: mode,
+        preferences: prefs,
+        updated_at: new Date().toISOString()
+      };
+      localStorage.setItem(storageKey, JSON.stringify(data));
+    } catch (error) {
+      console.error('Erro ao salvar no localStorage:', error);
     }
   };
 
   const setViewMode = async (mode: ViewMode) => {
-    if (!user?.id) {
-      setViewModeState(mode);
-      return;
-    }
-
     try {
-      const { error } = await supabase
-        .from('view_preferences')
-        .upsert({
-          user_id: user.id,
-          component_name: componentName,
-          view_mode: mode,
-          preferences: preferences,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
       setViewModeState(mode);
+      
+      if (useDatabase && user?.id) {
+        // Tentar salvar no banco de dados
+        const { error } = await supabase
+          .from('view_preferences')
+          .upsert({
+            user_id: user.id,
+            component_name: componentName,
+            view_mode: mode,
+            preferences: preferences,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.warn('Erro ao salvar no banco, usando localStorage:', error.message);
+          setUseDatabase(false);
+          savePreferencesToStorage(mode, preferences);
+        }
+      } else {
+        // Usar localStorage
+        savePreferencesToStorage(mode, preferences);
+      }
       
       toast({
         title: "Preferência salva",
@@ -119,45 +171,45 @@ export const useViewPreferences = (
       });
     } catch (error) {
       console.error('Erro ao salvar modo de visualização:', error);
+      // Fallback para localStorage
+      savePreferencesToStorage(mode, preferences);
       toast({
-        title: "Erro",
-        description: "Não foi possível salvar a preferência",
-        variant: "destructive",
+        title: "Preferência salva localmente",
+        description: `Modo de visualização alterado para ${mode === 'card' ? 'cards' : mode === 'list' ? 'lista' : 'tabela'}`,
       });
-      // Reverter para o estado anterior em caso de erro
-      setViewModeState(viewMode);
     }
   };
 
   const updatePreferences = async (newPreferences: Record<string, any>) => {
-    if (!user?.id) {
-      setPreferencesState(newPreferences);
-      return;
-    }
-
     try {
       const mergedPreferences = { ...preferences, ...newPreferences };
-      
-      const { error } = await supabase
-        .from('view_preferences')
-        .upsert({
-          user_id: user.id,
-          component_name: componentName,
-          view_mode: viewMode,
-          preferences: mergedPreferences,
-          updated_at: new Date().toISOString()
-        });
-
-      if (error) throw error;
-
       setPreferencesState(mergedPreferences);
+      
+      if (useDatabase && user?.id) {
+        // Tentar salvar no banco de dados
+        const { error } = await supabase
+          .from('view_preferences')
+          .upsert({
+            user_id: user.id,
+            component_name: componentName,
+            view_mode: viewMode,
+            preferences: mergedPreferences,
+            updated_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.warn('Erro ao salvar no banco, usando localStorage:', error.message);
+          setUseDatabase(false);
+          savePreferencesToStorage(viewMode, mergedPreferences);
+        }
+      } else {
+        // Usar localStorage
+        savePreferencesToStorage(viewMode, mergedPreferences);
+      }
     } catch (error) {
       console.error('Erro ao salvar preferências:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível salvar as preferências",
-        variant: "destructive",
-      });
+      // Fallback para localStorage
+      savePreferencesToStorage(viewMode, mergedPreferences);
     }
   };
 

@@ -33,14 +33,27 @@ serve(async (req) => {
   }
 
   try {
-    const { api_id, endpoint_id, custom_url, custom_method, custom_headers, custom_body } = await req.json()
+    const requestBody = await req.json()
+    const { api_id, endpoint_id, custom_url, custom_method, custom_headers, custom_body } = requestBody
 
-    console.log('Iniciando teste de API:', { api_id, custom_url, custom_method })
+    console.log('Iniciando teste de API:', { api_id, endpoint_id, custom_url, custom_method })
+    console.log('Dados recebidos:', requestBody)
+
+    if (!api_id) {
+      throw new Error('ID da API é obrigatório')
+    }
 
     // Criar cliente Supabase
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
+    const serviceRole = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+    const supabase = createClient(
+      supabaseUrl,
+      serviceRole ?? anonKey,
+      {
+        auth: { persistSession: false }
+      }
+    ) // Usa service role se disponível (ignora RLS)
 
     // Buscar dados da API
     const { data: apiData, error: apiError } = await supabase
@@ -49,23 +62,58 @@ serve(async (req) => {
       .eq('id', api_id)
       .single()
 
-    if (apiError || !apiData) {
+    if (apiError) {
+      console.error('Erro ao buscar API:', apiError)
+      throw new Error(`Erro ao buscar API: ${apiError.message}`)
+    }
+
+    if (!apiData) {
       throw new Error('API não encontrada')
     }
 
+    console.log('API encontrada:', apiData.name, apiData.base_url)
+
     // Construir URL final
-    let finalUrl = custom_url || apiData.base_url
-    if (endpoint_id) {
-      const { data: endpointData } = await supabase
+    let finalUrl = ''
+    
+    if (custom_url) {
+      // Se há URL customizada, usar ela diretamente
+      finalUrl = custom_url
+      console.log('Usando URL customizada:', finalUrl)
+    } else if (endpoint_id) {
+      // Se há endpoint selecionado, buscar e construir URL
+      console.log('Buscando endpoint:', endpoint_id)
+      const { data: endpointData, error: endpointError } = await supabase
         .from('external_api_endpoints')
         .select('*')
         .eq('id', endpoint_id)
         .single()
       
-      if (endpointData) {
-        finalUrl = apiData.base_url + endpointData.path
+      if (endpointError) {
+        console.error('Erro ao buscar endpoint:', endpointError)
+        throw new Error(`Erro ao buscar endpoint: ${endpointError.message}`)
       }
+      
+      if (endpointData) {
+        // Construir URL combinando base_url + path do endpoint
+        const baseUrl = apiData.base_url.endsWith('/') ? apiData.base_url.slice(0, -1) : apiData.base_url
+        const path = endpointData.path.startsWith('/') ? endpointData.path : '/' + endpointData.path
+        finalUrl = baseUrl + path
+        console.log('URL construída com endpoint:', finalUrl)
+      } else {
+        throw new Error('Endpoint não encontrado')
+      }
+    } else {
+      // Se não há endpoint nem URL customizada, usar apenas a base_url
+      finalUrl = apiData.base_url
+      console.log('Usando URL base:', finalUrl)
     }
+
+    if (!finalUrl) {
+      throw new Error('URL final não pôde ser determinada')
+    }
+
+    console.log('URL final para teste:', finalUrl)
 
     // Construir headers
     const headers: Record<string, string> = {

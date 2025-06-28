@@ -363,16 +363,30 @@ export const useExternalAPIs = () => {
         body: JSON.stringify(testData)
       });
 
-      if (!response.ok) {
-        throw new Error(`Erro na edge function: ${response.status}`);
+      // Sempre tentar ler o JSON, mesmo se status !== 200
+      let resultJson: TestAPIResponse;
+      try {
+        resultJson = await response.json();
+      } catch {
+        // Caso não seja JSON válido
+        resultJson = {
+          success: false,
+          url: '',
+          method: testData.custom_method || 'GET',
+          headers: {},
+          response_time_ms: 0,
+          status: response.status,
+          body: '',
+          error: `Resposta não-JSON (${response.status})`
+        } as TestAPIResponse;
       }
 
-      const result = await response.json();
-      
-      // Atualizar histórico
-      await fetchTestHistory(testData.api_id);
-      
-      return result;
+      // Atualizar histórico se possível
+      if (response.ok) {
+        await fetchTestHistory(testData.api_id);
+      }
+
+      return resultJson;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao testar API';
       setError(errorMessage);
@@ -381,7 +395,17 @@ export const useExternalAPIs = () => {
         description: errorMessage,
         variant: 'destructive'
       });
-      return null;
+      // Retornar objeto de erro para exibir na UI
+      return {
+        success: false,
+        url: '',
+        method: testData.custom_method || 'GET',
+        headers: {},
+        response_time_ms: 0,
+        status: 0,
+        body: '',
+        error: errorMessage
+      } as TestAPIResponse;
     } finally {
       setLoading(false);
     }

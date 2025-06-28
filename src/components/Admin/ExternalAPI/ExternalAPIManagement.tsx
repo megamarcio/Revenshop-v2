@@ -352,68 +352,80 @@ export const ExternalAPIManagement: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Gerenciamento de APIs Externas</h1>
-          <p className="text-muted-foreground">
-            Gerencie e teste suas APIs externas
-          </p>
-        </div>
-        <div className="flex gap-2">
-          {/* Seletor de modo de visualização */}
-          <ViewModeSelector
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-          />
+      <div className="space-y-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold">Gerenciamento de APIs Externas</h1>
+            <p className="text-muted-foreground">
+              Gerencie e teste suas APIs externas
+            </p>
+          </div>
           
-          {/* Seletor de estilo de formulário */}
-          <div className="flex items-center gap-2 mr-4">
-            <span className="text-sm text-muted-foreground">Estilo:</span>
-            <div className="flex border rounded-md">
-              <Button
-                variant={formStyle === 'classic' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setFormStyle('classic')}
-                className="rounded-r-none"
-              >
-                Clássico
-              </Button>
-              <Button
-                variant={formStyle === 'n8n' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setFormStyle('n8n')}
-                className="rounded-l-none"
-              >
-                N8N
-              </Button>
+          <div className="flex items-center gap-2">
+            <Button onClick={() => setShowCreateForm(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Nova API
+            </Button>
+          </div>
+        </div>
+        
+        {/* Barra de ferramentas */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Seletor de modo de visualização */}
+            <ViewModeSelector
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+            />
+            
+            {/* Seletor de estilo de formulário */}
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Estilo:</span>
+              <div className="flex border rounded-md">
+                <Button
+                  variant={formStyle === 'classic' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFormStyle('classic')}
+                  className="rounded-r-none"
+                >
+                  Clássico
+                </Button>
+                <Button
+                  variant={formStyle === 'n8n' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setFormStyle('n8n')}
+                  className="rounded-l-none"
+                >
+                  N8N
+                </Button>
+              </div>
             </div>
           </div>
           
-          <CurlImportModal
-            onImport={handleCurlImport}
-          >
-            <Button variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Importar cURL
+          <div className="flex flex-wrap gap-2">
+            <CurlImportModal
+              onImport={handleCurlImport}
+            >
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Importar cURL
+              </Button>
+            </CurlImportModal>
+            
+            <JsonImportModal
+              onImport={handleJsonImport}
+            >
+              <Button variant="outline" size="sm">
+                <FileText className="h-4 w-4 mr-2" />
+                Importar JSON
+              </Button>
+            </JsonImportModal>
+            
+            <Button variant="outline" size="sm" onClick={downloadAPIList}>
+              <Download className="h-4 w-4 mr-2" />
+              Exportar
             </Button>
-          </CurlImportModal>
-          
-          <JsonImportModal
-            onImport={handleJsonImport}
-          >
-            <Button variant="outline">
-              <FileText className="h-4 w-4 mr-2" />
-              Importar JSON
-            </Button>
-          </JsonImportModal>
-          <Button variant="outline" onClick={downloadAPIList}>
-            <Download className="h-4 w-4 mr-2" />
-            Exportar
-          </Button>
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Nova API
-          </Button>
+          </div>
         </div>
       </div>
 
@@ -810,19 +822,7 @@ export const ExternalAPIManagement: React.FC = () => {
             <APITester
               api={selectedAPI}
               endpoints={endpoints}
-              onTest={async (data) => {
-                try {
-                  const result = await testAPI(data);
-                  return result;
-                } catch (error) {
-                  toast({
-                    title: 'Erro',
-                    description: 'Erro ao testar API',
-                    variant: 'destructive'
-                  });
-                  return null;
-                }
-              }}
+              onTest={testAPI}
               onEditEndpoint={() => {}}
               onDeleteEndpoint={() => {}}
             />
