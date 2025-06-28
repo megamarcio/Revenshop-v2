@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <title>Adicionar Dados de Teste - Expense Forecasts</title>
+    <meta charset="UTF-8">
+</head>
+<body>
+    <h1>Adicionar Dados de Teste</h1>
+    <button type="button" onclick="addTestData()">Adicionar Previsões de Teste</button>
+    <p id="status"></p>
+
+    <script>
+        function addTestData() {
+            // Dados de teste para expense_forecasts
+            const expenseForecasts = [
+                {
+                    id: '1',
+                    description: 'Aluguel do Escritório',
+                    amount: 2500,
+                    type: 'fixa',
+                    category_id: 'cat1',
+                    due_day: 5,
+                    is_active: true,
+                    notes: 'Pagamento mensal do aluguel',
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    description: 'Internet e Telefone',
+                    amount: 150,
+                    type: 'fixa',
+                    category_id: 'cat2',
+                    due_day: 10,
+                    is_active: true,
+                    notes: 'Pacote empresarial',
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: '3',
+                    description: 'Material de Escritório',
+                    amount: 300,
+                    type: 'variavel',
+                    category_id: 'cat3',
+                    due_day: 15,
+                    is_active: true,
+                    notes: 'Compra mensal de suprimentos',
+                    created_at: new Date().toISOString()
+                }
+            ];
+
+            // Dados de teste para revenue_forecasts
+            const revenueForecasts = [
+                {
+                    id: '1',
+                    description: 'Aluguel de Veículos',
+                    amount: 5000,
+                    type: 'fixa',
+                    category_id: 'cat4',
+                    due_day: 1,
+                    is_active: true,
+                    notes: 'Receita média mensal',
+                    created_at: new Date().toISOString()
+                },
+                {
+                    id: '2',
+                    description: 'Serviços Adicionais',
+                    amount: 1500,
+                    type: 'variavel',
+                    category_id: 'cat5',
+                    due_day: 1,
+                    is_active: true,
+                    notes: 'Seguros e proteções',
+                    created_at: new Date().toISOString()
+                }
+            ];
+
+            // Categorias financeiras
+            const categories = [
+                { id: 'cat1', name: 'Aluguel', type: 'despesa' },
+                { id: 'cat2', name: 'Utilidades', type: 'despesa' },
+                { id: 'cat3', name: 'Material', type: 'despesa' },
+                { id: 'cat4', name: 'Aluguel Veículos', type: 'receita' },
+                { id: 'cat5', name: 'Serviços', type: 'receita' }
+            ];
+
+            // Salvar no localStorage
+            localStorage.setItem('expense_forecasts', JSON.stringify(expenseForecasts));
+            localStorage.setItem('revenue_forecasts', JSON.stringify(revenueForecasts));
+            localStorage.setItem('financial_categories', JSON.stringify(categories));
+
+            document.getElementById('status').innerHTML = 
+                '✅ Dados adicionados com sucesso!<br>' +
+                '- ' + expenseForecasts.length + ' previsões de despesas<br>' +
+                '- ' + revenueForecasts.length + ' previsões de receitas<br>' +
+                '- ' + categories.length + ' categorias<br><br>' +
+                'Agora recarregue a página do aplicativo!';
+        }
+    </script>
+</body>
+</html> 

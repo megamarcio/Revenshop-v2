@@ -404,39 +404,30 @@ export const APIForm: React.FC<APIFormProps> = ({
                 Análise de IA
               </CardTitle>
               <CardDescription>
-                Configure a análise automática de erros com IA
+                Esta funcionalidade estará disponível em breve.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 opacity-50 pointer-events-none">
                 <Switch
                   id="ai_analysis_enabled"
                   checked={formData.ai_analysis_enabled}
-                  onCheckedChange={(checked) => handleInputChange('ai_analysis_enabled', checked)}
+                  onCheckedChange={() => {}}
+                  disabled
                 />
                 <Label htmlFor="ai_analysis_enabled">Habilitar análise de IA</Label>
               </div>
-
-              {formData.ai_analysis_enabled && (
-                <div>
-                  <Label htmlFor="ai_key_id">Chave de IA</Label>
-                  <Select
-                    value={formData.ai_key_id}
-                    onValueChange={(value) => handleInputChange('ai_key_id', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma configuração de IA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {aiSettings.map((setting) => (
-                        <SelectItem key={setting.id} value={setting.id}>
-                          {setting.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="opacity-50 pointer-events-none">
+                <Label htmlFor="ai_key_id">Chave de IA</Label>
+                <Select value={formData.ai_key_id} onValueChange={() => {}} disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma configuração de IA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* Opções desabilitadas */}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
 

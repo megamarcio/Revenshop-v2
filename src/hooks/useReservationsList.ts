@@ -1,7 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { ReservationDetails } from './useReservationById';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useProfiles } from './useProfiles';
 
 export interface ReservationListItem {
   id: string;
@@ -10,6 +11,9 @@ export interface ReservationListItem {
   error: string | null;
   temperature?: string;
   notes?: string;
+  assigned_to?: string;
+  delegated_to_user_id?: string;
+  contact_stage?: string;
 }
 
 const STORAGE_KEY = 'reservationsList';
@@ -17,6 +21,7 @@ const STORAGE_KEY = 'reservationsList';
 export const useReservationsList = () => {
   const [reservations, setReservations] = useState<ReservationListItem[]>([]);
   const { toast } = useToast();
+  const { profiles, loading: profilesLoading, error: profilesError } = useProfiles();
 
   // Carregar reservas do localStorage na inicialização
   useEffect(() => {
@@ -57,6 +62,11 @@ export const useReservationsList = () => {
       return;
     }
 
+    // Garante que existe um registro mínimo no Supabase
+    await supabase
+      .from('reservations')
+      .upsert([{ id: reservationId }], { onConflict: 'id' });
+
     // Adicionar à lista com estado de loading
     const newReservation: ReservationListItem = {
       id: reservationId,
@@ -64,7 +74,10 @@ export const useReservationsList = () => {
       loading: true,
       error: null,
       temperature: '',
-      notes: ''
+      notes: '',
+      assigned_to: '',
+      delegated_to_user_id: '',
+      contact_stage: ''
     };
 
     setReservations(prev => {
@@ -92,14 +105,37 @@ export const useReservationsList = () => {
       }
 
       const result = await response.json();
-      
+      // Buscar campos customizados no Supabase
+      const { data: customFields, error: supabaseError } = await supabase
+        .from('reservations')
+        .select('temperature, notes, assigned_to, delegated_to_user_id, contact_stage')
+        .eq('id', reservationId)
+        .single();
+
+      if (supabaseError) {
+        console.warn('Erro ao buscar campos customizados no Supabase:', supabaseError);
+      }
+
+      // Merge robusto: campos do Supabase prevalecem se existirem
+      const mergedCustomFields = (customFields && typeof customFields === 'object') ? {
+        ...Object.fromEntries(
+          Object.entries(customFields).filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        )
+      } : {};
+
       setReservations(prev => {
-        const updated = prev.map(r => 
-          r.id === reservationId 
-            ? { ...r, data: result.data, loading: false, error: null }
+        const updated = prev.map(r =>
+          r.id === reservationId
+            ? {
+                ...r,
+                data: result.data,
+                loading: false,
+                error: null,
+                ...mergedCustomFields
+              }
             : r
         );
-        console.log('Atualizando reserva com dados da API:', updated);
+        console.log('Atualizando reserva com dados da API e Supabase:', updated);
         return updated;
       });
 
@@ -109,17 +145,15 @@ export const useReservationsList = () => {
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
-      
       setReservations(prev => {
-        const updated = prev.map(r => 
-          r.id === reservationId 
+        const updated = prev.map(r =>
+          r.id === reservationId
             ? { ...r, loading: false, error: errorMessage }
             : r
         );
         console.log('Erro ao carregar reserva:', updated);
         return updated;
       });
-
       toast({
         title: "Erro ao carregar reserva",
         description: errorMessage,
@@ -128,16 +162,30 @@ export const useReservationsList = () => {
     }
   };
 
-  const updateReservationField = (reservationId: string, field: 'temperature' | 'notes', value: string) => {
+  // Handler universal para upsert de campos customizados
+  const upsertReservationField = async (reservationId: string, field: string, value: string) => {
+    const updateObj: any = { id: reservationId };
+    updateObj[field] = value;
+    const { error } = await supabase
+      .from('reservations')
+      .upsert([updateObj], { onConflict: 'id' });
+    if (error) {
+      console.warn(`Erro ao salvar campo ${field} da reserva ${reservationId}:`, error);
+    }
+  };
+
+  const updateReservationField = (reservationId: string, field: 'temperature' | 'notes' | 'assigned_to' | 'delegated_to_user_id' | 'contact_stage', value: string) => {
     setReservations(prev => {
-      const updated = prev.map(r => 
-        r.id === reservationId 
+      const updated = prev.map(r =>
+        r.id === reservationId
           ? { ...r, [field]: value }
           : r
       );
       console.log(`Atualizando ${field} da reserva ${reservationId}:`, value);
       return updated;
     });
+    // Salvar no Supabase
+    upsertReservationField(reservationId, field, value);
   };
 
   const removeReservation = (reservationId: string) => {
@@ -167,6 +215,9 @@ export const useReservationsList = () => {
     addReservation,
     removeReservation,
     clearAll,
-    updateReservationField
+    updateReservationField,
+    profiles,
+    profilesLoading,
+    profilesError
   };
 };

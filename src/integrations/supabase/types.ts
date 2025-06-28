@@ -1400,6 +1400,39 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      },
+      reservations: {
+        Row: {
+          id: string;
+          created_at: string;
+          updated_at: string;
+          temperature: string | null;
+          notes: string | null;
+          assigned_to: string | null;
+          delegated_to_user_id: string | null;
+          contact_stage: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          temperature?: string | null;
+          notes?: string | null;
+          assigned_to?: string | null;
+          delegated_to_user_id?: string | null;
+          contact_stage?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string;
+          updated_at?: string;
+          temperature?: string | null;
+          notes?: string | null;
+          assigned_to?: string | null;
+          delegated_to_user_id?: string | null;
+          contact_stage?: string | null;
+        };
+        Relationships: [];
       }
     }
     Views: {

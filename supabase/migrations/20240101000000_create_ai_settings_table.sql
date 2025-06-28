@@ -1,4 +1,3 @@
-
 -- Criar tabela para configurações de IA
 CREATE TABLE IF NOT EXISTS ai_settings (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -15,10 +14,12 @@ CREATE UNIQUE INDEX IF NOT EXISTS ai_settings_singleton ON ai_settings ((true));
 ALTER TABLE ai_settings ENABLE ROW LEVEL SECURITY;
 
 -- Política para permitir leitura para usuários autenticados
+DROP POLICY IF EXISTS "Allow read for authenticated users" ON ai_settings;
 CREATE POLICY "Allow read for authenticated users" ON ai_settings
   FOR SELECT USING (auth.role() = 'authenticated');
 
 -- Política para permitir inserção/atualização para admins e managers
+DROP POLICY IF EXISTS "Allow insert/update for admins and managers" ON ai_settings;
 CREATE POLICY "Allow insert/update for admins and managers" ON ai_settings
   FOR ALL USING (
     EXISTS (
@@ -38,6 +39,7 @@ END;
 $$ language 'plpgsql';
 
 -- Trigger para atualizar updated_at
+DROP TRIGGER IF EXISTS update_ai_settings_updated_at ON ai_settings;
 CREATE TRIGGER update_ai_settings_updated_at
     BEFORE UPDATE ON ai_settings
     FOR EACH ROW

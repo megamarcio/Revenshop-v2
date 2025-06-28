@@ -28,11 +28,19 @@ import { ExternalAPI, ExternalAPIEndpoint, TestAPIRequest, TestAPIResponse } fro
 
 interface APITesterProps {
   api: ExternalAPI;
+  endpoints: ExternalAPIEndpoint[];
   onTest: (data: TestAPIRequest) => Promise<TestAPIResponse | null>;
-  onClose: () => void;
+  onEditEndpoint?: (endpoint: ExternalAPIEndpoint) => void;
+  onDeleteEndpoint?: (endpointId: string) => void;
 }
 
-export const APITester: React.FC<APITesterProps> = ({ api, onTest, onClose }) => {
+export const APITester: React.FC<APITesterProps> = ({ 
+  api, 
+  endpoints: endpointsProp, 
+  onTest, 
+  onEditEndpoint, 
+  onDeleteEndpoint 
+}) => {
   const [endpoints, setEndpoints] = useState<ExternalAPIEndpoint[]>([]);
   const [selectedEndpoint, setSelectedEndpoint] = useState<ExternalAPIEndpoint | null>(null);
   const [customUrl, setCustomUrl] = useState('');
@@ -46,10 +54,8 @@ export const APITester: React.FC<APITesterProps> = ({ api, onTest, onClose }) =>
 
   // Carregar endpoints da API
   useEffect(() => {
-    // Aqui você faria a chamada para carregar os endpoints
-    // Por enquanto, vamos simular
-    setEndpoints([]);
-  }, [api.id]);
+    setEndpoints(endpointsProp || []);
+  }, [endpointsProp]);
 
   const handleTest = async () => {
     if (!customUrl && !selectedEndpoint) {
@@ -184,9 +190,11 @@ export const APITester: React.FC<APITesterProps> = ({ api, onTest, onClose }) =>
             {api.name} - {api.base_url}
           </p>
         </div>
-        <Button variant="outline" onClick={onClose}>
-          Fechar
-        </Button>
+        {selectedEndpoint && onEditEndpoint && (
+          <Button variant="outline" onClick={() => onEditEndpoint(selectedEndpoint)}>
+            Editar Endpoint
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -391,12 +399,11 @@ export const APITester: React.FC<APITesterProps> = ({ api, onTest, onClose }) =>
                   </div>
                 </div>
               )}
-              {api.ai_analysis_enabled && (
-                <div className="flex items-center gap-2">
-                  <Brain className="h-4 w-4 text-blue-500" />
-                  <span className="text-sm text-blue-600">Análise de IA habilitada</span>
-                </div>
-              )}
+              {/* Informação de IA desabilitada */}
+              <div className="flex items-center gap-2 opacity-50 pointer-events-none">
+                <Brain className="h-4 w-4 text-blue-500" />
+                <span className="text-sm text-blue-600">Análise de IA (em breve)</span>
+              </div>
             </CardContent>
           </Card>
         </div>

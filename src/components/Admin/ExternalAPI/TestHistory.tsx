@@ -14,45 +14,78 @@ import {
   Brain,
   MessageSquare,
   FileText,
-  Zap
+  Zap,
+  ExternalLink
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { ExternalAPI, ExternalAPITestHistory } from '@/types/externalApi';
 
 interface TestHistoryProps {
-  api: ExternalAPI;
-  history: ExternalAPITestHistory[];
-  onClose: () => void;
+  testHistory: ExternalAPITestHistory[];
+  apis: ExternalAPI[];
+  selectedAPI: ExternalAPI | null;
+  onSelectAPI: (api: ExternalAPI) => void;
 }
 
-export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onClose }) => {
+export const TestHistory: React.FC<TestHistoryProps> = ({ 
+  testHistory = [], 
+  apis = [], 
+  selectedAPI, 
+  onSelectAPI 
+}) => {
   // Verificação defensiva para api
-  if (!api) {
+  if (!selectedAPI) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold">Histórico de Testes</h2>
-            <p className="text-muted-foreground">API não encontrada</p>
+            <p className="text-muted-foreground">Selecione uma API para ver o histórico</p>
           </div>
-          <Button variant="outline" onClick={onClose}>
-            Fechar
-          </Button>
         </div>
-        <Card>
-          <CardContent className="p-8 text-center">
-            <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-            <h3 className="text-lg font-medium mb-2">Erro ao carregar API</h3>
-            <p className="text-muted-foreground">
-              Não foi possível carregar as informações da API selecionada.
-            </p>
-          </CardContent>
-        </Card>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {apis.map((api) => (
+            <Card 
+              key={api.id} 
+              className="cursor-pointer transition-all hover:shadow-md"
+              onClick={() => onSelectAPI(api)}
+            >
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4" />
+                  {api.name}
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  {api.description || 'Sem descrição'}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-sm text-gray-600">
+                  <div className="font-medium">URL Base:</div>
+                  <div className="truncate">{api.base_url}</div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        
+        {apis.length === 0 && (
+          <Card>
+            <CardContent className="text-center py-12">
+              <AlertTriangle className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-medium mb-2">Nenhuma API encontrada</h3>
+              <p className="text-muted-foreground">
+                Crie uma API primeiro para poder ver o histórico de testes.
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </div>
     );
   }
 
-  const safeHistory = Array.isArray(history) ? history : [];
+  const safeHistory = Array.isArray(testHistory) ? testHistory : [];
   const [selectedTest, setSelectedTest] = useState<ExternalAPITestHistory | null>(null);
 
   const copyToClipboard = (text: string) => {
@@ -65,7 +98,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
 
   const downloadTestData = (test: ExternalAPITestHistory) => {
     const data = {
-      api: api?.name || 'API Desconhecida',
+      api: selectedAPI?.name || 'API Desconhecida',
       test_date: test.created_at,
       url: test.request_url,
       method: test.request_method,
@@ -85,7 +118,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `test-${api?.name || 'api'}-${new Date(test.created_at).toISOString().split('T')[0]}.json`;
+    a.download = `test-${selectedAPI?.name || 'api'}-${new Date(test.created_at).toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -127,12 +160,9 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
         <div>
           <h2 className="text-2xl font-bold">Histórico de Testes</h2>
           <p className="text-muted-foreground">
-            {api?.name || 'API Desconhecida'} - {safeHistory.length} testes realizados
+            {selectedAPI?.name || 'API Desconhecida'} - {safeHistory.length} testes realizados
           </p>
         </div>
-        <Button variant="outline" onClick={onClose}>
-          Fechar
-        </Button>
       </div>
 
       {/* Estatísticas */}
@@ -174,11 +204,11 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
         </Card>
         
         <Card>
-          <CardContent className="p-4">
+          <CardContent className="p-4 opacity-50 pointer-events-none">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-muted-foreground">Análises IA</p>
-                <p className="text-2xl font-bold text-blue-600">{testsWithAI.length}</p>
+                <p className="text-2xl font-bold text-blue-600">Em breve</p>
               </div>
               <Brain className="h-8 w-8 text-blue-500" />
             </div>
@@ -192,7 +222,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
           <TabsTrigger value="all">Todos ({safeHistory.length})</TabsTrigger>
           <TabsTrigger value="success">Sucessos ({successfulTests.length})</TabsTrigger>
           <TabsTrigger value="failed">Falhas ({failedTests.length})</TabsTrigger>
-          <TabsTrigger value="ai">Com IA ({testsWithAI.length})</TabsTrigger>
+          <TabsTrigger value="ai" disabled>Com IA (Em breve)</TabsTrigger>
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
@@ -200,7 +230,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
             <TestHistoryItem
               key={test.id}
               test={test}
-              api={api}
+              api={selectedAPI}
               onSelect={setSelectedTest}
               onCopy={copyToClipboard}
               onDownload={downloadTestData}
@@ -216,7 +246,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
             <TestHistoryItem
               key={test.id}
               test={test}
-              api={api}
+              api={selectedAPI}
               onSelect={setSelectedTest}
               onCopy={copyToClipboard}
               onDownload={downloadTestData}
@@ -232,7 +262,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
             <TestHistoryItem
               key={test.id}
               test={test}
-              api={api}
+              api={selectedAPI}
               onSelect={setSelectedTest}
               onCopy={copyToClipboard}
               onDownload={downloadTestData}
@@ -248,7 +278,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
             <TestHistoryItem
               key={test.id}
               test={test}
-              api={api}
+              api={selectedAPI}
               onSelect={setSelectedTest}
               onCopy={copyToClipboard}
               onDownload={downloadTestData}
@@ -264,7 +294,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
       {selectedTest && (
         <TestDetailsModal
           test={selectedTest}
-          api={api}
+          api={selectedAPI}
           onClose={() => setSelectedTest(null)}
           onCopy={copyToClipboard}
           onDownload={downloadTestData}
@@ -277,7 +307,7 @@ export const TestHistory: React.FC<TestHistoryProps> = ({ api, history = [], onC
 // Componente de Item do Histórico
 interface TestHistoryItemProps {
   test: ExternalAPITestHistory;
-  api: ExternalAPI;
+  api: ExternalAPI | null;
   onSelect: (test: ExternalAPITestHistory) => void;
   onCopy: (text: string) => void;
   onDownload: (test: ExternalAPITestHistory) => void;
@@ -318,9 +348,9 @@ const TestHistoryItem: React.FC<TestHistoryItemProps> = ({
           
           <div className="flex items-center gap-2">
             {test.ai_analysis && (
-              <Badge variant="outline" className="flex items-center gap-1">
+              <Badge variant="outline" className="flex items-center gap-1 opacity-50 pointer-events-none">
                 <Brain className="h-3 w-3" />
-                IA
+                Em breve
               </Badge>
             )}
             {test.curl_command && (
@@ -355,7 +385,7 @@ const TestHistoryItem: React.FC<TestHistoryItemProps> = ({
 // Modal de Detalhes do Teste
 interface TestDetailsModalProps {
   test: ExternalAPITestHistory;
-  api: ExternalAPI;
+  api: ExternalAPI | null;
   onClose: () => void;
   onCopy: (text: string) => void;
   onDownload: (test: ExternalAPITestHistory) => void;

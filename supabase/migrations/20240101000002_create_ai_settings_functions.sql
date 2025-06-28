@@ -1,5 +1,5 @@
-
 -- Create RPC function to get AI settings
+DROP FUNCTION IF EXISTS get_ai_settings();
 CREATE OR REPLACE FUNCTION get_ai_settings()
 RETURNS TABLE (
   image_instructions TEXT,

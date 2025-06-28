@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface ReservationDetails {
   customer: {
@@ -35,6 +36,11 @@ export interface ReservationDetails {
   }>;
   created_at?: string;
   updated_at?: string;
+  temperature?: string;
+  notes?: string;
+  assigned_to?: string;
+  delegated_to_user_id?: string;
+  contact_stage?: string;
 }
 
 // Histórico de consultas
@@ -72,6 +78,7 @@ export const useReservationById = () => {
     setData(null);
 
     try {
+      // Busca na API externa
       const response = await fetch(
         `https://api-america-3.us5.hqrentals.app/api-america-3/car-rental/reservations/${reservationId}`,
         {
@@ -93,20 +100,39 @@ export const useReservationById = () => {
 
       const result = await response.json();
       console.log('API Response:', result);
-      
-      setData(result.data);
+
+      // Busca campos customizados no Supabase
+      const { data: customFields, error: supabaseError } = await supabase
+        .from('reservations')
+        .select('temperature, notes, assigned_to, delegated_to_user_id, contact_stage')
+        .eq('id', reservationId)
+        .single();
+
+      if (supabaseError) {
+        console.warn('Erro ao buscar campos customizados no Supabase:', supabaseError);
+      }
+
+      // Merge: se existir no Supabase, prevalece sobre o da API
+      const mergedData: ReservationDetails = {
+        ...result.data,
+        ...(customFields && typeof customFields === 'object' ? Object.fromEntries(
+          Object.entries(customFields).filter(([key, value]) => value !== undefined && value !== null && value !== '')
+        ) : {})
+      };
+
+      setData(mergedData);
       addToHistory(reservationId);
       toast({
-        title: "Sucesso",
-        description: "Reserva encontrada com sucesso!",
+        title: 'Sucesso',
+        description: 'Reserva encontrada com sucesso!',
       });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro desconhecido';
       setError(errorMessage);
       toast({
-        title: "Erro",
+        title: 'Erro',
         description: errorMessage,
-        variant: "destructive",
+        variant: 'destructive',
       });
     } finally {
       setLoading(false);

@@ -19,6 +19,7 @@ import UserManagement from '@/components/Users/UserManagement';
 import AdminPanel from '@/components/Admin/AdminPanel';
 import ProfilePage from '@/components/Profile/ProfilePage';
 import FinancialManagement from '@/components/Financial/FinancialManagement';
+import FluxoCaixa from '@/components/Financial/FluxoCaixa';
 import AcompanharReservas from '@/components/Reservas/AcompanharReservas';
 import ListaReservas from '@/components/Reservas/ListaReservas';
 
@@ -57,6 +58,8 @@ function App() {
         return <BuyHerePayHere />;
       case 'logistica':
         return <ConsultaReservas />;
+      case 'fluxo-caixa':
+        return <FluxoCaixa />;
       case 'financial':
       case 'revenues':
       case 'expenses':

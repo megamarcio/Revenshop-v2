@@ -1,0 +1,33 @@
+# Ignorar arquivos e pastas desnecessárias para IA
+node_modules/
+dist/
+build/
+*.log
+*.tmp
+*.cache
+*.sqlite
+*.csv
+*.db
+*.bak
+
+# Arquivos de sistema
+desktop.ini
+
+# Configurações locais
+.env
+.env.*
+
+# Documentação extensa que pode ser lida sob demanda
+*.md
+
+# Arquivos de build e IDE
+.vscode/
+.idea/
+*.lock
+
+# Testes gerados ou temporários
+coverage/
+test-results/
+
+# HTMLs e arquivos estáticos manuais
+*.html

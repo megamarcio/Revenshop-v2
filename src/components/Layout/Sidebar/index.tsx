@@ -126,7 +126,7 @@ const AppSidebar = ({ activeTab, setActiveTab }: SidebarProps) => {
       <SidebarFooter>
         <div className="flex items-center justify-center w-full px-2 py-2">
           <span className="text-xs text-sidebar-foreground/60 font-mono">
-            {APP_VERSION.toString()}
+            {APP_VERSION.getFullVersion()}
           </span>
         </div>
       </SidebarFooter>

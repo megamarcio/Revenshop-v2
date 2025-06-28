@@ -36,7 +36,7 @@ export const useExternalAPIs = () => {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Erro ao buscar APIs';
       // Só mostra erro se não for um problema de tabela não existir ou estar vazia
-      if (!errorMessage.includes('relation "external_apis" does not exist')) {
+      if (!errorMessage.includes('relation "external_apis" does not exist') && !errorMessage.includes('Not Found')) {
         setError(errorMessage);
         toast({
           title: 'Erro',
@@ -123,7 +123,29 @@ export const useExternalAPIs = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Se o erro for de RLS, a inserção pode ter funcionado, então vamos buscar novamente
+        if (error.message.includes('permission denied')) {
+          await fetchAPIs();
+          toast({
+            title: 'Sucesso',
+            description: 'API criada, mas não foi possível retorná-la diretamente. Atualizando lista.'
+          });
+          return null; 
+        }
+        throw error;
+      }
+      
+      // Se data for null após uma inserção sem erros, pode ser um problema de RLS.
+      // A melhor abordagem é forçar uma nova busca
+      if (!data) {
+        await fetchAPIs();
+        toast({
+          title: 'Sucesso',
+          description: 'API criada com sucesso! Atualizando lista...'
+        });
+        return null;
+      }
       
       setApis(prev => [data, ...prev]);
       toast({
@@ -144,7 +166,7 @@ export const useExternalAPIs = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchAPIs]);
 
   // Atualizar API
   const updateAPI = useCallback(async (id: string, apiData: UpdateExternalAPIRequest): Promise<ExternalAPI | null> => {

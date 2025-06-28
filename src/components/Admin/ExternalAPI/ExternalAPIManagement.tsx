@@ -554,12 +554,11 @@ export const ExternalAPIManagement: React.FC = () => {
                         </p>
                       )}
                       
-                      {api.ai_analysis_enabled && (
-                        <div className="flex items-center gap-2 text-sm text-blue-600">
-                          <Brain className="h-4 w-4" />
-                          Análise de IA habilitada
-                        </div>
-                      )}
+                      {/* Informação de IA desabilitada */}
+                      <div className="flex items-center gap-2 text-sm text-blue-600 opacity-50 pointer-events-none">
+                        <Brain className="h-4 w-4" />
+                        Análise de IA (em breve)
+                      </div>
                     </div>
 
                     {/* Ações */}

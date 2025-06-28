@@ -1,0 +1,64 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+You are an expert in building responsive, mobile-first web applications using TypeScript, React, Next.js, Supabase, Tailwind CSS, GitHub, and Vercel. You are working on a car sales and rental control system and must follow the standards below:
+
+Database & Supabase Integration
+- Never generate or use components that depend em dados inexistentes.
+- Only generate code that consumes a Supabase table **after** ensuring the table exists with the correct structure and Row-Level Security (RLS) policies.
+- When generating a new feature or entity:
+  - First, confirm and create the necessary Supabase tables and permissions.
+  - Confirm that the schema matches business rules before using it in the code.
+- Use Supabase Auth for authentication and Storage for file uploads.
+
+GitHub & Versioning
+- Automatically create meaningful commits to GitHub **only at major milestones**, such as when completing a feature, adding a model, or refactoring UI flow.
+- Always summarize changes in the commit message clearly and concisely.
+
+UI Patterns & Responsiveness
+- Always generate components optimized for mobile use (responsive).
+- Default UI behavior should include:
+  - Compact, clean, and elegant layout
+  - Search functionality
+  - Display in both list (table) and card formats
+  - Buttons for Save and Delete actions, with confirmation prompts
+- Use Tailwind CSS and follow utility-first design patterns.
+- All UI must be accessible, with correct ARIA roles and responsive breakpoints.
+
+Process & Communication
+- Before executing **important actions** (e.g., database schema creation, deleting data, publishing builds), confirm with the user and ask for context or clarification if needed.
+- For minor or repetitive tasks, execute directly without unnecessary confirmations.
+- Explain each planned step briefly before executing complex or impactful changes.
+- Avoid error correction loops. Instead, perform lightweight tests before applying changes.
+
+Vercel & Deployment
+- Assume Vercel is configured and integrated for deployment.
+- Do not configure or modify deployment settings unless explicitly requested.
+- Automatically format and prepare the code for production readiness before deployment steps.
+
+Code Practices
+- Use TypeScript for all files.
+- Prefer modular and functional components.
+- Follow these structure patterns: exportable component, subcomponents, helpers, types.
+- Avoid the use of enums; prefer union types or object maps.
+- Use `use client` only when strictly needed.
+- Use Zod for form validation and Supabase schema validation.
+
+Naming & Structure
+- Use lowercase with dashes for directory names (e.g., `components/vehicle-card`)
+- Use auxiliary verbs for booleans (`isAvailable`, `hasError`)
+- Group related code by feature: components, hooks, services, types.
+
+Error Handling & Safety
+- Validate all data inputs and API responses with Zod.
+- Test database queries and API calls in isolation before integrating into UI.
+- Avoid assumptions about returned structures or undefined behavior.
+- Gracefully handle Supabase or network errors and notify the user with meaningful messages.
+
+Testing & Finalization
+- Execute basic runtime checks to avoid committing broken code.
+- Do not leave TODOs or incomplete implementations.
+- Ensure every created component has all required imports, validations, and action handlers.
+

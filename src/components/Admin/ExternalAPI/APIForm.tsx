@@ -59,12 +59,12 @@ const APIForm: React.FC<APIFormProps> = ({ onSubmit, initialData }) => {
         base_url: initialData.base_url,
         api_key: initialData.api_key || '',
         auth_type: initialData.auth_type,
-        headers: initialData.headers.length > 0 ? initialData.headers : [{ name: '', value: '' }],
-        query_params: initialData.query_params.length > 0 ? initialData.query_params : [{ name: '', value: '' }],
+        headers: Array.isArray(initialData.headers) && initialData.headers.length > 0 ? initialData.headers : [{ name: '', value: '' }],
+        query_params: Array.isArray(initialData.query_params) && initialData.query_params.length > 0 ? initialData.query_params : [{ name: '', value: '' }],
         is_mcp_server: initialData.is_mcp_server,
         mcp_config: initialData.mcp_config,
         is_active: initialData.is_active,
-        mcp_tools: initialData.mcp_tools || [],
+        mcp_tools: Array.isArray(initialData.mcp_tools) ? initialData.mcp_tools : [],
         observations: initialData.observations || '',
         documentation: initialData.documentation || '',
         ai_analysis_enabled: initialData.ai_analysis_enabled || false,
@@ -169,11 +169,23 @@ const APIForm: React.FC<APIFormProps> = ({ onSubmit, initialData }) => {
       return;
     }
 
-    // Filtrar headers e query params vazios
+    // Filtrar headers e query params vazios e mapear para o formato correto da API
     const cleanData = {
-      ...formData,
-      headers: formData.headers.filter(h => h.name.trim() && h.value.trim()),
-      query_params: formData.query_params.filter(q => q.name.trim() && q.value.trim())
+      name: formData.name.trim(),
+      description: formData.description?.trim() || undefined,
+      base_url: formData.base_url.trim(),
+      auth_type: formData.auth_type,
+      api_key: formData.api_key?.trim() || undefined,
+      headers: formData.headers?.filter(h => h.name.trim() && h.value.trim()) || [],
+      query_params: formData.query_params?.filter(q => q.name.trim() && q.value.trim()) || [],
+      is_active: formData.is_active,
+      is_mcp_server: formData.is_mcp_server,
+      mcp_config: formData.mcp_config || {},
+      mcp_tools: formData.mcp_tools || [],
+      observations: formData.observations?.trim() || undefined,
+      documentation: formData.documentation?.trim() || undefined,
+      ai_analysis_enabled: formData.ai_analysis_enabled || false,
+      ai_key_id: formData.ai_key_id?.trim() || undefined
     };
 
     onSubmit(cleanData);
@@ -447,39 +459,30 @@ const APIForm: React.FC<APIFormProps> = ({ onSubmit, initialData }) => {
                 Análise de IA
               </CardTitle>
               <CardDescription>
-                Configure a análise automática de erros com IA
+                Esta funcionalidade estará disponível em breve.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 opacity-50 pointer-events-none">
                 <Switch
                   id="ai_analysis_enabled"
                   checked={formData.ai_analysis_enabled}
-                  onCheckedChange={(checked) => handleInputChange('ai_analysis_enabled', checked)}
+                  onCheckedChange={() => {}}
+                  disabled
                 />
                 <Label htmlFor="ai_analysis_enabled">Habilitar análise de IA</Label>
               </div>
-
-              {formData.ai_analysis_enabled && (
-                <div>
-                  <Label htmlFor="ai_key_id">Chave de IA</Label>
-                  <Select
-                    value={formData.ai_key_id}
-                    onValueChange={(value) => handleInputChange('ai_key_id', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Selecione uma configuração de IA" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {aiSettings.map((setting) => (
-                        <SelectItem key={setting.id} value={setting.id}>
-                          {setting.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
+              <div className="opacity-50 pointer-events-none">
+                <Label htmlFor="ai_key_id">Chave de IA</Label>
+                <Select value={formData.ai_key_id} onValueChange={() => {}} disabled>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione uma configuração de IA" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {/* Opções desabilitadas */}
+                  </SelectContent>
+                </Select>
+              </div>
             </CardContent>
           </Card>
 

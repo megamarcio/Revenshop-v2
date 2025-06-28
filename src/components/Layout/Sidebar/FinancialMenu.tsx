@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   SidebarMenuButton, 
@@ -23,6 +22,7 @@ const FinancialMenu: React.FC<FinancialMenuProps> = ({ activeTab, setActiveTab }
     { id: 'financial', label: 'Dashboard' },
     { id: 'revenues', label: 'Receitas' },
     { id: 'expenses', label: 'Despesas' },
+    { id: 'fluxo-caixa', label: 'Fluxo de Caixa' },
     { id: 'bank-statements', label: 'Extratos' },
     { id: 'software', label: 'Software' },
     { id: 'financial-config', label: 'Configurações' },
